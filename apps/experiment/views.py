@@ -1,3 +1,7 @@
-from django.shortcuts import render
+from django.views.generic import DetailView
 
-# Create your views here.
+from . import models
+
+
+class ExperimentDetailView(DetailView):
+    model = models.Experiment
