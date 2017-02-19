@@ -1,2 +1,2 @@
 # l-rex
-Linguistics Rating Experiment
+Linguistic Rating Experiments
