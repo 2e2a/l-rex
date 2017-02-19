@@ -1,1 +1,5 @@
+*.mo
+*__pycache__/
 .env
+.idea
+db.sqlite3*
