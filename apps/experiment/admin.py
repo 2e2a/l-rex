@@ -4,3 +4,4 @@ from . import models
 
 
 admin.site.register(models.Experiment)
+admin.site.register(models.TextItem)

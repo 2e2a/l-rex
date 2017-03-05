@@ -2,11 +2,34 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{{ view.experiement.title }}</title>
+    <title>{{ view.experiment.title }}</title>
 </head>
 <body>
 <h1>
-    Experiment {{ view.experiement.title }}
+    Experiment {{ object.title }}
 </h1>
+<div>
+    Item Type: {{ object.item_type }}
+</div>
+{% if object.item_type == 'txt' %}
+<table>
+    <thead>
+    <tr>
+        <th>Item Number</th>
+        <th>Item Condition</th>
+        <th>Item</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for item in object.text_items %}
+    <tr>
+        <td>{{ item.number }}</td>
+        <td>{{ item.condition }}</td>
+        <td>{{ item.text }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endif %}
 </body>
 </html>
