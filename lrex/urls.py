@@ -6,5 +6,5 @@ from apps.experiment import urls as experiment_urls
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^exp/', include(experiment_urls)),
+    url(r'^setup/', include(experiment_urls)),
 ]

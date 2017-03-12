@@ -1,16 +1,24 @@
-from django.views.generic import DetailView
-from django.views.generic import ListView
+from django.views import generic
 
 from . import models
 
 
-class SetupDetailView(DetailView):
+class SetupDetailView(generic.DetailView):
     model = models.Setup
 
 
-class ExperimentDetailView(DetailView):
+class SetupCreateView(generic.CreateView):
+    model = models.Setup
+    fields = ['title']
+
+    def form_valid(self, form):
+        form.instance.creator = self.request.user
+        return super().form_valid(form)
+
+
+class ExperimentDetailView(generic.DetailView):
     model = models.Experiment
 
 
-class ListListView(ListView):
+class ListListView(generic.ListView):
     model = models.ListItem
