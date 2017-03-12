@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ object.title }}</title>
+</head>
+<body>
+<h1>
+    Experiment Setup: {{ object.title }}
+</h1>
+{% for experiment in object.experiments %}
+<div>
+    <a href="{% url 'experiment' setup_slug=object.slug slug=experiment.slug %}">
+        {{ experiment.title }}
+    </a>
+</div>
+{% endfor %}
+</body>
+</html>
