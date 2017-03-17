@@ -18,8 +18,7 @@ class Setup(models.Model):
         return self.slug
 
     def get_absolute_url(self):
-        return reverse('setup', args=[str(self.slug)])
-
+        return reverse('setup', args=[self.slug])
 
 
 class Experiment(models.Model):
@@ -43,6 +42,9 @@ class Experiment(models.Model):
 
     def __str__(self):
         return self.slug
+
+    def get_absolute_url(self):
+        return reverse('experiment', args=[self.setup.slug, self.slug])
 
 
 class Item(models.Model):

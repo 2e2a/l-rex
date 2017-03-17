@@ -10,10 +10,13 @@
 </h1>
 {% for experiment in object.experiments %}
 <div>
-    <a href="{% url 'experiment' setup_slug=object.slug slug=experiment.slug %}">
-        {{ experiment.title }}
-    </a>
+<a href="{% url 'experiment' setup_slug=object.slug slug=experiment.slug %}">
+    {{ experiment.title }}
+</a>
 </div>
 {% endfor %}
+<a href="{% url 'experiment-create' setup_slug=object.slug %}">
+    Add experiment
+</a>
 </body>
 </html>
