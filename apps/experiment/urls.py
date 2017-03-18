@@ -15,4 +15,7 @@ urlpatterns = [
     url(r'^(?P<setup_slug>[-\w_]+)/exp/(?P<slug>[-\w_]+)/$',
         views.ExperimentDetailView.as_view(),
         name='experiment'),
+    url(r'^(?P<setup_slug>[-\w_]+)/exp/(?P<slug>[-\w_]+)/text_item_create/$',
+        views.TextItemCreateView.as_view(),
+        name='text-item-create'),
 ]

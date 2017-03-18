@@ -62,6 +62,9 @@ class Item(models.Model):
 class TextItem(Item):
     text = models.TextField(max_length=1024)
 
+    def get_absolute_url(self):
+        return reverse('experiment', args=[self.experiment.setup.slug, self.experiment.slug])
+
 
 class Response(models.Model):
     experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE)
