@@ -103,19 +103,3 @@ class ListItem(models.Model):
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
 
-
-class Response(models.Model):
-    experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE)
-    question = models.CharField(max_length=200)
-    legend = models.TextField(max_length=1024)
-
-    class Meta:
-        abstract = True
-
-    def __str__(self):
-        return '{}-response'.format(self.experiment)
-
-
-class BinaryResponse(Response):
-    yes = models.CharField(max_length=200)
-    no = models.CharField(max_length=200)
