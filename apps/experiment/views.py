@@ -1,19 +1,8 @@
 from django.views import generic
 
+from apps.setup import models as setup_models
+
 from . import models
-
-
-class SetupDetailView(generic.DetailView):
-    model = models.Setup
-
-
-class SetupCreateView(generic.CreateView):
-    model = models.Setup
-    fields = ['title']
-
-    def form_valid(self, form):
-        form.instance.creator = self.request.user
-        return super().form_valid(form)
 
 
 class ExperimentDetailView(generic.DetailView):
@@ -26,7 +15,7 @@ class ExperimentCreateView(generic.CreateView):
 
     def dispatch(self, *args, **kwargs):
         setup_slug = self.kwargs['setup_slug']
-        self.setup = models.Setup.objects.get(slug=setup_slug)
+        self.setup = setup_models.Setup.objects.get(slug=setup_slug)
         return super().dispatch(*args, **kwargs)
 
     def form_valid(self, form):

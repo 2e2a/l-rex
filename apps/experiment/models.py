@@ -1,25 +1,10 @@
-from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.db import models
 from autoslug import AutoSlugField
 
-
-class Setup(models.Model):
-    title = models.CharField(max_length=200)
-    slug = AutoSlugField(populate_from='title', unique=True)
-    creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-
-    def experiments(self):
-        return Experiment.objects.filter(setup=self)
-
-    def __str__(self):
-        return self.slug
-
-    def get_absolute_url(self):
-        return reverse('setup', args=[self.slug])
-
+from apps.setup import models as setup_models
 
 class Experiment(models.Model):
     ITEM_TYPE = (
@@ -32,7 +17,10 @@ class Experiment(models.Model):
         choices=ITEM_TYPE,
         default='txt',
     )
-    setup = models.ForeignKey(Setup, on_delete=models.CASCADE)
+    setup = models.ForeignKey(
+        'lrex_setup.Setup',
+        on_delete=models.CASCADE
+    )
 
     def item_model(self):
         return TextItem
