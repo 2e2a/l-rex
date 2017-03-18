@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ view.experiment.title }}</title>
+</head>
+<body>
+<h1>
+    Experiment {{ view.experiment.title }} Lists
+</h1>
+<table>
+    <thead>
+    <tr>
+        <th>List Number</th>
+        <th>Item Number</th>
+        <th>Item Condition</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for list in list_list %}
+        {% for item in list.items %}
+        <tr>
+            <td>{{ list.number }}</td>
+            <td>{{ item.number }}</td>
+            <td>{{ item.condition }}</td>
+        </tr>
+        {% endfor %}
+    {% endfor %}
+    </tbody>
+</table>
+</body>
+</html>

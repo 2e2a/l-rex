@@ -46,6 +46,12 @@ class TextItemCreateView(generic.CreateView):
         form.instance.experiment = self.experiment
         return super().form_valid(form)
 
-class ListListView(generic.ListView):
-    model = models.ListItem
 
+class ListListView(generic.ListView):
+    model = models.List
+
+    def dispatch(self, *args, **kwargs):
+        experiment_slug = self.kwargs['slug']
+        self.experiment = models.Experiment.objects.get(slug=experiment_slug)
+        self.experiment.compute_lists()
+        return super().dispatch(*args, **kwargs)

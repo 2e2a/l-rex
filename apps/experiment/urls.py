@@ -18,4 +18,7 @@ urlpatterns = [
     url(r'^(?P<setup_slug>[-\w_]+)/exp/(?P<slug>[-\w_]+)/text_item_create/$',
         views.TextItemCreateView.as_view(),
         name='text-item-create'),
+    url(r'^(?P<setup_slug>[-\w_]+)/exp/(?P<slug>[-\w_]+)/lists/$',
+        views.ListListView.as_view(),
+        name='lists'),
 ]

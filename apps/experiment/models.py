@@ -34,6 +34,15 @@ class Experiment(models.Model):
     )
     setup = models.ForeignKey(Setup, on_delete=models.CASCADE)
 
+    def item_model(self):
+        return TextItem
+
+    def conditions(self):
+        item_model = self.item_model()
+        items = item_model.objects.filter(experiment=self, number=1)
+        conditions = [item.condition for item in items]
+        return conditions
+
     def text_items(self):
         return TextItem.objects.filter(experiment=self)
 
@@ -46,6 +55,23 @@ class Experiment(models.Model):
     def get_absolute_url(self):
         return reverse('experiment', args=[self.setup.slug, self.slug])
 
+    def compute_lists(self):
+        List.objects.filter(experiment=self).delete()
+
+        lists = []
+        conditions = self.conditions()
+        condition_count = len(conditions)
+        for i in range(condition_count):
+            list = List.objects.create(number=i, experiment=self)
+            lists.append(list)
+
+        items = self.item_model().objects.filter(experiment=self)
+        for i in range(len(items)):
+            item = items[i]
+            shift  =  (i - (item.number - 1)) % condition_count
+            list = lists[shift]
+            ListItem.objects.create(list=list, content_object=item)
+
 
 class Item(models.Model):
     number = models.IntegerField()
@@ -54,6 +80,7 @@ class Item(models.Model):
 
     class Meta:
         abstract = True
+        ordering = ['number', 'condition']
 
     def __str__(self):
         return '{}-{}-{}'.format(self.experiment, self.number, self.condition)
@@ -86,6 +113,14 @@ class BinaryResponse(Response):
 class List(models.Model):
     number = models.IntegerField()
     experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ['number']
+
+    def items(self):
+        list_items = ListItem.objects.filter(list=self)
+        items = [list_item.content_object for list_item in list_items]
+        return items
 
     def __str__(self):
         return '{}-list-{}'.format(self.experiment, self.number)

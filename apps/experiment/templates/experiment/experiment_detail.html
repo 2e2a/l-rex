@@ -33,6 +33,9 @@
 <a href="{% url 'text-item-create' setup_slug=object.setup.slug slug=object.slug %}">
     Add Text Item
 </a>
+<a href="{% url 'lists' setup_slug=object.setup.slug slug=object.slug %}">
+    View/Generate lists
+</a>
 {% endif %}
 </body>
 </html>
