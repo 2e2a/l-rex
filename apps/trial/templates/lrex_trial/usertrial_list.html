@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ view.setup.title }} User Trials</title>
+</head>
+<body>
+<h1>
+    {{ view.setup.title }} User Trials
+</h1>
+<table>
+    <thead>
+    <tr>
+        <th>User</th>
+        <th>Trial</th>
+        <th>Link</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for usertrial in usertrial_list %}
+        <tr>
+            <td>{{ usertrial.participant }}</td>
+            <td>{{ usertrial.trial.number }}</td>
+            <td>
+                <a href="{% url 'user-trial' setup_slug=view.setup.slug slug=usertrial.slug %}">
+                    User Trial Link
+                </a>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<a href="{% url 'user-trial-create' setup_slug=view.setup.slug %}">
+    New User Trial
+</a><br>
+</body>
+</html>

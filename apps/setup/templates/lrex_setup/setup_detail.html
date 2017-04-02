@@ -17,6 +17,12 @@
 {% endfor %}
 <a href="{% url 'experiment-create' setup_slug=object.slug %}">
     Add experiment
-</a>
+</a><br>
+<a href="{% url 'trials' setup_slug=object.slug %}">
+    View/Generate Trials
+</a><br>
+<a href="{% url 'user-trials' setup_slug=object.slug %}">
+    User Trials
+</a><br>
 </body>
 </html>

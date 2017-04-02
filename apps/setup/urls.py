@@ -4,6 +4,8 @@ from django.conf.urls import include
 from . import views
 
 from apps.experiment import urls as experiment_urls
+from apps.trial import urls as trial_urls
+
 
 urlpatterns = [
     url(r'^create/$',
@@ -14,4 +16,6 @@ urlpatterns = [
         name='setup'),
     url(r'^(?P<setup_slug>[-\w_]+)/exp/',
         include(experiment_urls)),
+    url(r'^(?P<setup_slug>[-\w_]+)/trial/',
+        include(trial_urls)),
 ]

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Trial</title>
+</head>
+<body>
+<h1>
+    Trial {{ object.slug }}
+</h1>
+{% for item in object.items %}
+<div>
+    {{ item }}
+</div>
+{% endfor %}
+</body>
+</html>

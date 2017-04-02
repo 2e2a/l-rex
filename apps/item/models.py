@@ -36,6 +36,7 @@ class List(models.Model):
     class Meta:
         ordering = ['number']
 
+    @property
     def items(self):
         list_items = ListItem.objects.filter(list=self)
         items = [list_item.content_object for list_item in list_items]
@@ -43,6 +44,12 @@ class List(models.Model):
 
     def __str__(self):
         return '{}-list-{}'.format(self.experiment, self.number)
+
+    def next(self, last_list):
+        next_list =  List.objects.filter(experiment=last_list.experiment, number__gt=last_list.number).first()
+        if not next_list:
+            next_list =  List.objects.first()
+        return next_list
 
 
 class ListItem(models.Model):

@@ -27,3 +27,6 @@ class ListListView(generic.ListView):
         self.experiment = experiment_models.Experiment.objects.get(slug=experiment_slug)
         self.experiment.compute_lists()
         return super().dispatch(*args, **kwargs)
+
+    def get_queryset(self):
+        return models.List.objects.filter(experiment=self.experiment)
