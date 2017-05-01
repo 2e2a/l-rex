@@ -8,10 +8,9 @@
 <h1>
     Trial {{ object.slug }}
 </h1>
-{% for item in object.items %}
-<div>
-    {{ item }}
-</div>
-{% endfor %}
+bla Bla
+<a href="{% url 'user-response-intro' setup_slug=object.trial.setup.slug slug=object.slug %}">
+    User Link
+</a>
 </body>
 </html>

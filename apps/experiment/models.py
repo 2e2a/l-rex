@@ -21,15 +21,15 @@ class Experiment(models.Model):
     )
 
     @property
-    def item_model(self):
-        return item_models.TextItem
-
-    @property
     def conditions(self):
         item_model = self.item_model
         items = item_model.objects.filter(experiment=self, number=1)
         conditions = [item.condition for item in items]
         return conditions
+
+    @property
+    def item_model(self):
+        return item_models.TextItem
 
     @property
     def text_items(self):

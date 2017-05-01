@@ -14,6 +14,7 @@ class Setup(models.Model):
     slug = AutoSlugField(populate_from='title', unique=True)
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
+    @property
     def experiments(self):
         return experiment_models.Experiment.objects.filter(setup=self)
 

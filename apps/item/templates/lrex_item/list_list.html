@@ -8,6 +8,12 @@
 <h1>
     Experiment {{ view.experiment.title }} Lists
 </h1>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" name="action" value="generate_lists">
+        Generate Items Lists
+    </button>
+</form>
 <table>
     <thead>
     <tr>

@@ -40,8 +40,10 @@ INSTALLED_APPS = [
 
     'apps.setup.apps.SetupConfig',
     'apps.experiment.apps.ExperimentConfig',
+    'apps.responseinfo.apps.ResponseInfoConfig',
     'apps.response.apps.ResponseConfig',
     'apps.item.apps.ItemConfig',
+    'apps.trial.apps.TrialConfig',
 ]
 
 MIDDLEWARE = [

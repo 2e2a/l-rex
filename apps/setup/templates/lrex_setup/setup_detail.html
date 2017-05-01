@@ -18,6 +18,10 @@
 <a href="{% url 'experiment-create' setup_slug=object.slug %}">
     Add experiment
 </a><br>
+
+<a href="{% url 'binary-response-info' setup_slug=object.slug %}">
+    Response Info
+</a><br>
 <a href="{% url 'trials' setup_slug=object.slug %}">
     View/Generate Trials
 </a><br>

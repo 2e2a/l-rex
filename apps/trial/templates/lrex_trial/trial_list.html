@@ -8,6 +8,12 @@
 <h1>
     {{ view.setup.title }} Trials
 </h1>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" name="action" value="generate_trials">
+        Generate Trials
+    </button>
+</form>
 <table>
     <thead>
     <tr>
@@ -20,8 +26,10 @@
         <tr>
             <td>{{ trial.number }}</td>
             <td>
-                {% for item in list.items %}
-                    {{ item }},
+                {% for list in trial.lists %}
+                    {% for item in list.items %}
+                        {{ item }},
+                    {% endfor %}
                 {% endfor %}
             </td>
         </tr>

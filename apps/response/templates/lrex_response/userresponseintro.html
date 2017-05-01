@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Trial</title>
+</head>
+<body>
+<h1>
+    Welcome to Trial {{ view.user_trial.slug }}
+</h1>
+<div>
+    Question: {{ view.setup.responseinfo.question }}
+</div>
+<a href="{% url 'user-binary-response' setup_slug=view.setup.slug slug=view.user_trial.slug num=0 %}">
+    Start Trial
+</a>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Repsonse Info</title>
+</head>
+<body>
+<h1>
+    Reponse Info
+</h1>
+{%if view.object %}
+    <div>
+         Question: {{ view.object.question }}
+    </div>
+    <div>
+        Legend:
+        <div>
+            {{ view.object.legend }}
+        </div>
+    </div>
+    <div>
+        Yes Lable: {{ view.object.yes }}
+    </div>
+    <div>
+        No Lable: {{ view.object.no }}
+    </div>
+{% else %}
+    <a href="{% url 'binary-response-info-create' setup_slug=view.setup.slug %}">
+        Create Response Info
+    </a><br>
+{% endif %}
+</body>
+</html>

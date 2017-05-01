@@ -1,3 +1,4 @@
+from django.shortcuts import redirect
 from django.views import generic
 
 from apps.setup import models as setup_models
@@ -11,8 +12,13 @@ class TrialListView(generic.ListView):
     def dispatch(self, *args, **kwargs):
         setup_slug = self.kwargs['setup_slug']
         self.setup = setup_models.Setup.objects.get(slug=setup_slug)
-        self.setup.generate_trials()
         return super().dispatch(*args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        action = request.POST.get('action', None)
+        if action and action == 'generate_trials':
+            self.setup.generate_trials()
+        return redirect('trials',setup_slug=self.setup.slug)
 
 
 class UserTrialListView(generic.ListView):
