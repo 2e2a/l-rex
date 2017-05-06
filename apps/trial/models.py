@@ -1,7 +1,5 @@
 import random
 import uuid
-from django.contrib.contenttypes.fields import GenericForeignKey
-from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils import timezone
@@ -69,7 +67,7 @@ class UserTrial(models.Model):
     @property
     def items(self):
         trial_items = UserTrialItem.objects.filter(user_trial=self)
-        items = [trial_item.content_object for trial_item in trial_items]
+        items = [trial_item.item for trial_item in trial_items]
         return items
 
     def generate(self):
@@ -83,7 +81,7 @@ class UserTrial(models.Model):
         items = self.trial.items
         random.shuffle(items)
         for i, item in enumerate(items):
-            UserTrialItem.objects.create(number=i, user_trial=self, content_object=item)
+            UserTrialItem.objects.create(number=i, user_trial=self, item=item)
 
     def get_absolute_url(self):
         return reverse('user-trial', args=[self.setup.slug, self.slug])
@@ -92,8 +90,4 @@ class UserTrial(models.Model):
 class UserTrialItem(models.Model):
     number = models.IntegerField()
     user_trial = models.ForeignKey(UserTrial, on_delete=models.CASCADE)
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id')
-
-
+    item = models.ForeignKey(item_models.Item, on_delete=models.CASCADE)

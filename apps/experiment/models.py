@@ -22,18 +22,9 @@ class Experiment(models.Model):
 
     @property
     def conditions(self):
-        item_model = self.item_model
-        items = item_model.objects.filter(experiment=self, number=1)
+        items = item_models.Item.objects.filter(experiment=self, number=1)
         conditions = [item.condition for item in items]
         return conditions
-
-    @property
-    def item_model(self):
-        return item_models.TextItem
-
-    @property
-    def text_items(self):
-        return item_models.TextItem.objects.filter(experiment=self)
 
     @property
     def is_textitem(self):
@@ -55,8 +46,8 @@ class Experiment(models.Model):
             list = item_models.List.objects.create(number=i, experiment=self)
             lists.append(list)
 
-        items = self.item_model.objects.filter(experiment=self)
+        items = item_models.Item.objects.filter(experiment=self)
         for i, item in enumerate(items):
             shift  =  (i - (item.number - 1)) % condition_count
             list = lists[shift]
-            item_models.ListItem.objects.create(list=list, content_object=item)
+            item_models.ListItem.objects.create(list=list, item=item)
