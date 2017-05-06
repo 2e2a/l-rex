@@ -1,13 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Repsonse Info</title>
-</head>
-<body>
-<h1>
-    Reponse Info
-</h1>
+{% extends "lrex_home/base.html" %}
+
+{% block content %}
 {%if view.object %}
     <div>
          Question: {{ view.object.question }}
@@ -29,5 +22,4 @@
         Create Response Info
     </a><br>
 {% endif %}
-</body>
-</html>
+{% endblock %}

@@ -1,16 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Add Experiment</title>
-</head>
-<body>
-<h1>
-    Add Expriment
-</h1>
+{% extends "lrex_home/base.html" %}
+
+{% block content %}
 <form action="" method="post">{% csrf_token %}
     {{ form.as_p }}
     <input type="submit" />
 </form>
-</body>
-</html>
+{% endblock %}

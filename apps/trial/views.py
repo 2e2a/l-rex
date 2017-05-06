@@ -8,6 +8,7 @@ from . import models
 
 class TrialListView(generic.ListView):
     model = models.Trial
+    title = 'Trial List'
 
     def dispatch(self, *args, **kwargs):
         setup_slug = self.kwargs['setup_slug']
@@ -23,6 +24,7 @@ class TrialListView(generic.ListView):
 
 class UserTrialListView(generic.ListView):
     model = models.UserTrial
+    title = 'User Trial List'
 
     def dispatch(self, *args, **kwargs):
         setup_slug = self.kwargs['setup_slug']
@@ -33,6 +35,7 @@ class UserTrialListView(generic.ListView):
 class UserTrialCreateView(generic.CreateView):
     model = models.UserTrial
     fields = ['participant']
+    title = 'Create User Trial'
 
     def dispatch(self, *args, **kwargs):
         setup_slug = self.kwargs['setup_slug']
@@ -46,3 +49,4 @@ class UserTrialCreateView(generic.CreateView):
 
 class UserTrialDetailView(generic.DetailView):
     model = models.UserTrial
+    title = 'User Trial Overview'

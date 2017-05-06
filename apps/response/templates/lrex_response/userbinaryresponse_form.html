@@ -1,10 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>User Trial</title>
-</head>
-<body>
+{% extends "lrex_home/base.html" %}
+
+{% block content %}
 <h1>
     {{ view.setup.responseinfo.question }}
 </h1>
@@ -23,5 +19,4 @@
 <div>
     {{ view.setup.responseinfo.legend }}
 </div>
-</body>
-</html>
+{% endblock %}

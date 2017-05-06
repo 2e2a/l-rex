@@ -1,16 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>User Trial</title>
-</head>
-<body>
-<h1>
-    Trial {{ object.slug }}
-</h1>
-bla Bla
+{% extends "lrex_home/base.html" %}
+
+{% block content %}
+<div>
+    TODO ... summary
+</div>
 <a href="{% url 'user-response-intro' setup_slug=object.trial.setup.slug slug=object.slug %}">
     User Link
 </a>
-</body>
-</html>
+{% endblock %}

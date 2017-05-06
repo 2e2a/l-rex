@@ -7,11 +7,13 @@ from . import models
 
 class ExperimentDetailView(generic.DetailView):
     model = models.Experiment
+    title = 'Experiment Overview'
 
 
 class ExperimentCreateView(generic.CreateView):
     model = models.Experiment
     fields = ['title', 'item_type']
+    title = 'Create Experiment'
 
     def dispatch(self, *args, **kwargs):
         setup_slug = self.kwargs['setup_slug']

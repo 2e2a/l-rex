@@ -1,13 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ view.experiment.title }}</title>
-</head>
-<body>
-<h1>
-    Experiment {{ object.title }}
-</h1>
+{% extends "lrex_home/base.html" %}
+
+{% block content %}
 <div>
     Item Type: {{ object.item_type }}
 </div>
@@ -37,5 +30,4 @@
     Item Lists
 </a>
 {% endif %}
-</body>
-</html>
+{% endblock %}

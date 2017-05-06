@@ -1,13 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ view.setup.title }} User Trials</title>
-</head>
-<body>
-<h1>
-    {{ view.setup.title }} User Trials
-</h1>
+{% extends "lrex_home/base.html" %}
+
+{% block content %}
 <table>
     <thead>
     <tr>
@@ -32,6 +25,5 @@
 </table>
 <a href="{% url 'user-trial-create' setup_slug=view.setup.slug %}">
     New User Trial
-</a><br>
-</body>
-</html>
+</a>
+{% endblock %}

@@ -2,9 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}{% endblock %}</title>
+    {% if view.title %}
+        <title>{{ view.title }}</title>
+    {% else %}
+        <title>L-REX</title>
+    {% endif %}
 </head>
 <body>
-{% block content %}{% endblock %}
+    {% if view.title %}
+        <h1>{{ view.title }}</h1>
+    {% endif %}
+    {% block content %}{% endblock %}
 </body>
 </html>

@@ -9,6 +9,7 @@ from . import models
 class TextItemCreateView(generic.CreateView):
     model = models.TextItem
     fields = ['number', 'condition', 'text']
+    title = 'Add Item'
 
     def dispatch(self, *args, **kwargs):
         experiment_slug = self.kwargs['slug']
@@ -22,6 +23,7 @@ class TextItemCreateView(generic.CreateView):
 
 class ListListView(generic.ListView):
     model = models.List
+    title = 'Item List'
 
     def dispatch(self, *args, **kwargs):
         experiment_slug = self.kwargs['slug']

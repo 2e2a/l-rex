@@ -8,6 +8,7 @@ from . import models
 
 class BinaryResponseInfoDetailView(generic.TemplateView):
     template_name = 'lrex_responseinfo/binaryresponseinfo_detail.html'
+    title = 'Response Info'
 
     def dispatch(self, *args, **kwargs):
         setup_slug = self.kwargs['setup_slug']
@@ -22,6 +23,7 @@ class BinaryResponseInfoDetailView(generic.TemplateView):
 class BinaryResponseInfoCreateView(generic.CreateView):
     model = models.BinaryResponseInfo
     fields = ['question', 'legend', 'yes', 'no']
+    title = 'Set Response Info'
 
     def dispatch(self, *args, **kwargs):
         setup_slug = self.kwargs['setup_slug']
