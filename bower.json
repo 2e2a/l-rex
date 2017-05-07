@@ -1,0 +1,21 @@
+{
+  "name": "l-rex",
+  "homepage": "https://github.com/2e2a/l-rex",
+  "authors": [
+    "2e2a <alexej@2e2a.de>"
+  ],
+  "description": "Linguistic Rating Experiments",
+  "main": "",
+  "license": "GPL3",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "static/components/",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "3"
+  }
+}
