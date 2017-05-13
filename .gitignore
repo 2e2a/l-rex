@@ -3,3 +3,4 @@
 .env
 .idea
 db.sqlite3*
+static/components/
