@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
 from django.views import generic
 
@@ -6,7 +7,7 @@ from apps.setup import models as setup_models
 from . import models
 
 
-class TrialListView(generic.ListView):
+class TrialListView(LoginRequiredMixin, generic.ListView):
     model = models.Trial
     title = 'Trial List'
 
@@ -22,7 +23,7 @@ class TrialListView(generic.ListView):
         return redirect('trials',setup_slug=self.setup.slug)
 
 
-class UserTrialListView(generic.ListView):
+class UserTrialListView(LoginRequiredMixin, generic.ListView):
     model = models.UserTrial
     title = 'User Trial List'
 
@@ -32,7 +33,7 @@ class UserTrialListView(generic.ListView):
         return super().dispatch(*args, **kwargs)
 
 
-class UserTrialCreateView(generic.CreateView):
+class UserTrialCreateView(LoginRequiredMixin, generic.CreateView):
     model = models.UserTrial
     fields = ['participant']
     title = 'Create User Trial'
@@ -47,6 +48,6 @@ class UserTrialCreateView(generic.CreateView):
         form.instance.generate()
         return super().form_valid(form)
 
-class UserTrialDetailView(generic.DetailView):
+class UserTrialDetailView(LoginRequiredMixin, generic.DetailView):
     model = models.UserTrial
     title = 'User Trial Overview'

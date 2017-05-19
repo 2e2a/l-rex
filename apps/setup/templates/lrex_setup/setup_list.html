@@ -1,0 +1,14 @@
+{% extends "lrex_home/base.html" %}
+
+{% block content %}
+<div>
+    <a href="{% url 'setup-create'  %}">
+        New Setup
+    </a><br>
+{% for setup in setup_list %}
+<a href="{% url 'setup' slug=setup.slug %}">
+    {{ setup.title }}
+</a>
+</div>
+{% endfor %}
+{% endblock %}

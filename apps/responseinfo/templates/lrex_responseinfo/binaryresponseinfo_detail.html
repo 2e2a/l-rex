@@ -12,10 +12,10 @@
         </div>
     </div>
     <div>
-        Yes Lable: {{ view.object.yes }}
+        Yes Label: {{ view.object.yes }}
     </div>
     <div>
-        No Lable: {{ view.object.no }}
+        No Label: {{ view.object.no }}
     </div>
 {% else %}
     <a href="{% url 'binary-response-info-create' setup_slug=view.setup.slug %}">

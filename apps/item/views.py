@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
 from django.views import generic
 
@@ -6,7 +7,7 @@ from apps.experiment import models as experiment_models
 from . import models
 
 
-class TextItemCreateView(generic.CreateView):
+class TextItemCreateView(LoginRequiredMixin, generic.CreateView):
     model = models.TextItem
     fields = ['number', 'condition', 'text']
     title = 'Add Item'
@@ -21,7 +22,7 @@ class TextItemCreateView(generic.CreateView):
         return super().form_valid(form)
 
 
-class ListListView(generic.ListView):
+class ListListView(LoginRequiredMixin, generic.ListView):
     model = models.List
     title = 'Item List'
 

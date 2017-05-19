@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
 
 from apps.setup import models as setup_models
@@ -5,12 +6,12 @@ from apps.setup import models as setup_models
 from . import models
 
 
-class ExperimentDetailView(generic.DetailView):
+class ExperimentDetailView(LoginRequiredMixin, generic.DetailView):
     model = models.Experiment
     title = 'Experiment Overview'
 
 
-class ExperimentCreateView(generic.CreateView):
+class ExperimentCreateView(LoginRequiredMixin, generic.CreateView):
     model = models.Experiment
     fields = ['title', 'item_type']
     title = 'Create Experiment'

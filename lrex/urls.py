@@ -13,10 +13,12 @@ urlpatterns = [
 
     url(r'^accounts/login/',
         auth_views.login,
-        {'template_name': 'accounts/login.html'}),
+        {'template_name': 'accounts/login.html'},
+        name='login'),
     url(r'^accounts/logout/',
-        auth_views.login,
-        {'template_name': 'accounts/logged_out.html'}),
+        auth_views.logout,
+        {'template_name': 'accounts/logged_out.html'},
+        name='logout'),
 
     url(r'', include(home_urls)),
 ]

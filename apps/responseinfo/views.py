@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.urlresolvers import reverse
 from django.views import generic
 
@@ -6,7 +7,7 @@ from apps.setup import models as setup_models
 from . import models
 
 
-class BinaryResponseInfoDetailView(generic.TemplateView):
+class BinaryResponseInfoDetailView(LoginRequiredMixin, generic.TemplateView):
     template_name = 'lrex_responseinfo/binaryresponseinfo_detail.html'
     title = 'Response Info'
 
@@ -20,7 +21,7 @@ class BinaryResponseInfoDetailView(generic.TemplateView):
         return super().dispatch(*args, **kwargs)
 
 
-class BinaryResponseInfoCreateView(generic.CreateView):
+class BinaryResponseInfoCreateView(LoginRequiredMixin, generic.CreateView):
     model = models.BinaryResponseInfo
     fields = ['question', 'legend', 'yes', 'no']
     title = 'Set Response Info'

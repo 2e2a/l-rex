@@ -21,4 +21,7 @@ urlpatterns = [
         include(trial_urls)),
     url(r'^(?P<setup_slug>[-\w_]+)/responseinfo/',
         include(responseinfo_url)),
+    url(r'',
+        views.SetupListView.as_view(),
+        name='setups'),
 ]
