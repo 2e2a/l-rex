@@ -12,11 +12,34 @@
     <script src="{% static 'components/jquery/dist/jquery.min.js' %}"></script>
     <script src="{% static 'components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
     <link rel="stylesheet" href="{% static 'components/bootstrap/dist/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/lrex.css' %}">
 </head>
 <body>
-    {% if view.title %}
-        <h1>{{ view.title }}</h1>
-    {% endif %}
-    {% block content %}{% endblock %}
+
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">L-REX</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="#">Login</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+        {% if view.title %}
+            <h1>{{ view.title }}</h1>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </div>
 </body>
 </html>
