@@ -23,3 +23,5 @@ class SetupListView(LoginRequiredMixin, generic.ListView):
     model = models.Setup
     title = 'Your Experiment Setups'
 
+    def get_queryset(self):
+        return super().get_queryset().filter(creator=self.request.user)

@@ -1,14 +1,21 @@
 {% extends "lrex_home/base.html" %}
 
 {% block content %}
-<div>
-    <a href="{% url 'setup-create'  %}">
+<div class="row action">
+    <a href="{% url 'setup-create' %}" class="btn btn-primary" role="button">
         New Setup
-    </a><br>
-{% for setup in setup_list %}
-<a href="{% url 'setup' slug=setup.slug %}">
-    {{ setup.title }}
-</a>
+    </a>
 </div>
-{% endfor %}
+
+<div class="row">
+    <ul class="list-group">
+        {% for setup in setup_list %}
+        <li class="list-group-item">
+            <a href="{% url 'setup' slug=setup.slug %}">
+                {{ setup.title }}
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
 {% endblock %}
