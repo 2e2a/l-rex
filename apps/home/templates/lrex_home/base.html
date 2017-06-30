@@ -22,15 +22,14 @@
           <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
             <span class="sr-only">Toggle navigation</span>
             <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">L-REX</a>
+          <a class="navbar-brand" href="/">L-REX</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
+              <li><a href="">Impressum</a></li>
               {% if user.is_authenticated %}
-                <li><a href="{% url 'logout' %}">Logout</a></li>
+                <li ><a href="{% url 'logout' %}">Logout</a></li>
               {% else %}
                 <li><a href="{% url 'login' %}">Login</a></li>
               {% endif %}
@@ -40,9 +39,6 @@
     </nav>
 
     <div class="container">
-        {% if view.title %}
-            <h1>{{ view.title }}</h1>
-        {% endif %}
         {% block content %}{% endblock %}
     </div>
 </body>

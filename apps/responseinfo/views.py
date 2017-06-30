@@ -37,3 +37,21 @@ class BinaryResponseInfoCreateView(LoginRequiredMixin, generic.CreateView):
 
     def get_success_url(self):
         return reverse('binary-response-info', args=[self.setup.slug])
+
+
+class BinaryResponseInfoUpdateView(LoginRequiredMixin, generic.UpdateView):
+    model = models.BinaryResponseInfo
+    fields = ['question', 'legend', 'yes', 'no']
+    title = 'Set Response Info'
+
+    def dispatch(self, *args, **kwargs):
+        setup_slug = self.kwargs['setup_slug']
+        self.setup = setup_models.Setup.objects.get(slug=setup_slug)
+        return super().dispatch(*args, **kwargs)
+
+    def form_valid(self, form):
+        form.instance.setup = self.setup
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('binary-response-info', args=[self.setup.slug])

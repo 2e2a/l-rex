@@ -1,18 +1,19 @@
-{% extends "lrex_home/base.html" %}
+{% extends "lrex_home/setup_base.html" %}
 
-{% block content %}
-<form method="post">
-    {% csrf_token %}
-    <button type="submit" name="action" value="generate_lists">
-        Generate Items Lists
-    </button>
-</form>
-<table>
+{% block main_content %}
+<div class="action">
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="action" value="generate_lists" class="btn btn-warning">
+            Generate Items Lists
+        </button>
+    </form>
+</div>
+<table class="table">
     <thead>
     <tr>
         <th>List Number</th>
-        <th>Item Number</th>
-        <th>Item Condition</th>
+        <th>Item</th>
     </tr>
     </thead>
     <tbody>
@@ -20,8 +21,7 @@
         {% for item in list.items %}
         <tr>
             <td>{{ list.number }}</td>
-            <td>{{ item.number }}</td>
-            <td>{{ item.condition }}</td>
+            <td>{{ item }}</td>
         </tr>
         {% endfor %}
     {% endfor %}

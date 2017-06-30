@@ -1,32 +1,43 @@
-{% extends "lrex_home/base.html" %}
+{% extends "lrex_home/setup_base.html" %}
 
-{% block content %}
-<div>
-    Item Type: {{ object.item_type }}
+{% block main_content %}
+<div class="action">
+    <a href="{% url 'experiment-update' object.setup.slug object.slug %}" class="btn btn-warning" role="button">
+        Edit
+    </a>
+    <a href="{% url 'experiment-delete' object.setup.slug object.slug %}" class="btn btn-danger" role="button">
+        Delete
+    </a>
 </div>
-{% if object.item_type == 'txt' %}
-<table>
-    <thead>
+<h2>
+    Settings
+</h2>
+<p><i>
+    General experiment settings.
+</i></p>
+<table class="table">
     <tr>
-        <th>Item Number</th>
-        <th>Item Condition</th>
-        <th>Item</th>
+        <td>Item type</td>
+        <td><strong>{{ object.get_item_type_display }}</strong></td>
     </tr>
-    </thead>
-    <tbody>
-    {% for item in object.text_items %}
-    <tr>
-        <td>{{ item.number }}</td>
-        <td>{{ item.condition }}</td>
-        <td>{{ item.text }}</td>
-    </tr>
-    {% endfor %}
-    </tbody>
 </table>
-<a href="{% url 'text-item-create' setup_slug=object.setup.slug slug=object.slug %}">
-    Add Text Item
+{% if object.item_type == 'txt' %}
+<h2>
+    Items
+</h2>
+<p><i>
+    Experiment Items configuration
+</i></p>
+<a href="{% url 'textitems' setup_slug=object.setup.slug slug=object.slug %}">
+    Items
 </a>
-<a href="{% url 'lists' setup_slug=object.setup.slug slug=object.slug %}">
+<h2>
+    Item Lists
+</h2>
+<p><i>
+    Experiment items list configuration
+</i></p>
+<a href="{% url 'itemlists' setup_slug=object.setup.slug slug=object.slug %}">
     Item Lists
 </a>
 {% endif %}

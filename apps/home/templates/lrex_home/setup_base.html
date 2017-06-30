@@ -1,0 +1,20 @@
+{% extends "lrex_home/base.html" %}
+
+<a href="{% url 'binary-response-info' setup_slug=object.slug %}">
+    Response Info
+</a><br>
+{% block content %}
+    <ol class="breadcrumb">
+        {% for name, link in view.breadcrumbs %}
+            {% if not forloop.last %}
+                <li><a href="{{ link }}">{{ name }}</a></li>
+            {% else %}
+                <li class="active">{{ name }}</li>
+            {% endif %}
+        {% endfor %}
+    </ol>
+    {% if view.title %}
+        <h1>{{ view.title }}</h1>
+    {% endif %}
+    {% block main_content %}{% endblock %}
+{% endblock %}

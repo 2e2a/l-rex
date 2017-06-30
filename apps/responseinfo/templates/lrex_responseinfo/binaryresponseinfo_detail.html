@@ -1,25 +1,33 @@
-{% extends "lrex_home/base.html" %}
+{% extends "lrex_home/setup_base.html" %}
 
-{% block content %}
-{%if view.object %}
-    <div>
-         Question: {{ view.object.question }}
-    </div>
-    <div>
-        Legend:
-        <div>
-            {{ view.object.legend }}
-        </div>
-    </div>
-    <div>
-        Yes Label: {{ view.object.yes }}
-    </div>
-    <div>
-        No Label: {{ view.object.no }}
-    </div>
+{% block main_content %}
+{% if view.object %}
+<div class="row action">
+    <a href="{% url 'binary-response-info-update' setup_slug=view.setup.slug pk=view.object.pk%}" class="btn btn-primary" role="button">
+        Edit
+    </a>
+</div>
+<h2>
+     Question:
+</h2>
+{{ view.object.question }}
+<h2>
+    Legend:
+</h2>
+{{ view.object.legend }}
+<h2>
+    Yes Label:
+</h2>
+{{ view.object.yes }}
+<h2>
+    No Label:
+</h2>
+{{ view.object.no }}
 {% else %}
-    <a href="{% url 'binary-response-info-create' setup_slug=view.setup.slug %}">
-        Create Response Info
-    </a><br>
+<div class="row action">
+    <a href="{% url 'binary-response-info-create' setup_slug=view.setup.slug %}" class="btn btn-primary" role="button">
+        Create
+    </a>
+</div>
 {% endif %}
 {% endblock %}

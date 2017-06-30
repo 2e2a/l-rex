@@ -13,14 +13,14 @@ class Item(models.Model):
         ordering = ['number', 'condition']
 
     def __str__(self):
-        return '{}-{}-{}'.format(self.experiment, self.number, self.condition)
+        return '{}{}'.format(self.number, self.condition)
 
 
 class TextItem(Item):
     text = models.TextField(max_length=1024)
 
     def get_absolute_url(self):
-        return reverse('experiment', args=[self.experiment.setup.slug, self.experiment.slug])
+        return reverse('textitem', args=[self.experiment.setup.slug, self.experiment.slug, self.pk])
 
 
 class List(models.Model):
