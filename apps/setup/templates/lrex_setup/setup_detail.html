@@ -21,14 +21,17 @@
     </tr>
 </table>
 
+<h2>Response Settings</h2>
+<p><i>
+    Resposne Settings
+</i></p>
+<a href="{% url 'binary-response-info' setup_slug=object.slug %}">Response</a>
+
 <h2>Experiments</h2>
 <p><i>
     Create/Edit experiments
 </i></p>
 <a href="{% url 'experiments' setup_slug=object.slug %}">Experiments</a>
-
-<h2>Response Settings</h2>
-<a href="{% url 'binary-response-info' setup_slug=object.slug %}">Response</a>
 
 <h2>Trials</h2>
 <a href="{% url 'trials' setup_slug=object.slug %}">View/Generate Trials</a>

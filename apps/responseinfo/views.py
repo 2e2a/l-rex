@@ -20,6 +20,14 @@ class BinaryResponseInfoDetailView(LoginRequiredMixin, generic.TemplateView):
             pass
         return super().dispatch(*args, **kwargs)
 
+    @property
+    def breadcrumbs(self):
+        return [
+            ('setups', reverse('setups')),
+            (self.setup.title, reverse('setup', args=[self.setup.slug])),
+            ('response','')
+        ]
+
 
 class BinaryResponseInfoCreateView(LoginRequiredMixin, generic.CreateView):
     model = models.BinaryResponseInfo
@@ -38,6 +46,15 @@ class BinaryResponseInfoCreateView(LoginRequiredMixin, generic.CreateView):
     def get_success_url(self):
         return reverse('binary-response-info', args=[self.setup.slug])
 
+    @property
+    def breadcrumbs(self):
+        return [
+            ('setups', reverse('setups')),
+            (self.setup.title, reverse('setup', args=[self.setup.slug])),
+            ('response', reverse('binary-response-info', args=[self.setup.slug])),
+            ('create','')
+        ]
+
 
 class BinaryResponseInfoUpdateView(LoginRequiredMixin, generic.UpdateView):
     model = models.BinaryResponseInfo
@@ -55,3 +72,12 @@ class BinaryResponseInfoUpdateView(LoginRequiredMixin, generic.UpdateView):
 
     def get_success_url(self):
         return reverse('binary-response-info', args=[self.setup.slug])
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('setups', reverse('setups')),
+            (self.setup.title, reverse('setup', args=[self.setup.slug])),
+            ('response', reverse('binary-response-info', args=[self.setup.slug])),
+            ('edit','')
+        ]
