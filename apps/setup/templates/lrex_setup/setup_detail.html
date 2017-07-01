@@ -10,7 +10,21 @@
     </a>
 </span>
 
+<h2>Settings</h2>
+<p><i>
+    General settings
+</i></p>
+<table class="table">
+    <tr>
+        <td>Item type</td>
+        <td><strong>{{ object.get_item_type_display }}</strong></td>
+    </tr>
+</table>
+
 <h2>Experiments</h2>
+<p><i>
+    Create/Edit experiments
+</i></p>
 <a href="{% url 'experiments' setup_slug=object.slug %}">Experiments</a>
 
 <h2>Response Settings</h2>

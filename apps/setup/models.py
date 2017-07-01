@@ -13,10 +13,22 @@ class Setup(models.Model):
     title = models.CharField(max_length=200)
     slug = AutoSlugField(populate_from='title', unique=True)
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    ITEM_TYPE = (
+        ('txt', 'Text'),
+    )
+    item_type = models.CharField(
+        max_length=3,
+        choices=ITEM_TYPE,
+        default='txt',
+    )
 
     @property
     def experiments(self):
-        return experiment_models.Experiment.objects.filter(setup=self)
+        return self.experiment_set.all()
+
+    @property
+    def is_textitem(self):
+        return self.item_type == 'txt'
 
     def __str__(self):
         return self.slug

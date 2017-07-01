@@ -23,7 +23,7 @@ class ExperimentDetailView(LoginRequiredMixin, generic.DetailView):
 
 class ExperimentCreateView(LoginRequiredMixin, generic.CreateView):
     model = models.Experiment
-    fields = ['title', 'item_type']
+    fields = ['title']
     title = 'Create Experiment'
 
     def dispatch(self, *args, **kwargs):
@@ -47,7 +47,7 @@ class ExperimentCreateView(LoginRequiredMixin, generic.CreateView):
 
 class ExperimentUpdateView(LoginRequiredMixin, generic.UpdateView):
     model = models.Experiment
-    fields = ['title', 'item_type']
+    fields = ['title']
     title = 'Edit Experiment'
 
     @property

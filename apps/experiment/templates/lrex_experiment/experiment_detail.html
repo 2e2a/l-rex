@@ -9,19 +9,7 @@
         Delete
     </a>
 </div>
-<h2>
-    Settings
-</h2>
-<p><i>
-    General experiment settings.
-</i></p>
-<table class="table">
-    <tr>
-        <td>Item type</td>
-        <td><strong>{{ object.get_item_type_display }}</strong></td>
-    </tr>
-</table>
-{% if object.item_type == 'txt' %}
+{% if object.setup.is_textitem %}
 <h2>
     Items
 </h2>

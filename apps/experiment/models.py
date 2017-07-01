@@ -5,16 +5,8 @@ from autoslug import AutoSlugField
 from apps.item import models as item_models
 
 class Experiment(models.Model):
-    ITEM_TYPE = (
-        ('txt', 'Text'),
-    )
     title = models.CharField(max_length=200)
     slug = AutoSlugField(populate_from='title', unique=True)
-    item_type = models.CharField(
-        max_length=3,
-        choices=ITEM_TYPE,
-        default='txt',
-    )
     setup = models.ForeignKey(
         'lrex_setup.Setup',
         on_delete=models.CASCADE
@@ -25,10 +17,6 @@ class Experiment(models.Model):
         items = item_models.Item.objects.filter(experiment=self, number=1)
         conditions = [item.condition for item in items]
         return conditions
-
-    @property
-    def is_textitem(self):
-        return self.item_type is 'txt'
 
     def __str__(self):
         return self.slug

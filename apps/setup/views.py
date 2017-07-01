@@ -23,7 +23,7 @@ class SetupDetailView(LoginRequiredMixin, generic.DetailView):
 
 class SetupCreateView(LoginRequiredMixin, generic.CreateView):
     model = models.Setup
-    fields = ['title']
+    fields = ['title', 'item_type']
     title = 'Create Experiment Setup'
 
     @property
@@ -39,7 +39,7 @@ class SetupCreateView(LoginRequiredMixin, generic.CreateView):
 
 class SetupUpdateView(LoginRequiredMixin, generic.UpdateView):
     model = models.Setup
-    fields = ['title']
+    fields = ['title', 'item_type']
     title = 'Edit Experiment Setup'
 
     @property
