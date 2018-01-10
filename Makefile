@@ -32,8 +32,13 @@ build:
 	cp $(NODE_MODULES)/jquery/dist/jquery.slim.min.js static/js/
 	cp $(NODE_MODULES)/bootstrap/dist/js/bootstrap.min.js static/js/
 
+.PHONY: scss
+scss:
+	mkdir -p static/css
+	$(NODE_BIN)/node-sass lrex/static/scss/style.scss > static/css/lrex.css
+
 .PHONY: build
-build: js
+build: js scss
 
 .PHONY: run
 server:
