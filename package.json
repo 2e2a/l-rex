@@ -1,0 +1,20 @@
+{
+  "name": "l-rex",
+  "version": "0.0.1",
+  "description": "Linguistic Rating Experiments",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/2e2a/l-rex.git"
+  },
+  "author": "2e2a <alexej@2e2a.de>",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/2e2a/l-rex/issues"
+  },
+  "homepage": "https://github.com/2e2a/l-rex#readme",
+  "dependencies": {
+    "bootstrap": "^3.3.7",
+    "jquery": "^3.2.1",
+    "popper.js": "^1.12.9"
+  }
+}

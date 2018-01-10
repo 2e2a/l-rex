@@ -1,3 +1,4 @@
-django>1.10,<1.11
-django-autoslug
-django-crispy-forms
+Django==2.0.1
+django-autoslug==1.9.3
+django-crispy-forms==1.7.0
+pytz==2017.3
