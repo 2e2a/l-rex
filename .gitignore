@@ -1,6 +1,7 @@
 *.mo
 *__pycache__/
-.env
-.idea
-db.sqlite3*
-static/components/
+/.env
+/.idea
+/db.sqlite3*
+/node_modules/
+/static/
