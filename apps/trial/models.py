@@ -1,7 +1,7 @@
 import random
 import uuid
-from django.core.urlresolvers import reverse
 from django.db import models
+from django.urls import reverse
 from django.utils import timezone
 
 from apps.item import models as item_models
