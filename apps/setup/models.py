@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.urls import reverse
-from autoslug import AutoSlugField
+from django.utils.text import slugify
 
 from apps.contrib import math
 from apps.experiment import models as experiment_models
@@ -11,7 +11,7 @@ from apps.trial import models as trial_models
 
 class Setup(models.Model):
     title = models.CharField(max_length=200)
-    slug = AutoSlugField(populate_from='title', unique=True)
+    slug = models.SlugField(unique=True)
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     ITEM_TYPE = (
         ('txt', 'Text'),
@@ -21,6 +21,10 @@ class Setup(models.Model):
         choices=ITEM_TYPE,
         default='txt',
     )
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.title)
+        return super().save(*args, **kwargs)
 
     @property
     def experiments(self):

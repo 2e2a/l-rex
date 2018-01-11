@@ -1,16 +1,20 @@
 from django.urls import reverse
 from django.db import models
-from autoslug import AutoSlugField
+from django.utils.text import slugify
 
 from apps.item import models as item_models
 
 class Experiment(models.Model):
     title = models.CharField(max_length=200)
-    slug = AutoSlugField(populate_from='title', unique=True)
+    slug = models.SlugField(unique=True)
     setup = models.ForeignKey(
         'lrex_setup.Setup',
         on_delete=models.CASCADE
     )
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.title)
+        return super().save(*args, **kwargs)
 
     @property
     def conditions(self):
