@@ -5,41 +5,38 @@
 <head>
     <meta charset="UTF-8">
     {% if view.title %}
-        <title>{{ view.title }}</title>
+    <title>{{ view.title }}</title>
     {% else %}
-        <title>L-REX</title>
+    <title>L-REX</title>
     {% endif %}
-    <script src="{% static 'components/jquery/dist/jquery.min.js' %}"></script>
-    <script src="{% static 'components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
-    <link rel="stylesheet" href="{% static 'components/bootstrap/dist/css/bootstrap.min.css' %}">
+    <script src="{% static 'js/jquery.slim.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
     <link rel="stylesheet" href="{% static 'css/lrex.css' %}">
 </head>
 <body>
 
-    <nav class="navbar navbar-default navbar-fixed-top">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="/">L-REX</a>
-        </div>
-        <div id="navbar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav navbar-right">
-              <li><a href="">Impressum</a></li>
-              {% if user.is_authenticated %}
-                <li ><a href="{% url 'logout' %}">Logout</a></li>
-              {% else %}
-                <li><a href="{% url 'login' %}">Login</a></li>
-              {% endif %}
-          </ul>
-        </div>
-      </div>
-    </nav>
-
-    <div class="container">
-        {% block content %}{% endblock %}
+<nav class="navbar navbar-expand-md navbar-light bg-light fixed-top">
+    <a class="navbar-brand" href="/">L-REX</a>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="#">Impressum</a>
+            </li>
+            {% if user.is_authenticated %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+            </li>
+            {% else %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'login' %}">Login</a>
+            </li>
+            {% endif %}
+        </ul>
     </div>
+</nav>
+
+<div class="container">
+    {% block content %}{% endblock %}
+</div>
 </body>
 </html>
