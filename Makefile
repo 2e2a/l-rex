@@ -41,5 +41,5 @@ scss:
 build: js scss
 
 .PHONY: run
-server:
+run:
 	$(VIRTUAL_ENV)/bin/python3 manage.py runserver 8000
