@@ -47,7 +47,7 @@ class SetupUpdateView(LoginRequiredMixin, generic.UpdateView):
         return [
             ('setups', reverse('setups')),
             (self.object.title, reverse('setup', args=[self.object.slug])),
-            ('edit', ''),
+            ('settings', ''),
         ]
 
 

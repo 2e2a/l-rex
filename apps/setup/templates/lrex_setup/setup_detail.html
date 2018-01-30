@@ -1,15 +1,6 @@
 {% extends "lrex_home/setup_base.html" %}
 
 {% block main_content %}
-<span class="action">
-    <a href="{% url 'setup-update' object.slug %}" class="btn btn-warning" role="button">
-        Edit
-    </a>
-    <a href="{% url 'setup-delete' object.slug %}" class="btn btn-danger" role="button">
-        Delete
-    </a>
-</span>
-
 <h2>Settings</h2>
 <p><i>
     General settings
@@ -20,8 +11,10 @@
         <td><strong>{{ object.get_item_type_display }}</strong></td>
     </tr>
 </table>
+<p>bla bla</p>
+<a href="{% url 'setup-update' object.slug %}">Edit</a>
 
-<h2>Response Settings</h2>
+<h2 class="mt-4">Response Settings</h2>
 <p><i>
     Resposne Settings
 </i></p>
@@ -38,4 +31,9 @@
 
 <h2>User Trials</h2>
 <a href="{% url 'user-trials' setup_slug=object.slug %}">User Trials</a>
+<div class="row justify-content-center mb-2 ">
+    <a href="{% url 'setup-delete' object.slug %}" class="btn btn-outline-warning btn-sm mx-1" role="button">
+        Delete
+    </a>
+</div>
 {% endblock %}

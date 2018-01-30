@@ -1,12 +1,11 @@
 {% extends "lrex_home/setup_base.html" %}
 
 {% block main_content %}
-<div class="action">
-    <a href="{% url 'setup-create' %}" class="btn btn-primary" role="button">
+<div class="row justify-content-center mb-2">
+    <a href="{% url 'setup-create' %}" class="btn btn-outline-primary btn-sm mx-1" role="button">
         New Setup
     </a>
 </div>
-
 <ul class="list-group">
     {% for setup in setup_list %}
     <li class="list-group-item">
