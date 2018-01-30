@@ -7,26 +7,16 @@ from apps.setup import models as setup_models
 from . import models
 
 
-class BinaryResponseInfoDetailView(LoginRequiredMixin, generic.TemplateView):
-    template_name = 'lrex_responseinfo/binaryresponseinfo_detail.html'
-    title = 'Response Info'
+class BinaryResponseInfoView(LoginRequiredMixin, generic.RedirectView):
 
-    def dispatch(self, *args, **kwargs):
+    def get_redirect_url(self, *args, **kwargs):
         setup_slug = self.kwargs['setup_slug']
-        self.setup = setup_models.Setup.objects.get(slug=setup_slug)
+        setup = setup_models.Setup.objects.get(slug=setup_slug)
         try:
-            self.object = models.BinaryResponseInfo.objects.get(setup=self.setup)
+            response_info = models.BinaryResponseInfo.objects.get(setup=setup)
+            return reverse('binary-response-info-update', args=[setup.slug, response_info.pk])
         except models.BinaryResponseInfo.DoesNotExist:
-            pass
-        return super().dispatch(*args, **kwargs)
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('setups', reverse('setups')),
-            (self.setup.title, reverse('setup', args=[self.setup.slug])),
-            ('response','')
-        ]
+            return reverse('binary-response-info-create', args=[setup.slug])
 
 
 class BinaryResponseInfoCreateView(LoginRequiredMixin, generic.CreateView):
@@ -44,15 +34,14 @@ class BinaryResponseInfoCreateView(LoginRequiredMixin, generic.CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse('binary-response-info', args=[self.setup.slug])
+        return reverse('setup', args=[self.setup.slug])
 
     @property
     def breadcrumbs(self):
         return [
             ('setups', reverse('setups')),
             (self.setup.title, reverse('setup', args=[self.setup.slug])),
-            ('response', reverse('binary-response-info', args=[self.setup.slug])),
-            ('create','')
+            ('response', ''),
         ]
 
 
@@ -71,13 +60,12 @@ class BinaryResponseInfoUpdateView(LoginRequiredMixin, generic.UpdateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse('binary-response-info', args=[self.setup.slug])
+        return reverse('setup', args=[self.setup.slug])
 
     @property
     def breadcrumbs(self):
         return [
             ('setups', reverse('setups')),
             (self.setup.title, reverse('setup', args=[self.setup.slug])),
-            ('response', reverse('binary-response-info', args=[self.setup.slug])),
-            ('edit','')
+            ('response', ''),
         ]

@@ -10,6 +10,7 @@ urlpatterns = [
         views.BinaryResponseInfoUpdateView.as_view(),
         name='binary-response-info-update'),
     url(r'binary/$',
-        views.BinaryResponseInfoDetailView.as_view(),
+        views.BinaryResponseInfoView.as_view(),
         name='binary-response-info'),
+
 ]
