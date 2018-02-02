@@ -1,21 +1,19 @@
 {% extends "lrex_home/setup_base.html" %}
 
 {% block main_content %}
-<div class="action">
-    <a href="{% url 'experiment-create' setup_slug=view.setup.slug %}" class="btn btn-primary" role="button">
+<div class="row justify-content-center mb-2">
+    <a href="{% url 'experiment-create' setup_slug=view.setup.slug %}" class="btn btn-outline-primary btn-sm mx-1"
+       role="button">
         New Experiment
     </a>
 </div>
-
-<div>
-    <ul class="list-group">
-        {% for experiment in experiment_list %}
-        <li class="list-group-item">
-            <a href="{% url 'experiment' setup_slug=view.setup.slug slug=experiment.slug %}">
-                {{ experiment.title }}
-            </a>
-        </li>
-        {% endfor %}
-    </ul>
-</div>
+<ul class="list-group">
+    {% for experiment in experiment_list %}
+    <li class="list-group-item">
+        <a href="{% url 'experiment' setup_slug=view.setup.slug slug=experiment.slug %}">
+            {{ experiment.title }}
+        </a>
+    </li>
+    {% endfor %}
+</ul>
 {% endblock %}

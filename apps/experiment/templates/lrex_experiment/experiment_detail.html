@@ -1,32 +1,44 @@
 {% extends "lrex_home/setup_base.html" %}
 
 {% block main_content %}
-<div class="action">
-    <a href="{% url 'experiment-update' object.setup.slug object.slug %}" class="btn btn-warning" role="button">
-        Edit
-    </a>
-    <a href="{% url 'experiment-delete' object.setup.slug object.slug %}" class="btn btn-danger" role="button">
+<div class="my-2 p-4 border">
+    <h2>Settings</h2>
+    <p>
+        Edit Expriment Settings, such as name.
+    </p>
+    <p>
+        <a href="{% url 'experiment-update' object.setup.slug object.slug %}">Edit</a>
+    </p>
+</div>
+
+{% if object.setup.is_textitem %}
+<div class="my-2 p-4 border">
+    <h2>Items</h2>
+    <p>
+        Experiment Items configuration
+    </p>
+    <p>
+        <a href="{% url 'textitems' setup_slug=object.setup.slug slug=object.slug %}">
+            Items
+        </a>
+    </p>
+</div>
+<div class="my-2 p-4 border">
+    <h2>Item Lists</h2>
+    <p>
+        Experiment items list configuration
+    </p>
+    <p>
+        <a href="{% url 'itemlists' setup_slug=object.setup.slug slug=object.slug %}">
+            Item Lists
+        </a>
+    </p>
+</div>
+{% endif %}
+<div class="row justify-content-end mb-2">
+    <a href="{% url 'experiment-delete' object.setup.slug object.slug %}" class="btn btn-outline-danger btn-sm mx-1"
+       role="button">
         Delete
     </a>
 </div>
-{% if object.setup.is_textitem %}
-<h2>
-    Items
-</h2>
-<p><i>
-    Experiment Items configuration
-</i></p>
-<a href="{% url 'textitems' setup_slug=object.setup.slug slug=object.slug %}">
-    Items
-</a>
-<h2>
-    Item Lists
-</h2>
-<p><i>
-    Experiment items list configuration
-</i></p>
-<a href="{% url 'itemlists' setup_slug=object.setup.slug slug=object.slug %}">
-    Item Lists
-</a>
-{% endif %}
 {% endblock %}
