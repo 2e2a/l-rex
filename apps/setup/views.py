@@ -66,7 +66,7 @@ class SetupDeleteView(LoginRequiredMixin, generic.DeleteView):
 
     @property
     def cancel_url(self):
-        return reverse('setups')
+        return reverse('setup', args=[self.object.slug])
 
     def get_success_url(self):
         return reverse('setups')

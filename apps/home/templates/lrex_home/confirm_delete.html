@@ -3,10 +3,12 @@
 
 {% block main_content %}
 <form action="" method="post">{% csrf_token %}
-    <p>{{ view.message }}</p>
+    <p class="row justify-content-center">{{ view.message }}</p>
+    <div class="row justify-content-center">
     <span>
-        <input type="submit" value="Delete" class="btn btn-primary"/>
-        <a href="{{ view.cancel_url }}" class="btn btn-secondary">Cancel</a>
+        <input type="submit" value="Delete" class="btn btn-outline-danger"/>
+        <a href="{{ view.cancel_url }}" class="btn btn-outline-secondary">Cancel</a>
     </span>
+    </div>
 </form>
 {% endblock %}
