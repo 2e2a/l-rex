@@ -1,13 +1,15 @@
 {% extends "lrex_home/setup_base.html" %}
 
 {% block main_content %}
-<div class="action">
+<div class="row justify-content-center mb-2">
     <form method="post">
         {% csrf_token %}
-        <button type="submit" name="action" value="generate_lists" class="btn btn-warning">
+        <button type="submit" name="action" value="generate_lists" class="btn btn-outline-primary btn-sm mx-1">
             Generate Items Lists
         </button>
     </form>
+</div>
+<div class="action">
 </div>
 <table class="table">
     <thead>
