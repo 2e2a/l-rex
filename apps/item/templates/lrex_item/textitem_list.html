@@ -1,19 +1,14 @@
 {% extends "lrex_home/setup_base.html" %}
 
 {% block main_content %}
-<div class="action">
-    <a href="{% url 'textitem-create' setup_slug=view.experiment.setup.slug slug=view.experiment.slug %}" class=" btn btn-primary" role="button">
+<div class="row justify-content-center mb-2">
+    <a href="{% url 'textitem-create' setup_slug=view.experiment.setup.slug slug=view.experiment.slug %}"
+       class="btn btn-outline-primary btn-sm mx-1" role="button">
         Add Text Item
     </a>
-</div>
-
-<div>
-    <ul class="list-group">
-        {% for experiment in experiment_list %}
-        <li class="list-group-item">
-        </li>
-        {% endfor %}
-    </ul>
+    <a href="" class="btn btn-outline-primary btn-sm mx-1" role="button">
+        Upload
+    </a>
 </div>
 <table class="table">
     <thead>
@@ -26,7 +21,7 @@
     {% for item in textitem_list %}
     <tr>
         <td class="col-md-1">
-            <a href="{% url 'textitem' setup_slug=view.experiment.setup.slug slug=view.experiment.slug pk=item.pk %}">
+            <a href="{% url 'textitem-update' setup_slug=view.experiment.setup.slug slug=view.experiment.slug pk=item.pk %}">
                 {{ item }}
             </a>
         </td>

@@ -8,23 +8,6 @@ from apps.experiment import models as experiment_models
 from . import models
 
 
-class TextItemDetailView(LoginRequiredMixin, generic.DetailView):
-    model = models.TextItem
-    title = 'Item'
-
-    @property
-    def breadcrumbs(self):
-        exp = self.object.experiment
-        setup = exp.setup
-        return [
-            ('setups', reverse('setups')),
-            (setup.title, reverse('setup', args=[setup.slug])),
-            ('experiments',reverse('experiments', args=[setup.slug])),
-            (exp.title, reverse('experiment', args=[setup.slug, exp.slug])),
-            ('items', reverse('textitems', args=[setup.slug, exp.slug])),
-            (self.get_object(), reverse('textitem', args=[setup.slug, exp.slug, self.get_object().pk])),
-        ]
-
 class TextItemCreateView(LoginRequiredMixin, generic.CreateView):
     model = models.TextItem
     fields = ['number', 'condition', 'text']
@@ -39,9 +22,13 @@ class TextItemCreateView(LoginRequiredMixin, generic.CreateView):
         form.instance.experiment = self.experiment
         return super().form_valid(form)
 
+    def get_success_url(self):
+        exp = self.object.experiment
+        return reverse('textitems', args=[exp.setup.slug, exp.slug])
+
     @property
     def breadcrumbs(self):
-        exp = self.object.experiment
+        exp = self.experiment
         setup = exp.setup
         return [
             ('setups', reverse('setups')),
@@ -58,6 +45,10 @@ class TextItemUpdateView(LoginRequiredMixin, generic.UpdateView):
     fields = ['number', 'condition', 'text']
     title = 'Edit Item'
 
+    def get_success_url(self):
+        exp = self.object.experiment
+        return reverse('textitems', args=[exp.setup.slug, exp.slug])
+
     @property
     def breadcrumbs(self):
         exp = self.object.experiment
@@ -68,8 +59,7 @@ class TextItemUpdateView(LoginRequiredMixin, generic.UpdateView):
             ('experiments',reverse('experiments', args=[setup.slug])),
             (exp.title, reverse('experiment', args=[setup.slug, exp.slug])),
             ('items', reverse('textitems', args=[setup.slug, exp.slug])),
-            (self.get_object(), reverse('textitem', args=[setup.slug, exp.slug, self.get_object().pk])),
-            ('edit', ''),
+            (self.object, ''),
         ]
 
 
@@ -81,7 +71,8 @@ class TextItemDeleteView(LoginRequiredMixin, generic.DeleteView):
     @property
     def cancel_url(self):
         exp = self.object.experiment
-        return reverse('textitem', args=[exp.setup.slug, exp.slug, self.object.pk])
+        setup = exp.setup
+        return reverse('textitem-update', args=[setup.slug, exp.slug, self.object.pk])
 
     @property
     def breadcrumbs(self):
@@ -93,7 +84,7 @@ class TextItemDeleteView(LoginRequiredMixin, generic.DeleteView):
             ('experiments',reverse('experiments', args=[setup.slug])),
             (exp.title, reverse('experiment', args=[setup.slug, exp.slug])),
             ('items', reverse('textitems', args=[setup.slug, exp.slug])),
-            (self.get_object(), reverse('textitem', args=[setup.slug, exp.slug, self.get_object().pk])),
+            (self.object, reverse('textitem-update', args=[setup.slug, exp.slug, self.object.pk])),
             ('delete','')
         ]
 
