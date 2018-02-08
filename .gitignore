@@ -2,6 +2,6 @@
 *__pycache__/
 /.env
 /.idea
-/db.sqlite3*
+/lrex/local.py
 /node_modules/
 /static/
