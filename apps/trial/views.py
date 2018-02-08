@@ -45,8 +45,10 @@ class UserTrialCreateView(LoginRequiredMixin, generic.CreateView):
 
     def form_valid(self, form):
         form.instance.setup = self.setup
-        form.instance.generate()
-        return super().form_valid(form)
+        form.instance.init()
+        response = super().form_valid(form)
+        form.instance.generate_items()
+        return response
 
 class UserTrialDetailView(LoginRequiredMixin, generic.DetailView):
     model = models.UserTrial

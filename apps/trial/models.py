@@ -70,7 +70,7 @@ class UserTrial(models.Model):
         items = [trial_item.item for trial_item in trial_items]
         return items
 
-    def generate(self):
+    def init(self):
         last_user_trial = UserTrial.objects.last()
         if last_user_trial:
             trial = last_user_trial.trial.next
@@ -78,6 +78,7 @@ class UserTrial(models.Model):
             trial = Trial.objects.first()
         self.trial = trial
 
+    def generate_items(self):
         items = self.trial.items
         random.shuffle(items)
         for i, item in enumerate(items):
