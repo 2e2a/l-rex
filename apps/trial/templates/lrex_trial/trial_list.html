@@ -1,23 +1,25 @@
-{% extends "lrex_home/base.html" %}
+{% extends "lrex_home/setup_base.html" %}
 
-{% block content %}
-<form method="post">
-    {% csrf_token %}
-    <button type="submit" name="action" value="generate_trials">
-        Generate Trials
-    </button>
-</form>
-<table>
+{% block main_content %}
+<div class="row justify-content-center mb-2">
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="action" value="generate_trials" class="btn btn-outline-primary btn-sm mx-1">
+            Generate Trials
+        </button>
+    </form>
+</div>
+<table class="table">
     <thead>
     <tr>
-        <th>Trial Number</th>
-        <th>Trial Lists</th>
+        <th>Trial</th>
+        <th>Lists</th>
     </tr>
     </thead>
     <tbody>
     {% for trial in trial_list %}
         <tr>
-            <td>{{ trial.number }}</td>
+            <td class="col-md-1">{{ trial.number }}</td>
             <td>
                 {% for list in trial.lists %}
                     {% for item in list.items %}

@@ -1,5 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
+from django.urls import reverse
 from django.views import generic
 
 from apps.setup import models as setup_models
@@ -9,7 +10,7 @@ from . import models
 
 class TrialListView(LoginRequiredMixin, generic.ListView):
     model = models.Trial
-    title = 'Trial List'
+    title = 'Trials'
 
     def dispatch(self, *args, **kwargs):
         setup_slug = self.kwargs['setup_slug']
@@ -22,6 +23,14 @@ class TrialListView(LoginRequiredMixin, generic.ListView):
             self.setup.generate_trials()
         return redirect('trials',setup_slug=self.setup.slug)
 
+    @property
+    def breadcrumbs(self):
+        return [
+            ('setups', reverse('setups')),
+            (self.setup.title, reverse('setup', args=[self.setup.slug])),
+            ('trials', ''),
+        ]
+
 
 class UserTrialListView(LoginRequiredMixin, generic.ListView):
     model = models.UserTrial
@@ -31,6 +40,14 @@ class UserTrialListView(LoginRequiredMixin, generic.ListView):
         setup_slug = self.kwargs['setup_slug']
         self.setup = setup_models.Setup.objects.get(slug=setup_slug)
         return super().dispatch(*args, **kwargs)
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('setups', reverse('setups')),
+            (self.setup.title, reverse('setup', args=[self.setup.slug])),
+            ('user-trials', ''),
+        ]
 
 
 class UserTrialCreateView(LoginRequiredMixin, generic.CreateView):
@@ -49,6 +66,15 @@ class UserTrialCreateView(LoginRequiredMixin, generic.CreateView):
         response = super().form_valid(form)
         form.instance.generate_items()
         return response
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('setups', reverse('setups')),
+            (self.setup.title, reverse('setup', args=[self.setup.slug])),
+            ('user-trials', reverse('user-trials', args=[self.setup.slug])),
+            ('create', ''),
+        ]
 
 class UserTrialDetailView(LoginRequiredMixin, generic.DetailView):
     model = models.UserTrial

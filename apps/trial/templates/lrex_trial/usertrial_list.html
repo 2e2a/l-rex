@@ -1,7 +1,13 @@
-{% extends "lrex_home/base.html" %}
+{% extends "lrex_home/setup_base.html" %}
 
-{% block content %}
-<table>
+{% block main_content %}
+<div class="row justify-content-center mb-2">
+    <a href="{% url 'user-trial-create' setup_slug=view.setup.slug %}"
+       class="btn btn-outline-primary btn-sm mx-1" role="button">
+        New User Trial
+    </a>
+</div>
+<table class="table">
     <thead>
     <tr>
         <th>User</th>
@@ -23,7 +29,4 @@
     {% endfor %}
     </tbody>
 </table>
-<a href="{% url 'user-trial-create' setup_slug=view.setup.slug %}">
-    New User Trial
-</a>
 {% endblock %}

@@ -1,7 +1,7 @@
-{% extends "lrex_home/base.html" %}
+{% extends "lrex_home/setup_base.html" %}
 {% load crispy_forms_tags %}
 
-{% block content %}
+{% block main_content %}
 <form action="" method="post">{% csrf_token %}
     {{ form|crispy }}
     <input type="submit" />
