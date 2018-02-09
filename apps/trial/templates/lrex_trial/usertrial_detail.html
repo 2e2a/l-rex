@@ -1,10 +1,21 @@
-{% extends "lrex_home/base.html" %}
+{% extends "lrex_home/setup_base.html" %}
 
-{% block content %}
-<div>
-    TODO ... summary
+{% block main_content %}
+<div class="my-2 p-4 border">
+    <h2>Start trial</h2>
+    <p>
+        Send this link to the trial participant.
+    </p>
+    <p>
+        <a href="{% url 'user-response-intro' setup_slug=object.trial.setup.slug slug=object.slug %}">
+            User Trial Link
+        </a>
+    </p>
 </div>
-<a href="{% url 'user-response-intro' setup_slug=object.trial.setup.slug slug=object.slug %}">
-    User Link
-</a>
+<div class="my-2 p-4 border">
+    <h2>Results</h2>
+    <p>
+        TODO...
+    </p>
+</div>
 {% endblock %}
