@@ -1,22 +1,33 @@
 {% extends "lrex_home/base.html" %}
 
 {% block content %}
-<h1>
-    {{ view.setup.responseinfo.question }}
-</h1>
-<div>
-    {{ view.user_trial_item.item.textitem.text }}
+<h1 class="row justify-content-center mt-2">Participate In Experiment</h1>
+<div class="row justify-content-center">
+    <div class="my-2 p-4 border col-6">
+            <p>
+                {{ view.user_trial_item.item.textitem.text }}
+            </p>
+            <form method="post">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col">
+                        <button class="btn btn-outline-primary" type="submit" name="yes" value="on">
+                            {{ view.yes }}
+                        </button>
+                    </div>
+                    <div class="col text-right">
+                        <button class="btn btn-outline-primary" type="submit" name="yes" value="">
+                            {{ view.no }}
+                        </button>
+                    </div>
+                </div>
+            </form>
+            <p>
+                <small>
+                    {{ view.setup.responseinfo.legend }}
+                </small>
+            </p>
+    </div>
 </div>
-<form method="post">
-    {% csrf_token %}
-    <button type="submit" name="yes" value="on">
-        {{ view.yes }}
-    </button>
-    <button type="submit" name="yes" value="">
-        {{ view.no }}
-    </button>
-</form>
-<div>
-    {{ view.setup.responseinfo.legend }}
-</div>
+
 {% endblock %}

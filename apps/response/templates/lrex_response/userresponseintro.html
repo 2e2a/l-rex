@@ -1,13 +1,17 @@
 {% extends "lrex_home/base.html" %}
 
 {% block content %}
-<h1>
-    Welcome to Trial {{ view.user_trial.slug }}
-</h1>
-<div>
-    Question: {{ view.setup.responseinfo.question }}
+<h1 class="row justify-content-center mt-2">Participate In Experiment</h1>
+<div class="row justify-content-center">
+<div class="my-2 p-4 border col-6">
+    <p>
+        {{ view.setup.responseinfo.question }}
+    </p>
+    <p>
+        <a href="{% url 'user-binary-response' setup_slug=view.setup.slug slug=view.user_trial.slug num=0 %}">
+            Start Trial
+        </a>
+    </p>
 </div>
-<a href="{% url 'user-binary-response' setup_slug=view.setup.slug slug=view.user_trial.slug num=0 %}">
-    Start Trial
-</a>
+</div>
 {% endblock %}
