@@ -4,7 +4,6 @@ from django.conf.urls import include
 from . import views
 
 from apps.experiment import urls as experiment_urls
-from apps.responseinfo import urls as responseinfo_url
 from apps.trial import urls as trial_urls
 
 
@@ -28,8 +27,6 @@ urlpatterns = [
         include(experiment_urls)),
     url(r'^(?P<setup_slug>[-\w_]+)/trial/',
         include(trial_urls)),
-    url(r'^(?P<setup_slug>[-\w_]+)/responseinfo/',
-        include(responseinfo_url)),
     url(r'',
         views.SetupListView.as_view(),
         name='setups'),
