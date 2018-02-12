@@ -21,6 +21,23 @@ class SetupDetailView(LoginRequiredMixin, generic.DetailView):
         return self.object
 
 
+class SetupRunView(LoginRequiredMixin, generic.DetailView):
+    model = models.Setup
+    title = 'Run Experiment Setup'
+    template_name = 'lrex_setup/setup_run.html'
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('setups', reverse('setups')),
+            (self.setup.title, ''),
+        ]
+
+    @property
+    def setup(self):
+        return self.object
+
+
 class SetupCreateView(LoginRequiredMixin, generic.CreateView):
     model = models.Setup
     fields = ['title', 'item_type']

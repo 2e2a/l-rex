@@ -1,0 +1,19 @@
+{% extends "lrex_home/setup_base.html" %}
+
+{% block main_content %}
+<div class="my-2 p-4 border">
+    <h2>User Trials</h2>
+    <p>
+        Create and run user trials. View indivirual results.
+    </p>
+    <p>
+        <a href="{% url 'user-trials' setup_slug=object.slug %}">User Trials</a>
+    </p>
+</div>
+<div class="my-2 p-4 border">
+    <h2>Results</h2>
+    <p>
+        TODO
+    </p>
+</div>
+{% endblock %}
