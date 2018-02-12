@@ -1,57 +1,47 @@
 {% extends "lrex_home/setup_base.html" %}
 
 {% block main_content %}
-<div class="my-2 p-4 border">
-    <div class="my-2">
-        <h2>Settings</h2>
-        <p>
-            Configure General settings
+<div class="card my-1">
+    <div class="card-body">
+        <h2 class="card-title">Intialization</h2>
+        <p class="card-text">
+            Configure initial settings
         </p>
-        <p>
-            <a href="{% url 'setup-update' object.slug %}">Edit</a>
-        </p>
-    </div>
-
-    <div class="my-2">
-        <p>
-            Resposne Settings
-        </p>
-        <p>
-            <a href="{% url 'binary-response-info' setup_slug=object.slug %}">Response</a>
-        </p>
-
+        <a  class="card-link" href="{% url 'setup-update' object.slug %}">Edit</a>
     </div>
 </div>
 
-<div class="my-2 p-4 border">
-    <h2>Experiments</h2>
-    <p>
-        Create/Edit experiments
-    </p>
-    <p>
-        <a href="{% url 'experiments' setup_slug=object.slug %}">Experiments</a>
-    </p>
+<div class="card my-1">
+    <div class="card-body">
+        <h2 class="card-title">Resposne Settings</h2>
+        <p class="card-text">
+            Set response specific settings
+        </p>
+        <a  class="card-link" href="{% url 'binary-response-info' setup_slug=object.slug %}">Response</a>
+    </div>
 </div>
 
-<div class="my-2 p-4 border">
-    <h2>Trials</h2>
-    <p>
-        Create/Edit experiments
-    </p>
-    <p>
-        <a href="{% url 'trials' setup_slug=object.slug %}">View/Generate Trials</a></p>
+<div class="card my-1">
+    <div class="card-body">
+        <h2 class="card-title">Experiments</h2>
+        <p class="card-text">
+            Create/Edit experiments
+        </p>
+        <a  class="card-link" href="{% url 'experiments' setup_slug=object.slug %}">Experiments</a>
+    </div>
+</div>
+
+<div class="card my-1">
+    <div class="card-body">
+        <h2 class="card-title">Trials</h2>
+        <p class="card-text">
+            Create trials for experiments.
+        </p>
+        <a  class="card-link" href="{% url 'trials' setup_slug=object.slug %}">View/Generate Trials</a></p>
+    </div>
 </div>
 
 
-<div class="my-2 p-4 border">
-    <h2>User Trials</h2>
-    <p>
-        Create user trial. View Results.
-    </p>
-    <p>
-        <a href="{% url 'user-trials' setup_slug=object.slug %}">User Trials</a>
-    </p>
-</div>
 <div class="row justify-content-end mb-2">
     <a href="{% url 'setup-delete' object.slug %}" class="btn btn-outline-danger btn-sm mx-1" role="button">
         Delete

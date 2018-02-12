@@ -7,14 +7,15 @@
 <h1 class="row justify-content-center mt-2">
     Linguistic Rating Experiments
 </h1>
-<div class="my-2 p-4 border">
-    <h2>My Setups</h2>
-<p>
-    Here are your Experiment Setups...
-</p>
-<p>
-    <a href="{% url 'setups' %}">My Setups</a>
-</p>
+
+<div class="card my-1">
+    <div class="card-body">
+        <h2 class="card-title">My Setups</h2>
+        <p class="card-text">
+            Here are your Experiment Setups...
+        </p>
+        <a  class="card-link" href="{% url 'setups' %}">My Setups</a>
+    </div>
 </div>
 
 {% endblock %}
