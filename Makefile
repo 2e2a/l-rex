@@ -43,3 +43,9 @@ build: js scss
 .PHONY: run
 run:
 	$(VIRTUAL_ENV)/bin/python3 manage.py runserver 8000
+
+.PHONY: reset
+reset:
+	psql -U postgres -c 'DROP DATABASE lrex'
+	psql -U postgres -c 'CREATE DATABASE lrex OWNER django'
+	$(VIRTUAL_ENV)/bin/python3 manage.py migrate
