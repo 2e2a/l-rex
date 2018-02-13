@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'apps.home.apps.HomeConfig',
     'apps.setup.apps.SetupConfig',
     'apps.experiment.apps.ExperimentConfig',
-    'apps.responseinfo.apps.ResponseInfoConfig',
+    'apps.response_settings.apps.ResponseSettingsConfig',
     'apps.response.apps.ResponseConfig',
     'apps.item.apps.ItemConfig',
     'apps.trial.apps.TrialConfig',
@@ -140,4 +140,4 @@ STATICFILES_DIRS = [
 STATIC_URL = '/static/'
 
 # Other
-CRISPY_TEMPLATE_PACK = 'bootstrap3'
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
