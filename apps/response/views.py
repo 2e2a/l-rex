@@ -40,8 +40,8 @@ class UserBinaryResponseCreateView(generic.CreateView):
             number=self.num
         )
         self.setup = self.user_trial.trial.setup
-        self.yes = self.setup.responseinfo.binaryresponseinfo.yes
-        self.no = self.setup.responseinfo.binaryresponseinfo.no
+        self.yes = self.setup.responsesettings.binaryresponsesettings.yes
+        self.no = self.setup.responsesettings.binaryresponsesettings.no
         return super().dispatch(*args, **kwargs)
 
     def form_valid(self, form):

@@ -3,7 +3,7 @@ from django.db import models
 from apps.setup import models as setup_models
 
 
-class ResponseInfo(models.Model):
+class ResponseSettings(models.Model):
     setup = models.OneToOneField(
         setup_models.Setup,
         on_delete=models.CASCADE
@@ -25,6 +25,6 @@ class ResponseInfo(models.Model):
         return self.reponse_type is 'bin'
 
 
-class BinaryResponseInfo(ResponseInfo):
+class BinaryResponseSettings(ResponseSettings):
     yes = models.CharField(max_length=200)
     no = models.CharField(max_length=200)

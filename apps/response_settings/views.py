@@ -7,22 +7,22 @@ from apps.setup import models as setup_models
 from . import models
 
 
-class BinaryResponseInfoView(LoginRequiredMixin, generic.RedirectView):
+class BinaryResponseSettingsView(LoginRequiredMixin, generic.RedirectView):
 
     def get_redirect_url(self, *args, **kwargs):
         setup_slug = self.kwargs['setup_slug']
         setup = setup_models.Setup.objects.get(slug=setup_slug)
         try:
-            response_info = models.BinaryResponseInfo.objects.get(setup=setup)
-            return reverse('binary-response-info-update', args=[setup.slug, response_info.pk])
-        except models.BinaryResponseInfo.DoesNotExist:
-            return reverse('binary-response-info-create', args=[setup.slug])
+            response_settings = models.BinaryResponseSettings.objects.get(setup=setup)
+            return reverse('binary-response-settings-update', args=[setup.slug, response_settings.pk])
+        except models.BinaryResponseSettings.DoesNotExist:
+            return reverse('binary-response-settings-create', args=[setup.slug])
 
 
-class BinaryResponseInfoCreateView(LoginRequiredMixin, generic.CreateView):
-    model = models.BinaryResponseInfo
+class BinaryResponseSettingsCreateView(LoginRequiredMixin, generic.CreateView):
+    model = models.BinaryResponseSettings
     fields = ['question', 'legend', 'yes', 'no']
-    title = 'Set Response Info'
+    title = 'Set Response Settings'
 
     def dispatch(self, *args, **kwargs):
         setup_slug = self.kwargs['setup_slug']
@@ -45,10 +45,10 @@ class BinaryResponseInfoCreateView(LoginRequiredMixin, generic.CreateView):
         ]
 
 
-class BinaryResponseInfoUpdateView(LoginRequiredMixin, generic.UpdateView):
-    model = models.BinaryResponseInfo
+class BinaryResponseSettingsUpdateView(LoginRequiredMixin, generic.UpdateView):
+    model = models.BinaryResponseSettings
     fields = ['question', 'legend', 'yes', 'no']
-    title = 'Set Response Info'
+    title = 'Set Response Settings'
 
     def dispatch(self, *args, **kwargs):
         setup_slug = self.kwargs['setup_slug']
