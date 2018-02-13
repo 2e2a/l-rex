@@ -79,3 +79,17 @@ class UserTrialCreateView(LoginRequiredMixin, generic.CreateView):
 class UserTrialDetailView(LoginRequiredMixin, generic.DetailView):
     model = models.UserTrial
     title = 'User Trial Overview'
+
+    def dispatch(self, *args, **kwargs):
+        setup_slug = self.kwargs['setup_slug']
+        self.setup = setup_models.Setup.objects.get(slug=setup_slug)
+        return super().dispatch(*args, **kwargs)
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('setups', reverse('setups')),
+            (self.setup.title, reverse('setup-run', args=[self.setup.slug])),
+            ('user-trials', reverse('user-trials', args=[self.setup.slug])),
+            (self.object.pk, ''),
+        ]

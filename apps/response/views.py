@@ -1,3 +1,4 @@
+from django.shortcuts import redirect
 from django.urls import reverse
 from django.views import generic
 
@@ -8,23 +9,31 @@ from . import models
 
 
 class UserResponseIntroView(generic.TemplateView):
-    template_name = 'lrex_response/userresponseintro.html'
+    template_name = 'lrex_response/userresponse_intro.html'
 
     def dispatch(self, *args, **kwargs):
         user_trial_slug = self.kwargs['slug']
         self.user_trial = trail_models.UserTrial.objects.get(slug=user_trial_slug)
         self.setup = self.user_trial.trial.setup
+        if models.UserBinaryResponse.objects.filter(user_trial_item__user_trial=self.user_trial).exists():
+            return redirect('user-response-taken', self.setup.slug, self.user_trial.slug)
         return super().dispatch(*args, **kwargs)
 
 
 class UserResponseOutroView(generic.TemplateView):
-    template_name = 'lrex_response/userresponseoutro.html'
+    template_name = 'lrex_response/userresponse_outro.html'
 
     def dispatch(self, *args, **kwargs):
         user_trial_slug = self.kwargs['slug']
         self.user_trial = trail_models.UserTrial.objects.get(slug=user_trial_slug)
         self.setup = self.user_trial.trial.setup
+        if models.UserBinaryResponse.objects.filter(user_trial_item__user_trial=self.user_trial).exists():
+            return redirect('user-response-taken', self.setup.slug, self.user_trial.slug)
         return super().dispatch(*args, **kwargs)
+
+
+class UserResponseTakenView(generic.TemplateView):
+    template_name = 'lrex_response/userresponse_taken.html'
 
 
 class UserBinaryResponseCreateView(generic.CreateView):
@@ -35,11 +44,13 @@ class UserBinaryResponseCreateView(generic.CreateView):
         user_trial_slug = self.kwargs['slug']
         self.num = int(self.kwargs['num'])
         self.user_trial = trail_models.UserTrial.objects.get(slug=user_trial_slug)
+        self.setup = self.user_trial.trial.setup
+        if models.UserBinaryResponse.objects.filter(user_trial_item__user_trial=self.user_trial).exists():
+            return redirect('user-response-taken', self.setup.slug, self.user_trial.slug)
         self.user_trial_item = trail_models.UserTrialItem.objects.get(
             user_trial__slug=user_trial_slug,
             number=self.num
         )
-        self.setup = self.user_trial.trial.setup
         self.yes = self.setup.responsesettings.binaryresponsesettings.yes
         self.no = self.setup.responsesettings.binaryresponsesettings.no
         return super().dispatch(*args, **kwargs)
@@ -51,5 +62,5 @@ class UserBinaryResponseCreateView(generic.CreateView):
 
     def get_success_url(self):
         if self.num < (len(self.user_trial.items) - 1):
-            return reverse('user-binary-response', args=[self.setup.slug, self.user_trial.slug, self.num+1 ])
-        return reverse('user-response-outro', args=[self.setup.slug, self.user_trial.slug ])
+            return reverse('user-binary-response', args=[self.setup.slug, self.user_trial.slug, self.num + 1])
+        return reverse('user-response-outo', args=[self.setup.slug, self.user_trial.slug])
