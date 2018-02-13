@@ -12,18 +12,20 @@
 <table class="table">
     <thead>
     <tr>
-        <th>List Number</th>
-        <th>Item</th>
+        <th>List</th>
+        <th>Items</th>
     </tr>
     </thead>
     <tbody>
     {% for list in list_list %}
-        {% for item in list.items %}
-        <tr>
-            <td>{{ list.number }}</td>
-            <td>{{ item }}</td>
-        </tr>
-        {% endfor %}
+    <tr>
+        <td class="col-md-1">{{ list.number }}</td>
+        <td>
+            {% for item in list.items %}
+                {{ item }},
+            {% endfor %}
+        </td>
+    </tr>
     {% endfor %}
     </tbody>
 </table>

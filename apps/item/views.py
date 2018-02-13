@@ -120,7 +120,7 @@ class TextItemListView(LoginRequiredMixin, generic.ListView):
 
 class ListListView(LoginRequiredMixin, generic.ListView):
     model = models.List
-    title = 'Item List'
+    title = 'Item Lists'
 
     def dispatch(self, *args, **kwargs):
         experiment_slug = self.kwargs['slug']
