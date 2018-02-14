@@ -9,17 +9,13 @@
             </p>
             <form method="post">
                 {% csrf_token %}
-                <div class="row">
-                    <div class="col">
-                        <button class="btn btn-outline-primary" type="submit" name="yes" value="on">
-                            {{ view.yes }}
-                        </button>
-                    </div>
-                    <div class="col text-right">
-                        <button class="btn btn-outline-primary" type="submit" name="yes" value="">
-                            {{ view.no }}
-                        </button>
-                    </div>
+                <div class="row justify-content-center">
+                    <button class="btn btn-outline-primary mx-1" type="submit" name="yes" value="on">
+                        {{ view.yes }}
+                    </button>
+                    <button class="btn btn-outline-primary mx-1" type="submit" name="yes" value="">
+                        {{ view.no }}
+                    </button>
                 </div>
             </form>
             <p>
