@@ -35,13 +35,5 @@
         </a>
     </div>
 </div>
-
 {% endif %}
-
-<div class="row justify-content-end">
-    <a href="{% url 'experiment-delete' object.setup.slug object.slug %}" class="btn btn-outline-danger btn-sm mx-1"
-       role="button">
-        Delete
-    </a>
-</div>
 {% endblock %}
