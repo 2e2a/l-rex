@@ -71,7 +71,7 @@ class UserTrial(models.Model):
         return items
 
     def init(self):
-        last_user_trial = UserTrial.objects.last()
+        last_user_trial = UserTrial.objects.first()
         if last_user_trial:
             trial = last_user_trial.trial.next
         else:
