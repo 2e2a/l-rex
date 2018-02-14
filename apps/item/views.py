@@ -31,7 +31,6 @@ class TextItemCreateView(LoginRequiredMixin, generic.CreateView):
         exp = self.experiment
         setup = exp.setup
         return [
-            ('setups', reverse('setups')),
             (setup.title, reverse('setup', args=[setup.slug])),
             ('experiments',reverse('experiments', args=[setup.slug])),
             (exp.title, reverse('experiment', args=[setup.slug, exp.slug])),
@@ -54,7 +53,6 @@ class TextItemUpdateView(LoginRequiredMixin, generic.UpdateView):
         exp = self.object.experiment
         setup = exp.setup
         return [
-            ('setups', reverse('setups')),
             (setup.title, reverse('setup', args=[setup.slug])),
             ('experiments',reverse('experiments', args=[setup.slug])),
             (exp.title, reverse('experiment', args=[setup.slug, exp.slug])),
@@ -79,7 +77,6 @@ class TextItemDeleteView(LoginRequiredMixin, generic.DeleteView):
         exp = self.object.experiment
         setup = exp.setup
         return [
-            ('setups', reverse('setups')),
             (setup.title, reverse('setup', args=[setup.slug])),
             ('experiments',reverse('experiments', args=[setup.slug])),
             (exp.title, reverse('experiment', args=[setup.slug, exp.slug])),
@@ -110,7 +107,6 @@ class TextItemListView(LoginRequiredMixin, generic.ListView):
         exp = self.experiment
         setup = exp.setup
         return [
-            ('setups', reverse('setups')),
             (setup.title, reverse('setup', args=[setup.slug])),
             ('experiments',reverse('experiments', args=[setup.slug])),
             (exp.title, reverse('experiment', args=[setup.slug, exp.slug])),
@@ -142,7 +138,6 @@ class ListListView(LoginRequiredMixin, generic.ListView):
         exp = self.experiment
         setup = exp.setup
         return [
-            ('setups', reverse('setups')),
             (setup.title, reverse('setup', args=[setup.slug])),
             ('experiments',reverse('experiments', args=[setup.slug])),
             (exp.title, reverse('experiment', args=[setup.slug, exp.slug])),

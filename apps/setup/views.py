@@ -12,7 +12,6 @@ class SetupDetailView(LoginRequiredMixin, generic.DetailView):
     @property
     def breadcrumbs(self):
         return [
-            ('setups', reverse('setups')),
             (self.setup.title, ''),
         ]
 
@@ -29,7 +28,6 @@ class SetupRunView(LoginRequiredMixin, generic.DetailView):
     @property
     def breadcrumbs(self):
         return [
-            ('setups', reverse('setups')),
             (self.setup.title, ''),
         ]
 
@@ -43,13 +41,6 @@ class SetupCreateView(LoginRequiredMixin, generic.CreateView):
     fields = ['title', 'item_type']
     title = 'Create Experiment Setup'
 
-    @property
-    def breadcrumbs(self):
-        return [
-            ('setups', reverse('setups')),
-            ('create', ''),
-        ]
-
     def form_valid(self, form):
         form.instance.creator = self.request.user
         return super().form_valid(form)
@@ -62,7 +53,6 @@ class SetupUpdateView(LoginRequiredMixin, generic.UpdateView):
     @property
     def breadcrumbs(self):
         return [
-            ('setups', reverse('setups')),
             (self.object.title, reverse('setup', args=[self.object.slug])),
             ('settings', ''),
         ]
@@ -76,7 +66,6 @@ class SetupDeleteView(LoginRequiredMixin, generic.DeleteView):
     @property
     def breadcrumbs(self):
         return [
-            ('setups', reverse('setups')),
             (self.object.title, reverse('setup', args=[self.object.slug])),
             ('delete', ''),
         ]
@@ -92,10 +81,6 @@ class SetupDeleteView(LoginRequiredMixin, generic.DeleteView):
 class SetupListView(LoginRequiredMixin, generic.ListView):
     model = models.Setup
     title = 'Your Experiment Setups'
-
-    @property
-    def breadcrumbs(self):
-        return [('setups','')]
 
     def get_queryset(self):
         return super().get_queryset().filter(creator=self.request.user)

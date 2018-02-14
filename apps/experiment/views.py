@@ -14,7 +14,6 @@ class ExperimentDetailView(LoginRequiredMixin, generic.DetailView):
     @property
     def breadcrumbs(self):
         return [
-            ('setups', reverse('setups')),
             (self.object.setup.title, reverse('setup', args=[self.object.setup.slug])),
             ('experiments',reverse('experiments', args=[self.object.setup.slug])),
             (self.object.title, '')
@@ -38,7 +37,6 @@ class ExperimentCreateView(LoginRequiredMixin, generic.CreateView):
     @property
     def breadcrumbs(self):
         return [
-            ('setups', reverse('setups')),
             (self.setup.title, reverse('setup', args=[self.setup.slug])),
             ('experiments',reverse('experiments', args=[self.setup.slug])),
             ('create','')
@@ -53,7 +51,6 @@ class ExperimentUpdateView(LoginRequiredMixin, generic.UpdateView):
     @property
     def breadcrumbs(self):
         return [
-            ('setups', reverse('setups')),
             (self.object.setup.title, reverse('setup', args=[self.object.setup.slug])),
             ('experiments',reverse('experiments', args=[self.object.setup.slug])),
             (self.object.title, reverse('experiment', args=[self.object.setup.slug, self.object.slug])),
@@ -73,7 +70,6 @@ class ExperimentDeleteView(LoginRequiredMixin, generic.DeleteView):
     @property
     def breadcrumbs(self):
         return [
-            ('setups', reverse('setups')),
             (self.object.setup.title, reverse('setup', args=[self.object.setup.slug])),
             ('experiments',reverse('experiments', args=[self.object.setup.slug])),
             (self.object.title, reverse('experiment', args=[self.object.setup.slug, self.object.slug])),
@@ -99,7 +95,6 @@ class ExperimentListView(LoginRequiredMixin, generic.ListView):
     @property
     def breadcrumbs(self):
         return [
-            ('setups', reverse('setups')),
             (self.setup.title, reverse('setup',args=[self.setup.slug])),
             ('experiments','')
         ]

@@ -26,7 +26,6 @@ class TrialListView(LoginRequiredMixin, generic.ListView):
     @property
     def breadcrumbs(self):
         return [
-            ('setups', reverse('setups')),
             (self.setup.title, reverse('setup', args=[self.setup.slug])),
             ('trials', ''),
         ]
@@ -44,7 +43,6 @@ class UserTrialListView(LoginRequiredMixin, generic.ListView):
     @property
     def breadcrumbs(self):
         return [
-            ('setups', reverse('setups')),
             (self.setup.title, reverse('setup-run', args=[self.setup.slug])),
             ('user-trials', ''),
         ]
@@ -70,7 +68,6 @@ class UserTrialCreateView(LoginRequiredMixin, generic.CreateView):
     @property
     def breadcrumbs(self):
         return [
-            ('setups', reverse('setups')),
             (self.setup.title, reverse('setup-run', args=[self.setup.slug])),
             ('user-trials', reverse('user-trials', args=[self.setup.slug])),
             ('create', ''),
@@ -88,7 +85,6 @@ class UserTrialDetailView(LoginRequiredMixin, generic.DetailView):
     @property
     def breadcrumbs(self):
         return [
-            ('setups', reverse('setups')),
             (self.setup.title, reverse('setup-run', args=[self.setup.slug])),
             ('user-trials', reverse('user-trials', args=[self.setup.slug])),
             (self.object.pk, ''),
