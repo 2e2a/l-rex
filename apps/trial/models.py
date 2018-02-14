@@ -92,3 +92,18 @@ class UserTrialItem(models.Model):
     number = models.IntegerField()
     user_trial = models.ForeignKey(UserTrial, on_delete=models.CASCADE)
     item = models.ForeignKey(item_models.Item, on_delete=models.CASCADE)
+
+    @property
+    def response_text(self):
+        from apps.response import models as response_models
+        setup = self.user_trial.trial.setup
+        try:
+            response = self.userresponse
+            if response.userbinaryresponse:
+                if response.userbinaryresponse.yes:
+                    return setup.responsesettings.binaryresponsesettings.yes
+                else:
+                    return setup.responsesettings.binaryresponsesettings.no
+        except response_models.UserResponse.DoesNotExist:
+            return ''
+

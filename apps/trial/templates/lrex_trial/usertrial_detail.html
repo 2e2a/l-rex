@@ -1,25 +1,41 @@
 {% extends "lrex_home/setup_base.html" %}
 
 {% block main_content %}
-<div class="card my-1">
-    <div class="card-body">
-        <h2 class="card-title">Start trial</h2>
-        <p class="card-text">
-            Send this link to the trial participant.
-        </p>
-        <a  class="card-link" href="{% url 'user-response-intro' setup_slug=object.trial.setup.slug slug=object.slug %}">
-            User Trial Link
-        </a>
-    </div>
-</div>
+<h2>Run trial</h2>
+<p class="card-text">
+    Send this link to the trial participant:
+    <a class="card-link" href="{% url 'user-response-intro' setup_slug=object.trial.setup.slug slug=object.slug %}">
+        User Trial Link
+    </a>
+</p>
 
-<div class="card my-1">
-    <div class="card-body">
-        <h2 class="card-title">Results</h2>
-        <p class="card-text">
-            TODO
-        </p>
-        <a  class="card-link" href="">TODO</a>
-    </div>
-</div>
+<h2>Results</h2>
+<table class="table">
+    <thead>
+    <tr>
+        <th class="col-md-1">Item</th>
+        <th>Experiment</th>
+        <th>Text</th>
+        <th class="col-md-2">Response</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for usertrialitem in object.usertrialitem_set.all %}
+    <tr>
+        <td class="col-md-1">
+            {{ usertrialitem.item }}
+        </td>
+        <td>{{ usertrialitem.item.experiment }}</td>
+        <td>
+            {% if usertrialitem.item.textitem %}
+                {{ usertrialitem.item.textitem.text }}
+            {% endif %}
+        </td>
+        <td class="col-md-2">
+            {{ usertrialitem.response_text }}
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
 {% endblock %}
