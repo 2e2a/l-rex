@@ -95,16 +95,21 @@ class UserTrialDeleteView(LoginRequiredMixin, generic.DeleteView):
     title = 'Delete'
     message = 'Delete User Trial?'
 
+    def dispatch(self, *args, **kwargs):
+        setup_slug = self.kwargs['setup_slug']
+        self.setup = setup_models.Setup.objects.get(slug=setup_slug)
+        return super().dispatch(*args, **kwargs)
+
     @property
     def breadcrumbs(self):
         return [
-            (self.object.title, reverse('setup', args=[self.object.slug])),
+            (self.object.slug, reverse('setup', args=[self.object.slug])),
             ('delete', ''),
         ]
 
     @property
     def cancel_url(self):
-        return reverse('setup', args=[self.object.slug])
+        return reverse('user-trials', args=[self.setup.slug])
 
     def get_success_url(self):
-        return reverse('setups')
+        return reverse('user-trials', args=[self.setup.slug])

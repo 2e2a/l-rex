@@ -69,8 +69,7 @@ class TextItemDeleteView(LoginRequiredMixin, generic.DeleteView):
     @property
     def cancel_url(self):
         exp = self.object.experiment
-        setup = exp.setup
-        return reverse('textitem-update', args=[setup.slug, exp.slug, self.object.pk])
+        return reverse('textitems', args=[exp.setup.slug, exp.slug])
 
     @property
     def breadcrumbs(self):

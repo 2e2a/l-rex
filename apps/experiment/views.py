@@ -65,7 +65,7 @@ class ExperimentDeleteView(LoginRequiredMixin, generic.DeleteView):
 
     @property
     def cancel_url(self):
-        return reverse('experiment', args=[self.object.setup.slug, self.object.slug])
+        return reverse('experiments', args=[self.object.setup.slug])
 
     @property
     def breadcrumbs(self):
