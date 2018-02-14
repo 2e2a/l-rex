@@ -40,11 +40,4 @@
         <a  class="card-link" href="{% url 'trials' setup_slug=object.slug %}">View/Generate Trials</a></p>
     </div>
 </div>
-
-
-<div class="row justify-content-end mb-2">
-    <a href="{% url 'setup-delete' object.slug %}" class="btn btn-outline-danger btn-sm mx-1" role="button">
-        Delete
-    </a>
-</div>
 {% endblock %}

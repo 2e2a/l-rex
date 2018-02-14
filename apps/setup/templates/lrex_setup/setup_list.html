@@ -17,6 +17,9 @@
             <a href="{% url 'setup-run' slug=setup.slug %}" class="btn btn-outline-primary btn-sm mx-1" role="button">
                 Run
             </a>
+            <a href="{% url 'setup-delete' slug=setup.slug %}" class="btn btn-outline-danger btn-sm mx-1" role="button">
+                Delete
+            </a>
         </span>
     </li>
     {% endfor %}
