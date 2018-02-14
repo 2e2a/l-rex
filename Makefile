@@ -49,3 +49,4 @@ reset:
 	psql -U postgres -c 'DROP DATABASE lrex'
 	psql -U postgres -c 'CREATE DATABASE lrex OWNER django'
 	$(VIRTUAL_ENV)/bin/python3 manage.py migrate
+	$(VIRTUAL_ENV)/bin/python3 manage.py loaddata fixtures/init.json
