@@ -7,26 +7,22 @@
         New User Trial
     </a>
 </div>
-<table class="table">
-    <thead>
-    <tr>
-        <th>User</th>
-        <th>Trial</th>
-        <th>Link</th>
-    </tr>
-    </thead>
-    <tbody>
+<ul class="list-group">
     {% for usertrial in usertrial_list %}
-        <tr>
-            <td>{{ usertrial.participant }}</td>
-            <td>{{ usertrial.trial.number }}</td>
-            <td>
-                <a href="{% url 'user-trial' setup_slug=view.setup.slug slug=usertrial.slug %}">
-                    User Trial
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span>
+            {{ forloop.counter }}. {{ usertrial.participant }}
+            <span class="badge badge-secondary">Trial {{ usertrial.trial.number }}</span>
+        </span>
+        <span>
+                <a href="{% url 'user-trial' setup_slug=view.setup.slug slug=usertrial.slug %}" class="btn btn-outline-primary btn-sm mx-1" role="button">
+                    Run/View
                 </a>
-            </td>
-        </tr>
+                <a href="{% url 'user-trial-delete' setup_slug=view.setup.slug slug=usertrial.slug %}" class="btn btn-outline-danger btn-sm mx-1" role="button">
+                    Delete
+                </a>
+        </span>
+    </li>
     {% endfor %}
-    </tbody>
-</table>
+</ul>
 {% endblock %}

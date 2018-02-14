@@ -89,3 +89,22 @@ class UserTrialDetailView(LoginRequiredMixin, generic.DetailView):
             ('user-trials', reverse('user-trials', args=[self.setup.slug])),
             (self.object.pk, ''),
         ]
+
+class UserTrialDeleteView(LoginRequiredMixin, generic.DeleteView):
+    model = models.UserTrial
+    title = 'Delete'
+    message = 'Delete User Trial?'
+
+    @property
+    def breadcrumbs(self):
+        return [
+            (self.object.title, reverse('setup', args=[self.object.slug])),
+            ('delete', ''),
+        ]
+
+    @property
+    def cancel_url(self):
+        return reverse('setup', args=[self.object.slug])
+
+    def get_success_url(self):
+        return reverse('setups')

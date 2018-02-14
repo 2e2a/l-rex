@@ -8,7 +8,7 @@
 </div>
 <ul class="list-group">
     {% for setup in setup_list %}
-    <li class="list-group-item d-flex justify-content-between align-items-cente">
+    <li class="list-group-item d-flex justify-content-between align-items-center">
         {{ setup.title }}
         <span>
             <a href="{% url 'setup' slug=setup.slug %}" class="btn btn-outline-primary btn-sm mx-1" role="button">

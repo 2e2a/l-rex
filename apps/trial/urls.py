@@ -5,12 +5,15 @@ from apps.response import urls as response_urls
 from . import views
 
 urlpatterns = [
-    url(r'user-trial-create/$',
+    url(r'create/$',
         views.UserTrialCreateView.as_view(),
         name='user-trial-create'),
     url(r'user-trials/$',
         views.UserTrialListView.as_view(),
         name='user-trials'),
+    url(r'user-trial/(?P<slug>[-\w_]+)/delete/',
+        views.UserTrialDeleteView.as_view(),
+        name='user-trial-delete'),
     url(r'user-trial/(?P<slug>[-\w_]+)/response/',
         include(response_urls)),
     url(r'user-trial/(?P<slug>[-\w_]+)/$',
