@@ -5,11 +5,5 @@
 <form action="" method="post">{% csrf_token %}
     {{ form|crispy }}
     <input type="submit"/>
-    {% if object %}
-    <a href="{% url 'textitem-delete' object.experiment.setup.slug  object.experiment.setup.slug object.pk %}"
-       class="btn btn-outline-danger btn-sm mx-1" role="button">
-        Delete
-    </a>
-    {% endif %}
 </form>
 {% endblock %}
