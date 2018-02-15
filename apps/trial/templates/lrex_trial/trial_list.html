@@ -23,7 +23,7 @@
             <td>
                 {% for list in trial.lists %}
                     {% for item in list.items %}
-                        {{ item }},
+                       {{ item.experiment }}-{{ item }},
                     {% endfor %}
                 {% endfor %}
             </td>
