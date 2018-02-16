@@ -98,3 +98,41 @@ class ExperimentListView(LoginRequiredMixin, generic.ListView):
             (self.setup.title, reverse('setup',args=[self.setup.slug])),
             ('experiments','')
         ]
+
+
+class ExperimentResultListView(LoginRequiredMixin, generic.ListView):
+    model = models.Experiment
+    title = 'Experiment Results'
+    template_name = 'lrex_experiment/experiment_result_list.html'
+
+    def dispatch(self, *args, **kwargs):
+        setup_slug = self.kwargs['setup_slug']
+        self.setup = setup_models.Setup.objects.get(slug=setup_slug)
+        return super().dispatch(*args, **kwargs)
+
+    def get_queryset(self):
+        return super().get_queryset().filter(setup=self.setup)
+
+    @property
+    def breadcrumbs(self):
+        return [
+            (self.setup.title, reverse('setup-run',args=[self.setup.slug])),
+            ('results','')
+        ]
+
+class ExperimentResultsView(LoginRequiredMixin, generic.DetailView):
+    model = models.Experiment
+    title = 'Experiment Results'
+    template_name = 'lrex_experiment/experiment_results.html'
+
+    @property
+    def setup(self):
+        return self.object.setup
+
+    @property
+    def breadcrumbs(self):
+        return [
+            (self.setup.title, reverse('setup-run',args=[self.setup.slug])),
+            ('results', reverse('experiment-result-list',args=[self.setup.slug])),
+            (self.object.title,'')
+        ]

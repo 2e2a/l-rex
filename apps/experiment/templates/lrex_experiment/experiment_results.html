@@ -1,0 +1,40 @@
+{% extends "lrex_home/setup_base.html" %}
+
+{% block main_content %}
+<table class="table">
+    <thead>
+    <tr>
+        <th class="col-md-1">Item</th>
+        <th>Experiment</th>
+        <th>Text</th>
+        <th class="col-md-1">Responses</th>
+        <th class="col-md-1">{{ view.setup.responsesettings.binaryresponsesettings.yes }}</th>
+        <th class="col-md-1">{{ view.setup.responsesettings.binaryresponsesettings.no }}</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for item, total, yes_prc, no_prc in object.results_binary_response %}
+    <tr>
+        <td class="col-md-1">
+            {{ item }}
+        </td>
+        <td>{{ item.experiment }}</td>
+        <td>
+            {% if item.textitem %}
+                {{ item.textitem.text }}
+            {% endif %}
+        </td>
+        <td class="col-md-1">
+            {{ total }}
+        </td>
+        <td class="col-md-1">
+            {{ yes_prc }}
+        </td>
+        <td class="col-md-1">
+            {{ no_prc }}
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
