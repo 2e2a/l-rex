@@ -12,6 +12,7 @@ class StudyDetailView(LoginRequiredMixin, generic.DetailView):
     @property
     def breadcrumbs(self):
         return [
+            ('studies', reverse('studies')),
             (self.study.title, ''),
         ]
 
@@ -28,6 +29,7 @@ class StudyRunView(LoginRequiredMixin, generic.DetailView):
     @property
     def breadcrumbs(self):
         return [
+            ('studies', reverse('studies')),
             (self.study.title, ''),
         ]
 
@@ -53,6 +55,7 @@ class StudyUpdateView(LoginRequiredMixin, generic.UpdateView):
     @property
     def breadcrumbs(self):
         return [
+            ('studies', reverse('studies')),
             (self.object.title, reverse('study', args=[self.object.slug])),
             ('settings', ''),
         ]
@@ -66,6 +69,7 @@ class StudyDeleteView(LoginRequiredMixin, generic.DeleteView):
     @property
     def breadcrumbs(self):
         return [
+            ('studies', reverse('studies')),
             (self.object.title, reverse('study', args=[self.object.slug])),
             ('delete', ''),
         ]
@@ -84,3 +88,9 @@ class StudyListView(LoginRequiredMixin, generic.ListView):
 
     def get_queryset(self):
         return super().get_queryset().filter(creator=self.request.user)
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+        ]

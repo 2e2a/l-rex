@@ -39,6 +39,7 @@ class BinaryResponseSettingsCreateView(LoginRequiredMixin, generic.CreateView):
     @property
     def breadcrumbs(self):
         return [
+            ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
             ('response', ''),
         ]
@@ -64,6 +65,7 @@ class BinaryResponseSettingsUpdateView(LoginRequiredMixin, generic.UpdateView):
     @property
     def breadcrumbs(self):
         return [
+            ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
             ('response', ''),
         ]

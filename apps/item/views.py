@@ -31,6 +31,7 @@ class TextItemCreateView(LoginRequiredMixin, generic.CreateView):
         exp = self.experiment
         study = exp.study
         return [
+            ('studies', reverse('studies')),
             (study.title, reverse('study', args=[study.slug])),
             ('experiments',reverse('experiments', args=[study.slug])),
             (exp.title, reverse('experiment', args=[study.slug, exp.slug])),
@@ -53,6 +54,7 @@ class TextItemUpdateView(LoginRequiredMixin, generic.UpdateView):
         exp = self.object.experiment
         study = exp.study
         return [
+            ('studies', reverse('studies')),
             (study.title, reverse('study', args=[study.slug])),
             ('experiments',reverse('experiments', args=[study.slug])),
             (exp.title, reverse('experiment', args=[study.slug, exp.slug])),
@@ -76,6 +78,7 @@ class TextItemDeleteView(LoginRequiredMixin, generic.DeleteView):
         exp = self.object.experiment
         study = exp.study
         return [
+            ('studies', reverse('studies')),
             (study.title, reverse('study', args=[study.slug])),
             ('experiments',reverse('experiments', args=[study.slug])),
             (exp.title, reverse('experiment', args=[study.slug, exp.slug])),
@@ -106,6 +109,7 @@ class TextItemListView(LoginRequiredMixin, generic.ListView):
         exp = self.experiment
         study = exp.study
         return [
+            ('studies', reverse('studies')),
             (study.title, reverse('study', args=[study.slug])),
             ('experiments',reverse('experiments', args=[study.slug])),
             (exp.title, reverse('experiment', args=[study.slug, exp.slug])),
@@ -137,6 +141,7 @@ class ListListView(LoginRequiredMixin, generic.ListView):
         exp = self.experiment
         study = exp.study
         return [
+            ('studies', reverse('studies')),
             (study.title, reverse('study', args=[study.slug])),
             ('experiments',reverse('experiments', args=[study.slug])),
             (exp.title, reverse('experiment', args=[study.slug, exp.slug])),
