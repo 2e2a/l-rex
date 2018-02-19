@@ -24,8 +24,7 @@ class Trial(models.Model):
 
     @property
     def lists(self):
-        trial_lists = TrialList.objects.filter(trial=self)
-        lists = [trial_list.list for trial_list in trial_lists]
+        lists = [trial_list.list for trial_list in self.triallist_set.all()]
         return lists
 
     @property
@@ -37,7 +36,7 @@ class Trial(models.Model):
 
     @property
     def next(self):
-        trial =  Trial.objects.filter(study=self.study, number__gt=self.number).first()
+        trial =  self.study.trial_set.filter(number__gt=self.number).first()
         if not trial:
             trial = Trial.objects.first()
         return trial
@@ -66,8 +65,7 @@ class UserTrial(models.Model):
 
     @property
     def items(self):
-        trial_items = UserTrialItem.objects.filter(user_trial=self)
-        items = [trial_item.item for trial_item in trial_items]
+        items = [trial_item.item for trial_item in self.usertrialitem_set.all()]
         return items
 
     def init(self):

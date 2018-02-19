@@ -4,8 +4,6 @@ from django.urls import reverse
 from django.utils.text import slugify
 
 from apps.contrib import math
-from apps.experiment import models as experiment_models
-from apps.item import models as item_models
 from apps.trial import models as trial_models
 
 
@@ -42,17 +40,15 @@ class Study(models.Model):
 
     def _trial_count(self):
         trial_lcm = 1
-        experiments = experiment_models.Experiment.objects.filter(study=self)
-        for experiment in experiments:
+        for experiment in self.experiment_set.all():
             condition_count = len(experiment.conditions)
             trial_lcm = math.lcm(trial_lcm,  condition_count)
         return trial_lcm
 
     def _init_trail_lists(self):
         lists = []
-        experiments = experiment_models.Experiment.objects.filter(study=self)
-        for experiment in experiments:
-            list = item_models.List.objects.filter(experiment=experiment).first()
+        for experiment in self.experiment_set.all():
+            list = experiment.list_set.first()
             lists.append(list)
         return lists
 
@@ -78,7 +74,7 @@ class Study(models.Model):
         return trial
 
     def generate_trials(self):
-        trial_models.Trial.objects.filter(study=self).delete()
+        self.trial_set.all().delete()
         trial_count = self._trial_count()
         last_trial = None
         for i in range(trial_count):

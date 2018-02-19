@@ -35,15 +35,14 @@ class List(models.Model):
 
     @property
     def items(self):
-        list_items = ListItem.objects.filter(list=self)
-        items = [list_item.item.textitem for list_item in list_items]
+        items = [list_item.item.textitem for list_item in self.listitem_set.all()]
         return items
 
     def __str__(self):
         return '{}-list-{}'.format(self.experiment, self.number)
 
     def next(self, last_list):
-        next_list =  List.objects.filter(experiment=last_list.experiment, number__gt=last_list.number).first()
+        next_list =  last_list.experiment.list_set.filter(number__gt=last_list.number).first()
         if not next_list:
             next_list =  List.objects.first()
         return next_list

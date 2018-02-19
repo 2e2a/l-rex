@@ -19,7 +19,7 @@ class Experiment(models.Model):
 
     @property
     def conditions(self):
-        items = item_models.Item.objects.filter(experiment=self, number=1)
+        items = self.item_set.filter(number=1)
         conditions = [item.condition for item in items]
         return conditions
 
@@ -30,7 +30,7 @@ class Experiment(models.Model):
         return reverse('experiment', args=[self.study.slug, self.slug])
 
     def compute_lists(self):
-        item_models.List.objects.filter(experiment=self).delete()
+        self.list_set.all().delete()
 
         lists = []
         conditions = self.conditions
@@ -39,8 +39,7 @@ class Experiment(models.Model):
             list = item_models.List.objects.create(number=i, experiment=self)
             lists.append(list)
 
-        items = item_models.Item.objects.filter(experiment=self)
-        for i, item in enumerate(items):
+        for i, item in enumerate(self.item_set.all()):
             shift  =  (i - (item.number - 1)) % condition_count
             list = lists[shift]
             item_models.ListItem.objects.create(list=list, item=item)
