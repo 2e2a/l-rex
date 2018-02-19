@@ -4,12 +4,12 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 
 from apps.home import urls as home_urls
-from apps.study import urls as setup_urls
+from apps.study import urls as study_urls
 
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^setup/', include(setup_urls)),
+    url(r'^study/', include(study_urls)),
 
     url(r'^accounts/login/',
         auth_views.login,
