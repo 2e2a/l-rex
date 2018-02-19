@@ -5,10 +5,10 @@
 <div class="row justify-content-center">
 <div class="my-2 p-4 border col-6">
     <p>
-        {{ view.setup.responsesettings.question }}
+        {{ view.study.responsesettings.question }}
     </p>
     <p>
-        <a href="{% url 'user-binary-response' setup_slug=view.setup.slug slug=view.user_trial.slug num=0 %}">
+        <a href="{% url 'user-binary-response' study_slug=view.study.slug slug=view.user_trial.slug num=0 %}">
             Start Trial
         </a>
     </p>

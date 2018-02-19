@@ -1,8 +1,8 @@
-{% extends "lrex_home/setup_base.html" %}
+{% extends "lrex_home/study_base.html" %}
 
 {% block main_content %}
 <div class="row justify-content-center mb-2">
-    <a href="{% url 'user-trial-create' setup_slug=view.setup.slug %}"
+    <a href="{% url 'user-trial-create' study_slug=view.study.slug %}"
        class="btn btn-outline-primary btn-sm mx-1" role="button">
         New User Trial
     </a>
@@ -15,10 +15,10 @@
             <span class="badge badge-secondary">Trial {{ usertrial.trial.number }}</span>
         </span>
         <span>
-                <a href="{% url 'user-trial' setup_slug=view.setup.slug slug=usertrial.slug %}" class="btn btn-outline-primary btn-sm mx-1" role="button">
+                <a href="{% url 'user-trial' study_slug=view.study.slug slug=usertrial.slug %}" class="btn btn-outline-primary btn-sm mx-1" role="button">
                     Run/View
                 </a>
-                <a href="{% url 'user-trial-delete' setup_slug=view.setup.slug slug=usertrial.slug %}" class="btn btn-outline-danger btn-sm mx-1" role="button">
+                <a href="{% url 'user-trial-delete' study_slug=view.study.slug slug=usertrial.slug %}" class="btn btn-outline-danger btn-sm mx-1" role="button">
                     Delete
                 </a>
         </span>

@@ -3,7 +3,7 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.views import generic
 
-from apps.setup import models as setup_models
+from apps.study import models as study_models
 
 from . import models
 
@@ -13,20 +13,20 @@ class TrialListView(LoginRequiredMixin, generic.ListView):
     title = 'Trials'
 
     def dispatch(self, *args, **kwargs):
-        setup_slug = self.kwargs['setup_slug']
-        self.setup = setup_models.Setup.objects.get(slug=setup_slug)
+        study_slug = self.kwargs['study_slug']
+        self.study = study_models.Study.objects.get(slug=study_slug)
         return super().dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         action = request.POST.get('action', None)
         if action and action == 'generate_trials':
-            self.setup.generate_trials()
-        return redirect('trials',setup_slug=self.setup.slug)
+            self.study.generate_trials()
+        return redirect('trials',study_slug=self.study.slug)
 
     @property
     def breadcrumbs(self):
         return [
-            (self.setup.title, reverse('setup', args=[self.setup.slug])),
+            (self.study.title, reverse('study', args=[self.study.slug])),
             ('trials', ''),
         ]
 
@@ -36,14 +36,14 @@ class UserTrialListView(LoginRequiredMixin, generic.ListView):
     title = 'User Trial List'
 
     def dispatch(self, *args, **kwargs):
-        setup_slug = self.kwargs['setup_slug']
-        self.setup = setup_models.Setup.objects.get(slug=setup_slug)
+        study_slug = self.kwargs['study_slug']
+        self.study = study_models.Study.objects.get(slug=study_slug)
         return super().dispatch(*args, **kwargs)
 
     @property
     def breadcrumbs(self):
         return [
-            (self.setup.title, reverse('setup-run', args=[self.setup.slug])),
+            (self.study.title, reverse('study-run', args=[self.study.slug])),
             ('user-trials', ''),
         ]
 
@@ -54,12 +54,12 @@ class UserTrialCreateView(LoginRequiredMixin, generic.CreateView):
     title = 'Create User Trial'
 
     def dispatch(self, *args, **kwargs):
-        setup_slug = self.kwargs['setup_slug']
-        self.setup = setup_models.Setup.objects.get(slug=setup_slug)
+        study_slug = self.kwargs['study_slug']
+        self.study = study_models.Study.objects.get(slug=study_slug)
         return super().dispatch(*args, **kwargs)
 
     def form_valid(self, form):
-        form.instance.setup = self.setup
+        form.instance.study = self.study
         form.instance.init()
         response = super().form_valid(form)
         form.instance.generate_items()
@@ -68,8 +68,8 @@ class UserTrialCreateView(LoginRequiredMixin, generic.CreateView):
     @property
     def breadcrumbs(self):
         return [
-            (self.setup.title, reverse('setup-run', args=[self.setup.slug])),
-            ('user-trials', reverse('user-trials', args=[self.setup.slug])),
+            (self.study.title, reverse('study-run', args=[self.study.slug])),
+            ('user-trials', reverse('user-trials', args=[self.study.slug])),
             ('create', ''),
         ]
 
@@ -78,15 +78,15 @@ class UserTrialDetailView(LoginRequiredMixin, generic.DetailView):
     title = 'User Trial Overview'
 
     def dispatch(self, *args, **kwargs):
-        setup_slug = self.kwargs['setup_slug']
-        self.setup = setup_models.Setup.objects.get(slug=setup_slug)
+        study_slug = self.kwargs['study_slug']
+        self.study = study_models.Study.objects.get(slug=study_slug)
         return super().dispatch(*args, **kwargs)
 
     @property
     def breadcrumbs(self):
         return [
-            (self.setup.title, reverse('setup-run', args=[self.setup.slug])),
-            ('user-trials', reverse('user-trials', args=[self.setup.slug])),
+            (self.study.title, reverse('study-run', args=[self.study.slug])),
+            ('user-trials', reverse('user-trials', args=[self.study.slug])),
             (self.object.pk, ''),
         ]
 
@@ -96,20 +96,20 @@ class UserTrialDeleteView(LoginRequiredMixin, generic.DeleteView):
     message = 'Delete User Trial?'
 
     def dispatch(self, *args, **kwargs):
-        setup_slug = self.kwargs['setup_slug']
-        self.setup = setup_models.Setup.objects.get(slug=setup_slug)
+        study_slug = self.kwargs['study_slug']
+        self.study = study_models.Study.objects.get(slug=study_slug)
         return super().dispatch(*args, **kwargs)
 
     @property
     def breadcrumbs(self):
         return [
-            (self.object.slug, reverse('setup', args=[self.object.slug])),
+            (self.object.slug, reverse('study', args=[self.object.slug])),
             ('delete', ''),
         ]
 
     @property
     def cancel_url(self):
-        return reverse('user-trials', args=[self.setup.slug])
+        return reverse('user-trials', args=[self.study.slug])
 
     def get_success_url(self):
-        return reverse('user-trials', args=[self.setup.slug])
+        return reverse('user-trials', args=[self.study.slug])

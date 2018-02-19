@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 
 from apps.home import urls as home_urls
-from apps.setup import urls as setup_urls
+from apps.study import urls as setup_urls
 
 
 urlpatterns = [

@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'apps.home.apps.HomeConfig',
-    'apps.setup.apps.SetupConfig',
+    'apps.study.apps.StudyConfig',
     'apps.experiment.apps.ExperimentConfig',
     'apps.response_settings.apps.ResponseSettingsConfig',
     'apps.response.apps.ResponseConfig',

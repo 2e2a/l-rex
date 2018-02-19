@@ -1,4 +1,4 @@
-{% extends "lrex_home/setup_base.html" %}
+{% extends "lrex_home/study_base.html" %}
 
 {% block main_content %}
 <ul class="list-group">
@@ -6,7 +6,7 @@
     <li class="list-group-item d-flex justify-content-between align-items-center">
         {{ experiment.title }}
         <span>
-            <a href="{% url 'experiment-results' setup_slug=view.setup.slug slug=experiment.slug %}" class="btn btn-outline-primary btn-sm mx-1" role="button">
+            <a href="{% url 'experiment-results' study_slug=view.study.slug slug=experiment.slug %}" class="btn btn-outline-primary btn-sm mx-1" role="button">
                 Results
             </a>
         </span>

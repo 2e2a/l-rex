@@ -1,11 +1,11 @@
 from django.db import models
 
-from apps.setup import models as setup_models
+from apps.study import models as study_models
 
 
 class ResponseSettings(models.Model):
-    setup = models.OneToOneField(
-        setup_models.Setup,
+    study = models.OneToOneField(
+        study_models.Study,
         on_delete=models.CASCADE
     )
     question = models.CharField(max_length=200)

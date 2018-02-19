@@ -8,8 +8,8 @@ from apps.response import models as response_models
 class Experiment(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
-    setup = models.ForeignKey(
-        'lrex_setup.Setup',
+    study = models.ForeignKey(
+        'lrex_study.Study',
         on_delete=models.CASCADE
     )
 
@@ -27,7 +27,7 @@ class Experiment(models.Model):
         return self.slug
 
     def get_absolute_url(self):
-        return reverse('experiment', args=[self.setup.slug, self.slug])
+        return reverse('experiment', args=[self.study.slug, self.slug])
 
     def compute_lists(self):
         item_models.List.objects.filter(experiment=self).delete()

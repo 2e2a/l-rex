@@ -2,7 +2,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 from django.views import generic
 
-from apps.setup import models as setup_models
+from apps.study import models as study_models
 
 from . import models
 
@@ -10,13 +10,13 @@ from . import models
 class BinaryResponseSettingsView(LoginRequiredMixin, generic.RedirectView):
 
     def get_redirect_url(self, *args, **kwargs):
-        setup_slug = self.kwargs['setup_slug']
-        setup = setup_models.Setup.objects.get(slug=setup_slug)
+        study_slug = self.kwargs['study_slug']
+        study = study_models.Study.objects.get(slug=study_slug)
         try:
-            response_settings = models.BinaryResponseSettings.objects.get(setup=setup)
-            return reverse('binary-response-settings-update', args=[setup.slug, response_settings.pk])
+            response_settings = models.BinaryResponseSettings.objects.get(study=study)
+            return reverse('binary-response-settings-update', args=[study.slug, response_settings.pk])
         except models.BinaryResponseSettings.DoesNotExist:
-            return reverse('binary-response-settings-create', args=[setup.slug])
+            return reverse('binary-response-settings-create', args=[study.slug])
 
 
 class BinaryResponseSettingsCreateView(LoginRequiredMixin, generic.CreateView):
@@ -25,21 +25,21 @@ class BinaryResponseSettingsCreateView(LoginRequiredMixin, generic.CreateView):
     title = 'Set Response Settings'
 
     def dispatch(self, *args, **kwargs):
-        setup_slug = self.kwargs['setup_slug']
-        self.setup = setup_models.Setup.objects.get(slug=setup_slug)
+        study_slug = self.kwargs['study_slug']
+        self.study = study_models.Study.objects.get(slug=study_slug)
         return super().dispatch(*args, **kwargs)
 
     def form_valid(self, form):
-        form.instance.setup = self.setup
+        form.instance.study = self.study
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse('setup', args=[self.setup.slug])
+        return reverse('study', args=[self.study.slug])
 
     @property
     def breadcrumbs(self):
         return [
-            (self.setup.title, reverse('setup', args=[self.setup.slug])),
+            (self.study.title, reverse('study', args=[self.study.slug])),
             ('response', ''),
         ]
 
@@ -50,20 +50,20 @@ class BinaryResponseSettingsUpdateView(LoginRequiredMixin, generic.UpdateView):
     title = 'Set Response Settings'
 
     def dispatch(self, *args, **kwargs):
-        setup_slug = self.kwargs['setup_slug']
-        self.setup = setup_models.Setup.objects.get(slug=setup_slug)
+        study_slug = self.kwargs['study_slug']
+        self.study = study_models.Study.objects.get(slug=study_slug)
         return super().dispatch(*args, **kwargs)
 
     def form_valid(self, form):
-        form.instance.setup = self.setup
+        form.instance.study = self.study
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse('setup', args=[self.setup.slug])
+        return reverse('study', args=[self.study.slug])
 
     @property
     def breadcrumbs(self):
         return [
-            (self.setup.title, reverse('setup', args=[self.setup.slug])),
+            (self.study.title, reverse('study', args=[self.study.slug])),
             ('response', ''),
         ]

@@ -8,8 +8,8 @@ from apps.item import models as item_models
 
 class Trial(models.Model):
     number = models.IntegerField()
-    setup = models.ForeignKey(
-        'lrex_setup.Setup',
+    study = models.ForeignKey(
+        'lrex_study.Study',
         on_delete=models.CASCADE
     )
 
@@ -17,10 +17,10 @@ class Trial(models.Model):
         ordering = ['number']
 
     def __str__(self):
-        return '{}-{}'.format(self.setup, self.number)
+        return '{}-{}'.format(self.study, self.number)
 
     def get_absolute_url(self):
-        return reverse('trial', args=[self.setup.slug, self.slug])
+        return reverse('trial', args=[self.study.slug, self.slug])
 
     @property
     def lists(self):
@@ -37,7 +37,7 @@ class Trial(models.Model):
 
     @property
     def next(self):
-        trial =  Trial.objects.filter(setup=self.setup, number__gt=self.number).first()
+        trial =  Trial.objects.filter(study=self.study, number__gt=self.number).first()
         if not trial:
             trial = Trial.objects.first()
         return trial
@@ -85,7 +85,7 @@ class UserTrial(models.Model):
             UserTrialItem.objects.create(number=i, user_trial=self, item=item)
 
     def get_absolute_url(self):
-        return reverse('user-trial', args=[self.setup.slug, self.slug])
+        return reverse('user-trial', args=[self.study.slug, self.slug])
 
 
 class UserTrialItem(models.Model):
@@ -96,14 +96,14 @@ class UserTrialItem(models.Model):
     @property
     def response_text(self):
         from apps.response import models as response_models
-        setup = self.user_trial.trial.setup
+        study = self.user_trial.trial.study
         try:
             response = self.userresponse
             if response.userbinaryresponse:
                 if response.userbinaryresponse.yes:
-                    return setup.responsesettings.binaryresponsesettings.yes
+                    return study.responsesettings.binaryresponsesettings.yes
                 else:
-                    return setup.responsesettings.binaryresponsesettings.no
+                    return study.responsesettings.binaryresponsesettings.no
         except response_models.UserResponse.DoesNotExist:
             return ''
 

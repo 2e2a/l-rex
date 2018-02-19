@@ -20,7 +20,7 @@ class TextItem(Item):
     text = models.TextField(max_length=1024)
 
     def get_absolute_url(self):
-        return reverse('textitem-update', args=[self.experiment.setup.slug, self.experiment.slug, self.pk])
+        return reverse('textitem-update', args=[self.experiment.study.slug, self.experiment.slug, self.pk])
 
 
 class List(models.Model):

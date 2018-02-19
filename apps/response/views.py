@@ -14,9 +14,9 @@ class UserResponseIntroView(generic.TemplateView):
     def dispatch(self, *args, **kwargs):
         user_trial_slug = self.kwargs['slug']
         self.user_trial = trail_models.UserTrial.objects.get(slug=user_trial_slug)
-        self.setup = self.user_trial.trial.setup
+        self.study = self.user_trial.trial.study
         if models.UserBinaryResponse.objects.filter(user_trial_item__user_trial=self.user_trial).exists():
-            return redirect('user-response-taken', self.setup.slug, self.user_trial.slug)
+            return redirect('user-response-taken', self.study.slug, self.user_trial.slug)
         return super().dispatch(*args, **kwargs)
 
 
@@ -26,7 +26,7 @@ class UserResponseOutroView(generic.TemplateView):
     def dispatch(self, *args, **kwargs):
         user_trial_slug = self.kwargs['slug']
         self.user_trial = trail_models.UserTrial.objects.get(slug=user_trial_slug)
-        self.setup = self.user_trial.trial.setup
+        self.study = self.user_trial.trial.study
         return super().dispatch(*args, **kwargs)
 
 
@@ -42,13 +42,13 @@ class UserBinaryResponseCreateView(generic.CreateView):
         user_trial_slug = self.kwargs['slug']
         self.num = int(self.kwargs['num'])
         self.user_trial = trail_models.UserTrial.objects.get(slug=user_trial_slug)
-        self.setup = self.user_trial.trial.setup
+        self.study = self.user_trial.trial.study
         self.user_trial_item = trail_models.UserTrialItem.objects.get(
             user_trial__slug=user_trial_slug,
             number=self.num
         )
-        self.yes = self.setup.responsesettings.binaryresponsesettings.yes
-        self.no = self.setup.responsesettings.binaryresponsesettings.no
+        self.yes = self.study.responsesettings.binaryresponsesettings.yes
+        self.no = self.study.responsesettings.binaryresponsesettings.no
         return super().dispatch(*args, **kwargs)
 
     def form_valid(self, form):
@@ -58,5 +58,5 @@ class UserBinaryResponseCreateView(generic.CreateView):
 
     def get_success_url(self):
         if self.num < (len(self.user_trial.items) - 1):
-            return reverse('user-binary-response', args=[self.setup.slug, self.user_trial.slug, self.num + 1])
-        return reverse('user-response-outro', args=[self.setup.slug, self.user_trial.slug])
+            return reverse('user-binary-response', args=[self.study.slug, self.user_trial.slug, self.num + 1])
+        return reverse('user-response-outro', args=[self.study.slug, self.user_trial.slug])

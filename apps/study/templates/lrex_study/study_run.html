@@ -1,4 +1,4 @@
-{% extends "lrex_home/setup_base.html" %}
+{% extends "lrex_home/study_base.html" %}
 
 {% block main_content %}
 <div class="card my-1">
@@ -7,7 +7,7 @@
         <p class="card-text">
             Create and run user trials. View indivirual results.
         </p>
-        <a  class="card-link" href="{% url 'user-trials' setup_slug=object.slug %}">User Trials</a>
+        <a  class="card-link" href="{% url 'user-trials' study_slug=object.slug %}">User Trials</a>
     </div>
 </div>
 

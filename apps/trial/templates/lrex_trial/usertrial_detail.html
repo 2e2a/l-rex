@@ -1,10 +1,10 @@
-{% extends "lrex_home/setup_base.html" %}
+{% extends "lrex_home/study_base.html" %}
 
 {% block main_content %}
 <h2>Run trial</h2>
 <p class="card-text">
     Send this link to the trial participant:
-    <a class="card-link" href="{% url 'user-response-intro' setup_slug=object.trial.setup.slug slug=object.slug %}">
+    <a class="card-link" href="{% url 'user-response-intro' study_slug=object.trial.study.slug slug=object.slug %}">
         User Trial Link
     </a>
 </p>

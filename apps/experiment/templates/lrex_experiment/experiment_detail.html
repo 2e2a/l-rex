@@ -1,4 +1,4 @@
-{% extends "lrex_home/setup_base.html" %}
+{% extends "lrex_home/study_base.html" %}
 
 {% block main_content %}
 <div class="card my-1">
@@ -7,18 +7,18 @@
     <p class="card-text">
         Edit Expriment Settings, such as name.
     </p>
-    <a href="{% url 'experiment-update' object.setup.slug object.slug %}" class="card-link">Edit</a>
+    <a href="{% url 'experiment-update' object.study.slug object.slug %}" class="card-link">Edit</a>
   </div>
 </div>
 
-{% if object.setup.is_textitem %}
+{% if object.study.is_textitem %}
 <div class="card my-1">
     <div class="card-body">
         <h2 class="card-title">Items</h2>
         <p class="card-text">
             Experiment Items configuration
         </p>
-        <a  class="card-link" href="{% url 'textitems' setup_slug=object.setup.slug slug=object.slug %}">
+        <a  class="card-link" href="{% url 'textitems' study_slug=object.study.slug slug=object.slug %}">
             Items
         </a>
     </div>
@@ -30,7 +30,7 @@
         <p class="card-text">
             Experiment items list configuration
         </p>
-        <a  class="card-link" href="{% url 'itemlists' setup_slug=object.setup.slug slug=object.slug %}">
+        <a  class="card-link" href="{% url 'itemlists' study_slug=object.study.slug slug=object.slug %}">
             Item Lists
         </a>
     </div>
