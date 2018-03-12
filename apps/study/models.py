@@ -19,6 +19,9 @@ class Study(models.Model):
         choices=ITEM_TYPE,
         default='txt',
     )
+    response_instructions = models.TextField(max_length=1024)
+    response_question = models.CharField(max_length=200)
+    response_legend = models.TextField(max_length=1024, blank=True, null=True)
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.title)
@@ -79,3 +82,15 @@ class Study(models.Model):
         last_trial = None
         for i in range(trial_count):
             last_trial = self._create_next_trial(i, last_trial)
+
+
+class Response(models.Model):
+    study = models.ForeignKey(
+        Study,
+        on_delete=models.CASCADE
+    )
+    number = models.IntegerField()
+    label = models.CharField(max_length=50)
+
+    class Meta:
+        ordering = ['number']

@@ -93,7 +93,7 @@ class UserTrialItem(models.Model):
 
     @property
     def response_text(self):
-        from apps.response import models as response_models
+        from apps.results import models as response_models
         study = self.user_trial.trial.study
         try:
             response = self.userresponse

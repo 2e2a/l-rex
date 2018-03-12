@@ -2,8 +2,5 @@
 {% load crispy_forms_tags %}
 
 {% block main_content %}
-<form action="" method="post">{% csrf_token %}
-    {{ form|crispy }}
-    <input type="submit" />
-</form>
+    {% crispy view.formset view.helper %}
 {% endblock %}

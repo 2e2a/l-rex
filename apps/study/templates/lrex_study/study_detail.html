@@ -7,17 +7,8 @@
         <p class="card-text">
             Configure initial settings
         </p>
-        <a  class="card-link" href="{% url 'study-update' object.slug %}">Edit</a>
-    </div>
-</div>
-
-<div class="card my-1">
-    <div class="card-body">
-        <h2 class="card-title">Resposne Settings</h2>
-        <p class="card-text">
-            Set response specific settings
-        </p>
-        <a  class="card-link" href="{% url 'binary-response-settings' study_slug=object.slug %}">Response</a>
+        <a  class="card-link" href="{% url 'study-update' object.slug %}">Settings</a>
+        <a  class="card-link" href="{% url 'study-responses' object.slug %}">Response</a>
     </div>
 </div>
 

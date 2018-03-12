@@ -1,7 +1,7 @@
 from django.conf.urls import url
 from django.conf.urls import include
 
-from apps.response import urls as response_urls
+from apps.results import urls as response_urls
 from . import views
 
 urlpatterns = [

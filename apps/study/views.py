@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.views import generic
 
 from . import models
+from . import forms
 
 
 class StudyDetailView(LoginRequiredMixin, generic.DetailView):
@@ -40,7 +41,7 @@ class StudyRunView(LoginRequiredMixin, generic.DetailView):
 
 class StudyCreateView(LoginRequiredMixin, generic.CreateView):
     model = models.Study
-    fields = ['title', 'item_type']
+    fields = ['title', 'item_type', 'response_instructions', 'response_question', 'response_legend']
     title = 'Create Study'
 
     def form_valid(self, form):
@@ -49,7 +50,7 @@ class StudyCreateView(LoginRequiredMixin, generic.CreateView):
 
 class StudyUpdateView(LoginRequiredMixin, generic.UpdateView):
     model = models.Study
-    fields = ['title', 'item_type']
+    fields = ['title', 'item_type', 'response_instructions', 'response_question', 'response_legend']
     title = 'Edit Study'
 
     @property
@@ -93,4 +94,52 @@ class StudyListView(LoginRequiredMixin, generic.ListView):
     def breadcrumbs(self):
         return [
             ('studies', reverse('studies')),
+        ]
+
+
+class ResponseUpdateView(LoginRequiredMixin, generic.TemplateView):
+    model = models.Study
+    title = 'Edit Reponse'
+    template_name = 'lrex_study/study_responses.html'
+
+    formset = None
+    helper = forms.response_formset_helper
+
+    def dispatch(self, *args, **kwargs):
+        study_slug = self.kwargs['slug']
+        self.study = models.Study.objects.get(slug=study_slug)
+        self.formset = forms.responseformset_factory(
+            queryset=models.Response.objects.filter(study=self.study)
+        )
+        return super().dispatch(*args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.formset = forms.responseformset_factory(request.POST, request.FILES)
+        if self.formset.is_valid():
+            instances = self.formset.save(commit=False)
+            for instance in instances:
+                instance.number = 0
+                instance.study = self.study
+                instance.save()
+            i = 1
+            for form in self.formset.forms:
+                if form.instance.id:
+                    if form.cleaned_data['delete']:
+                        form.instance.delete()
+                    else:
+                        form.instance.number = i
+                        form.instance.save()
+                        i = i + 1
+            self.formset = forms.responseformset_factory(
+                queryset=models.Response.objects.filter(study=self.study)
+            )
+        return super().get(request, *args, **kwargs)
+
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('responses', ''),
         ]

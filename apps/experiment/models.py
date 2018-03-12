@@ -3,7 +3,7 @@ from django.db import models
 from django.utils.text import slugify
 
 from apps.item import models as item_models
-from apps.response import models as response_models
+from apps.results import models as response_models
 
 class Experiment(models.Model):
     title = models.CharField(max_length=200)
