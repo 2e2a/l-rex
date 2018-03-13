@@ -3,4 +3,4 @@ from django.contrib import admin
 from . import models
 
 
-admin.site.register(models.UserBinaryResponse)
+admin.site.register(models.UserResponse)

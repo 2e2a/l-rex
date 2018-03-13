@@ -9,19 +9,19 @@ from . import models
 
 
 class UserResponseIntroView(generic.TemplateView):
-    template_name = 'lrex_response/userresponse_intro.html'
+    template_name = 'lrex_results/userresponse_intro.html'
 
     def dispatch(self, *args, **kwargs):
         user_trial_slug = self.kwargs['slug']
         self.user_trial = trail_models.UserTrial.objects.get(slug=user_trial_slug)
         self.study = self.user_trial.trial.study
-        if models.UserBinaryResponse.objects.filter(user_trial_item__user_trial=self.user_trial).exists():
+        if models.UserResponse.objects.filter(user_trial_item__user_trial=self.user_trial).exists():
             return redirect('user-response-taken', self.study.slug, self.user_trial.slug)
         return super().dispatch(*args, **kwargs)
 
 
 class UserResponseOutroView(generic.TemplateView):
-    template_name = 'lrex_response/userresponse_outro.html'
+    template_name = 'lrex_results/userresponse_outro.html'
 
     def dispatch(self, *args, **kwargs):
         user_trial_slug = self.kwargs['slug']
@@ -31,12 +31,12 @@ class UserResponseOutroView(generic.TemplateView):
 
 
 class UserResponseTakenView(generic.TemplateView):
-    template_name = 'lrex_response/userresponse_taken.html'
+    template_name = 'lrex_results/userresponse_taken.html'
 
 
-class UserBinaryResponseCreateView(generic.CreateView):
-    model = models.UserBinaryResponse
-    form_class = forms.UserBinaryResponseForm
+class UserResponseCreateView(generic.CreateView):
+    model = models.UserResponse
+    form_class = forms.UserResponseForm
 
     def dispatch(self, *args, **kwargs):
         user_trial_slug = self.kwargs['slug']
@@ -47,9 +47,12 @@ class UserBinaryResponseCreateView(generic.CreateView):
             user_trial__slug=user_trial_slug,
             number=self.num
         )
-        self.yes = self.study.responsesettings.binaryresponsesettings.yes
-        self.no = self.study.responsesettings.binaryresponsesettings.no
         return super().dispatch(*args, **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['study'] = self.study
+        return kwargs
 
     def form_valid(self, form):
         form.instance.number = self.num

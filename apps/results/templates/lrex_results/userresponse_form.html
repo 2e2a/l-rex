@@ -1,0 +1,33 @@
+{% extends "lrex_home/base.html" %}
+
+{% block content %}
+<h1 class="row justify-content-center mt-2">Participate In Experiment</h1>
+<div class="row justify-content-center">
+    <div class="my-2 p-4 border col-6">
+        <p>
+            <em>
+                {{ view.study.response_question }}
+            </em>
+        </p>
+        <p>
+            {{ view.user_trial_item.item.textitem.text }}
+        </p>
+        <form action="" method="post">
+            {% csrf_token %}
+            <div class="btn-group d-flex" role="group">
+                {% for choice in form.response.field.choices %}
+                <button class="btn btn-outline-primary mx-1 w-100" type="submit" name="response" value="{{ choice.0 }}">
+                    {{ choice.1 }}
+                </button>
+                {% endfor %}
+            </div>
+        </form>
+        <p>
+            <small>
+                {{ view.study.response_question }}
+            </small>
+        </p>
+    </div>
+</div>
+
+{% endblock %}

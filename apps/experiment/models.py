@@ -45,9 +45,10 @@ class Experiment(models.Model):
             item_models.ListItem.objects.create(list=list, item=item)
 
 
-    def results_binary_response(self):
+    def results(self):
+        # TODO
         result = []
-        responses = response_models.UserBinaryResponse.objects.filter(
+        responses = response_models.UserResponse.objects.filter(
             user_trial_item__item__experiment=self
         )
         for item in self.item_set.all():

@@ -12,7 +12,7 @@ urlpatterns = [
     url(r'taken/$',
         views.UserResponseTakenView.as_view(),
         name='user-response-taken'),
-    url(r'binary/(?P<num>[0-9]+)/$',
-        views.UserBinaryResponseCreateView.as_view(),
+    url(r'(?P<num>[0-9]+)/$',
+        views.UserResponseCreateView.as_view(),
         name='user-binary-response'),
 ]

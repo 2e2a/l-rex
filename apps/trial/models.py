@@ -94,14 +94,9 @@ class UserTrialItem(models.Model):
     @property
     def response_text(self):
         from apps.results import models as response_models
-        study = self.user_trial.trial.study
         try:
-            response = self.userresponse
-            if response.userbinaryresponse:
-                if response.userbinaryresponse.yes:
-                    return study.responsesettings.binaryresponsesettings.yes
-                else:
-                    return study.responsesettings.binaryresponsesettings.no
+            response = self.userresponse.response
+            return response.label
         except response_models.UserResponse.DoesNotExist:
             return ''
 

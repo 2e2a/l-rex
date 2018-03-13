@@ -20,7 +20,7 @@ class Study(models.Model):
         default='txt',
     )
     response_instructions = models.TextField(max_length=1024)
-    response_question = models.CharField(max_length=200)
+    response_question = models.CharField(max_length=200, blank=True, null=True)
     response_legend = models.TextField(max_length=1024, blank=True, null=True)
 
     def save(self, *args, **kwargs):
@@ -94,3 +94,6 @@ class Response(models.Model):
 
     class Meta:
         ordering = ['number']
+
+    def __str__(self):
+        return self.label
