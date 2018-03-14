@@ -4,35 +4,24 @@
 <table class="table">
     <thead>
     <tr>
-        <th class="col-md-1">Item</th>
-        <th>Experiment</th>
-        <th>Text</th>
-        <th class="col-md-1">Responses</th>
-        <th class="col-md-1">{{ view.study.responsesettings.binaryresponsesettings.yes }}</th>
-        <th class="col-md-1">{{ view.study.responsesettings.binaryresponsesettings.no }}</th>
+        <th scope="col">Subject</th>
+        <th scope="col">Item</th>
+        <th scope="col">Condition</th>
+        <th scope="col">Text</th>
+        <th scope="col">Responses</th>
+        {% for response in view.study.response_set.all %}
+        <th scope="col">{{ response.label }}</th>
+        {% endfor %}
     </tr>
     </thead>
     <tbody>
-    {% for item, total, yes_prc, no_prc in object.results_binary_response %}
+    {% for results in object.results %}
     <tr>
-        <td class="col-md-1">
-            {{ item }}
+        {% for value in results %}
+        <td scope="col">
+            {{ value }}
         </td>
-        <td>{{ item.experiment }}</td>
-        <td>
-            {% if item.textitem %}
-                {{ item.textitem.text }}
-            {% endif %}
-        </td>
-        <td class="col-md-1">
-            {{ total }}
-        </td>
-        <td class="col-md-1">
-            {{ yes_prc }}
-        </td>
-        <td class="col-md-1">
-            {{ no_prc }}
-        </td>
+        {% endfor %}
     </tr>
     {% endfor %}
     </tbody>

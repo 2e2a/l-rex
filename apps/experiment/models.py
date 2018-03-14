@@ -4,6 +4,7 @@ from django.utils.text import slugify
 
 from apps.item import models as item_models
 from apps.results import models as response_models
+from apps.trial import models as trial_models
 
 class Experiment(models.Model):
     title = models.CharField(max_length=200)
@@ -44,26 +45,36 @@ class Experiment(models.Model):
             list = lists[shift]
             item_models.ListItem.objects.create(list=list, item=item)
 
-
     def results(self):
-        # TODO
-        result = []
-        responses = response_models.UserResponse.objects.filter(
+        results = []
+
+        user_trials_list = list(trial_models.UserTrial.objects.filter(
+            trial__study=self.study
+        ))
+        user_responses = response_models.UserResponse.objects.filter(
             user_trial_item__item__experiment=self
         )
-        for item in self.item_set.all():
-            total_count = 0
-            yes_count = 0
-            for response in responses:
-                if response.user_trial_item.item == item:
-                    total_count = total_count + 1
-                    if response.yes:
-                        yes_count = yes_count + 1
-            yes_prc = 0.0
-            no_prc = 0.0
-            if total_count > 0:
-                yes_prc = (100 * yes_count) / total_count
-                no_prc = 100 - yes_prc
-            result.append((item, total_count, yes_prc, no_prc))
-        return result
+        for user_response in user_responses:
+            values = []
 
+            subject = user_trials_list.index(user_response.user_trial_item.user_trial) + 1
+            values.append(subject)
+
+            item = user_response.user_trial_item.item
+            values.append(item.number)
+            values.append(item.condition)
+            values.append(item.textitem.text)
+
+            result_count = 1
+            values.append(result_count)
+
+            for response in self.study.response_set.all():
+                if user_response.response == response:
+                    values.append(1)
+                else:
+                    values.append(0)
+
+            results.append(values)
+
+        results_sorted = sorted(results, key=lambda r: r[0])
+        return results_sorted

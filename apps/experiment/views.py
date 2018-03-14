@@ -126,6 +126,7 @@ class ExperimentResultListView(LoginRequiredMixin, generic.ListView):
             ('results','')
         ]
 
+
 class ExperimentResultsView(LoginRequiredMixin, generic.DetailView):
     model = models.Experiment
     title = 'Experiment Results'
