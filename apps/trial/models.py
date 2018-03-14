@@ -90,13 +90,3 @@ class UserTrialItem(models.Model):
     number = models.IntegerField()
     user_trial = models.ForeignKey(UserTrial, on_delete=models.CASCADE)
     item = models.ForeignKey(item_models.Item, on_delete=models.CASCADE)
-
-    @property
-    def response_text(self):
-        from apps.results import models as response_models
-        try:
-            response = self.userresponse.response
-            return response.label
-        except response_models.UserResponse.DoesNotExist:
-            return ''
-
