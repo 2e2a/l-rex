@@ -58,10 +58,10 @@ class UserTrial(models.Model):
     creation_date = models.DateTimeField(
         default=timezone.now
     )
-    participant = models.EmailField(blank=True)
+    id = models.CharField(max_length=200, blank=True, null=True)
 
     class Meta:
-        ordering = ['-creation_date']
+        ordering = ['creation_date']
 
     @property
     def items(self):
@@ -90,3 +90,6 @@ class UserTrialItem(models.Model):
     number = models.IntegerField()
     user_trial = models.ForeignKey(UserTrial, on_delete=models.CASCADE)
     item = models.ForeignKey(item_models.Item, on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ['number']

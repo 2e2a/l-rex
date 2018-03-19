@@ -2,7 +2,7 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.views import generic
 
-from apps.trial import models as trail_models
+from apps.trial import models as trial_models
 
 from . import forms
 from . import models
@@ -11,12 +11,25 @@ from . import models
 class UserResponseIntroView(generic.TemplateView):
     template_name = 'lrex_results/userresponse_intro.html'
 
+    def _redirect_started(self):
+        try:
+            n_responses = len(models.UserResponse.objects.filter(user_trial_item__user_trial=self.user_trial))
+            n_user_trial_items = len(trial_models.UserTrialItem.objects.filter(user_trial=self.user_trial))
+            if n_responses == n_user_trial_items:
+                return reverse('user-response-taken', args=[self.study.slug, self.user_trial.slug])
+            return reverse('user-binary-response', args=[self.study.slug, self.user_trial.slug, n_responses])
+        except models.UserResponse.DoesNotExist:
+            pass
+        except trial_models.UserTrialItem.DoesNotExist:
+            pass
+
     def dispatch(self, *args, **kwargs):
         user_trial_slug = self.kwargs['slug']
-        self.user_trial = trail_models.UserTrial.objects.get(slug=user_trial_slug)
+        self.user_trial = trial_models.UserTrial.objects.get(slug=user_trial_slug)
         self.study = self.user_trial.trial.study
-        if models.UserResponse.objects.filter(user_trial_item__user_trial=self.user_trial).exists():
-            return redirect('user-response-taken', self.study.slug, self.user_trial.slug)
+        redirect_link = self._redirect_started()
+        if redirect_link:
+            return redirect(redirect_link)
         return super().dispatch(*args, **kwargs)
 
 
@@ -25,7 +38,7 @@ class UserResponseOutroView(generic.TemplateView):
 
     def dispatch(self, *args, **kwargs):
         user_trial_slug = self.kwargs['slug']
-        self.user_trial = trail_models.UserTrial.objects.get(slug=user_trial_slug)
+        self.user_trial = trial_models.UserTrial.objects.get(slug=user_trial_slug)
         self.study = self.user_trial.trial.study
         return super().dispatch(*args, **kwargs)
 
@@ -41,9 +54,9 @@ class UserResponseCreateView(generic.CreateView):
     def dispatch(self, *args, **kwargs):
         user_trial_slug = self.kwargs['slug']
         self.num = int(self.kwargs['num'])
-        self.user_trial = trail_models.UserTrial.objects.get(slug=user_trial_slug)
+        self.user_trial = trial_models.UserTrial.objects.get(slug=user_trial_slug)
         self.study = self.user_trial.trial.study
-        self.user_trial_item = trail_models.UserTrialItem.objects.get(
+        self.user_trial_item = trial_models.UserTrialItem.objects.get(
             user_trial__slug=user_trial_slug,
             number=self.num
         )

@@ -5,7 +5,7 @@ from apps.results import urls as response_urls
 from . import views
 
 urlpatterns = [
-    url(r'create/$',
+    url(r'participate/$',
         views.UserTrialCreateView.as_view(),
         name='user-trial-create'),
     url(r'user-trials/$',

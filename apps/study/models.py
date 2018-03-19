@@ -22,6 +22,8 @@ class Study(models.Model):
     response_instructions = models.TextField(max_length=1024)
     response_question = models.CharField(max_length=200, blank=True, null=True)
     response_legend = models.TextField(max_length=1024, blank=True, null=True)
+    password = models.CharField(max_length=200)
+    allow_anonymous = models.BooleanField()
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.title)
@@ -59,7 +61,7 @@ class Study(models.Model):
         lists = []
         last_lists = last_trial.lists
         for last_list in last_lists:
-            list = last_list.next(last_list)
+            list = last_list.next()
             lists.append(list)
         return lists
 
