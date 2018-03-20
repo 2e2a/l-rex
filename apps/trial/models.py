@@ -1,5 +1,7 @@
 import random
 import uuid
+from datetime import datetime, timedelta
+from enum import Enum, auto
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
@@ -47,6 +49,13 @@ class TrialList(models.Model):
     list = models.ForeignKey(item_models.List, on_delete=models.CASCADE)
 
 
+class UserTrialStatus(Enum):
+    CREATED = auto()
+    STARTED = auto()
+    FINISHED = auto()
+    ABANDOND = auto()
+
+
 class UserTrial(models.Model):
     slug = models.UUIDField(
         primary_key=True,
@@ -67,6 +76,20 @@ class UserTrial(models.Model):
     def items(self):
         items = [trial_item.item for trial_item in self.usertrialitem_set.all()]
         return items
+
+    @property
+    def status(self):
+        from apps.results.models import UserResponse
+        n_responses = len(UserResponse.objects.filter(user_trial_item__user_trial=self))
+        if n_responses>0:
+            n_user_trial_items = len(self.items)
+            if n_responses == n_user_trial_items:
+                return UserTrialStatus.FINISHED
+            if self.creation_date + timedelta(1) < timezone.now():
+                return UserTrialStatus.ABANDOND
+            return UserTrialStatus.STARTED
+        return UserTrialStatus.CREATED
+
 
     def init(self):
         last_user_trial = UserTrial.objects.first()

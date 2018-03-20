@@ -69,11 +69,9 @@ class UserTrialCreateView(LoginRequiredMixin, generic.CreateView):
         return reverse('user-response-intro', args=[self.study.slug, self.object.slug])
 
 
-
-
 class UserTrialListView(LoginRequiredMixin, generic.ListView):
     model = models.UserTrial
-    title = 'User Trial List'
+    title = 'User Trials'
 
     def dispatch(self, *args, **kwargs):
         study_slug = self.kwargs['study_slug']

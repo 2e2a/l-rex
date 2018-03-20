@@ -13,7 +13,7 @@
     <li class="list-group-item d-flex justify-content-between align-items-center">
         <span>
             {{ forloop.counter }}. {{ usertrial.id }}
-            <span class="badge badge-primary">Finished</span>
+            <span class="badge badge-primary">{{ usertrial.status.name }}</span>
             <span class="badge badge-secondary">Trial {{ usertrial.trial.number }}</span>
         </span>
         <span>

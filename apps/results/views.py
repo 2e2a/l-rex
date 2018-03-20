@@ -13,10 +13,9 @@ class UserResponseIntroView(generic.TemplateView):
 
     def _redirect_started(self):
         try:
-            n_responses = len(models.UserResponse.objects.filter(user_trial_item__user_trial=self.user_trial))
-            n_user_trial_items = len(trial_models.UserTrialItem.objects.filter(user_trial=self.user_trial))
-            if n_responses == n_user_trial_items:
+            if self.user_trial.status == trial_models.UserTrialStatus.FINISHED:
                 return reverse('user-response-taken', args=[self.study.slug, self.user_trial.slug])
+            n_responses = len(models.UserResponse.objects.filter(user_trial_item__user_trial=self.user_trial))
             return reverse('user-binary-response', args=[self.study.slug, self.user_trial.slug, n_responses])
         except models.UserResponse.DoesNotExist:
             pass
