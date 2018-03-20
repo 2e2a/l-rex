@@ -41,7 +41,8 @@ class StudyRunView(LoginRequiredMixin, generic.DetailView):
 
 class StudyCreateView(LoginRequiredMixin, generic.CreateView):
     model = models.Study
-    fields = ['title', 'item_type', 'response_instructions', 'response_question', 'response_legend']
+    fields = ['title', 'item_type', 'response_instructions', 'response_question', 'response_legend',
+              'start_time', 'end_time']
     title = 'Create Study'
 
     def form_valid(self, form):
@@ -50,7 +51,8 @@ class StudyCreateView(LoginRequiredMixin, generic.CreateView):
 
 class StudyUpdateView(LoginRequiredMixin, generic.UpdateView):
     model = models.Study
-    fields = ['title', 'item_type', 'response_instructions', 'response_question', 'response_legend']
+    fields = ['title', 'item_type', 'response_instructions', 'response_question', 'response_legend',
+              'start_time', 'end_time']
     title = 'Edit Study'
 
     @property

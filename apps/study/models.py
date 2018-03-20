@@ -1,11 +1,18 @@
+from enum import Enum, auto
 from django.conf import settings
 from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
+from django.utils import timezone
 
 from apps.contrib import math
 from apps.trial import models as trial_models
 
+
+class StudyStatus(Enum):
+    PENDING = auto()
+    ACTIVE = auto()
+    FINISHED = auto()
 
 class Study(models.Model):
     title = models.CharField(max_length=200)
@@ -24,6 +31,8 @@ class Study(models.Model):
     response_legend = models.TextField(max_length=1024, blank=True, null=True)
     password = models.CharField(max_length=200)
     allow_anonymous = models.BooleanField()
+    start_time = models.DateTimeField(null=True)
+    end_time = models.DateTimeField(null=True)
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.title)
@@ -36,6 +45,16 @@ class Study(models.Model):
     @property
     def is_textitem(self):
         return self.item_type == 'txt'
+
+    @property
+    def status(self):
+        if self.start_time and self.end_time:
+            if self.start_time < timezone.now():
+                if self.end_time < timezone.now():
+                    return StudyStatus.FINISHED
+            else:
+                return StudyStatus.PENDING
+        return StudyStatus.ACTIVE
 
     def __str__(self):
         return self.slug
