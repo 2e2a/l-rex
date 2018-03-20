@@ -61,6 +61,8 @@ class UserResponseCreateView(generic.CreateView):
         )
         return super().dispatch(*args, **kwargs)
 
+    def progress(self):
+        return self.num * 100 / len(self.user_trial.items)
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['study'] = self.study

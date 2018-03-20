@@ -23,10 +23,12 @@
                 {% endfor %}
             </div>
         </form>
-        <hr>
         <p>
+            <div class="progress" style="height: 2px;">
+                <div class="progress-bar" role="progressbar" style="width: {{ view.progress }}%" aria-valuenow="{{ view.progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
             <small>
-                {{ view.study.response_question }}
+                {{ view.study.response_legend }}
             </small>
         </p>
     </div>
