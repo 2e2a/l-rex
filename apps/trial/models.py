@@ -15,7 +15,7 @@ class Questionnaire(models.Model):
         'lrex_study.Study',
         on_delete=models.CASCADE
     )
-    item_lists = models.ManyToManyField(item_models.List)
+    item_lists = models.ManyToManyField(item_models.ItemList)
 
     class Meta:
         ordering = ['number']
@@ -29,8 +29,8 @@ class Questionnaire(models.Model):
     @property
     def items(self):
         items = []
-        for list in self.item_lists.all():
-            items.extend(list.items.all())
+        for item_list in self.item_lists.all():
+            items.extend(item_list.items.all())
         return items
 
     @property

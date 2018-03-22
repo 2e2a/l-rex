@@ -72,7 +72,7 @@ class Study(models.Model):
     def _init_questionnaire_lists(self):
         questionnaire_item_list = []
         for experiment in self.experiment_set.all():
-            item_list = experiment.list_set.first()
+            item_list = experiment.itemlist_set.first()
             questionnaire_item_list.append(item_list)
         return questionnaire_item_list
 

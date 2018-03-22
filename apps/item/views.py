@@ -117,8 +117,8 @@ class TextItemListView(LoginRequiredMixin, generic.ListView):
         ]
 
 
-class ListListView(LoginRequiredMixin, generic.ListView):
-    model = models.List
+class ItemListListView(LoginRequiredMixin, generic.ListView):
+    model = models.ItemList
     title = 'Item Lists'
 
     def dispatch(self, *args, **kwargs):
@@ -128,13 +128,13 @@ class ListListView(LoginRequiredMixin, generic.ListView):
 
     def post(self, request, *args, **kwargs):
         action = request.POST.get('action', None)
-        if action and action == 'generate_lists':
-            self.experiment.compute_lists()
+        if action and action == 'generate_item_lists':
+            self.experiment.compute_item_lists()
         return redirect('itemlists',study_slug=self.experiment.study.slug, slug=self.experiment.slug)
 
 
     def get_queryset(self):
-        return models.List.objects.filter(experiment=self.experiment)
+        return models.ItemList.objects.filter(experiment=self.experiment)
 
     @property
     def breadcrumbs(self):
@@ -145,5 +145,5 @@ class ListListView(LoginRequiredMixin, generic.ListView):
             (study.title, reverse('study', args=[study.slug])),
             ('experiments',reverse('experiments', args=[study.slug])),
             (exp.title, reverse('experiment', args=[study.slug, exp.slug])),
-            ('lists', reverse('itemlists', args=[study.slug, exp.slug])),
+            ('itemlists', reverse('itemlists', args=[study.slug, exp.slug])),
         ]

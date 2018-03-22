@@ -4,7 +4,7 @@
 <div class="row justify-content-center mb-2">
     <form method="post">
         {% csrf_token %}
-        <button type="submit" name="action" value="generate_lists" class="btn btn-outline-primary btn-sm mx-1">
+        <button type="submit" name="action" value="generate_item_lists" class="btn btn-outline-primary btn-sm mx-1">
             Generate Items Lists
         </button>
     </form>
@@ -17,11 +17,11 @@
     </tr>
     </thead>
     <tbody>
-    {% for list in list_list %}
+    {% for item_list in itemlist_list %}
     <tr>
-        <td class="col-md-1">{{ list.number }}</td>
+        <td class="col-md-1">{{ item_list.number }}</td>
         <td>
-            {% for item in list.items.all %}
+            {% for item in item_list.items.all %}
                 {{ item }},
             {% endfor %}
         </td>

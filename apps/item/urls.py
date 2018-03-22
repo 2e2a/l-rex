@@ -16,6 +16,6 @@ urlpatterns = [
         views.TextItemDeleteView.as_view(),
         name='textitem-delete'),
     url(r'lists/$',
-        views.ListListView.as_view(),
+        views.ItemListListView.as_view(),
         name='itemlists'),
 ]

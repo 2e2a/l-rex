@@ -23,7 +23,7 @@ class TextItem(Item):
         return reverse('textitem-update', args=[self.experiment.study.slug, self.experiment.slug, self.pk])
 
 
-class List(models.Model):
+class ItemList(models.Model):
     number = models.IntegerField()
     experiment = models.ForeignKey(
         'lrex_experiment.Experiment',
@@ -38,7 +38,7 @@ class List(models.Model):
         return '{}-list-{}'.format(self.experiment, self.number)
 
     def next(self):
-        next_list =  self.experiment.list_set.filter(number__gt=self.number).first()
+        next_list =  self.experiment.itemlist_set.filter(number__gt=self.number).first()
         if not next_list:
-            next_list =  List.objects.first()
+            next_list =  ItemList.objects.first()
         return next_list

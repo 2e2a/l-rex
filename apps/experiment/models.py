@@ -30,20 +30,20 @@ class Experiment(models.Model):
     def get_absolute_url(self):
         return reverse('experiment', args=[self.study.slug, self.slug])
 
-    def compute_lists(self):
-        self.list_set.all().delete()
+    def compute_item_lists(self):
+        self.itemlist_set.all().delete()
 
-        lists = []
+        item_lists = []
         conditions = self.conditions
         condition_count = len(conditions)
         for i in range(condition_count):
-            list = item_models.List.objects.create(number=i, experiment=self)
-            lists.append(list)
+            item_list = item_models.ItemList.objects.create(number=i, experiment=self)
+            item_lists.append(item_list)
 
         for i, item in enumerate(self.item_set.all()):
-            shift  =  (i - (item.number - 1)) % condition_count
-            list = lists[shift]
-            list.items.add(item)
+            shift =  (i - (item.number - 1)) % condition_count
+            item_list = item_lists[shift]
+            item_list.items.add(item)
 
     def results(self):
         results = []
