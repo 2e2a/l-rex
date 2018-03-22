@@ -31,8 +31,8 @@ class Study(models.Model):
     response_legend = models.TextField(max_length=1024, blank=True, null=True)
     password = models.CharField(max_length=200)
     allow_anonymous = models.BooleanField()
-    start_time = models.DateTimeField(null=True)
-    end_time = models.DateTimeField(null=True)
+    start_time = models.DateTimeField(blank=True, null=True)
+    end_time = models.DateTimeField(blank=True, null=True)
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.title)
