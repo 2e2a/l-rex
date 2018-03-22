@@ -7,6 +7,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from apps.item import models as item_models
+from apps.study import models as study_models
 
 
 class Questionnaire(models.Model):
@@ -71,11 +72,10 @@ class Trial(models.Model):
 
     @property
     def status(self):
-        from apps.results.models import UserResponse
-        n_responses = len(UserResponse.objects.filter(trial_item__trial=self))
-        if n_responses>0:
+        n_ratings = len(Rating.objects.filter(trial_item__trial=self))
+        if n_ratings > 0:
             n_trial_items = len(self.items)
-            if n_responses == n_trial_items:
+            if n_ratings == n_trial_items:
                 return TrialStatus.FINISHED
             if self.creation_date + timedelta(1) < timezone.now():
                 return TrialStatus.ABANDOND
@@ -107,3 +107,9 @@ class TrialItem(models.Model):
 
     class Meta:
         ordering = ['number']
+
+
+class Rating(models.Model):
+    number = models.IntegerField()
+    trial_item = models.OneToOneField(TrialItem, on_delete=models.CASCADE)
+    scale_value = models.ForeignKey(study_models.ScaleValue, on_delete=models.CASCADE)

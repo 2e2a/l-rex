@@ -3,7 +3,6 @@ from django.db import models
 from django.utils.text import slugify
 
 from apps.item import models as item_models
-from apps.results import models as response_models
 from apps.trial import models as trial_models
 
 class Experiment(models.Model):
@@ -51,25 +50,25 @@ class Experiment(models.Model):
         trials_list = list(trial_models.Trial.objects.filter(
             questionnaire__study=self.study
         ))
-        user_responses = response_models.UserResponse.objects.filter(
+        ratings = trial_models.Rating.objects.filter(
             trial_item__item__experiment=self
         )
-        for user_response in user_responses:
+        for rating in ratings:
             values = []
 
-            subject = trials_list.index(user_response.trial_item.trial) + 1
+            subject = trials_list.index(rating.trial_item.trial) + 1
             values.append(subject)
 
-            item = user_response.trial_item.item
+            item = rating.trial_item.item
             values.append(item.number)
             values.append(item.condition)
             values.append(item.textitem.text)
 
-            result_count = 1
-            values.append(result_count)
+            rating_count = 1
+            values.append(rating_count)
 
             for scale_value in self.study.scalevalue_set.all():
-                if user_response.scale_value == scale_value:
+                if rating.scale_value == scale_value:
                     values.append(1)
                 else:
                     values.append(0)

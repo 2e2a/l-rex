@@ -6,7 +6,6 @@ from django.utils.text import slugify
 from django.utils import timezone
 
 from apps.contrib import math
-from apps.trial import models as trial_models
 
 
 class StudyStatus(Enum):
@@ -26,9 +25,9 @@ class Study(models.Model):
         choices=ITEM_TYPE,
         default='txt',
     )
-    response_instructions = models.TextField(max_length=1024)
-    response_question = models.CharField(max_length=200, blank=True, null=True)
-    response_legend = models.TextField(max_length=1024, blank=True, null=True)
+    rating_instructions = models.TextField(max_length=1024)
+    rating_question = models.CharField(max_length=200, blank=True, null=True)
+    rating_legend = models.TextField(max_length=1024, blank=True, null=True)
     password = models.CharField(max_length=200)
     allow_anonymous = models.BooleanField()
     start_time = models.DateTimeField(blank=True, null=True)
@@ -85,7 +84,8 @@ class Study(models.Model):
         return questionnaire_item_list
 
     def _create_next_questionnaire(self, questionnaire_num, last_questionnaire):
-        questionnaire = trial_models.Questionnaire.objects.create(number=questionnaire_num, study=self)
+        from apps.trial.models import Questionnaire
+        questionnaire = Questionnaire.objects.create(number=questionnaire_num, study=self)
 
         if questionnaire_num == 0:
             questionnaire_item_lists = self._init_questionnaire_lists()

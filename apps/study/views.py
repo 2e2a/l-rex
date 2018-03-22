@@ -41,8 +41,8 @@ class StudyRunView(LoginRequiredMixin, generic.DetailView):
 
 class StudyCreateView(LoginRequiredMixin, generic.CreateView):
     model = models.Study
-    fields = ['title', 'item_type', 'response_instructions', 'response_question', 'response_legend',
-              'start_time', 'end_time', 'password', 'allow_anonymous']
+    fields = ['title', 'rating_instructions', 'rating_question', 'rating_legend', 'start_time', 'end_time', 'password',
+              'allow_anonymous']
     title = 'Create Study'
 
     def form_valid(self, form):
@@ -52,8 +52,8 @@ class StudyCreateView(LoginRequiredMixin, generic.CreateView):
 
 class StudyUpdateView(LoginRequiredMixin, generic.UpdateView):
     model = models.Study
-    fields = ['title', 'item_type', 'response_instructions', 'response_question', 'response_legend',
-              'start_time', 'end_time', 'password', 'allow_anonymous']
+    fields = ['title', 'rating_instructions', 'rating_question', 'rating_legend', 'start_time', 'end_time', 'password',
+              'allow_anonymous']
     title = 'Edit Study'
 
     @property
@@ -137,7 +137,6 @@ class ScaleUpdateView(LoginRequiredMixin, generic.TemplateView):
                 queryset=models.ScaleValue.objects.filter(study=self.study)
             )
         return super().get(request, *args, **kwargs)
-
 
     @property
     def breadcrumbs(self):

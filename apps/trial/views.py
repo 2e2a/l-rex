@@ -58,7 +58,7 @@ class TrialCreateView(LoginRequiredMixin, generic.CreateView):
     def form_valid(self, form):
         active_trial = self._trial_by_id(form.instance.id)
         if active_trial:
-            return redirect('user-response-intro', self.study.slug, active_trial.slug)
+            return redirect('rating-intro', self.study.slug, active_trial.slug)
         form.instance.study = self.study
         form.instance.init()
         response = super().form_valid(form)
@@ -66,7 +66,7 @@ class TrialCreateView(LoginRequiredMixin, generic.CreateView):
         return response
 
     def get_success_url(self):
-        return reverse('user-response-intro', args=[self.study.slug, self.object.slug])
+        return reverse('rating-intro', args=[self.study.slug, self.object.slug])
 
 
 class TrialListView(LoginRequiredMixin, generic.ListView):
@@ -105,6 +105,7 @@ class TrialDetailView(LoginRequiredMixin, generic.DetailView):
             (self.object.pk, ''),
         ]
 
+
 class TrialDeleteView(LoginRequiredMixin, generic.DeleteView):
     model = models.Trial
     title = 'Delete'
@@ -129,3 +130,78 @@ class TrialDeleteView(LoginRequiredMixin, generic.DeleteView):
 
     def get_success_url(self):
         return reverse('trials', args=[self.study.slug])
+
+
+class RatingIntroView(generic.TemplateView):
+    template_name = 'lrex_trial/rating_intro.html'
+
+    def _redirect_started(self):
+        try:
+            if self.trial.status == models.TrialStatus.FINISHED:
+                return reverse('rating-taken', args=[self.study.slug, self.trial.slug])
+            n_ratings = len(models.Rating.objects.filter(trial_item__trial=self.trial))
+            return reverse('rating-create', args=[self.study.slug, self.trial.slug, n_ratings])
+        except models.Rating.DoesNotExist:
+            pass
+        except models.TrialItem.DoesNotExist:
+            pass
+        return None
+
+    def dispatch(self, *args, **kwargs):
+        trial_slug = self.kwargs['slug']
+        self.trial = models.Trial.objects.get(slug=trial_slug)
+        self.study = self.trial.questionnaire.study
+        redirect_link = self._redirect_started()
+        if redirect_link:
+            return redirect(redirect_link)
+        return super().dispatch(*args, **kwargs)
+
+
+class RatingOutroView(generic.TemplateView):
+    template_name = 'lrex_trial/rating_outro.html'
+
+    def dispatch(self, *args, **kwargs):
+        trial_slug = self.kwargs['slug']
+        self.trial = models.Trial.objects.get(slug=trial_slug)
+        self.study = self.trial.questionnaire.study
+        return super().dispatch(*args, **kwargs)
+
+
+class RatingTakenView(generic.TemplateView):
+    template_name = 'lrex_trial/rating_taken.html'
+
+
+class RatingCreateView(generic.CreateView):
+    model = models.Rating
+    form_class = forms.RatingForm
+
+    def dispatch(self, *args, **kwargs):
+        trial_slug = self.kwargs['slug']
+        self.num = int(self.kwargs['num'])
+        self.trial = models.Trial.objects.get(slug=trial_slug)
+        if self.trial.status == models.TrialStatus.FINISHED:
+            return redirect(reverse('rating-taken', args=[self.study.slug, self.trial.slug]))
+        self.study = self.trial.questionnaire.study
+        self.trial_item = models.TrialItem.objects.get(
+            trial__slug=trial_slug,
+            number=self.num
+        )
+        return super().dispatch(*args, **kwargs)
+
+    def progress(self):
+        return self.num * 100 / len(self.trial.items)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['study'] = self.study
+        return kwargs
+
+    def form_valid(self, form):
+        form.instance.number = self.num
+        form.instance.trial_item = self.trial_item
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        if self.num < (len(self.trial.items) - 1):
+            return reverse('rating-create', args=[self.study.slug, self.trial.slug, self.num + 1])
+        return reverse('rating-outro', args=[self.study.slug, self.trial.slug])

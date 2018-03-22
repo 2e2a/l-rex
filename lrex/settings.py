@@ -44,7 +44,6 @@ INSTALLED_APPS = [
     'apps.home.apps.HomeConfig',
     'apps.study.apps.StudyConfig',
     'apps.experiment.apps.ExperimentConfig',
-    'apps.results.apps.ResultsConfig',
     'apps.item.apps.ItemConfig',
     'apps.trial.apps.TrialConfig',
 
