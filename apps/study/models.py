@@ -104,7 +104,7 @@ class Study(models.Model):
             last_trial = self._create_next_trial(i, last_trial)
 
 
-class Response(models.Model):
+class ScaleValue(models.Model):
     study = models.ForeignKey(
         Study,
         on_delete=models.CASCADE

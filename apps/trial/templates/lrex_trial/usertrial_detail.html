@@ -7,7 +7,7 @@
         <th class="col-md-1">Item</th>
         <th>Experiment</th>
         <th>Text</th>
-        <th class="col-md-2">Response</th>
+        <th class="col-md-2">Rating</th>
     </tr>
     </thead>
     <tbody>
@@ -23,7 +23,7 @@
             {% endif %}
         </td>
         <td class="col-md-2">
-            {{ usertrialitem.userresponse.response.label }}
+            {{ usertrialitem.userresponse.scale_value.label }}
         </td>
     </tr>
     {% endfor %}

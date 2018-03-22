@@ -16,8 +16,8 @@
         <form action="" method="post">
             {% csrf_token %}
             <div class="btn-group d-flex" role="group">
-                {% for choice in form.response.field.choices %}
-                <button class="btn btn-outline-primary mx-1 w-100" type="submit" name="response" value="{{ choice.0 }}">
+                {% for choice in form.scale_value.field.choices %}
+                <button class="btn btn-outline-primary mx-1 w-100" type="submit" name="scale_value" value="{{ choice.0 }}">
                     {{ choice.1 }}
                 </button>
                 {% endfor %}

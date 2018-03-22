@@ -8,11 +8,11 @@ class UserResponseForm(forms.ModelForm):
 
     class Meta:
         model = models.UserResponse
-        fields = ['response']
+        fields = ['scale_value']
 
     def __init__(self, *args, **kwargs):
         study = kwargs.pop('study')
         super().__init__(*args, **kwargs)
-        self.fields['response'].empty_label = None
-        self.fields['response'].queryset = study_models.Response.objects.filter(study=study)
+        self.fields['scale_value'].empty_label = None
+        self.fields['scale_value'].queryset = study_models.ScaleValue.objects.filter(study=study)
 

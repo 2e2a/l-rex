@@ -49,6 +49,7 @@ class StudyCreateView(LoginRequiredMixin, generic.CreateView):
         form.instance.creator = self.request.user
         return super().form_valid(form)
 
+
 class StudyUpdateView(LoginRequiredMixin, generic.UpdateView):
     model = models.Study
     fields = ['title', 'item_type', 'response_instructions', 'response_question', 'response_legend',
@@ -99,24 +100,24 @@ class StudyListView(LoginRequiredMixin, generic.ListView):
         ]
 
 
-class ResponseUpdateView(LoginRequiredMixin, generic.TemplateView):
+class ScaleUpdateView(LoginRequiredMixin, generic.TemplateView):
     model = models.Study
-    title = 'Edit Reponse'
-    template_name = 'lrex_study/study_responses.html'
+    title = 'Edit Rating Scale'
+    template_name = 'lrex_study/study_scale.html'
 
     formset = None
-    helper = forms.response_formset_helper
+    helper = forms.scale_formset_helper
 
     def dispatch(self, *args, **kwargs):
         study_slug = self.kwargs['slug']
         self.study = models.Study.objects.get(slug=study_slug)
-        self.formset = forms.responseformset_factory(
-            queryset=models.Response.objects.filter(study=self.study)
+        self.formset = forms.scaleformset_factory(
+            queryset=models.ScaleValue.objects.filter(study=self.study)
         )
         return super().dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        self.formset = forms.responseformset_factory(request.POST, request.FILES)
+        self.formset = forms.scaleformset_factory(request.POST, request.FILES)
         if self.formset.is_valid():
             instances = self.formset.save(commit=False)
             for instance in instances:
@@ -132,8 +133,8 @@ class ResponseUpdateView(LoginRequiredMixin, generic.TemplateView):
                         form.instance.number = i
                         form.instance.save()
                         i = i + 1
-            self.formset = forms.responseformset_factory(
-                queryset=models.Response.objects.filter(study=self.study)
+            self.formset = forms.scaleformset_factory(
+                queryset=models.ScaleValue.objects.filter(study=self.study)
             )
         return super().get(request, *args, **kwargs)
 
@@ -143,5 +144,5 @@ class ResponseUpdateView(LoginRequiredMixin, generic.TemplateView):
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
-            ('responses', ''),
+            ('scale', ''),
         ]

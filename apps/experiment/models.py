@@ -68,8 +68,8 @@ class Experiment(models.Model):
             result_count = 1
             values.append(result_count)
 
-            for response in self.study.response_set.all():
-                if user_response.response == response:
+            for scale_value in self.study.scalevalue_set.all():
+                if user_response.scale_value == scale_value:
                     values.append(1)
                 else:
                     values.append(0)
