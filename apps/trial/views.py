@@ -33,9 +33,9 @@ class QuestionnaireListView(LoginRequiredMixin, generic.ListView):
         ]
 
 
-class UserTrialCreateView(LoginRequiredMixin, generic.CreateView):
-    model = models.UserTrial
-    form_class = forms.UserTrialForm
+class TrialCreateView(LoginRequiredMixin, generic.CreateView):
+    model = models.Trial
+    form_class = forms.TrialForm
 
     def dispatch(self, *args, **kwargs):
         study_slug = self.kwargs['study_slug']
@@ -47,18 +47,18 @@ class UserTrialCreateView(LoginRequiredMixin, generic.CreateView):
         kwargs['study'] = self.study
         return kwargs
 
-    def _user_trial_by_id(self, id):
+    def _trial_by_id(self, id):
         if id:
             try:
-                return models.UserTrial.objects.get(id=id)
-            except models.UserTrial.DoesNotExist:
+                return models.Trial.objects.get(id=id)
+            except models.Trial.DoesNotExist:
                 pass
         return None
 
     def form_valid(self, form):
-        active_user_trial = self._user_trial_by_id(form.instance.id)
-        if active_user_trial:
-            return redirect('user-response-intro', self.study.slug, active_user_trial.slug)
+        active_trial = self._trial_by_id(form.instance.id)
+        if active_trial:
+            return redirect('user-response-intro', self.study.slug, active_trial.slug)
         form.instance.study = self.study
         form.instance.init()
         response = super().form_valid(form)
@@ -69,9 +69,9 @@ class UserTrialCreateView(LoginRequiredMixin, generic.CreateView):
         return reverse('user-response-intro', args=[self.study.slug, self.object.slug])
 
 
-class UserTrialListView(LoginRequiredMixin, generic.ListView):
-    model = models.UserTrial
-    title = 'User Trials'
+class TrialListView(LoginRequiredMixin, generic.ListView):
+    model = models.Trial
+    title = 'Trials'
 
     def dispatch(self, *args, **kwargs):
         study_slug = self.kwargs['study_slug']
@@ -83,13 +83,13 @@ class UserTrialListView(LoginRequiredMixin, generic.ListView):
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study-run', args=[self.study.slug])),
-            ('user-trials', ''),
+            ('trials', ''),
         ]
 
 
-class UserTrialDetailView(LoginRequiredMixin, generic.DetailView):
-    model = models.UserTrial
-    title = 'User Trial Overview'
+class TrialDetailView(LoginRequiredMixin, generic.DetailView):
+    model = models.Trial
+    title = 'Trial Overview'
 
     def dispatch(self, *args, **kwargs):
         study_slug = self.kwargs['study_slug']
@@ -101,14 +101,14 @@ class UserTrialDetailView(LoginRequiredMixin, generic.DetailView):
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study-run', args=[self.study.slug])),
-            ('user-trials', reverse('user-trials', args=[self.study.slug])),
+            ('trials', reverse('trials', args=[self.study.slug])),
             (self.object.pk, ''),
         ]
 
-class UserTrialDeleteView(LoginRequiredMixin, generic.DeleteView):
-    model = models.UserTrial
+class TrialDeleteView(LoginRequiredMixin, generic.DeleteView):
+    model = models.Trial
     title = 'Delete'
-    message = 'Delete User Trial?'
+    message = 'Delete Trial?'
 
     def dispatch(self, *args, **kwargs):
         study_slug = self.kwargs['study_slug']
@@ -125,7 +125,7 @@ class UserTrialDeleteView(LoginRequiredMixin, generic.DeleteView):
 
     @property
     def cancel_url(self):
-        return reverse('user-trials', args=[self.study.slug])
+        return reverse('trials', args=[self.study.slug])
 
     def get_success_url(self):
-        return reverse('user-trials', args=[self.study.slug])
+        return reverse('trials', args=[self.study.slug])

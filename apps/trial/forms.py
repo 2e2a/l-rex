@@ -1,13 +1,13 @@
 from django import forms
 
-from .models import UserTrial
+from .models import Trial
 
 
-class UserTrialForm(forms.ModelForm):
+class TrialForm(forms.ModelForm):
     password = forms.CharField(max_length=200, widget=forms.PasswordInput)
 
     class Meta:
-        model = UserTrial
+        model = Trial
         fields = ['id']
 
     def __init__(self, *args, **kwargs):

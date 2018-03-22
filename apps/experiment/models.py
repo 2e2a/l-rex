@@ -48,19 +48,19 @@ class Experiment(models.Model):
     def results(self):
         results = []
 
-        user_trials_list = list(trial_models.UserTrial.objects.filter(
+        trials_list = list(trial_models.Trial.objects.filter(
             questionnaire__study=self.study
         ))
         user_responses = response_models.UserResponse.objects.filter(
-            user_trial_item__item__experiment=self
+            trial_item__item__experiment=self
         )
         for user_response in user_responses:
             values = []
 
-            subject = user_trials_list.index(user_response.user_trial_item.user_trial) + 1
+            subject = trials_list.index(user_response.trial_item.trial) + 1
             values.append(subject)
 
-            item = user_response.user_trial_item.item
+            item = user_response.trial_item.item
             values.append(item.number)
             values.append(item.condition)
             values.append(item.textitem.text)

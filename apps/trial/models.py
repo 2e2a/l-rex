@@ -41,14 +41,14 @@ class Questionnaire(models.Model):
         return questionnaire
 
 
-class UserTrialStatus(Enum):
+class TrialStatus(Enum):
     CREATED = auto()
     STARTED = auto()
     FINISHED = auto()
     ABANDOND = auto()
 
 
-class UserTrial(models.Model):
+class Trial(models.Model):
     slug = models.UUIDField(
         primary_key=True,
         default=uuid.uuid4,
@@ -66,26 +66,26 @@ class UserTrial(models.Model):
 
     @property
     def items(self):
-        items = [trial_item.item for trial_item in self.usertrialitem_set.all()]
+        items = [trial_item.item for trial_item in self.trialitem_set.all()]
         return items
 
     @property
     def status(self):
         from apps.results.models import UserResponse
-        n_responses = len(UserResponse.objects.filter(user_trial_item__user_trial=self))
+        n_responses = len(UserResponse.objects.filter(trial_item__trial=self))
         if n_responses>0:
-            n_user_trial_items = len(self.items)
-            if n_responses == n_user_trial_items:
-                return UserTrialStatus.FINISHED
+            n_trial_items = len(self.items)
+            if n_responses == n_trial_items:
+                return TrialStatus.FINISHED
             if self.creation_date + timedelta(1) < timezone.now():
-                return UserTrialStatus.ABANDOND
-            return UserTrialStatus.STARTED
-        return UserTrialStatus.CREATED
+                return TrialStatus.ABANDOND
+            return TrialStatus.STARTED
+        return TrialStatus.CREATED
 
     def init(self):
-        last_user_trial = UserTrial.objects.first()
-        if last_user_trial:
-            questionnaire = last_user_trial.questionnaire.next
+        last_trial = Trial.objects.first()
+        if last_trial:
+            questionnaire = last_trial.questionnaire.next
         else:
             questionnaire = Questionnaire.objects.first()
         self.questionnaire = questionnaire
@@ -94,15 +94,15 @@ class UserTrial(models.Model):
         items = self.questionnaire.items
         random.shuffle(items)
         for i, item in enumerate(items):
-            UserTrialItem.objects.create(number=i, user_trial=self, item=item)
+            TrialItem.objects.create(number=i, trial=self, item=item)
 
     def get_absolute_url(self):
-        return reverse('user-trial', args=[self.study.slug, self.slug])
+        return reverse('trial', args=[self.study.slug, self.slug])
 
 
-class UserTrialItem(models.Model):
+class TrialItem(models.Model):
     number = models.IntegerField()
-    user_trial = models.ForeignKey(UserTrial, on_delete=models.CASCADE)
+    trial = models.ForeignKey(Trial, on_delete=models.CASCADE)
     item = models.ForeignKey(item_models.Item, on_delete=models.CASCADE)
 
     class Meta:

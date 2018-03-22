@@ -8,7 +8,7 @@
         {{ view.study.response_instructions }}
     </p>
     <p>
-        <a href="{% url 'user-binary-response' study_slug=view.study.slug slug=view.user_trial.slug num=0 %}">
+        <a href="{% url 'user-binary-response' study_slug=view.study.slug slug=view.trial.slug num=0 %}">
             Start Trial
         </a>
     </p>

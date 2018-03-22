@@ -4,5 +4,5 @@ from . import models
 
 
 admin.site.register(models.Questionnaire)
-admin.site.register(models.UserTrial)
-admin.site.register(models.UserTrialItem)
+admin.site.register(models.Trial)
+admin.site.register(models.TrialItem)

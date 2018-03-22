@@ -11,19 +11,19 @@
     </tr>
     </thead>
     <tbody>
-    {% for usertrialitem in object.usertrialitem_set.all %}
+    {% for trialitem in object.trialitem_set.all %}
     <tr>
         <td class="col-md-1">
-            {{ usertrialitem.item }}
+            {{ trialitem.item }}
         </td>
-        <td>{{ usertrialitem.item.experiment }}</td>
+        <td>{{ trialitem.item.experiment }}</td>
         <td>
-            {% if usertrialitem.item.textitem %}
-                {{ usertrialitem.item.textitem.text }}
+            {% if trialitem.item.textitem %}
+                {{ trialitem.item.textitem.text }}
             {% endif %}
         </td>
         <td class="col-md-2">
-            {{ usertrialitem.userresponse.scale_value.label }}
+            {{ trialitem.userresponse.scale_value.label }}
         </td>
     </tr>
     {% endfor %}
