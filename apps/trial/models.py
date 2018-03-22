@@ -14,6 +14,7 @@ class Trial(models.Model):
         'lrex_study.Study',
         on_delete=models.CASCADE
     )
+    item_lists = models.ManyToManyField(item_models.List)
 
     class Meta:
         ordering = ['number']
@@ -25,15 +26,10 @@ class Trial(models.Model):
         return reverse('trial', args=[self.study.slug, self.slug])
 
     @property
-    def lists(self):
-        lists = [trial_list.list for trial_list in self.triallist_set.all()]
-        return lists
-
-    @property
     def items(self):
         items = []
-        for list in self.lists:
-            items.extend(list.items)
+        for list in self.item_lists.all():
+            items.extend(list.items.all())
         return items
 
     @property
@@ -42,11 +38,6 @@ class Trial(models.Model):
         if not trial:
             trial = Trial.objects.first()
         return trial
-
-
-class TrialList(models.Model):
-    trial = models.ForeignKey(Trial, on_delete=models.CASCADE)
-    list = models.ForeignKey(item_models.List, on_delete=models.CASCADE)
 
 
 class UserTrialStatus(Enum):
@@ -89,7 +80,6 @@ class UserTrial(models.Model):
                 return UserTrialStatus.ABANDOND
             return UserTrialStatus.STARTED
         return UserTrialStatus.CREATED
-
 
     def init(self):
         last_user_trial = UserTrial.objects.first()

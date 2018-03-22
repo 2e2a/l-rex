@@ -29,25 +29,16 @@ class List(models.Model):
         'lrex_experiment.Experiment',
         on_delete=models.CASCADE
     )
+    items = models.ManyToManyField(Item)
 
     class Meta:
         ordering = ['number']
 
-    @property
-    def items(self):
-        items = [list_item.item.textitem for list_item in self.listitem_set.all()]
-        return items
-
     def __str__(self):
         return '{}-list-{}'.format(self.experiment, self.number)
 
-    def next(self, last_list):
-        next_list =  last_list.experiment.list_set.filter(number__gt=last_list.number).first()
+    def next(self):
+        next_list =  self.experiment.list_set.filter(number__gt=self.number).first()
         if not next_list:
             next_list =  List.objects.first()
         return next_list
-
-
-class ListItem(models.Model):
-    list = models.ForeignKey(List, on_delete=models.CASCADE)
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)

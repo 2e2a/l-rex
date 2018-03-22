@@ -21,8 +21,8 @@
         <tr>
             <td class="col-md-1">{{ trial.number }}</td>
             <td>
-                {% for list in trial.lists %}
-                    {% for item in list.items %}
+                {% for item_list in trial.item_lists.all %}
+                    {% for item in item_list.items.all %}
                        {{ item.experiment }}-{{ item }},
                     {% endfor %}
                 {% endfor %}

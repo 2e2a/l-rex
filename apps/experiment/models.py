@@ -43,7 +43,7 @@ class Experiment(models.Model):
         for i, item in enumerate(self.item_set.all()):
             shift  =  (i - (item.number - 1)) % condition_count
             list = lists[shift]
-            item_models.ListItem.objects.create(list=list, item=item)
+            list.items.add(item)
 
     def results(self):
         results = []

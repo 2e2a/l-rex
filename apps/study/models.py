@@ -70,30 +70,29 @@ class Study(models.Model):
         return trial_lcm
 
     def _init_trail_lists(self):
-        lists = []
+        item_lists = []
         for experiment in self.experiment_set.all():
-            list = experiment.list_set.first()
-            lists.append(list)
-        return lists
+            item_list = experiment.list_set.first()
+            item_lists.append(item_list)
+        return item_lists
 
     def _next_trail_lists(self, last_trial):
-        lists = []
-        last_lists = last_trial.lists
-        for last_list in last_lists:
-            list = last_list.next()
-            lists.append(list)
-        return lists
+        item_lists = []
+        last_item_lists = last_trial.item_lists.all()
+        for last_item_list in last_item_lists:
+            next_item_list = last_item_list.next()
+            item_lists.append(next_item_list)
+        return item_lists
 
     def _create_next_trial(self, trial_num, last_trial):
         trial = trial_models.Trial.objects.create(number=trial_num, study=self)
 
         if trial_num == 0:
-            lists = self._init_trail_lists()
+            item_lists = self._init_trail_lists()
         else:
-            lists = self._next_trail_lists(last_trial)
+            item_lists = self._next_trail_lists(last_trial)
 
-        for list in lists:
-            trial_models.TrialList.objects.create(trial=trial, list=list)
+        [trial.item_lists.add(item_list) for item_list in item_lists]
 
         return trial
 

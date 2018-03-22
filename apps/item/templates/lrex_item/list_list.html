@@ -21,7 +21,7 @@
     <tr>
         <td class="col-md-1">{{ list.number }}</td>
         <td>
-            {% for item in list.items %}
+            {% for item in list.items.all %}
                 {{ item }},
             {% endfor %}
         </td>
