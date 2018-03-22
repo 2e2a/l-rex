@@ -9,9 +9,9 @@ from . import forms
 from . import models
 
 
-class TrialListView(LoginRequiredMixin, generic.ListView):
-    model = models.Trial
-    title = 'Trials'
+class QuestionnaireListView(LoginRequiredMixin, generic.ListView):
+    model = models.Questionnaire
+    title = 'Questionnaires'
 
     def dispatch(self, *args, **kwargs):
         study_slug = self.kwargs['study_slug']
@@ -20,16 +20,16 @@ class TrialListView(LoginRequiredMixin, generic.ListView):
 
     def post(self, request, *args, **kwargs):
         action = request.POST.get('action', None)
-        if action and action == 'generate_trials':
-            self.study.generate_trials()
-        return redirect('trials',study_slug=self.study.slug)
+        if action and action == 'generate_questionnaires':
+            self.study.generate_questionnaires()
+        return redirect('questionnaires',study_slug=self.study.slug)
 
     @property
     def breadcrumbs(self):
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
-            ('trials', ''),
+            ('questionnaires', ''),
         ]
 
 

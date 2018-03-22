@@ -62,46 +62,46 @@ class Study(models.Model):
     def get_absolute_url(self):
         return reverse('study', args=[self.slug])
 
-    def _trial_count(self):
-        trial_lcm = 1
+    def _questionnaire_count(self):
+        questionnaire_lcm = 1
         for experiment in self.experiment_set.all():
             condition_count = len(experiment.conditions)
-            trial_lcm = math.lcm(trial_lcm,  condition_count)
-        return trial_lcm
+            questionnaire_lcm = math.lcm(questionnaire_lcm,  condition_count)
+        return questionnaire_lcm
 
-    def _init_trail_lists(self):
-        item_lists = []
+    def _init_questionnaire_lists(self):
+        questionnaire_item_list = []
         for experiment in self.experiment_set.all():
             item_list = experiment.list_set.first()
-            item_lists.append(item_list)
-        return item_lists
+            questionnaire_item_list.append(item_list)
+        return questionnaire_item_list
 
-    def _next_trail_lists(self, last_trial):
-        item_lists = []
-        last_item_lists = last_trial.item_lists.all()
+    def _next_questionnaire_lists(self, last_questionnaire):
+        questionnaire_item_list = []
+        last_item_lists = last_questionnaire.item_lists.all()
         for last_item_list in last_item_lists:
             next_item_list = last_item_list.next()
-            item_lists.append(next_item_list)
-        return item_lists
+            questionnaire_item_list.append(next_item_list)
+        return questionnaire_item_list
 
-    def _create_next_trial(self, trial_num, last_trial):
-        trial = trial_models.Trial.objects.create(number=trial_num, study=self)
+    def _create_next_questionnaire(self, questionnaire_num, last_questionnaire):
+        questionnaire = trial_models.Questionnaire.objects.create(number=questionnaire_num, study=self)
 
-        if trial_num == 0:
-            item_lists = self._init_trail_lists()
+        if questionnaire_num == 0:
+            questionnaire_item_lists = self._init_questionnaire_lists()
         else:
-            item_lists = self._next_trail_lists(last_trial)
+            questionnaire_item_lists = self._next_questionnaire_lists(last_questionnaire)
 
-        [trial.item_lists.add(item_list) for item_list in item_lists]
+        [questionnaire.item_lists.add(item_list) for item_list in questionnaire_item_lists]
 
-        return trial
+        return questionnaire
 
-    def generate_trials(self):
-        self.trial_set.all().delete()
-        trial_count = self._trial_count()
-        last_trial = None
-        for i in range(trial_count):
-            last_trial = self._create_next_trial(i, last_trial)
+    def generate_questionnaires(self):
+        self.questionnaire_set.all().delete()
+        questionnaire_count = self._questionnaire_count()
+        last_questionnaire = None
+        for i in range(questionnaire_count):
+            last_questionnaire = self._create_next_questionnaire(i, last_questionnaire)
 
 
 class ScaleValue(models.Model):

@@ -49,7 +49,7 @@ class Experiment(models.Model):
         results = []
 
         user_trials_list = list(trial_models.UserTrial.objects.filter(
-            trial__study=self.study
+            questionnaire__study=self.study
         ))
         user_responses = response_models.UserResponse.objects.filter(
             user_trial_item__item__experiment=self

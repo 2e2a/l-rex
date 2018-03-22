@@ -8,7 +8,8 @@ from django.utils import timezone
 
 from apps.item import models as item_models
 
-class Trial(models.Model):
+
+class Questionnaire(models.Model):
     number = models.IntegerField()
     study = models.ForeignKey(
         'lrex_study.Study',
@@ -23,7 +24,7 @@ class Trial(models.Model):
         return '{}-{}'.format(self.study, self.number)
 
     def get_absolute_url(self):
-        return reverse('trial', args=[self.study.slug, self.slug])
+        return reverse('questionnaire', args=[self.study.slug, self.slug])
 
     @property
     def items(self):
@@ -34,10 +35,10 @@ class Trial(models.Model):
 
     @property
     def next(self):
-        trial =  self.study.trial_set.filter(number__gt=self.number).first()
-        if not trial:
-            trial = Trial.objects.first()
-        return trial
+        questionnaire =  self.study.questionnaire_set.filter(number__gt=self.number).first()
+        if not questionnaire:
+            questionnaire = Questionnaire.objects.first()
+        return questionnaire
 
 
 class UserTrialStatus(Enum):
@@ -54,7 +55,7 @@ class UserTrial(models.Model):
         editable=False,
         unique=True,
     )
-    trial = models.ForeignKey(Trial, on_delete=models.CASCADE)
+    questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE)
     creation_date = models.DateTimeField(
         default=timezone.now
     )
@@ -84,13 +85,13 @@ class UserTrial(models.Model):
     def init(self):
         last_user_trial = UserTrial.objects.first()
         if last_user_trial:
-            trial = last_user_trial.trial.next
+            questionnaire = last_user_trial.questionnaire.next
         else:
-            trial = Trial.objects.first()
-        self.trial = trial
+            questionnaire = Questionnaire.objects.first()
+        self.questionnaire = questionnaire
 
     def generate_items(self):
-        items = self.trial.items
+        items = self.questionnaire.items
         random.shuffle(items)
         for i, item in enumerate(items):
             UserTrialItem.objects.create(number=i, user_trial=self, item=item)

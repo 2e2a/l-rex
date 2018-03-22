@@ -19,7 +19,7 @@ urlpatterns = [
     url(r'user-trial/(?P<slug>[-\w_]+)/$',
         views.UserTrialDetailView.as_view(),
         name='user-trial'),
-    url(r'trials/$',
-        views.TrialListView.as_view(),
-        name='trials'),
+    url(r'questionnaires/$',
+        views.QuestionnaireListView.as_view(),
+        name='questionnaires'),
 ]

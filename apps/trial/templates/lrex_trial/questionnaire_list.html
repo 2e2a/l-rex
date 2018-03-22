@@ -4,24 +4,24 @@
 <div class="row justify-content-center mb-2">
     <form method="post">
         {% csrf_token %}
-        <button type="submit" name="action" value="generate_trials" class="btn btn-outline-primary btn-sm mx-1">
-            Generate Trials
+        <button type="submit" name="action" value="generate_questionnaires" class="btn btn-outline-primary btn-sm mx-1">
+            Generate Questionnaires
         </button>
     </form>
 </div>
 <table class="table">
     <thead>
     <tr>
-        <th>Trial</th>
+        <th></th>
         <th>Lists</th>
     </tr>
     </thead>
     <tbody>
-    {% for trial in trial_list %}
+    {% for questionnaire in questionnaire_list %}
         <tr>
-            <td class="col-md-1">{{ trial.number }}</td>
+            <td class="col-md-1">{{ questionnaire.number }}</td>
             <td>
-                {% for item_list in trial.item_lists.all %}
+                {% for item_list in questionnaire.item_lists.all %}
                     {% for item in item_list.items.all %}
                        {{ item.experiment }}-{{ item }},
                     {% endfor %}

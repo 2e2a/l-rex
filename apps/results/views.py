@@ -26,7 +26,7 @@ class UserResponseIntroView(generic.TemplateView):
     def dispatch(self, *args, **kwargs):
         user_trial_slug = self.kwargs['slug']
         self.user_trial = trial_models.UserTrial.objects.get(slug=user_trial_slug)
-        self.study = self.user_trial.trial.study
+        self.study = self.user_trial.questionnaire.study
         redirect_link = self._redirect_started()
         if redirect_link:
             return redirect(redirect_link)
@@ -39,7 +39,7 @@ class UserResponseOutroView(generic.TemplateView):
     def dispatch(self, *args, **kwargs):
         user_trial_slug = self.kwargs['slug']
         self.user_trial = trial_models.UserTrial.objects.get(slug=user_trial_slug)
-        self.study = self.user_trial.trial.study
+        self.study = self.user_trial.questionnaire.study
         return super().dispatch(*args, **kwargs)
 
 
@@ -57,7 +57,7 @@ class UserResponseCreateView(generic.CreateView):
         self.user_trial = trial_models.UserTrial.objects.get(slug=user_trial_slug)
         if self.user_trial.status == trial_models.UserTrialStatus.FINISHED:
             return redirect(reverse('user-response-taken', args=[self.study.slug, self.user_trial.slug]))
-        self.study = self.user_trial.trial.study
+        self.study = self.user_trial.questionnaire.study
         self.user_trial_item = trial_models.UserTrialItem.objects.get(
             user_trial__slug=user_trial_slug,
             number=self.num
