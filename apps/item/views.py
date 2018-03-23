@@ -1,3 +1,4 @@
+from string import ascii_lowercase
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -5,6 +6,7 @@ from django.views import generic
 
 from apps.experiment import models as experiment_models
 
+from . import forms
 from . import models
 
 
@@ -114,6 +116,50 @@ class TextItemListView(LoginRequiredMixin, generic.ListView):
             ('experiments',reverse('experiments', args=[study.slug])),
             (exp.title, reverse('experiment', args=[study.slug, exp.slug])),
             ('items', reverse('textitems', args=[study.slug, exp.slug])),
+        ]
+
+
+class ItemPregenerateView(LoginRequiredMixin, generic.FormView):
+    form_class = forms.PregenerateItemsForm
+    title = 'Items'
+    template_name = 'lrex_item/item_pregenerate_form.html'
+
+    def dispatch(self, *args, **kwargs):
+        experiment_slug = self.kwargs['slug']
+        self.experiment = experiment_models.Experiment.objects.get(slug=experiment_slug)
+        return super().dispatch(*args, **kwargs)
+
+    def _pregenerate_items(self, n_items, n_conditions):
+        for n_item in range(1, n_items + 1):
+            for condition in ascii_lowercase[:n_conditions]:
+                models.TextItem.objects.create(
+                    number=n_item,
+                    condition=condition,
+                    experiment=self.experiment,
+                )
+
+    def form_valid(self, form):
+        result =  super().form_valid(form)
+        n_items = form.cleaned_data['num_items']
+        n_conditions = form.cleaned_data['num_conditions']
+        self._pregenerate_items(n_items, n_conditions)
+        return result
+
+    def get_success_url(self):
+        return reverse('textitems', args=[self.experiment.study.slug, self.experiment.slug])
+
+
+    @property
+    def breadcrumbs(self):
+        exp = self.experiment
+        study = exp.study
+        return [
+            ('studies', reverse('studies')),
+            (study.title, reverse('study', args=[study.slug])),
+            ('experiments',reverse('experiments', args=[study.slug])),
+            (exp.title, reverse('experiment', args=[study.slug, exp.slug])),
+            ('items', reverse('textitems', args=[study.slug, exp.slug])),
+            ('pregenerate', ''),
         ]
 
 

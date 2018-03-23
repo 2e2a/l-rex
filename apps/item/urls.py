@@ -3,6 +3,9 @@ from django.conf.urls import url
 from . import views
 
 urlpatterns = [
+    url(r'pregenerate/$',
+        views.ItemPregenerateView.as_view(),
+        name='items-pregenerate'),
     url(r'text/$',
         views.TextItemListView.as_view(),
         name='textitems'),

@@ -4,13 +4,14 @@
 <div class="row justify-content-center mb-2">
     <a href="{% url 'textitem-create' study_slug=view.experiment.study.slug slug=view.experiment.slug %}"
        class="btn btn-outline-primary btn-sm mx-1" role="button">
-        Add Text Item
+        Add Item
+    </a>
+    <a href="{% url 'items-pregenerate' study_slug=view.experiment.study.slug slug=view.experiment.slug %}"
+       class="btn btn-outline-primary btn-sm mx-1" role="button">
+        Pregenerate Items
     </a>
     <a href="" class="btn btn-outline-primary btn-sm mx-1" role="button">
-        Pregenerate?
-    </a>
-    <a href="" class="btn btn-outline-primary btn-sm mx-1" role="button">
-        Upload
+        Upload CSV
     </a>
 </div>
 <ul class="list-group">
