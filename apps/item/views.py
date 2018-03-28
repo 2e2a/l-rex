@@ -14,8 +14,9 @@ from . import models
 
 class TextItemCreateView(LoginRequiredMixin, generic.CreateView):
     model = models.TextItem
-    fields = ['number', 'condition', 'text']
     title = 'Add Item'
+    template_name = 'lrex_contrib/crispy_form.html'
+    form_class = forms.TextItemForm
 
     def dispatch(self, *args, **kwargs):
         experiment_slug = self.kwargs['slug']
@@ -46,8 +47,9 @@ class TextItemCreateView(LoginRequiredMixin, generic.CreateView):
 
 class TextItemUpdateView(LoginRequiredMixin, generic.UpdateView):
     model = models.TextItem
-    fields = ['number', 'condition', 'text']
     title = 'Edit Item'
+    template_name = 'lrex_contrib/crispy_form.html'
+    form_class = forms.TextItemForm
 
     def get_success_url(self):
         exp = self.object.experiment
@@ -122,9 +124,9 @@ class TextItemListView(LoginRequiredMixin, generic.ListView):
 
 
 class ItemPregenerateView(LoginRequiredMixin, generic.FormView):
-    form_class = forms.PregenerateItemsForm
     title = 'Pregenerate Items'
-    template_name = 'lrex_item/item_pregenerate_form.html'
+    form_class = forms.PregenerateItemsForm
+    template_name = 'lrex_contrib/crispy_form.html'
 
     def dispatch(self, *args, **kwargs):
         experiment_slug = self.kwargs['slug']
@@ -165,9 +167,9 @@ class ItemPregenerateView(LoginRequiredMixin, generic.FormView):
 
 
 class TextItemUploadView(LoginRequiredMixin, generic.FormView):
-    form_class = forms.UploadTextItemsForm
     title = 'Items'
-    template_name = 'lrex_item/textitem_upload_form.html'
+    form_class = forms.UploadTextItemsForm
+    template_name = 'lrex_contrib/crispy_form.html'
 
     def dispatch(self, *args, **kwargs):
         experiment_slug = self.kwargs['slug']

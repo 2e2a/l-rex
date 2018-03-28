@@ -5,6 +5,7 @@ from django.utils.text import slugify
 from apps.item import models as item_models
 from apps.trial import models as trial_models
 
+
 class Experiment(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)

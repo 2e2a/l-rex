@@ -4,23 +4,28 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 from django import forms
 
+from apps.contrib import forms as crispy_forms
 
-class PregenerateItemsForm(forms.Form):
+from . import models
+
+
+class TextItemForm(crispy_forms.CrispyModelForm):
+
+    class Meta:
+        model = models.TextItem
+        fields = ['number', 'condition', 'text']
+
+
+class PregenerateItemsForm(crispy_forms.CrispyForm):
     num_items = forms.IntegerField()
     num_conditions = forms.IntegerField()
 
 
-class UploadTextItemsForm(forms.Form):
+class UploadTextItemsForm(crispy_forms.CrispyForm):
     file = forms.FileField()
     number_column = forms.IntegerField(initial=1)
     condition_column = forms.IntegerField(initial=2)
     text_column = forms.IntegerField(initial=3)
-
-    def __init__(self, *args, **kwargs):
-        # TODO: Add default form helper (and template)
-        super().__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.add_input(Submit('submit', 'Submit'))
 
     def clean(self):
         cleaned_data = super().clean()

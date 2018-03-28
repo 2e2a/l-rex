@@ -1,9 +1,0 @@
-{% extends "lrex_home/study_base.html" %}
-{% load crispy_forms_tags %}
-
-{% block main_content %}
-<form action="" method="post">{% csrf_token %}
-    {{ form|crispy }}
-    <input type="submit"/>
-</form>
-{% endblock %}

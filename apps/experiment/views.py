@@ -4,6 +4,7 @@ from django.views import generic
 
 from apps.study import models as study_models
 
+from . import forms
 from . import models
 
 
@@ -23,8 +24,9 @@ class ExperimentDetailView(LoginRequiredMixin, generic.DetailView):
 
 class ExperimentCreateView(LoginRequiredMixin, generic.CreateView):
     model = models.Experiment
-    fields = ['title']
     title = 'Create Experiment'
+    template_name = 'lrex_contrib/crispy_form.html'
+    form_class = forms.ExperimentForm
 
     def dispatch(self, *args, **kwargs):
         study_slug = self.kwargs['study_slug']
@@ -47,8 +49,9 @@ class ExperimentCreateView(LoginRequiredMixin, generic.CreateView):
 
 class ExperimentUpdateView(LoginRequiredMixin, generic.UpdateView):
     model = models.Experiment
-    fields = ['title']
     title = 'Edit Experiment'
+    template_name = 'lrex_contrib/crispy_form.html'
+    form_class = forms.ExperimentForm
 
     @property
     def breadcrumbs(self):

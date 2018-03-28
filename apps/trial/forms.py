@@ -1,11 +1,12 @@
 from django import forms
 
+from apps.contrib import forms as crispy_forms
 from apps.study import models as study_models
 
 from . import models
 
 
-class TrialForm(forms.ModelForm):
+class TrialForm(crispy_forms.CrispyModelForm):
     password = forms.CharField(max_length=200, widget=forms.PasswordInput)
 
     class Meta:
@@ -24,7 +25,7 @@ class TrialForm(forms.ModelForm):
         return cleaned_data
 
 
-class RatingForm(forms.ModelForm):
+class RatingForm(crispy_forms.CrispyModelForm):
 
     class Meta:
         model = models.Rating

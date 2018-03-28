@@ -2,6 +2,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 from django.views import generic
 
+
 from . import models
 from . import forms
 
@@ -41,9 +42,9 @@ class StudyRunView(LoginRequiredMixin, generic.DetailView):
 
 class StudyCreateView(LoginRequiredMixin, generic.CreateView):
     model = models.Study
-    fields = ['title', 'rating_instructions', 'rating_question', 'rating_legend', 'start_time', 'end_time', 'password',
-              'allow_anonymous']
     title = 'Create Study'
+    template_name = 'lrex_contrib/crispy_form.html'
+    form_class = forms.StudyForm
 
     def form_valid(self, form):
         form.instance.creator = self.request.user
@@ -52,9 +53,9 @@ class StudyCreateView(LoginRequiredMixin, generic.CreateView):
 
 class StudyUpdateView(LoginRequiredMixin, generic.UpdateView):
     model = models.Study
-    fields = ['title', 'rating_instructions', 'rating_question', 'rating_legend', 'start_time', 'end_time', 'password',
-              'allow_anonymous']
     title = 'Edit Study'
+    template_name = 'lrex_contrib/crispy_form.html'
+    form_class = forms.StudyForm
 
     @property
     def breadcrumbs(self):

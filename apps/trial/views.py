@@ -24,6 +24,9 @@ class QuestionnaireListView(LoginRequiredMixin, generic.ListView):
             self.study.generate_questionnaires()
         return redirect('questionnaires',study_slug=self.study.slug)
 
+    def get_queryset(self):
+        return super().get_queryset().filter(study=self.study)
+
     @property
     def breadcrumbs(self):
         return [
@@ -60,7 +63,7 @@ class TrialCreateView(LoginRequiredMixin, generic.CreateView):
         if active_trial:
             return redirect('rating-intro', self.study.slug, active_trial.slug)
         form.instance.study = self.study
-        form.instance.init()
+        form.instance.init(self.study)
         response = super().form_valid(form)
         form.instance.generate_items()
         return response
