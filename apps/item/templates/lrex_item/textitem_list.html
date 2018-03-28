@@ -10,7 +10,8 @@
        class="btn btn-outline-primary btn-sm mx-1" role="button">
         Pregenerate Items
     </a>
-    <a href="" class="btn btn-outline-primary btn-sm mx-1" role="button">
+    <a href="{% url 'textitem-upload' study_slug=view.experiment.study.slug slug=view.experiment.slug %}"
+       class="btn btn-outline-primary btn-sm mx-1" role="button">
         Upload CSV
     </a>
 </div>

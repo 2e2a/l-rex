@@ -1,3 +1,5 @@
+import csv
+from io import StringIO
 from string import ascii_lowercase
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
@@ -121,7 +123,7 @@ class TextItemListView(LoginRequiredMixin, generic.ListView):
 
 class ItemPregenerateView(LoginRequiredMixin, generic.FormView):
     form_class = forms.PregenerateItemsForm
-    title = 'Items'
+    title = 'Pregenerate Items'
     template_name = 'lrex_item/item_pregenerate_form.html'
 
     def dispatch(self, *args, **kwargs):
@@ -148,7 +150,6 @@ class ItemPregenerateView(LoginRequiredMixin, generic.FormView):
     def get_success_url(self):
         return reverse('textitems', args=[self.experiment.study.slug, self.experiment.slug])
 
-
     @property
     def breadcrumbs(self):
         exp = self.experiment
@@ -160,6 +161,51 @@ class ItemPregenerateView(LoginRequiredMixin, generic.FormView):
             (exp.title, reverse('experiment', args=[study.slug, exp.slug])),
             ('items', reverse('textitems', args=[study.slug, exp.slug])),
             ('pregenerate', ''),
+        ]
+
+
+class TextItemUploadView(LoginRequiredMixin, generic.FormView):
+    form_class = forms.UploadTextItemsForm
+    title = 'Items'
+    template_name = 'lrex_item/textitem_upload_form.html'
+
+    def dispatch(self, *args, **kwargs):
+        experiment_slug = self.kwargs['slug']
+        self.experiment = experiment_models.Experiment.objects.get(slug=experiment_slug)
+        return super().dispatch(*args, **kwargs)
+
+    def form_valid(self, form):
+        result =  super().form_valid(form)
+        file = form.cleaned_data['file']
+        num_col = form.cleaned_data['number_column']
+        cond_col = form.cleaned_data['condition_column']
+        text_col = form.cleaned_data['text_column']
+        data = file.read().decode()
+        dialect = csv.Sniffer().sniff(data[:128])
+        reader = csv.reader(StringIO(data), dialect)
+        for row in reader:
+            models.TextItem.objects.create(
+                number=row[num_col - 1],
+                condition=row[cond_col - 1],
+                text=row[text_col - 1],
+                experiment=self.experiment,
+            )
+        return result
+
+    def get_success_url(self):
+        return reverse('textitems', args=[self.experiment.study.slug, self.experiment.slug])
+
+    @property
+    def breadcrumbs(self):
+        exp = self.experiment
+        study = exp.study
+        return [
+            ('studies', reverse('studies')),
+            (study.title, reverse('study', args=[study.slug])),
+            ('experiments',reverse('experiments', args=[study.slug])),
+            (exp.title, reverse('experiment', args=[study.slug, exp.slug])),
+            ('items', reverse('textitems', args=[study.slug, exp.slug])),
+            ('upload', ''),
         ]
 
 
