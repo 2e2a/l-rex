@@ -2,6 +2,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 from django.views import generic
 
+from apps.contrib import views as contib_views
 
 from . import models
 from . import forms
@@ -66,10 +67,8 @@ class StudyUpdateView(LoginRequiredMixin, generic.UpdateView):
         ]
 
 
-class StudyDeleteView(LoginRequiredMixin, generic.DeleteView):
+class StudyDeleteView(LoginRequiredMixin, contib_views.DefaultDeleteView):
     model = models.Study
-    title = 'Delete Study'
-    message = 'Delete?'
 
     @property
     def breadcrumbs(self):
@@ -78,10 +77,6 @@ class StudyDeleteView(LoginRequiredMixin, generic.DeleteView):
             (self.object.title, reverse('study', args=[self.object.slug])),
             ('delete', ''),
         ]
-
-    @property
-    def cancel_url(self):
-        return reverse('studies')
 
     def get_success_url(self):
         return reverse('studies')

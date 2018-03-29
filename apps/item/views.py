@@ -6,6 +6,7 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.views import generic
 
+from apps.contrib import views as contrib_views
 from apps.experiment import models as experiment_models
 
 from . import forms
@@ -69,15 +70,8 @@ class TextItemUpdateView(LoginRequiredMixin, generic.UpdateView):
         ]
 
 
-class TextItemDeleteView(LoginRequiredMixin, generic.DeleteView):
+class TextItemDeleteView(LoginRequiredMixin, contrib_views.DefaultDeleteView):
     model = models.TextItem
-    title = 'Delete Item'
-    message = 'Delete Item?'
-
-    @property
-    def cancel_url(self):
-        exp = self.object.experiment
-        return reverse('textitems', args=[exp.study.slug, exp.slug])
 
     @property
     def breadcrumbs(self):

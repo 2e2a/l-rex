@@ -3,6 +3,7 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.views import generic
 
+from apps.contrib import views as contrib_views
 from apps.study import models as study_models
 
 from . import forms
@@ -109,10 +110,8 @@ class TrialDetailView(LoginRequiredMixin, generic.DetailView):
         ]
 
 
-class TrialDeleteView(LoginRequiredMixin, generic.DeleteView):
+class TrialDeleteView(LoginRequiredMixin, contrib_views.DefaultDeleteView):
     model = models.Trial
-    title = 'Delete'
-    message = 'Delete Trial?'
 
     def dispatch(self, *args, **kwargs):
         study_slug = self.kwargs['study_slug']
@@ -126,10 +125,6 @@ class TrialDeleteView(LoginRequiredMixin, generic.DeleteView):
             (self.object.slug, reverse('study', args=[self.object.slug])),
             ('delete', ''),
         ]
-
-    @property
-    def cancel_url(self):
-        return reverse('trials', args=[self.study.slug])
 
     def get_success_url(self):
         return reverse('trials', args=[self.study.slug])
