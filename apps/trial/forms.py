@@ -16,7 +16,10 @@ class TrialForm(crispy_forms.CrispyModelForm):
     def __init__(self, *args, **kwargs):
         self.study = kwargs.pop('study')
         super().__init__(*args, **kwargs)
-        self.fields['id'].required = not self.study.allow_anonymous
+        if self.study.allow_anonymous:
+            self.fields['id'].widget = forms.HiddenInput()
+        else :
+            self.fields['id'].required = True
 
     def clean(self):
         cleaned_data = super().clean()
