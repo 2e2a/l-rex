@@ -1,4 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse
 from django.views import generic
 
@@ -23,11 +24,12 @@ class ExperimentDetailView(LoginRequiredMixin, generic.DetailView):
         ]
 
 
-class ExperimentCreateView(LoginRequiredMixin, generic.CreateView):
+class ExperimentCreateView(LoginRequiredMixin, SuccessMessageMixin, generic.CreateView):
     model = models.Experiment
     title = 'Create Experiment'
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.ExperimentForm
+    success_message = 'Experiment successfully created.'
 
     def dispatch(self, *args, **kwargs):
         study_slug = self.kwargs['study_slug']
@@ -48,11 +50,12 @@ class ExperimentCreateView(LoginRequiredMixin, generic.CreateView):
         ]
 
 
-class ExperimentUpdateView(LoginRequiredMixin, generic.UpdateView):
+class ExperimentUpdateView(LoginRequiredMixin, SuccessMessageMixin, generic.UpdateView):
     model = models.Experiment
     title = 'Edit Experiment'
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.ExperimentForm
+    success_message = 'Experiment successfully updated.'
 
     @property
     def breadcrumbs(self):

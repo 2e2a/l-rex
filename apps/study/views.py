@@ -1,4 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.messages.views import SuccessMessageMixin
+from django.contrib import messages
 from django.urls import reverse
 from django.views import generic
 
@@ -41,22 +43,24 @@ class StudyRunView(LoginRequiredMixin, generic.DetailView):
         return self.object
 
 
-class StudyCreateView(LoginRequiredMixin, generic.CreateView):
+class StudyCreateView(LoginRequiredMixin, SuccessMessageMixin, generic.CreateView):
     model = models.Study
     title = 'Create Study'
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.StudyForm
+    success_message = 'Study successfully created.'
 
     def form_valid(self, form):
         form.instance.creator = self.request.user
         return super().form_valid(form)
 
 
-class StudyUpdateView(LoginRequiredMixin, generic.UpdateView):
+class StudyUpdateView(LoginRequiredMixin, SuccessMessageMixin, generic.UpdateView):
     model = models.Study
     title = 'Edit Study'
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.StudyForm
+    success_message = 'Study successfully updated.'
 
     @property
     def breadcrumbs(self):
@@ -100,6 +104,7 @@ class ScaleUpdateView(LoginRequiredMixin, generic.TemplateView):
     model = models.Study
     title = 'Edit Rating Scale'
     template_name = 'lrex_study/study_scale.html'
+    success_message = 'Scale successfully updated.'
 
     formset = None
     helper = forms.scale_formset_helper
@@ -132,6 +137,7 @@ class ScaleUpdateView(LoginRequiredMixin, generic.TemplateView):
             self.formset = forms.scaleformset_factory(
                 queryset=models.ScaleValue.objects.filter(study=self.study)
             )
+            messages.success(request, self.success_message)
         return super().get(request, *args, **kwargs)
 
     @property

@@ -2,6 +2,8 @@ import csv
 from io import StringIO
 from string import ascii_lowercase
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib import messages
+from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.views import generic
@@ -13,11 +15,12 @@ from . import forms
 from . import models
 
 
-class TextItemCreateView(LoginRequiredMixin, generic.CreateView):
+class TextItemCreateView(LoginRequiredMixin, SuccessMessageMixin, generic.CreateView):
     model = models.TextItem
     title = 'Add Item'
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.TextItemForm
+    success_message = 'Item successfully created.'
 
     def dispatch(self, *args, **kwargs):
         experiment_slug = self.kwargs['slug']
@@ -46,11 +49,12 @@ class TextItemCreateView(LoginRequiredMixin, generic.CreateView):
         ]
 
 
-class TextItemUpdateView(LoginRequiredMixin, generic.UpdateView):
+class TextItemUpdateView(LoginRequiredMixin, SuccessMessageMixin, generic.UpdateView):
     model = models.TextItem
     title = 'Edit Item'
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.TextItemForm
+    success_message = 'Item successfully updated.'
 
     def get_success_url(self):
         exp = self.object.experiment
@@ -117,10 +121,11 @@ class TextItemListView(LoginRequiredMixin, generic.ListView):
         ]
 
 
-class ItemPregenerateView(LoginRequiredMixin, generic.FormView):
+class ItemPregenerateView(LoginRequiredMixin, SuccessMessageMixin, generic.FormView):
     title = 'Pregenerate Items'
     form_class = forms.PregenerateItemsForm
     template_name = 'lrex_contrib/crispy_form.html'
+    success_message = 'Items successfully generated.'
 
     def dispatch(self, *args, **kwargs):
         experiment_slug = self.kwargs['slug']
@@ -160,10 +165,11 @@ class ItemPregenerateView(LoginRequiredMixin, generic.FormView):
         ]
 
 
-class TextItemUploadView(LoginRequiredMixin, generic.FormView):
+class TextItemUploadView(LoginRequiredMixin, SuccessMessageMixin, generic.FormView):
     title = 'Items'
     form_class = forms.UploadTextItemsForm
     template_name = 'lrex_contrib/crispy_form.html'
+    success_message = 'Items loaded from file.'
 
     def dispatch(self, *args, **kwargs):
         experiment_slug = self.kwargs['slug']
@@ -218,6 +224,7 @@ class ItemListListView(LoginRequiredMixin, generic.ListView):
         action = request.POST.get('action', None)
         if action and action == 'generate_item_lists':
             self.experiment.compute_item_lists()
+            messages.success(request, 'Item lists successfully generated.')
         return redirect('itemlists',study_slug=self.experiment.study.slug, slug=self.experiment.slug)
 
 

@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -23,6 +24,7 @@ class QuestionnaireListView(LoginRequiredMixin, generic.ListView):
         action = request.POST.get('action', None)
         if action and action == 'generate_questionnaires':
             self.study.generate_questionnaires()
+            messages.success(request, 'Questionnaires successfully generated.')
         return redirect('questionnaires',study_slug=self.study.slug)
 
     def get_queryset(self):
