@@ -83,7 +83,7 @@ class Trial(models.Model):
         return TrialStatus.CREATED
 
     def init(self, study):
-        last_trial = Trial.objects.filter(questionnaire__study=study).first()
+        last_trial = Trial.objects.filter(questionnaire__study=study).last()
         if last_trial:
             questionnaire = last_trial.questionnaire.next
         else:
