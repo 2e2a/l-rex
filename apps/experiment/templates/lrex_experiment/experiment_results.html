@@ -4,23 +4,38 @@
 <table class="table">
     <thead>
     <tr>
-        <th scope="col">Subject</th>
-        <th scope="col">Item</th>
-        <th scope="col">Condition</th>
-        <th scope="col">Text</th>
+        <th scope="col" {% if 'subject' in view.aggregate_by %}class="table-secondary"{% endif %}>
+            <a href="{{ view.toggle_aggregate_by_subject }}" class="btn btn-outline-primary btn-sm" role="button">▾</a>
+            Subject
+        </th>
+        <th scope="col" {% if 'item' in view.aggregate_by %}class="table-secondary"{% endif %}>
+            <a href="{{ view.toggle_aggregate_by_item }}" class="btn btn-outline-primary btn-sm" role="button">▾</a>
+            Item
+        </th>
+        <th scope="col" {% if 'condition' in view.aggregate_by %}class="table-secondary"{% endif %}>
+            <a href="{{ view.toggle_aggregate_by_condition }}" class="btn btn-outline-primary btn-sm" role="button">▾</a>
+            Condition
+        </th>
+        <th scope="col" {% if 'item' in view.aggregate_by or 'condition' in view.aggregate_by %}class="table-secondary"{% endif %}>
+            Text
+        </th>
         <th scope="col">Ratings</th>
         {% for scale_value in view.study.scalevalue_set.all %}
-        <th scope="col">{{ scale_value.label }}</th>
+        <th scope="col" class="table-primary">{{ scale_value.label }}</th>
         {% endfor %}
     </tr>
     </thead>
     <tbody>
-    {% for results in object.results %}
+    {% for row in view.results %}
     <tr>
-        {% for value in results %}
-        <td scope="col">
-            {{ value }}
-        </td>
+
+        <td scope="col" {% if 'subject' in view.aggregate_by %}class="table-secondary"{% endif %}>{{ row.subject }}</td>
+        <td scope="col" {% if 'item' in view.aggregate_by %}class="table-secondary"{% endif %}>{{ row.item }}</td>
+        <td scope="col" {% if 'condition' in view.aggregate_by %}class="table-secondary"{% endif %}>{{ row.condition }}</td>
+        <td scope="col" {% if 'item' in view.aggregate_by or 'condition' in view.aggregate_by %}class="table-secondary"{% endif %}>{{ row.text }}</td>
+        <td scope="col">{{ row.rating_count }}</td>
+        {% for value in row.values %}
+        <td scope="col" class="table-primary">{{ value }}</td>
         {% endfor %}
     </tr>
     {% endfor %}

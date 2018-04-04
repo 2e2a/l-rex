@@ -55,26 +55,65 @@ class Experiment(models.Model):
             trial_item__item__experiment=self
         )
         for rating in ratings:
-            values = []
+            row = {}
 
             subject = trials_list.index(rating.trial_item.trial) + 1
-            values.append(subject)
+            row['subject'] = subject
 
             item = rating.trial_item.item
-            values.append(item.number)
-            values.append(item.condition)
-            values.append(item.textitem.text)
+            row['item'] = item.number
+            row['condition'] = item.condition
+            row['text'] =  item.textitem.text
 
-            rating_count = 1
-            values.append(rating_count)
+            row['rating_count'] = 1
 
+            values = []
             for scale_value in self.study.scalevalue_set.all():
                 if rating.scale_value == scale_value:
-                    values.append(1)
+                    values.append(1.0)
                 else:
-                    values.append(0)
+                    values.append(0.0)
+            row['values'] = values
 
-            results.append(values)
+            results.append(row)
 
-        results_sorted = sorted(results, key=lambda r: r[0])
+        results_sorted = sorted(results, key=lambda r: (r['subject'], r['item'], r['condition']))
         return results_sorted
+
+    def _aggregation_columns(self):
+        return ['subject', 'item', 'condition']
+
+    def _matching_row(self, row, aggregated_results, columns):
+        match = -1
+        for i, result_row in enumerate(aggregated_results):
+            match = i
+            colums_left = list(set(self._aggregation_columns())-set(columns))
+            for col in colums_left:
+                if result_row[col] != row[col]:
+                    match = -1
+                    break
+            if match >= 0:
+                break
+        return match
+
+    def aggregate(self, results, columns):
+        aggregated_results = []
+        for row in results:
+            matching_row = self._matching_row(row, aggregated_results, columns)
+            if matching_row >= 0:
+                aggregated_row = aggregated_results[matching_row]
+                aggregated_row['rating_count'] += 1
+                aggregated_row['values'] = [x + y for x, y in zip(aggregated_row['values'], row['values'])]
+            else:
+                for aggregated_column in columns:
+                    row[aggregated_column] = ''
+                if 'item' in columns or 'condition' in columns:
+                    row['text'] = ''
+                aggregated_results.append(row)
+
+        for aggregated_row in aggregated_results:
+            aggregated_row['values'] = list(map(lambda x: x/aggregated_row['rating_count'], aggregated_row['values']))
+
+        aggregated_results_sorted = sorted(aggregated_results, key=lambda r: (r['subject'], r['item'], r['condition']))
+
+        return aggregated_results_sorted
