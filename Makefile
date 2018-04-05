@@ -6,17 +6,8 @@ all: help
 
 .PHONY: help
 help:
-	@echo mein.berlin development tools
-	@echo
-	@echo It will either use an exisiting virtualenv if it was entered
-	@echo before or create a new one in the .env subdirectory.
-	@echo
-	@echo usage:
-	@echo
-	@echo "  make install         -- install dev setup"
-	@echo "  make build           -- build js and css and create new po and mo files"
-	@echo "  make run             -- start a dev server"
-	@echo
+	@echo L-REX development
+	@echo TODO
 
 .PHONY: install
 install:
@@ -30,6 +21,7 @@ install:
 build:
 	cp lrex/static/js/* static/js/
 	cp $(NODE_MODULES)/jquery/dist/jquery.slim.min.js static/js/
+	cp $(NODE_MODULES)/popper.js/dist/umd/popper.min.js static/js/
 	cp $(NODE_MODULES)/bootstrap/dist/js/bootstrap.min.js static/js/
 
 .PHONY: scss

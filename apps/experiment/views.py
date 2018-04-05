@@ -132,35 +132,22 @@ class ExperimentResultsView(LoginRequiredMixin, generic.DetailView):
     model = models.Experiment
     title = 'Experiment Results'
     template_name = 'lrex_experiment/experiment_results.html'
-    aggregate_by = []
+    aggregate_by = ['subject']
 
     def dispatch(self, request, *args, **kwargs):
         aggregate_by = request.GET.get('aggregate_by')
         if aggregate_by:
             self.aggregate_by = aggregate_by.split(',')
-        print(self.aggregate_by)
         return super().dispatch(request, *args, **kwargs)
 
+    def aggregate_by_subject_url(self):
+        return reverse('experiment-results', args=[self.study, self.object]) + '?aggregate_by=subject'
 
-    def _toggle_aggregate_by_column(self, column):
-        url = reverse('experiment-results', args=[self.study, self.object])
-        aggregate_by_colums = self.aggregate_by.copy()
-        if column in aggregate_by_colums:
-            aggregate_by_colums.remove(column)
-        else:
-            aggregate_by_colums.append(column)
-        url += '?aggregate_by=' + ','.join(aggregate_by_colums)
-        return url
+    def aggregate_by_subject_and_item_url(self):
+        return reverse('experiment-results', args=[self.study, self.object]) + '?aggregate_by=subject,item'
 
-
-    def toggle_aggregate_by_subject(self):
-        return self._toggle_aggregate_by_column('subject')
-
-    def toggle_aggregate_by_item(self):
-        return self._toggle_aggregate_by_column('item')
-
-    def toggle_aggregate_by_condition(self):
-        return self._toggle_aggregate_by_column('condition')
+    def aggregate_by_label(self):
+        return '+'.join(self.aggregate_by)
 
     def results(self):
         results = self.object.results()

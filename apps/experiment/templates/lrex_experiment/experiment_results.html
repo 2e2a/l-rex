@@ -1,44 +1,42 @@
 {% extends "lrex_home/study_base.html" %}
 
 {% block main_content %}
+<div class="row justify-content-center mb-2">
+    <div class="dropdown">
+        <button class="btn  btn-outline-primary btn-sm mx-1 dropdown-toggle" type="button" id="dropdownAggregateBy" data-toggle="dropdown"
+                aria-haspopup="true" aria-expanded="false">
+            Aggregated by: {{ view.aggregate_by_label }}
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownAggregateBy">
+            <a class="dropdown-item" href="{{ view.aggregate_by_subject_url }}">Subject</a>
+            <a class="dropdown-item" href="{{ view.aggregate_by_subject_and_item_url }}">Subject+Item</a>
+        </div>
+    </div>
+</div>
 <table class="table">
-    <thead>
-    <tr>
-        <th scope="col" {% if 'subject' in view.aggregate_by %}class="table-secondary"{% endif %}>
-            <a href="{{ view.toggle_aggregate_by_subject }}" class="btn btn-outline-primary btn-sm" role="button">▾</a>
-            Subject
-        </th>
-        <th scope="col" {% if 'item' in view.aggregate_by %}class="table-secondary"{% endif %}>
-            <a href="{{ view.toggle_aggregate_by_item }}" class="btn btn-outline-primary btn-sm" role="button">▾</a>
-            Item
-        </th>
-        <th scope="col" {% if 'condition' in view.aggregate_by %}class="table-secondary"{% endif %}>
-            <a href="{{ view.toggle_aggregate_by_condition }}" class="btn btn-outline-primary btn-sm" role="button">▾</a>
-            Condition
-        </th>
-        <th scope="col" {% if 'item' in view.aggregate_by or 'condition' in view.aggregate_by %}class="table-secondary"{% endif %}>
-            Text
-        </th>
-        <th scope="col">Ratings</th>
-        {% for scale_value in view.study.scalevalue_set.all %}
-        <th scope="col" class="table-primary">{{ scale_value.label }}</th>
-        {% endfor %}
-    </tr>
-    </thead>
-    <tbody>
-    {% for row in view.results %}
-    <tr>
-
-        <td scope="col" {% if 'subject' in view.aggregate_by %}class="table-secondary"{% endif %}>{{ row.subject }}</td>
-        <td scope="col" {% if 'item' in view.aggregate_by %}class="table-secondary"{% endif %}>{{ row.item }}</td>
-        <td scope="col" {% if 'condition' in view.aggregate_by %}class="table-secondary"{% endif %}>{{ row.condition }}</td>
-        <td scope="col" {% if 'item' in view.aggregate_by or 'condition' in view.aggregate_by %}class="table-secondary"{% endif %}>{{ row.text }}</td>
-        <td scope="col">{{ row.rating_count }}</td>
-        {% for value in row.values %}
-        <td scope="col" class="table-primary">{{ value }}</td>
-        {% endfor %}
-    </tr>
+<thead>
+<tr>
+    {% if 'subject' not in view.aggregate_by %}<th scope="col">Subject</th>{% endif %}
+    {% if 'item' not in view.aggregate_by %}<th scope="col">Item</th>{% endif %}
+    {% if 'condition' not in view.aggregate_by %}<th scope="col">Condition</th>{% endif %}
+    <th scope="col">Ratings</th>
+    {% for scale_value in view.study.scalevalue_set.all %}
+    <th scope="col" class="table-primary">{{ scale_value.label }}</th>
     {% endfor %}
-    </tbody>
+</tr>
+</thead>
+<tbody>
+{% for row in view.results %}
+<tr>
+    {% if 'subject' not in view.aggregate_by %}<td scope="col">{{ row.subject }}</td>{% endif %}
+    {% if 'item' not in view.aggregate_by %}<td scope="col">{{ row.item }}</td>{% endif %}
+    {% if 'condition' not in view.aggregate_by %}<td scope="col">{{ row.condition }}</td>{% endif %}
+    <td scope="col">{{ row.rating_count }}</td>
+    {% for value in row.values %}
+    <td scope="col" class="table-primary">{{ value }}</td>
+    {% endfor %}
+</tr>
+{% endfor %}
+</tbody>
 </table>
 {% endblock %}
