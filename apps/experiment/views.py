@@ -149,10 +149,9 @@ class ExperimentResultsView(LoginRequiredMixin, generic.DetailView):
     def aggregate_by_label(self):
         return '+'.join(self.aggregate_by)
 
-    def results(self):
+    def aggregated_results(self):
         results = self.object.results()
-        if self.aggregate_by:
-            results = self.object.aggregate(results, self.aggregate_by)
+        results = self.object.aggregate(results, self.aggregate_by)
         return results
 
     @property

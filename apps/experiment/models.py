@@ -65,15 +65,7 @@ class Experiment(models.Model):
             row['condition'] = item.condition
             row['text'] =  item.textitem.text
 
-            row['rating_count'] = 1
-
-            values = []
-            for scale_value in self.study.scalevalue_set.all():
-                if rating.scale_value == scale_value:
-                    values.append(1.0)
-                else:
-                    values.append(0.0)
-            row['values'] = values
+            row['rating'] = rating.scale_value.number
 
             results.append(row)
 
@@ -103,16 +95,17 @@ class Experiment(models.Model):
             if matching_row >= 0:
                 aggregated_row = aggregated_results[matching_row]
                 aggregated_row['rating_count'] += 1
-                aggregated_row['values'] = [x + y for x, y in zip(aggregated_row['values'], row['values'])]
+                aggregated_row['ratings'][row['rating'] - 1] += 1
             else:
                 for aggregated_column in columns:
                     row[aggregated_column] = ''
-                if 'item' in columns or 'condition' in columns:
-                    row['text'] = ''
+                row['rating_count'] = 1
+                row['ratings'] = [0.0] * len(self.study.scalevalue_set.all())
+                row['ratings'][row['rating'] - 1] = 1.0
                 aggregated_results.append(row)
 
         for aggregated_row in aggregated_results:
-            aggregated_row['values'] = list(map(lambda x: x/aggregated_row['rating_count'], aggregated_row['values']))
+            aggregated_row['ratings'] = list(map(lambda x: x/aggregated_row['rating_count'], aggregated_row['ratings']))
 
         aggregated_results_sorted = sorted(aggregated_results, key=lambda r: (r['subject'], r['item'], r['condition']))
 

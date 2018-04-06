@@ -26,14 +26,14 @@
 </tr>
 </thead>
 <tbody>
-{% for row in view.results %}
+{% for row in view.aggregated_results %}
 <tr>
     {% if 'subject' not in view.aggregate_by %}<td scope="col">{{ row.subject }}</td>{% endif %}
     {% if 'item' not in view.aggregate_by %}<td scope="col">{{ row.item }}</td>{% endif %}
     {% if 'condition' not in view.aggregate_by %}<td scope="col">{{ row.condition }}</td>{% endif %}
     <td scope="col">{{ row.rating_count }}</td>
-    {% for value in row.values %}
-    <td scope="col" class="table-primary">{{ value }}</td>
+    {% for rating in row.ratings %}
+    <td scope="col" class="table-primary">{{ rating }}</td>
     {% endfor %}
 </tr>
 {% endfor %}
