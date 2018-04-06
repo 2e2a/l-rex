@@ -1,5 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
+from django.http import HttpResponse
 from django.urls import reverse
 from django.views import generic
 
@@ -166,3 +167,18 @@ class ExperimentResultsView(LoginRequiredMixin, generic.DetailView):
             ('results', reverse('experiment-result-list',args=[self.study.slug])),
             (self.object.title,'')
         ]
+
+
+class ExperimentResultsCSVDownloadView(generic.View):
+
+    def dispatch(self, *args, **kwargs):
+        experiment_slug = self.kwargs['slug']
+        self.experiment = models.Experiment.objects.get(slug=experiment_slug)
+        return super().dispatch(*args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        filename = self.experiment.slug + '.csv'
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
+        self.experiment.results_csv(response)
+        return response

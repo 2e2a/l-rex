@@ -1,3 +1,4 @@
+import csv
 from django.urls import reverse
 from django.db import models
 from django.utils.text import slugify
@@ -64,7 +65,6 @@ class Experiment(models.Model):
             row['item'] = item.number
             row['condition'] = item.condition
             row['text'] =  item.textitem.text
-
             row['rating'] = rating.scale_value.number
 
             results.append(row)
@@ -110,3 +110,11 @@ class Experiment(models.Model):
         aggregated_results_sorted = sorted(aggregated_results, key=lambda r: (r['subject'], r['item'], r['condition']))
 
         return aggregated_results_sorted
+
+    def results_csv(self, fileobj):
+        writer = csv.writer(fileobj)
+        writer.writerow(['Subject', 'item', 'Condition', 'Rating', 'Text'])
+        results = self.results()
+        for row in results:
+            writer.writerow(
+                [ row['subject'], row['item'], row['condition'], row['rating'], row['text']])
