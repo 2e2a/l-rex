@@ -68,6 +68,7 @@ class TrialCreateView(LoginRequiredMixin, generic.CreateView):
         form.instance.study = self.study
         form.instance.init(self.study)
         response = super().form_valid(form)
+        form.instance.generate_id()
         form.instance.generate_items()
         return response
 
@@ -83,6 +84,9 @@ class TrialListView(LoginRequiredMixin, generic.ListView):
         study_slug = self.kwargs['study_slug']
         self.study = study_models.Study.objects.get(slug=study_slug)
         return super().dispatch(*args, **kwargs)
+
+    def show_counter(self):
+        return not self.study.allow_anonymous
 
     @property
     def breadcrumbs(self):
@@ -108,7 +112,7 @@ class TrialDetailView(LoginRequiredMixin, generic.DetailView):
             ('studies', reverse('studies')),
             (self.study.title, reverse('study-run', args=[self.study.slug])),
             ('trials', reverse('trials', args=[self.study.slug])),
-            (self.object.pk, ''),
+            (self.object.id, ''),
         ]
 
 

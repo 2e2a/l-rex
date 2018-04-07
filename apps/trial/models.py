@@ -96,8 +96,22 @@ class Trial(models.Model):
         for i, item in enumerate(items):
             TrialItem.objects.create(number=i, trial=self, item=item)
 
+    def generate_id(self):
+        if self.id:
+            return
+        try:
+            last_trial = Trial.objects.filter(questionnaire__study=self.questionnaire.study)\
+                             .order_by('-creation_date')[1:2][0]
+            self.id = int(last_trial.id) + 1
+        except IndexError:
+            self.id = 1
+        self.save()
+
     def get_absolute_url(self):
         return reverse('trial', args=[self.study.slug, self.slug])
+
+    def __str__(self):
+        return self.id
 
 
 class TrialItem(models.Model):

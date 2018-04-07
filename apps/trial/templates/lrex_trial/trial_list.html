@@ -12,9 +12,13 @@
     {% for trial in trial_list %}
     <li class="list-group-item d-flex justify-content-between align-items-center">
         <span>
-            {{ forloop.counter }}. {{ trial.id }}
+            {% if view.show_counter %}
+                {{ forloop.counter }}. {{ trial.id }}
+            {% else %}
+                {{ trial.id }}
+            {% endif %}
             <span class="badge badge-primary">{{ trial.status.name }}</span>
-            <span class="badge badge-secondary">Trial {{ trial.questionnaire.number }}</span>
+            <span class="badge badge-secondary">Questionnaire {{ trial.questionnaire.number }}</span>
         </span>
         <span>
                 <a href="{% url 'trial' study_slug=view.study.slug slug=trial.slug %}" class="btn btn-outline-primary btn-sm mx-1" role="button">

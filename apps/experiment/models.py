@@ -48,20 +48,14 @@ class Experiment(models.Model):
 
     def results(self):
         results = []
-
-        trials_list = list(trial_models.Trial.objects.filter(
-            questionnaire__study=self.study
-        ))
         ratings = trial_models.Rating.objects.filter(
             trial_item__item__experiment=self
         )
         for rating in ratings:
             row = {}
-
-            subject = trials_list.index(rating.trial_item.trial) + 1
-            row['subject'] = subject
-
             item = rating.trial_item.item
+
+            row['subject'] = rating.trial_item.trial.id
             row['item'] = item.number
             row['condition'] = item.condition
             row['text'] =  item.textitem.text
