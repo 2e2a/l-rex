@@ -1,4 +1,6 @@
-{% load static %}
+{% load static contrib_tags %}
+
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -48,7 +50,7 @@
 
 <div class="container">
     {% for message in messages %}
-    <div class="alert alert-{{ message.level_tag }}" role="alert">
+    <div class="alert {{ message.level_tag|bootstrap_alert_class }}" role="alert">
         {{ message }}
     </div>
     {% endfor %}

@@ -31,6 +31,29 @@ class Experiment(models.Model):
     def get_absolute_url(self):
         return reverse('experiment', args=[self.study.slug, self.slug])
 
+    def validate_items(self):
+        conditions = []
+        items = self.item_set.all()
+        for item in items:
+            if item.condition not in conditions:
+                conditions.append(item.condition)
+            else:
+                break
+
+        condition_count = len(conditions)
+        if len(items) % condition_count != 0:
+            raise AssertionError('Number of items is not a multiple of the number of conditions.')
+
+
+        item_number = 0
+        for i, item in enumerate(items):
+            if i % condition_count == 0:
+                item_number += 1
+            if item.number != item_number or item.condition != conditions[i % condition_count]:
+                raise AssertionError('Items invalid. Item {} was not expected.'.format(item))
+
+        return None
+
     def compute_item_lists(self):
         self.itemlist_set.all().delete()
 

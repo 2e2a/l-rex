@@ -14,6 +14,12 @@
        class="btn btn-outline-primary btn-sm mx-1" role="button">
         Upload CSV
     </a>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="action" value="validate" class="btn btn-outline-primary btn-sm mx-1">
+            Validate
+        </button>
+    </form>
 </div>
 <ul class="list-group">
     {% for item in textitem_list %}

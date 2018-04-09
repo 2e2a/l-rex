@@ -105,6 +105,16 @@ class TextItemListView(LoginRequiredMixin, generic.ListView):
         self.experiment = experiment_models.Experiment.objects.get(slug=experiment_slug)
         return super().dispatch(*args, **kwargs)
 
+    def post(self, request, *args, **kwargs):
+        action = request.POST.get('action', None)
+        if action and action == 'validate':
+            try:
+                self.experiment.validate_items()
+                messages.success(request, 'Items are valid.')
+            except AssertionError as e:
+                messages.error(request, str(e))
+        return redirect('textitems',study_slug=self.experiment.study.slug, slug=self.experiment.slug)
+
     def get_queryset(self):
         return super().get_queryset().filter(experiment=self.experiment)
 
