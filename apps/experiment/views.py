@@ -1,36 +1,44 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.messages.views import SuccessMessageMixin
+from django.contrib import messages
 from django.http import HttpResponse
 from django.urls import reverse
 from django.views import generic
 
 from apps.contrib import views as contrib_views
 from apps.study import models as study_models
+from apps.study import views as study_views
 
 from . import forms
 from . import models
 
 
-class ExperimentDetailView(LoginRequiredMixin, generic.DetailView):
+class ExperimentDetailView(LoginRequiredMixin, study_views.NextStepsMixin, generic.DetailView):
     model = models.Experiment
     title = 'Experiment Overview'
+
+    @property
+    def study(self):
+        return self.object.study
+
+    @property
+    def experiment(self):
+        return self.object
 
     @property
     def breadcrumbs(self):
         return [
             ('studies', reverse('studies')),
-            (self.object.study.title, reverse('study', args=[self.object.study.slug])),
-            ('experiments',reverse('experiments', args=[self.object.study.slug])),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('experiments',reverse('experiments', args=[self.study.slug])),
             (self.object.title, '')
         ]
 
 
-class ExperimentCreateView(LoginRequiredMixin, SuccessMessageMixin, generic.CreateView):
+class ExperimentCreateView(LoginRequiredMixin, generic.CreateView):
     model = models.Experiment
     title = 'Create Experiment'
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.ExperimentForm
-    success_message = 'Experiment successfully created.'
 
     def dispatch(self, *args, **kwargs):
         study_slug = self.kwargs['study_slug']
@@ -39,7 +47,11 @@ class ExperimentCreateView(LoginRequiredMixin, SuccessMessageMixin, generic.Crea
 
     def form_valid(self, form):
         form.instance.study = self.study
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        self.study.progress = self.study.PROGRESS_EXP_CREATED
+        self.study.save()
+        messages.success(self.request, study_views.progress_success_message(self.study.progress))
+        return response
 
     @property
     def breadcrumbs(self):
@@ -51,7 +63,7 @@ class ExperimentCreateView(LoginRequiredMixin, SuccessMessageMixin, generic.Crea
         ]
 
 
-class ExperimentUpdateView(LoginRequiredMixin, SuccessMessageMixin, generic.UpdateView):
+class ExperimentUpdateView(LoginRequiredMixin, generic.UpdateView):
     model = models.Experiment
     title = 'Edit Experiment'
     template_name = 'lrex_contrib/crispy_form.html'
@@ -72,6 +84,14 @@ class ExperimentUpdateView(LoginRequiredMixin, SuccessMessageMixin, generic.Upda
 class ExperimentDeleteView(LoginRequiredMixin, contrib_views.DefaultDeleteView):
     model = models.Experiment
 
+    def delete(self, *args, **kwargs):
+        response = super().delete(*args, **kwargs)
+        study = self.object.study
+        if not models.Experiment.objects.filter(study=study).exists():
+            study.progress = study.PROGRESS_STD_SCALE_CONFIGURED
+            study.save()
+        return response
+
     @property
     def breadcrumbs(self):
         return [
@@ -86,7 +106,7 @@ class ExperimentDeleteView(LoginRequiredMixin, contrib_views.DefaultDeleteView):
         return reverse('experiments', args=[self.object.study.slug])
 
 
-class ExperimentListView(LoginRequiredMixin, generic.ListView):
+class ExperimentListView(LoginRequiredMixin, study_views.NextStepsMixin, generic.ListView):
     model = models.Experiment
     title = 'Experiments'
 

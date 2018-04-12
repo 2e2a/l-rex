@@ -2,6 +2,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
 from django.urls import reverse
+from django.utils.safestring import mark_safe
 from django.views import generic
 
 from apps.contrib import views as contib_views
@@ -10,9 +11,34 @@ from . import models
 from . import forms
 
 
-class StudyDetailView(LoginRequiredMixin, generic.DetailView):
+def progress_success_message(progress):
+    return 'Success: {}'.format(models.Study.progress_description(progress))
+
+
+class NextStepsMixin:
+    study = None
+    experiment = None
+
+    def get(self, request, *args, **kwargs):
+        response = super().get(request, *args, **kwargs)
+        next_steps = self.study.next_steps(self.experiment)
+        for next_step in next_steps:
+            description, url = next_step
+            message = 'Next: {}'.format(description)
+            if url and self.request.path != url:
+                message = message + ' (<a href="{}">here</a>)'.format(url)
+            messages.info(request, mark_safe(message))
+        return response
+
+
+
+class StudyDetailView(LoginRequiredMixin, NextStepsMixin, generic.DetailView):
     model = models.Study
     title = 'Create Study'
+
+    @property
+    def study(self):
+        return self.object
 
     @property
     def breadcrumbs(self):
@@ -20,10 +46,6 @@ class StudyDetailView(LoginRequiredMixin, generic.DetailView):
             ('studies', reverse('studies')),
             (self.study.title, ''),
         ]
-
-    @property
-    def study(self):
-        return self.object
 
 
 class StudyRunView(LoginRequiredMixin, generic.DetailView):
@@ -43,7 +65,7 @@ class StudyRunView(LoginRequiredMixin, generic.DetailView):
         return self.object
 
 
-class StudyCreateView(LoginRequiredMixin, SuccessMessageMixin, generic.CreateView):
+class StudyCreateView(LoginRequiredMixin, generic.CreateView):
     model = models.Study
     title = 'Create Study'
     template_name = 'lrex_contrib/crispy_form.html'
@@ -52,7 +74,9 @@ class StudyCreateView(LoginRequiredMixin, SuccessMessageMixin, generic.CreateVie
 
     def form_valid(self, form):
         form.instance.creator = self.request.user
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        messages.success(self.request, progress_success_message(form.instance.progress))
+        return response
 
 
 class StudyUpdateView(LoginRequiredMixin, SuccessMessageMixin, generic.UpdateView):
@@ -100,11 +124,10 @@ class StudyListView(LoginRequiredMixin, generic.ListView):
         ]
 
 
-class ScaleUpdateView(LoginRequiredMixin, generic.TemplateView):
+class ScaleUpdateView(LoginRequiredMixin, NextStepsMixin, generic.TemplateView):
     model = models.Study
     title = 'Edit Rating Scale'
     template_name = 'lrex_study/study_scale.html'
-    success_message = 'Scale successfully updated.'
 
     formset = None
     helper = forms.scale_formset_helper
@@ -137,7 +160,10 @@ class ScaleUpdateView(LoginRequiredMixin, generic.TemplateView):
             self.formset = forms.scaleformset_factory(
                 queryset=models.ScaleValue.objects.filter(study=self.study)
             )
-            messages.success(request, self.success_message)
+
+            self.study.progress = self.study.PROGRESS_STD_SCALE_CONFIGURED
+            self.study.save()
+            messages.success(request, progress_success_message(self.study.progress))
         return super().get(request, *args, **kwargs)
 
     @property

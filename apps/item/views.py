@@ -10,6 +10,7 @@ from django.views import generic
 
 from apps.contrib import views as contrib_views
 from apps.experiment import models as experiment_models
+from apps.study import views as study_views
 
 from . import forms
 from . import models
@@ -27,9 +28,18 @@ class TextItemCreateView(LoginRequiredMixin, SuccessMessageMixin, generic.Create
         self.experiment = experiment_models.Experiment.objects.get(slug=experiment_slug)
         return super().dispatch(*args, **kwargs)
 
+    @property
+    def study(self):
+        return self.experiment.study
+
     def form_valid(self, form):
         form.instance.experiment = self.experiment
-        return super().form_valid(form)
+        result = super().form_valid(form)
+        self.study.progress = self.study.PROGRESS_EXP_ITEMS_CREATED
+        self.study.save()
+        if self.study.progress == self.study.PROGRESS_EXP_CREATED:
+            messages.success(self.request, study_views.progress_success_message(self.study.progress))
+        return result
 
     def get_success_url(self):
         exp = self.object.experiment
@@ -56,6 +66,16 @@ class TextItemUpdateView(LoginRequiredMixin, SuccessMessageMixin, generic.Update
     form_class = forms.TextItemForm
     success_message = 'Item successfully updated.'
 
+    def form_valid(self, form):
+        result = super().form_valid(form)
+        self.study.progress = self.study.PROGRESS_EXP_ITEMS_CREATED
+        self.study.save()
+        return result
+
+    @property
+    def study(self):
+        return self.object.experiment.study
+
     def get_success_url(self):
         exp = self.object.experiment
         return reverse('textitems', args=[exp.study.slug, exp.slug])
@@ -77,6 +97,16 @@ class TextItemUpdateView(LoginRequiredMixin, SuccessMessageMixin, generic.Update
 class TextItemDeleteView(LoginRequiredMixin, contrib_views.DefaultDeleteView):
     model = models.TextItem
 
+    def delete(self, *args, **kwargs):
+        response = super().delete(*args, **kwargs)
+        experiment = self.object.experiment
+        if not models.Item.objects.filter(experiment=experiment).exists():
+            experiment.study.progress = experiment.study.PROGRESS_EXP_CREATED
+        else:
+            experiment.study.progress = experiment.study.PROGRESS_EXP_ITEMS_CREATED
+        experiment.study.save()
+        return response
+
     @property
     def breadcrumbs(self):
         exp = self.object.experiment
@@ -96,9 +126,13 @@ class TextItemDeleteView(LoginRequiredMixin, contrib_views.DefaultDeleteView):
         return reverse('textitems', args=[exp.study.slug, exp.slug])
 
 
-class TextItemListView(LoginRequiredMixin, generic.ListView):
+class TextItemListView(LoginRequiredMixin, study_views.NextStepsMixin, generic.ListView):
     model = models.TextItem
     title = 'Items'
+
+    @property
+    def study(self):
+        return self.experiment.study
 
     def dispatch(self, *args, **kwargs):
         experiment_slug = self.kwargs['slug']
@@ -110,7 +144,9 @@ class TextItemListView(LoginRequiredMixin, generic.ListView):
         if action and action == 'validate':
             try:
                 self.experiment.validate_items()
-                messages.success(request, 'Items are valid.')
+                self.study.progress = self.study.PROGRESS_EXP_ITEMS_VALIDATED
+                messages.success(self.request, study_views.progress_success_message(self.study.progress))
+                self.study.save()
             except AssertionError as e:
                 messages.error(request, str(e))
         return redirect('textitems',study_slug=self.experiment.study.slug, slug=self.experiment.slug)
@@ -156,10 +192,17 @@ class ItemPregenerateView(LoginRequiredMixin, SuccessMessageMixin, generic.FormV
         n_items = form.cleaned_data['num_items']
         n_conditions = form.cleaned_data['num_conditions']
         self._pregenerate_items(n_items, n_conditions)
+        self.study.progress = self.study.PROGRESS_EXP_ITEMS_CREATED
+        messages.success(self.request, study_views.progress_success_message(self.study.progress))
+        self.study.save()
         return result
 
     def get_success_url(self):
         return reverse('textitems', args=[self.experiment.study.slug, self.experiment.slug])
+
+    @property
+    def study(self):
+        return self.experiment.study
 
     @property
     def breadcrumbs(self):
@@ -175,11 +218,10 @@ class ItemPregenerateView(LoginRequiredMixin, SuccessMessageMixin, generic.FormV
         ]
 
 
-class TextItemUploadView(LoginRequiredMixin, SuccessMessageMixin, generic.FormView):
+class TextItemUploadView(LoginRequiredMixin, generic.FormView):
     title = 'Items'
     form_class = forms.UploadTextItemsForm
     template_name = 'lrex_contrib/crispy_form.html'
-    success_message = 'Items loaded from file.'
 
     def dispatch(self, *args, **kwargs):
         experiment_slug = self.kwargs['slug']
@@ -202,10 +244,18 @@ class TextItemUploadView(LoginRequiredMixin, SuccessMessageMixin, generic.FormVi
                 text=row[text_col - 1],
                 experiment=self.experiment,
             )
+
+        self.study.progress = self.study.PROGRESS_EXP_ITEMS_CREATED
+        messages.success(self.request, study_views.progress_success_message(self.study.progress))
+        self.study.save()
         return result
 
     def get_success_url(self):
         return reverse('textitems', args=[self.experiment.study.slug, self.experiment.slug])
+
+    @property
+    def study(self):
+        return self.experiment.study
 
     @property
     def breadcrumbs(self):
@@ -221,7 +271,7 @@ class TextItemUploadView(LoginRequiredMixin, SuccessMessageMixin, generic.FormVi
         ]
 
 
-class ItemListListView(LoginRequiredMixin, generic.ListView):
+class ItemListListView(LoginRequiredMixin, study_views.NextStepsMixin, generic.ListView):
     model = models.ItemList
     title = 'Item Lists'
 
@@ -234,12 +284,17 @@ class ItemListListView(LoginRequiredMixin, generic.ListView):
         action = request.POST.get('action', None)
         if action and action == 'generate_item_lists':
             self.experiment.compute_item_lists()
-            messages.success(request, 'Item lists successfully generated.')
+            self.study.progress = self.study.PROGRESS_EXP_LISTS_CREATED
+            messages.success(self.request, study_views.progress_success_message(self.study.progress))
+            self.study.save()
         return redirect('itemlists',study_slug=self.experiment.study.slug, slug=self.experiment.slug)
-
 
     def get_queryset(self):
         return models.ItemList.objects.filter(experiment=self.experiment)
+
+    @property
+    def study(self):
+        return self.experiment.study
 
     @property
     def breadcrumbs(self):

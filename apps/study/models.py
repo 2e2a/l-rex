@@ -33,6 +33,30 @@ class Study(models.Model):
     start_time = models.DateTimeField(blank=True, null=True)
     end_time = models.DateTimeField(blank=True, null=True)
 
+    PROGRESS_STD_CREATED = '00sc'
+    PROGRESS_STD_SCALE_CONFIGURED = '01ss'
+    PROGRESS_EXP_CREATED = '02ec'
+    PROGRESS_EXP_ITEMS_CREATED = '03ic'
+    PROGRESS_EXP_ITEMS_VALIDATED = '04iv'
+    PROGRESS_EXP_LISTS_CREATED = '05lc'
+    PROGRESS_STD_QUESTIONNARES_GENERATED = '06sq'
+    PROGRESS_STD_RUN = '07sq'
+    PROGRESS = (
+        (PROGRESS_STD_CREATED, 'Create a study'),
+        (PROGRESS_STD_SCALE_CONFIGURED, 'Configure the rating scale '),
+        (PROGRESS_EXP_CREATED, 'Create a new experiment'),
+        (PROGRESS_EXP_ITEMS_CREATED, 'Create or upload experiment items'),
+        (PROGRESS_EXP_ITEMS_VALIDATED, 'Validate the experiment items consistancy'),
+        (PROGRESS_EXP_LISTS_CREATED, 'Generate item lists'),
+        (PROGRESS_STD_QUESTIONNARES_GENERATED, 'Generate questionnaires'),
+        (PROGRESS_STD_RUN, 'Run a study'),
+    )
+    progress = models.CharField(
+        max_length=4,
+        choices=PROGRESS,
+        default=PROGRESS_STD_CREATED,
+    )
+
     def save(self, *args, **kwargs):
         self.slug = slugify(self.title)
         return super().save(*args, **kwargs)
@@ -102,6 +126,60 @@ class Study(models.Model):
         last_questionnaire = None
         for i in range(questionnaire_count):
             last_questionnaire = self._create_next_questionnaire(i, last_questionnaire)
+
+    def progress_reached(self, progress):
+        return self.progress < progress
+
+    @staticmethod
+    def progress_description(progress):
+        return dict(Study.PROGRESS)[progress]
+
+    def _progress_url(self, progress, experiment=None):
+        if progress == self.PROGRESS_STD_CREATED:
+            return reverse('study-create', args=[])
+        elif progress == self.PROGRESS_STD_SCALE_CONFIGURED:
+            return reverse('study-scale', args=[self])
+        elif progress == self.PROGRESS_EXP_CREATED:
+            return reverse('experiment-create', args=[self])
+        elif progress == self.PROGRESS_EXP_ITEMS_CREATED:
+            if experiment:
+                return reverse('textitems', args=[self, experiment])
+        elif progress == self.PROGRESS_EXP_ITEMS_VALIDATED:
+            if experiment:
+                return reverse('textitems', args=[self, experiment])
+        elif progress == self.PROGRESS_EXP_LISTS_CREATED:
+            if experiment:
+                return reverse('itemlists', args=[self, experiment])
+        elif progress == self.PROGRESS_STD_QUESTIONNARES_GENERATED:
+            return reverse('questionnaires', args=[self])
+        elif progress == self.PROGRESS_STD_RUN:
+            return reverse('studies', args=[])
+        return None
+
+    def _next_progress_steps(self, progress):
+        if progress == self.PROGRESS_STD_CREATED:
+            return [self.PROGRESS_STD_SCALE_CONFIGURED]
+        elif progress == self.PROGRESS_STD_SCALE_CONFIGURED:
+            return [self.PROGRESS_EXP_CREATED]
+        elif progress == self.PROGRESS_EXP_CREATED:
+            return [self.PROGRESS_EXP_ITEMS_CREATED]
+        elif progress == self.PROGRESS_EXP_ITEMS_CREATED:
+            return [self.PROGRESS_EXP_ITEMS_CREATED, self.PROGRESS_EXP_ITEMS_VALIDATED]
+        elif progress == self.PROGRESS_EXP_ITEMS_VALIDATED:
+            return [self.PROGRESS_EXP_LISTS_CREATED]
+        elif progress == self.PROGRESS_EXP_LISTS_CREATED:
+            return [self.PROGRESS_EXP_CREATED, self.PROGRESS_STD_QUESTIONNARES_GENERATED]
+        elif progress == self.PROGRESS_STD_QUESTIONNARES_GENERATED:
+            return [ self.PROGRESS_STD_RUN ]
+        elif progress == self.PROGRESS_STD_RUN:
+            return []
+
+    def next_steps(self, experiment=None):
+        for next_step in self._next_progress_steps(self.progress):
+            description = self.progress_description(next_step)
+            url = self._progress_url(next_step, experiment)
+            yield ( description, url, )
+
 
 
 class ScaleValue(models.Model):

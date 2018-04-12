@@ -11,8 +11,9 @@ class DefaultDeleteView(generic.DeleteView):
         return self.success_message
 
     def delete(self, *args, **kwargs):
+        result = super().delete(*args, **kwargs)
         messages.success(self.request, self.get_success_message())
-        return super().delete(*args, **kwargs)
+        return result
 
     @property
     def message(self):

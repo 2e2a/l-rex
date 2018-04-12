@@ -6,12 +6,13 @@ from django.views import generic
 
 from apps.contrib import views as contrib_views
 from apps.study import models as study_models
+from apps.study import views as study_views
 
 from . import forms
 from . import models
 
 
-class QuestionnaireListView(LoginRequiredMixin, generic.ListView):
+class QuestionnaireListView(LoginRequiredMixin, study_views.NextStepsMixin, generic.ListView):
     model = models.Questionnaire
     title = 'Questionnaires'
 
@@ -24,7 +25,9 @@ class QuestionnaireListView(LoginRequiredMixin, generic.ListView):
         action = request.POST.get('action', None)
         if action and action == 'generate_questionnaires':
             self.study.generate_questionnaires()
-            messages.success(request, 'Questionnaires successfully generated.')
+            self.study.progress = self.study.PROGRESS_STD_QUESTIONNARES_GENERATED
+            self.study.save()
+            messages.success(request, study_views.progress_success_message(self.study.progress))
         return redirect('questionnaires',study_slug=self.study.slug)
 
     def get_queryset(self):
