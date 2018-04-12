@@ -47,6 +47,8 @@ class Experiment(models.Model):
 
         item_number = 0
         for i, item in enumerate(items):
+            if not item.textitem.text:
+                raise AssertionError('Item {} has no text.'.format(item))
             if i % condition_count == 0:
                 item_number += 1
             if item.number != item_number or item.condition != conditions[i % condition_count]:
