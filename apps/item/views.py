@@ -271,6 +271,39 @@ class TextItemUploadView(LoginRequiredMixin, generic.FormView):
         ]
 
 
+
+class TextItemDeleteAllView(LoginRequiredMixin, generic.TemplateView):
+    title = 'Confirm Delete'
+    template_name = 'lrex_contrib/confirm_delete.html'
+
+    def post(self, request, *args, **kwargs):
+        models.Item.objects.filter(experiment=self.experiment).delete()
+        self.experiment.study.progress = self.experiment.study.PROGRESS_EXP_CREATED
+        self.experiment.study.save()
+        messages.success(self.request, 'Deletion successfull.')
+        return redirect(self.get_success_url())
+
+    def dispatch(self, *args, **kwargs):
+        experiment_slug = self.kwargs['slug']
+        self.experiment = experiment_models.Experiment.objects.get(slug=experiment_slug)
+        return super().dispatch(*args, **kwargs)
+
+    @property
+    def breadcrumbs(self):
+        study = self.experiment.study
+        return [
+            ('studies', reverse('studies')),
+            (study.title, reverse('study', args=[study.slug])),
+            ('experiments',reverse('experiments', args=[study.slug])),
+            (self.experiment.title, reverse('experiment', args=[study.slug, self.experiment.slug])),
+            ('items', reverse('textitems', args=[study.slug, self.experiment.slug])),
+            ('delete-all','')
+        ]
+
+    def get_success_url(self):
+        return reverse('textitems', args=[self.experiment.study.slug, self.experiment.slug])
+
+
 class ItemListListView(LoginRequiredMixin, study_views.NextStepsMixin, generic.ListView):
     model = models.ItemList
     title = 'Item Lists'
