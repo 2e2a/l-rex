@@ -1,7 +1,8 @@
 {% extends "lrex_home/study_base.html" %}
+{% load study_tags %}
 
 {% block main_content %}
-<div class="card my-1">
+<div class="card  my-1 {% if view.study|is_progress_std_created %} border-primary {% endif %}">
     <div class="card-body">
         <h2 class="card-title">Intialization</h2>
         <p class="card-text">
@@ -12,23 +13,31 @@
     </div>
 </div>
 
-<div class="card my-1">
+<div class="card my-1 {% if view.study|is_progress_std_scale_configured %} border-primary {% endif %}">
     <div class="card-body">
         <h2 class="card-title">Experiments</h2>
         <p class="card-text">
             Create/Edit experiments
         </p>
+        {% if view.study|is_progress_std_scale_configured_reached %}
         <a  class="card-link" href="{% url 'experiments' study_slug=object.slug %}">Experiments</a>
+        {% else %}
+        <a  class="card-link disabled text-muted">Experiments</a>
+        {% endif %}
     </div>
 </div>
 
-<div class="card my-1">
+<div class="card my-1 {% if view.study|is_progress_exp_lists_created %} border-primary {% endif %}">
     <div class="card-body">
         <h2 class="card-title">Questionnaires</h2>
         <p class="card-text">
             Generate questionnaires for your experiments.
         </p>
+        {% if view.study|is_progress_exp_lists_created_reached  %}
         <a  class="card-link" href="{% url 'questionnaires' study_slug=object.slug %}">Questionnaires</a></p>
+        {% else %}
+        <a  class="card-link text-muted">Questionnaires</a></p>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

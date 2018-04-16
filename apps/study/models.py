@@ -128,7 +128,7 @@ class Study(models.Model):
             last_questionnaire = self._create_next_questionnaire(i, last_questionnaire)
 
     def progress_reached(self, progress):
-        return self.progress < progress
+        return self.progress >= progress
 
     @staticmethod
     def progress_description(progress):
