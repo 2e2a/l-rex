@@ -30,7 +30,7 @@ urlpatterns = [
         include(experiment_urls)),
     url(r'^(?P<study_slug>[-\w_]+)/trial/',
         include(trial_urls)),
-    url(r'',
+    url(r'^$',
         views.StudyListView.as_view(),
         name='studies'),
 ]
