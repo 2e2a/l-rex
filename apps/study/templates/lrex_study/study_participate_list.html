@@ -1,0 +1,19 @@
+{% extends "lrex_home/study_base.html" %}
+
+{% block main_content %}
+<ul class="list-group">
+    {% for study in study_list %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span>
+            {{ study.title }}
+        </span>
+        <span>
+            <a href="{% url 'trial-create' study_slug=study.slug %}" class="btn btn-outline-primary btn-sm mx-1" role="button">
+                Participate
+            </a>
+        </span>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}
+

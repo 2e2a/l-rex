@@ -2,6 +2,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.views import generic
 
@@ -122,6 +123,15 @@ class StudyListView(LoginRequiredMixin, generic.ListView):
         return [
             ('studies', reverse('studies')),
         ]
+
+
+class StudyParticipateListView(generic.ListView):
+    model = models.Study
+    title = 'Active Studies'
+    template_name = 'lrex_study/study_participate_list.html'
+
+    def get_queryset(self):
+        return super().get_queryset().filter(start_time__lte=timezone.now()).filter(end_time__gte=timezone.now())
 
 
 class ScaleUpdateView(LoginRequiredMixin, NextStepsMixin, generic.TemplateView):

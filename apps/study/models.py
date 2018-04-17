@@ -75,9 +75,11 @@ class Study(models.Model):
             if self.start_time < timezone.now():
                 if self.end_time < timezone.now():
                     return StudyStatus.FINISHED
+                else:
+                    return StudyStatus.ACTIVE
             else:
                 return StudyStatus.PENDING
-        return StudyStatus.ACTIVE
+        return StudyStatus.PENDING
 
     def __str__(self):
         return self.slug
