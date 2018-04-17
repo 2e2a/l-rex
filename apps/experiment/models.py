@@ -44,7 +44,6 @@ class Experiment(models.Model):
         if len(items) % condition_count != 0:
             raise AssertionError('Number of items is not a multiple of the number of conditions.')
 
-
         item_number = 0
         for i, item in enumerate(items):
             if not item.textitem.text:
