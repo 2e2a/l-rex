@@ -1,5 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
+from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.urls import reverse
 from django.views import generic
@@ -154,26 +155,40 @@ class ExperimentResultsView(LoginRequiredMixin, generic.DetailView):
     title = 'Experiment Results'
     template_name = 'lrex_experiment/experiment_results.html'
     aggregate_by = ['subject']
+    page = 1
+    paginate_by = 16
 
     def dispatch(self, request, *args, **kwargs):
+        self.page = request.GET.get('page')
         aggregate_by = request.GET.get('aggregate_by')
         if aggregate_by:
             self.aggregate_by = aggregate_by.split(',')
         return super().dispatch(request, *args, **kwargs)
 
-    def aggregate_by_subject_url(self):
-        return reverse('experiment-results', args=[self.study, self.object]) + '?aggregate_by=subject'
+    def aggregate_by_subject_url_par(self):
+        return 'aggregate_by=subject'
 
-    def aggregate_by_subject_and_item_url(self):
-        return reverse('experiment-results', args=[self.study, self.object]) + '?aggregate_by=subject,item'
+    def aggregate_by_subject_and_item_url_par(self):
+        return 'aggregate_by=subject,item'
 
     def aggregate_by_label(self):
         return '+'.join(self.aggregate_by)
 
-    def aggregated_results(self):
+    def aggregate_by_url_par(self):
+        return 'aggregate_by=' + ','.join(self.aggregate_by)
+
+    def _aggregated_results(self):
         results = self.object.results()
         results = self.object.aggregate(results, self.aggregate_by)
-        return results
+        paginator = Paginator(results, self.paginate_by)
+        results_on_page = paginator.get_page(self.page)
+        return results_on_page
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['results'] = self._aggregated_results()
+        return data
+
 
     @property
     def study(self):

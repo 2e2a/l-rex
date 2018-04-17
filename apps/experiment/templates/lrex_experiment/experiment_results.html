@@ -8,8 +8,8 @@
             Aggregated by: {{ view.aggregate_by_label }}
         </button>
         <div class="dropdown-menu" aria-labelledby="dropdownAggregateBy">
-            <a class="dropdown-item" href="{{ view.aggregate_by_subject_url }}">Subject</a>
-            <a class="dropdown-item" href="{{ view.aggregate_by_subject_and_item_url }}">Subject+Item</a>
+            <a class="dropdown-item" href="?{{ view.aggregate_by_subject_url_par }}">Subject</a>
+            <a class="dropdown-item" href="?{{ view.aggregate_by_subject_and_item_url_par }}">Subject+Item</a>
         </div>
     </div>
     <a href="{% url 'experiment-results-csv' study_slug=view.object.study.slug slug=view.object.slug %}"
@@ -30,7 +30,7 @@
 </tr>
 </thead>
 <tbody>
-{% for row in view.aggregated_results %}
+{% for row in results %}
 <tr>
     {% if 'subject' not in view.aggregate_by %}<td scope="col">{{ row.subject }}</td>{% endif %}
     {% if 'item' not in view.aggregate_by %}<td scope="col">{{ row.item }}</td>{% endif %}
@@ -43,4 +43,27 @@
 {% endfor %}
 </tbody>
 </table>
+<nav aria-label="Pagination">
+    <ul class="pagination justify-content-center mt-2">
+        {% if results.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page=1&{{ view.aggregate_by_url_par }}">&laquo; first</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ results.previous_page_number }}&{{ view.aggregate_by_url_par }}">previous</a></li>
+        {% else %}
+        <li class="page-item disabled"><a class="page-link">&laquo; first</a></li>
+        <li class="page-item disabled"><a class="page-link">previous</a></li>
+        {% endif %}
+
+        <span class="my-2 mx-2">
+                {{ results.number }} / {{ results.paginator.num_pages }}
+            </span>
+
+        {% if results.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ results.next_page_number }}&{{ view.aggregate_by_url_par }}">next</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ results.paginator.num_pages }}&{{ view.aggregate_by_url_par }}">last &raquo;</a></li>
+        {% else %}
+        <li class="page-item disabled"><a class="page-link">next</a></li>
+        <li class="page-item disabled"><a class="page-link">last &raquo;</a></li>
+        {% endif %}
+    </ul>
+</nav>
 {% endblock %}
