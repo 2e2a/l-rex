@@ -82,6 +82,7 @@ class TrialCreateView(LoginRequiredMixin, generic.CreateView):
 class TrialListView(LoginRequiredMixin, generic.ListView):
     model = models.Trial
     title = 'Trials'
+    paginate_by = 16
 
     def dispatch(self, *args, **kwargs):
         study_slug = self.kwargs['study_slug']
