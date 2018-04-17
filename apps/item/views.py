@@ -129,6 +129,7 @@ class TextItemDeleteView(LoginRequiredMixin, contrib_views.DefaultDeleteView):
 class TextItemListView(LoginRequiredMixin, study_views.NextStepsMixin, generic.ListView):
     model = models.TextItem
     title = 'Items'
+    paginate_by = 16
 
     @property
     def study(self):
