@@ -3,10 +3,12 @@
 {% block content %}
 <h1 class="row justify-content-center mt-2">Participate In Experiment</h1>
 <div class="row justify-content-center">
-    <div class="my-2 p-4 border col-6">
+    <div class="my-2 p-4 border col-6 bg-white">
         <p>
             <em>
-                {{ view.study.rating_question }}
+                {% if view.study.rating_question %}
+                    {{ view.study.rating_question }}
+                {% endif %}
             </em>
         </p>
         <hr>

@@ -1,8 +1,8 @@
-{% extends "lrex_home/study_base.html" %}
+{% extends "lrex_home/base.html" %}
 {% load study_tags %}
 
-{% block main_content %}
-<div class="card my-1">
+{% block content %}
+<div class="card my-2">
   <div class="card-body">
     <h2 class="card-title">Settings</h2>
     <p class="card-text">
@@ -13,7 +13,7 @@
 </div>
 
 {% if object.study.is_textitem %}
-<div class="card my-1 {% if view.study|is_progress_exp_created %} border-primary {% endif %}">
+<div class="card my-2 {% if view.study|is_progress_exp_created %} border-primary {% endif %}">
     <div class="card-body">
         <h2 class="card-title">Items</h2>
         <p class="card-text">
@@ -29,7 +29,7 @@
     </div>
 </div>
 
-<div class="card my-1 {% if view.study|is_progress_exp_items_validated %} border-primary {% endif %}">
+<div class="card my-2 {% if view.study|is_progress_exp_items_validated %} border-primary {% endif %}">
     <div class="card-body">
         <h2 class="card-title">Item Lists</h2>
         <p class="card-text">

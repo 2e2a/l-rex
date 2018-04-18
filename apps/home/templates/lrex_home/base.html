@@ -1,7 +1,5 @@
 {% load static contrib_tags %}
 
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,7 +14,7 @@
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
     <link rel="stylesheet" href="{% static 'css/lrex.css' %}">
 </head>
-<body>
+<body class="bg-light">
 
 <nav class="navbar navbar-expand-md navbar-light bg-light fixed-top">
     <a class="navbar-brand" href="/">L-REX</a>
@@ -52,11 +50,23 @@
 
 
 <div class="container">
+    <ol class="breadcrumb bg-light">
+        {% for name, link in view.breadcrumbs %}
+        {% if not forloop.last %}
+        <li class="breadcrumb-item"><a href="{{ link }}">{{ name }}</a></li>
+        {% else %}
+        <li class="breadcrumb-item active">{{ name }}</li>
+        {% endif %}
+        {% endfor %}
+    </ol>
     {% for message in messages %}
     <div class="alert {{ message.level_tag|bootstrap_alert_class }}" role="alert">
         {{ message }}
     </div>
     {% endfor %}
+    {% if view.title %}
+    <h1 class="row justify-content-center mt-2">{{ view.title }}</h1>
+    {% endif %}
     {% block content %}{% endblock %}
 </div>
 </body>

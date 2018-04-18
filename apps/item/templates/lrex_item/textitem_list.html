@@ -1,27 +1,27 @@
-{% extends "lrex_home/study_base.html" %}
+{% extends "lrex_home/base.html" %}
 
-{% block main_content %}
+{% block content %}
 <div class="row justify-content-center mb-2">
     <a href="{% url 'textitem-create' study_slug=view.experiment.study.slug slug=view.experiment.slug %}"
-       class="btn btn-outline-primary btn-sm mx-1" role="button">
+       class="btn btn-outline-primary btn-sm mx-1 bg-white" role="button">
         Add Item
     </a>
     <a href="{% url 'items-pregenerate' study_slug=view.experiment.study.slug slug=view.experiment.slug %}"
-       class="btn btn-outline-primary btn-sm mx-1" role="button">
+       class="btn btn-outline-primary btn-sm mx-1 bg-white" role="button">
         Pregenerate Items
     </a>
     <a href="{% url 'textitem-upload' study_slug=view.experiment.study.slug slug=view.experiment.slug %}"
-       class="btn btn-outline-primary btn-sm mx-1" role="button">
+       class="btn btn-outline-primary btn-sm mx-1 bg-white" role="button">
         Upload CSV
     </a>
     <form method="post">
         {% csrf_token %}
-        <button type="submit" name="action" value="validate" class="btn btn-outline-primary btn-sm mx-1">
+        <button type="submit" name="action" value="validate" class="btn btn-outline-primary btn-sm mx-1 bg-white">
             Validate
         </button>
     </form>
     <a href="{% url 'textitems-delete' study_slug=view.experiment.study.slug slug=view.experiment.slug %}"
-       class="btn btn-outline-danger btn-sm mx-1" role="button">
+       class="btn btn-outline-danger btn-sm mx-1 bg-white" role="button">
         Delete All
     </a>
 </div>

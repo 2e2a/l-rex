@@ -1,7 +1,7 @@
-{% extends "lrex_home/study_base.html" %}
+{% extends "lrex_home/base.html" %}
 
-{% block main_content %}
-<div class="card my-1">
+{% block content %}
+<div class="card my-2">
     <div class="card-body">
         <h2 class="card-title">User Trials</h2>
         <p class="card-text">
@@ -11,11 +11,11 @@
     </div>
 </div>
 
-<div class="card my-1">
+<div class="card my-2">
     <div class="card-body">
         <h2 class="card-title">Results</h2>
         <p class="card-text">
-            See the current Results for your expriments.
+            See the current results for your experiments.
         </p>
         <a  class="card-link" href="{% url 'experiment-result-list' object.slug %}">Results</a>
     </div>

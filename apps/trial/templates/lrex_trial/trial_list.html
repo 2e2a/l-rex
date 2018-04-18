@@ -1,16 +1,20 @@
-{% extends "lrex_home/study_base.html" %}
+{% extends "lrex_home/base.html" %}
 
-{% block main_content %}
-<h2>Run Trial</h2>
-<p class="card-text">
-    Share <a href="{% url 'trial-create' study_slug=view.study.slug %}">this link</a> with your participants
-    along with the password set for the study.
-</p>
+{% block content %}
+<div class="card  my-2">
+    <div class="card-body">
+        <h2>Run Trial</h2>
+        <p class="card-text">
+            Share <a href="{% url 'trial-create' study_slug=view.study.slug %}">this link</a> with your participants
+            along with the password set for the study.
+        </p>
+    </div>
+</div>
 
 <h2>Trials</h2>
 <ul class="list-group">
     {% for trial in trial_list %}
-    <li class="list-group-item d-flex justify-content-between align-items-center">
+    <li class="list-group-item d-flex justify-content-between align-items-center my-1">
         <span>
             {% if view.show_counter %}
                 {{ forloop.counter }}. {{ trial.id }}

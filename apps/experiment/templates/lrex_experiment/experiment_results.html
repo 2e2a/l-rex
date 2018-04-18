@@ -1,9 +1,9 @@
-{% extends "lrex_home/study_base.html" %}
+{% extends "lrex_home/base.html" %}
 
-{% block main_content %}
+{% block content %}
 <div class="row justify-content-center mb-2">
     <div class="dropdown">
-        <button class="btn  btn-outline-primary btn-sm mx-1 dropdown-toggle" type="button" id="dropdownAggregateBy" data-toggle="dropdown"
+        <button class="btn  btn-outline-primary btn-sm mx-1 dropdown-toggle bg-white" type="button" id="dropdownAggregateBy" data-toggle="dropdown"
                 aria-haspopup="true" aria-expanded="false">
             Aggregated by: {{ view.aggregate_by_label }}
         </button>
@@ -13,11 +13,11 @@
         </div>
     </div>
     <a href="{% url 'experiment-results-csv' study_slug=view.object.study.slug slug=view.object.slug %}"
-       class="btn btn-outline-primary btn-sm mx-1" role="button">
+       class="btn btn-outline-primary btn-sm mx-1 bg-white" role="button">
         Download CSV
     </a>
 </div>
-<table class="table">
+<table class="table bg-white">
 <thead>
 <tr>
     {% if 'subject' not in view.aggregate_by %}<th scope="col">Subject</th>{% endif %}
@@ -55,7 +55,7 @@
 
         <span class="my-2 mx-2">
                 {{ results.number }} / {{ results.paginator.num_pages }}
-            </span>
+        </span>
 
         {% if results.has_next %}
         <li class="page-item"><a class="page-link" href="?page={{ results.next_page_number }}&{{ view.aggregate_by_url_par }}">next</a></li>

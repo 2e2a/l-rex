@@ -1,9 +1,9 @@
-{% extends "lrex_home/study_base.html" %}
+{% extends "lrex_home/base.html" %}
 
-{% block main_content %}
+{% block content %}
 <ul class="list-group">
     {% for experiment in experiment_list %}
-    <li class="list-group-item d-flex justify-content-between align-items-center">
+    <li class="list-group-item d-flex justify-content-between align-items-center my-1">
         {{ experiment.title }}
         <span>
             <a href="{% url 'experiment-results' study_slug=view.study.slug slug=experiment.slug %}" class="btn btn-outline-primary btn-sm mx-1" role="button">
