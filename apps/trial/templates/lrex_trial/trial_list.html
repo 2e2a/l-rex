@@ -4,6 +4,11 @@
 <div class="card  my-2">
     <div class="card-body">
         <h2>Run Trial</h2>
+        {% if not view.study.is_published %}
+        <p class="card-text">
+            Pubish your study first.
+        </p>
+        {% endif %}
         <p class="card-text">
             Share <a href="{% url 'trial-create' study_slug=view.study.slug %}">this link</a> with your participants
             along with the password set for the study.

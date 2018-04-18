@@ -7,10 +7,10 @@
     <div class="my-2 p-4 border col-6 bg-white">
         {% if view.study.status.name == 'ACTIVE' %}
         {% crispy form form.helper %}
-        {% elif view.study.status.name == 'PENDING' %}
-        <p>Experiment participation will start on {{ view.study.start_time }}.</p>
+        {% elif view.study.status.name == 'DRAFT' %}
+        <p>Experiment is not yet published.</p>
         {% else %}
-        <p>Experiment participation is finished on  {{ view.study.start_time }}.</p>
+        <p>Experiment participation is finished.</p>
         {% endif %}
     </div>
 </div>

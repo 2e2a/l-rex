@@ -9,7 +9,7 @@ from apps.contrib import math
 
 
 class StudyStatus(Enum):
-    PENDING = auto()
+    DRAFT = auto()
     ACTIVE = auto()
     FINISHED = auto()
 
@@ -30,8 +30,9 @@ class Study(models.Model):
     rating_legend = models.TextField(max_length=1024, blank=True, null=True)
     password = models.CharField(max_length=200)
     allow_anonymous = models.BooleanField()
-    start_time = models.DateTimeField(blank=True, null=True)
-    end_time = models.DateTimeField(blank=True, null=True)
+    end_date = models.DateField(blank=True, null=True)
+    trial_limit = models.IntegerField(null=True, blank=True)
+    is_published = models.BooleanField(default=False)
 
     PROGRESS_STD_CREATED = '00sc'
     PROGRESS_STD_SCALE_CONFIGURED = '01ss'
@@ -40,7 +41,7 @@ class Study(models.Model):
     PROGRESS_EXP_ITEMS_VALIDATED = '04iv'
     PROGRESS_EXP_LISTS_CREATED = '05lc'
     PROGRESS_STD_QUESTIONNARES_GENERATED = '06sq'
-    PROGRESS_STD_RUN = '07sq'
+    PROGRESS_STD_PUBLISED = '07sp'
     PROGRESS = (
         (PROGRESS_STD_CREATED, 'Create a study'),
         (PROGRESS_STD_SCALE_CONFIGURED, 'Configure the rating scale '),
@@ -49,7 +50,7 @@ class Study(models.Model):
         (PROGRESS_EXP_ITEMS_VALIDATED, 'Validate the experiment items consistancy'),
         (PROGRESS_EXP_LISTS_CREATED, 'Generate item lists'),
         (PROGRESS_STD_QUESTIONNARES_GENERATED, 'Generate questionnaires'),
-        (PROGRESS_STD_RUN, 'Run a study'),
+        (PROGRESS_STD_PUBLISED, 'Publish the study'),
     )
     progress = models.CharField(
         max_length=4,
@@ -71,15 +72,14 @@ class Study(models.Model):
 
     @property
     def status(self):
-        if self.start_time and self.end_time:
-            if self.start_time < timezone.now():
-                if self.end_time < timezone.now():
-                    return StudyStatus.FINISHED
-                else:
-                    return StudyStatus.ACTIVE
-            else:
-                return StudyStatus.PENDING
-        return StudyStatus.PENDING
+        from apps.trial.models import Trial
+        if not self.is_published:
+            return StudyStatus.DRAFT
+        if self.end_date and self.end_date < timezone.now():
+            return StudyStatus.FINISHED
+        if self.trial_limit  and self.trial_limit >= Trial.objects.filter(questionnair__study=self):
+            return StudyStatus.FINISHED
+        return StudyStatus.ACTIVE
 
     def __str__(self):
         return self.slug
@@ -154,8 +154,8 @@ class Study(models.Model):
                 return reverse('itemlists', args=[self, experiment])
         elif progress == self.PROGRESS_STD_QUESTIONNARES_GENERATED:
             return reverse('questionnaires', args=[self])
-        elif progress == self.PROGRESS_STD_RUN:
-            return reverse('studies', args=[])
+        elif progress == self.PROGRESS_STD_PUBLISED:
+            return reverse('study-run', args=[self])
         return None
 
     def _next_progress_steps(self, progress):
@@ -172,8 +172,8 @@ class Study(models.Model):
         elif progress == self.PROGRESS_EXP_LISTS_CREATED:
             return [self.PROGRESS_EXP_CREATED, self.PROGRESS_STD_QUESTIONNARES_GENERATED]
         elif progress == self.PROGRESS_STD_QUESTIONNARES_GENERATED:
-            return [ self.PROGRESS_STD_RUN ]
-        elif progress == self.PROGRESS_STD_RUN:
+            return [ self.PROGRESS_STD_PUBLISED ]
+        elif progress == self.PROGRESS_STD_PUBLISED:
             return []
 
     def next_steps(self, experiment=None):

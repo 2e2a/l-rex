@@ -1,8 +1,8 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
+from django.shortcuts import redirect
 from django.urls import reverse
-from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.views import generic
 
@@ -32,7 +32,6 @@ class NextStepsMixin:
         return response
 
 
-
 class StudyDetailView(LoginRequiredMixin, NextStepsMixin, generic.DetailView):
     model = models.Study
     title = 'Create Study'
@@ -49,10 +48,24 @@ class StudyDetailView(LoginRequiredMixin, NextStepsMixin, generic.DetailView):
         ]
 
 
-class StudyRunView(LoginRequiredMixin, generic.DetailView):
+class StudyRunView(LoginRequiredMixin, NextStepsMixin, generic.DetailView):
     model = models.Study
     title = 'Run Study'
     template_name = 'lrex_study/study_run.html'
+
+    def post(self, request, *args, **kwargs):
+        action = request.POST.get('action', None)
+        if action:
+            study = self.get_object()
+            if action == 'publish':
+                study.is_published = True
+                study.progress = study.PROGRESS_STD_PUBLISED
+            elif action == 'unpublish':
+                study.is_published = False
+                study.progress = study.PROGRESS_STD_QUESTIONNARES_GENERATED
+            study.save()
+            messages.success(request, progress_success_message(study.progress))
+        return redirect('study-run', slug=study.slug)
 
     @property
     def breadcrumbs(self):
@@ -63,7 +76,7 @@ class StudyRunView(LoginRequiredMixin, generic.DetailView):
 
     @property
     def study(self):
-        return self.object
+        return self.get_object()
 
 
 class StudyCreateView(LoginRequiredMixin, generic.CreateView):
