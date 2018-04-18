@@ -125,15 +125,6 @@ class StudyListView(LoginRequiredMixin, generic.ListView):
         ]
 
 
-class StudyParticipateListView(generic.ListView):
-    model = models.Study
-    title = 'Active Studies'
-    template_name = 'lrex_study/study_participate_list.html'
-
-    def get_queryset(self):
-        return super().get_queryset().filter(start_time__lte=timezone.now()).filter(end_time__gte=timezone.now())
-
-
 class ScaleUpdateView(LoginRequiredMixin, NextStepsMixin, generic.TemplateView):
     model = models.Study
     title = 'Edit Rating Scale'
