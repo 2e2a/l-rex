@@ -4,10 +4,10 @@
 {% block content %}
 <h1 class="row justify-content-center mt-2">Login</h1>
 <div class="row justify-content-center">
-     <div class="col-4">
+    <div class="my-2 p-4 border col-4 bg-white">
          <form action="" method="post">{% csrf_token %}
              {{ form|crispy }}
-             <input type="submit" />
+             <button type="submit" class="btn btn-primary">Submit</button>
          </form>
      </div>
 </div>
