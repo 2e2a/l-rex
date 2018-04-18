@@ -13,8 +13,12 @@ class StudyStatus(Enum):
     ACTIVE = auto()
     FINISHED = auto()
 
+
 class Study(models.Model):
-    title = models.CharField(max_length=200)
+    title = models.CharField(
+        max_length=200,
+        help_text='TODO',
+        )
     slug = models.SlugField(unique=True)
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     ITEM_TYPE = (
@@ -25,14 +29,43 @@ class Study(models.Model):
         choices=ITEM_TYPE,
         default='txt',
     )
-    rating_instructions = models.TextField(max_length=1024)
-    rating_question = models.CharField(max_length=200, blank=True, null=True)
-    rating_legend = models.TextField(max_length=1024, blank=True, null=True)
-    password = models.CharField(max_length=200)
-    allow_anonymous = models.BooleanField()
-    end_date = models.DateField(blank=True, null=True)
-    trial_limit = models.IntegerField(null=True, blank=True)
-    is_published = models.BooleanField(default=False)
+    rating_instructions = models.TextField(
+        max_length=1024,
+        help_text='TODO',
+    )
+    rating_question = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text='TODO',
+    )
+    rating_legend = models.TextField(
+        max_length=1024,
+        blank=True,
+        null=True,
+        help_text='TODO',
+    )
+    password = models.CharField(
+        max_length=200,
+        help_text='TODO',
+    )
+    allow_anonymous = models.BooleanField(
+        help_text='TODO',
+    )
+    end_date = models.DateField(
+        blank=True,
+        null=True,
+        help_text='TODO',
+    )
+    trial_limit = models.IntegerField(
+        null=True,
+        blank=True,
+        help_text='TODO',
+    )
+    is_published = models.BooleanField(
+        default=False,
+        help_text='TODO',
+    )
 
     PROGRESS_STD_CREATED = '00sc'
     PROGRESS_STD_SCALE_CONFIGURED = '01ss'
@@ -190,7 +223,10 @@ class ScaleValue(models.Model):
         on_delete=models.CASCADE
     )
     number = models.IntegerField()
-    label = models.CharField(max_length=50)
+    label = models.CharField(
+        max_length=50,
+        help_text='TODO',
+    )
 
     class Meta:
         ordering = ['number']

@@ -46,7 +46,7 @@ class TrialStatus(Enum):
     CREATED = auto()
     STARTED = auto()
     FINISHED = auto()
-    ABANDOND = auto()
+    ABANDONED = auto()
 
 
 class Trial(models.Model):
@@ -60,7 +60,12 @@ class Trial(models.Model):
     creation_date = models.DateTimeField(
         default=timezone.now
     )
-    id = models.CharField(max_length=200, blank=True, null=True)
+    id = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text='TODO',
+    )
 
     class Meta:
         ordering = ['creation_date']
@@ -78,7 +83,7 @@ class Trial(models.Model):
             if n_ratings == n_trial_items:
                 return TrialStatus.FINISHED
             if self.creation_date + timedelta(1) < timezone.now():
-                return TrialStatus.ABANDOND
+                return TrialStatus.ABANDONED
             return TrialStatus.STARTED
         return TrialStatus.CREATED
 

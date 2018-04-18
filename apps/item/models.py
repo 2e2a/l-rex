@@ -1,9 +1,15 @@
 from django.urls import reverse
 from django.db import models
 
+
 class Item(models.Model):
-    number = models.IntegerField()
-    condition = models.CharField(max_length=8)
+    number = models.IntegerField(
+        help_text='TODO',
+    )
+    condition = models.CharField(
+        max_length=8,
+        help_text='TODO',
+    )
     experiment = models.ForeignKey(
         'lrex_experiment.Experiment',
         on_delete=models.CASCADE
@@ -17,7 +23,10 @@ class Item(models.Model):
 
 
 class TextItem(Item):
-    text = models.TextField(max_length=1024)
+    text = models.TextField(
+        max_length=1024,
+        help_text='TODO',
+    )
 
     def get_absolute_url(self):
         return reverse('textitem-update', args=[self.experiment.study.slug, self.experiment.slug, self.pk])

@@ -8,7 +8,10 @@ from apps.trial import models as trial_models
 
 
 class Experiment(models.Model):
-    title = models.CharField(max_length=200)
+    title = models.CharField(
+        max_length=200,
+        help_text='TODO',
+    )
     slug = models.SlugField(unique=True)
     study = models.ForeignKey(
         'lrex_study.Study',

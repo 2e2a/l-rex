@@ -7,7 +7,11 @@ from . import models
 
 
 class TrialForm(crispy_forms.CrispyModelForm):
-    password = forms.CharField(max_length=200, widget=forms.PasswordInput)
+    password = forms.CharField(
+        max_length=200,
+        widget=forms.PasswordInput,
+        help_text='TODO',
+    )
 
     class Meta:
         model = models.Trial
