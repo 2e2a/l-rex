@@ -13,9 +13,9 @@
   },
   "homepage": "https://github.com/2e2a/l-rex#readme",
   "dependencies": {
-    "bootstrap": "^4.0.0-beta.3",
-    "jquery": "^3.2.1",
-    "node-sass": "^4.7.2",
-    "popper.js": "^1.12.9"
+    "bootstrap": "^4.1.0",
+    "jquery": "^3.3.1",
+    "node-sass": "^4.8.3",
+    "popper.js": "^1.14.3"
   }
 }
