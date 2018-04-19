@@ -16,12 +16,11 @@ from . import forms
 from . import models
 
 
-class TextItemCreateView(LoginRequiredMixin, SuccessMessageMixin, generic.CreateView):
+class TextItemCreateView(LoginRequiredMixin, generic.CreateView):
     model = models.TextItem
     title = 'Add Item'
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.TextItemForm
-    success_message = 'Item successfully created.'
 
     def dispatch(self, *args, **kwargs):
         experiment_slug = self.kwargs['slug']
@@ -35,10 +34,8 @@ class TextItemCreateView(LoginRequiredMixin, SuccessMessageMixin, generic.Create
     def form_valid(self, form):
         form.instance.experiment = self.experiment
         result = super().form_valid(form)
-        self.study.progress = self.study.PROGRESS_EXP_ITEMS_CREATED
-        self.study.save()
-        if self.study.progress == self.study.PROGRESS_EXP_CREATED:
-            messages.success(self.request, study_views.progress_success_message(self.study.progress))
+        self.experiment.set_progress(experiment_models.Experiment.PROGRESS_EXP_ITEMS_CREATED)
+        messages.success(self.request, study_views.progress_success_message(self.experiment.progress))
         return result
 
     def get_success_url(self):
@@ -68,8 +65,7 @@ class TextItemUpdateView(LoginRequiredMixin, SuccessMessageMixin, generic.Update
 
     def form_valid(self, form):
         result = super().form_valid(form)
-        self.study.progress = self.study.PROGRESS_EXP_ITEMS_CREATED
-        self.study.save()
+        self.object.experiment.set_progress(self.object.experiment.PROGRESS_EXP_ITEMS_CREATED)
         return result
 
     @property
@@ -101,10 +97,9 @@ class TextItemDeleteView(LoginRequiredMixin, contrib_views.DefaultDeleteView):
         response = super().delete(*args, **kwargs)
         experiment = self.object.experiment
         if not models.Item.objects.filter(experiment=experiment).exists():
-            experiment.study.progress = experiment.study.PROGRESS_EXP_CREATED
+            experiment.set_progress(experiment.PROGRESS_EXP_CREATED)
         else:
-            experiment.study.progress = experiment.study.PROGRESS_EXP_ITEMS_CREATED
-        experiment.study.save()
+            experiment.set_progress(experiment.PROGRESS_EXP_ITEMS_CREATED)
         return response
 
     @property
@@ -145,9 +140,8 @@ class TextItemListView(LoginRequiredMixin, study_views.NextStepsMixin, generic.L
         if action and action == 'validate':
             try:
                 self.experiment.validate_items()
-                self.study.progress = self.study.PROGRESS_EXP_ITEMS_VALIDATED
-                messages.success(self.request, study_views.progress_success_message(self.study.progress))
-                self.study.save()
+                self.experiment.set_progress(self.experiment.PROGRESS_EXP_ITEMS_VALIDATED)
+                messages.success(self.request, study_views.progress_success_message(self.experiment.progress))
             except AssertionError as e:
                 messages.error(request, str(e))
         return redirect('textitems',study_slug=self.experiment.study.slug, slug=self.experiment.slug)
@@ -193,9 +187,6 @@ class ItemPregenerateView(LoginRequiredMixin, SuccessMessageMixin, generic.FormV
         n_items = form.cleaned_data['num_items']
         n_conditions = form.cleaned_data['num_conditions']
         self._pregenerate_items(n_items, n_conditions)
-        self.study.progress = self.study.PROGRESS_EXP_ITEMS_CREATED
-        messages.success(self.request, study_views.progress_success_message(self.study.progress))
-        self.study.save()
         return result
 
     def get_success_url(self):
@@ -246,9 +237,8 @@ class TextItemUploadView(LoginRequiredMixin, generic.FormView):
                 experiment=self.experiment,
             )
 
-        self.study.progress = self.study.PROGRESS_EXP_ITEMS_CREATED
-        messages.success(self.request, study_views.progress_success_message(self.study.progress))
-        self.study.save()
+        self.experiment.set_progress(self.experiment.PROGRESS_EXP_ITEMS_CREATED)
+        messages.success(self.request, study_views.progress_success_message(self.experiment.progress))
         return result
 
     def get_success_url(self):
@@ -279,8 +269,7 @@ class TextItemDeleteAllView(LoginRequiredMixin, generic.TemplateView):
 
     def post(self, request, *args, **kwargs):
         models.Item.objects.filter(experiment=self.experiment).delete()
-        self.experiment.study.progress = self.experiment.study.PROGRESS_EXP_CREATED
-        self.experiment.study.save()
+        self.experiment.set_progress(self.experiment.PROGRESS_EXP_CREATED)
         messages.success(self.request, 'Deletion successfull.')
         return redirect(self.get_success_url())
 
@@ -318,9 +307,8 @@ class ItemListListView(LoginRequiredMixin, study_views.NextStepsMixin, generic.L
         action = request.POST.get('action', None)
         if action and action == 'generate_item_lists':
             self.experiment.compute_item_lists()
-            self.study.progress = self.study.PROGRESS_EXP_LISTS_CREATED
-            messages.success(self.request, study_views.progress_success_message(self.study.progress))
-            self.study.save()
+            self.experiment.set_progress(self.experiment.PROGRESS_EXP_LISTS_CREATED)
+            messages.success(self.request, study_views.progress_success_message(self.experiment.progress))
         return redirect('itemlists',study_slug=self.experiment.study.slug, slug=self.experiment.slug)
 
     def get_queryset(self):

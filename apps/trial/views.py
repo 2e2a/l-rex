@@ -25,8 +25,7 @@ class QuestionnaireListView(LoginRequiredMixin, study_views.NextStepsMixin, gene
         action = request.POST.get('action', None)
         if action and action == 'generate_questionnaires':
             self.study.generate_questionnaires()
-            self.study.progress = self.study.PROGRESS_STD_QUESTIONNARES_GENERATED
-            self.study.save()
+            self.study.set_progress(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED)
             messages.success(request, study_views.progress_success_message(self.study.progress))
         return redirect('questionnaires',study_slug=self.study.slug)
 

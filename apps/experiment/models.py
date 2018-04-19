@@ -17,6 +17,21 @@ class Experiment(models.Model):
         'lrex_study.Study',
         on_delete=models.CASCADE
     )
+    PROGRESS_EXP_CREATED = '03ec'
+    PROGRESS_EXP_ITEMS_CREATED = '03ic'
+    PROGRESS_EXP_ITEMS_VALIDATED = '04iv'
+    PROGRESS_EXP_LISTS_CREATED = '05lc'
+    PROGRESS = (
+        (PROGRESS_EXP_CREATED, 'Create an experiment'),
+        (PROGRESS_EXP_ITEMS_CREATED, 'Create or upload experiment items'),
+        (PROGRESS_EXP_ITEMS_VALIDATED, 'Validate the experiment items consistency'),
+        (PROGRESS_EXP_LISTS_CREATED, 'Generate item lists'),
+    )
+    progress = models.CharField(
+        max_length=4,
+        choices=PROGRESS,
+        default=PROGRESS_EXP_CREATED,
+    )
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.title)
@@ -139,3 +154,47 @@ class Experiment(models.Model):
         for row in results:
             writer.writerow(
                 [ row['subject'], row['item'], row['condition'], row['rating'], row['text']])
+
+    @staticmethod
+    def progress_description(progress):
+        return dict(Experiment.PROGRESS)[progress]
+
+    def progress_reached(self, progress):
+        return self.progress >= progress
+
+    def progress_url(self, progress):
+        if progress == self.PROGRESS_EXP_ITEMS_CREATED:
+            return reverse('textitems', args=[self.study, self])
+        elif progress == self.PROGRESS_EXP_ITEMS_CREATED:
+            return reverse('textitems', args=[self.study, self])
+        elif progress == self.PROGRESS_EXP_ITEMS_VALIDATED:
+            return reverse('textitems', args=[self.study, self])
+        elif progress == self.PROGRESS_EXP_LISTS_CREATED:
+            return reverse('itemlists', args=[self.study, self])
+        return None
+
+    def set_progress(self, progress):
+        # USE IT
+        self.progress = progress
+        self.save()
+        if self.study.progress != self.study.PROGRESS_STD_EXP_CREATED:
+            self.study.set_progress(self.study.PROGRESS_STD_EXP_CREATED)
+
+
+    def next_progress_steps(self, progress):
+        if progress == self.PROGRESS_EXP_CREATED:
+            return [ self.PROGRESS_EXP_ITEMS_CREATED ]
+        elif progress == self.PROGRESS_EXP_ITEMS_CREATED:
+            return [ self.PROGRESS_EXP_ITEMS_CREATED, self.PROGRESS_EXP_ITEMS_VALIDATED ]
+        elif progress == self.PROGRESS_EXP_ITEMS_VALIDATED:
+            return [ self.PROGRESS_EXP_LISTS_CREATED ]
+        elif progress == self.PROGRESS_EXP_LISTS_CREATED:
+            return []
+
+    def next_steps(self):
+        next_steps = []
+        for next_step in self.next_progress_steps(self.progress):
+            description = self.progress_description(next_step)
+            url = self.progress_url(next_step)
+            next_steps.append(( description, url, ))
+        return next_steps

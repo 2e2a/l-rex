@@ -1,5 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
+from django.contrib.messages.views import SuccessMessageMixin
 from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.urls import reverse
@@ -49,8 +50,7 @@ class ExperimentCreateView(LoginRequiredMixin, generic.CreateView):
     def form_valid(self, form):
         form.instance.study = self.study
         response = super().form_valid(form)
-        self.study.progress = self.study.PROGRESS_EXP_CREATED
-        self.study.save()
+        self.study.set_progress(self.study.PROGRESS_STD_EXP_CREATED)
         messages.success(self.request, study_views.progress_success_message(self.study.progress))
         return response
 
@@ -64,7 +64,7 @@ class ExperimentCreateView(LoginRequiredMixin, generic.CreateView):
         ]
 
 
-class ExperimentUpdateView(LoginRequiredMixin, generic.UpdateView):
+class ExperimentUpdateView(LoginRequiredMixin, SuccessMessageMixin, generic.UpdateView):
     model = models.Experiment
     title = 'Edit Experiment'
     template_name = 'lrex_contrib/crispy_form.html'
@@ -89,8 +89,7 @@ class ExperimentDeleteView(LoginRequiredMixin, contrib_views.DefaultDeleteView):
         response = super().delete(*args, **kwargs)
         study = self.object.study
         if not models.Experiment.objects.filter(study=study).exists():
-            study.progress = study.PROGRESS_STD_SCALE_CONFIGURED
-            study.save()
+            study.set_progress(study.PROGRESS_STD_SCALE_CONFIGURED)
         return response
 
     @property

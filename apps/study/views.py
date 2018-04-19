@@ -22,7 +22,7 @@ class NextStepsMixin:
 
     def get(self, request, *args, **kwargs):
         response = super().get(request, *args, **kwargs)
-        next_steps = self.study.next_steps(self.experiment)
+        next_steps = self.study.next_steps()
         for next_step in next_steps:
             description, url = next_step
             message = 'Next: {}'.format(description)
@@ -59,10 +59,10 @@ class StudyRunView(LoginRequiredMixin, NextStepsMixin, generic.DetailView):
             study = self.get_object()
             if action == 'publish':
                 study.is_published = True
-                study.progress = study.PROGRESS_STD_PUBLISED
+                study.set_progress(study.PROGRESS_STD_PUBLISHED)
             elif action == 'unpublish':
                 study.is_published = False
-                study.progress = study.PROGRESS_STD_QUESTIONNARES_GENERATED
+                study.set_progress(study.PROGRESS_STD_QUESTIONNARES_GENERATED)
             study.save()
             messages.success(request, progress_success_message(study.progress))
         return redirect('study-run', slug=study.slug)
@@ -175,8 +175,7 @@ class ScaleUpdateView(LoginRequiredMixin, NextStepsMixin, generic.TemplateView):
                 queryset=models.ScaleValue.objects.filter(study=self.study)
             )
 
-            self.study.progress = self.study.PROGRESS_STD_SCALE_CONFIGURED
-            self.study.save()
+            self.study.set_progress(self.study.PROGRESS_STD_SCALE_CONFIGURED)
             messages.success(request, progress_success_message(self.study.progress))
         return super().get(request, *args, **kwargs)
 
