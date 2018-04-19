@@ -194,7 +194,7 @@ class Experiment(models.Model):
     def next_steps(self):
         next_steps = []
         for next_step in self.next_progress_steps(self.progress):
-            description = self.progress_description(next_step)
+            description = '{} [ {} ]'.format(self.progress_description(next_step), self)
             url = self.progress_url(next_step)
             next_steps.append(( description, url, ))
         return next_steps
