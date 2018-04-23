@@ -175,8 +175,11 @@ class ScaleUpdateView(LoginRequiredMixin, NextStepsMixin, generic.TemplateView):
                 queryset=models.ScaleValue.objects.filter(study=self.study)
             )
 
-            self.study.set_progress(self.study.PROGRESS_STD_SCALE_CONFIGURED)
-            messages.success(request, progress_success_message(self.study.progress))
+            if self.study.experiment_set.exists():
+                self.study.set_progress(self.study.PROGRESS_STD_EXP_CREATED)
+            else:
+                self.study.set_progress(self.study.PROGRESS_STD_SCALE_CONFIGURED)
+                messages.success(request, progress_success_message(self.study.progress))
         return super().get(request, *args, **kwargs)
 
     @property
