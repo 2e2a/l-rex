@@ -104,7 +104,7 @@ class Study(models.Model):
             return StudyStatus.DRAFT
         if self.end_date and self.end_date < timezone.now():
             return StudyStatus.FINISHED
-        if self.trial_limit  and self.trial_limit >= Trial.objects.filter(questionnair__study=self):
+        if self.trial_limit  and self.trial_limit <= Trial.objects.filter(questionnaire__study=self).count():
             return StudyStatus.FINISHED
         return StudyStatus.ACTIVE
 
