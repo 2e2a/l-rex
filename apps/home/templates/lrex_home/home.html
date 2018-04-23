@@ -1,4 +1,5 @@
 {% extends "lrex_home/base.html" %}
+{% load static %}
 
 {% block title %}L-REX{% endblock %}
 
@@ -6,7 +7,13 @@
 
 <div class="card my-2">
     <div class="card-body">
-        <h2 class="card-title">About</h2>
+        <h2 class="card-title">
+            <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                <use xlink:href="{% static 'icons/fa-solid.svg' %}#info-circle">
+                </use>
+            </svg>
+            About
+        </h2>
         <p class="card-text">
             L-REX is a platform for Linguistic Rating Experiments.
         </p>
