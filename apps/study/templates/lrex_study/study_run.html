@@ -1,22 +1,6 @@
 {% extends "lrex_home/base.html" %}
 
 {% block content %}
-<div class="row justify-content-center mb-2">
-    <form method="post">
-        {% csrf_token %}
-        {% if object.is_published %}
-        <button type="submit" name="action" value="unpublish"
-                class="btn btn-warning btn-sm mx-1">
-            Unpublish
-        </button>
-        {% else %}
-        <button type="submit" name="action" value="publish"
-                class="btn btn-primary btn-sm mx-1">
-            Publish
-        </button>
-        {% endif %}
-    </form>
-</div>
 <div class="card my-2">
     <div class="card-body">
         <h2 class="card-title">User Trials</h2>

@@ -53,20 +53,6 @@ class StudyRunView(LoginRequiredMixin, NextStepsMixin, generic.DetailView):
     title = 'Run Study'
     template_name = 'lrex_study/study_run.html'
 
-    def post(self, request, *args, **kwargs):
-        action = request.POST.get('action', None)
-        if action:
-            study = self.get_object()
-            if action == 'publish':
-                study.is_published = True
-                study.set_progress(study.PROGRESS_STD_PUBLISHED)
-            elif action == 'unpublish':
-                study.is_published = False
-                study.set_progress(study.PROGRESS_STD_QUESTIONNARES_GENERATED)
-            study.save()
-            messages.success(request, progress_success_message(study.progress))
-        return redirect('study-run', slug=study.slug)
-
     @property
     def breadcrumbs(self):
         return [
@@ -130,6 +116,22 @@ class StudyListView(LoginRequiredMixin, generic.ListView):
 
     def get_queryset(self):
         return super().get_queryset().filter(creator=self.request.user)
+
+    def post(self, request, *args, **kwargs):
+        study_slug = request.POST.get('publish', None)
+        if study_slug:
+            study = models.Study.objects.get(slug=study_slug)
+            study.is_published = True
+            study.set_progress(study.PROGRESS_STD_PUBLISHED)
+            messages.success(request, progress_success_message(study.progress))
+            study.save()
+        study_slug = request.POST.get('unpublish', None)
+        if study_slug:
+            study = models.Study.objects.get(slug=study_slug)
+            study.is_published = False
+            study.set_progress(study.PROGRESS_STD_QUESTIONNARES_GENERATED)
+            messages.success(request, 'Study unpublished.')
+        return redirect('studies')
 
     @property
     def breadcrumbs(self):

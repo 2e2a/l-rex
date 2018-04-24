@@ -1,4 +1,5 @@
 {% extends "lrex_home/base.html" %}
+{% load progress_tags %}
 
 {% block content %}
 <div class="row justify-content-center mb-2">
@@ -14,12 +15,33 @@
             <span class="badge badge-primary">{{ study.status.name }}</span>
         </span>
         <span>
-            <a href="{% url 'study' slug=study.slug %}" class="btn btn-outline-primary btn-sm mx-1" role="button">
+            <a href="{% url 'study' slug=study.slug %}"
+               class="btn {% if view.study.status.name == 'ACTIVE' %} btn-outline-primary {% else %} btn-outline-primary {% endif %} btn-sm mx-1"
+               role="button">
                 Create/Edit
             </a>
-            <a href="{% url 'study-run' slug=study.slug %}" class="btn btn-outline-primary btn-sm mx-1" role="button">
+
+            <a href="{% url 'study-run' slug=study.slug %}"
+               class="btn btn-outline-primary btn-sm mx-1 {% if not study|is_progress_std_questionnares_generated_reached %} disabled {% endif %}"
+               role="button">
                 Run
             </a>
+
+            <form class="form-inline" method="post">
+                {% csrf_token %}
+                {% if study.is_published %}
+                <button type="submit" name="unpublish" value="{{ study.slug }}"
+                        class="btn btn-outline-warning btn-sm mx-1">
+                    Unpublish
+                </button>
+                {% else %}
+                <button type="submit" name="publish" value="{{ study.slug }}"
+                        class="btn btn-outline-success btn-sm mx-1 {% if not study|is_progress_std_questionnares_generated_reached %} disabled {% endif %}">
+                    Publish
+                </button>
+                {% endif %}
+            </form>
+
             <a href="{% url 'study-delete' slug=study.slug %}" class="btn btn-outline-danger btn-sm mx-1" role="button">
                 Delete
             </a>
