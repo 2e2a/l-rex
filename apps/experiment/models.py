@@ -52,6 +52,9 @@ class Experiment(models.Model):
     def validate_items(self):
         conditions = []
         items = self.item_set.all()
+        if len(items) == 0:
+            raise AssertionError('No items.')
+
         for item in items:
             if item.condition not in conditions:
                 conditions.append(item.condition)
