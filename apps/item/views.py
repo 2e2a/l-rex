@@ -266,6 +266,7 @@ class TextItemUploadView(LoginRequiredMixin, generic.FormView):
 class TextItemDeleteAllView(LoginRequiredMixin, generic.TemplateView):
     title = 'Confirm Delete'
     template_name = 'lrex_contrib/confirm_delete.html'
+    message =  'Delete all items?'
 
     def post(self, request, *args, **kwargs):
         models.Item.objects.filter(experiment=self.experiment).delete()
