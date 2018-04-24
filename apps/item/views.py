@@ -186,6 +186,7 @@ class ItemPregenerateView(LoginRequiredMixin, SuccessMessageMixin, generic.FormV
         result =  super().form_valid(form)
         n_items = form.cleaned_data['num_items']
         n_conditions = form.cleaned_data['num_conditions']
+        models.Item.objects.filter(experiment=self.experiment).delete()
         self._pregenerate_items(n_items, n_conditions)
         return result
 
@@ -229,6 +230,7 @@ class TextItemUploadView(LoginRequiredMixin, generic.FormView):
         data = file.read().decode()
         dialect = csv.Sniffer().sniff(data[:128])
         reader = csv.reader(StringIO(data), dialect)
+        models.Item.objects.filter(experiment=self.experiment).delete()
         for row in reader:
             models.TextItem.objects.create(
                 number=row[num_col - 1],
