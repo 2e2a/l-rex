@@ -1,33 +1,16 @@
-from django.conf.urls import url
-from django.conf.urls import include
+from django.urls import include, path
 
 from apps.item import urls as item_urls
 from . import views
 
 urlpatterns = [
-    url(r'^(?P<slug>[-\w_]+)/item/', include(item_urls)),
-    url(r'^create/$',
-        views.ExperimentCreateView.as_view(),
-        name='experiment-create'),
-    url(r'^update/(?P<slug>[-\w_]+)/$',
-        views.ExperimentUpdateView.as_view(),
-        name='experiment-update'),
-    url(r'^delete/(?P<slug>[-\w_]+)/$',
-        views.ExperimentDeleteView.as_view(),
-        name='experiment-delete'),
-    url(r'^results/$',
-        views.ExperimentResultListView.as_view(),
-        name='experiment-result-list'),
-    url(r'^results/(?P<slug>[-\w_]+)/$',
-        views.ExperimentResultsView.as_view(),
-        name='experiment-results'),
-    url(r'^results/(?P<slug>[-\w_]+)/csv/$',
-        views.ExperimentResultsCSVDownloadView.as_view(),
-        name='experiment-results-csv'),
-    url(r'^(?P<slug>[-\w_]+)/$',
-        views.ExperimentDetailView.as_view(),
-        name='experiment'),
-    url(r'^$',
-        views.ExperimentListView.as_view(),
-        name='experiments'),
+    path('<slug:slug>/item/', include(item_urls)),
+    path('create/', views.ExperimentCreateView.as_view(), name='experiment-create'),
+    path('update/<slug:slug>/', views.ExperimentUpdateView.as_view(), name='experiment-update'),
+    path('delete/<slug:slug>/', views.ExperimentDeleteView.as_view(), name='experiment-delete'),
+    path('results/', views.ExperimentResultListView.as_view(), name='experiment-result-list'),
+    path('results/<slug:slug>/', views.ExperimentResultsView.as_view(), name='experiment-results'),
+    path('results/<slug:slug>/csv/', views.ExperimentResultsCSVDownloadView.as_view(), name='experiment-results-csv'),
+    path('<slug:slug>/', views.ExperimentDetailView.as_view(), name='experiment'),
+    path('', views.ExperimentListView.as_view(), name='experiments'),
 ]

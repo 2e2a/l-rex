@@ -1,33 +1,15 @@
-from django.conf.urls import url
+from django.urls import path
 
 from . import views
 
 urlpatterns = [
-    url(r'^questionnaires/$',
-        views.QuestionnaireListView.as_view(),
-        name='questionnaires'),
-    url(r'^participate/$',
-        views.TrialCreateView.as_view(),
-        name='trial-create'),
-    url(r'^trials/$',
-        views.TrialListView.as_view(),
-        name='trials'),
-    url(r'^delete/(?P<slug>[-\w_]+)/$',
-        views.TrialDeleteView.as_view(),
-        name='trial-delete'),
-    url(r'^(?P<slug>[-\w_]+)/rating/intro/$',
-        views.RatingIntroView.as_view(),
-        name='rating-intro'),
-    url(r'^(?P<slug>[-\w_]+)/rating/outro/$',
-        views.RatingOutroView.as_view(),
-        name='rating-outro'),
-    url(r'^(?P<slug>[-\w_]+)/rating/taken/$',
-        views.RatingTakenView.as_view(),
-        name='rating-taken'),
-    url(r'^(?P<slug>[-\w_]+)/rating/(?P<num>[0-9]+)/$',
-        views.RatingCreateView.as_view(),
-        name='rating-create'),
-    url(r'^(?P<slug>[-\w_]+)/$',
-        views.TrialDetailView.as_view(),
-        name='trial'),
+    path('questionnaires/', views.QuestionnaireListView.as_view(), name='questionnaires'),
+    path('trials/', views.TrialListView.as_view(), name='trials'),
+    path('delete/<slug:slug>/', views.TrialDeleteView.as_view(), name='trial-delete'),
+    path('participate/', views.TrialCreateView.as_view(), name='trial-create'),
+    path('<slug:slug>/rating/intro/', views.RatingIntroView.as_view(), name='rating-intro'),
+    path('<slug:slug>/rating/outro/', views.RatingOutroView.as_view(), name='rating-outro'),
+    path('<slug:slug>/rating/taken/', views.RatingTakenView.as_view(), name='rating-taken'),
+    path('<slug:slug>/rating/<int:num>/', views.RatingCreateView.as_view(), name='rating-create'),
+    path('<slug:slug>/', views.TrialDetailView.as_view(), name='trial'),
 ]
