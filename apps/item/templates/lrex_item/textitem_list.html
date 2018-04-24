@@ -3,25 +3,25 @@
 {% block content %}
 <div class="row justify-content-center mb-2">
     <a href="{% url 'textitem-create' study_slug=view.experiment.study.slug slug=view.experiment.slug %}"
-       class="btn btn-outline-primary btn-sm mx-1 bg-white" role="button">
+       class="btn btn-primary btn-sm mx-1" role="button">
         Add Item
     </a>
     <a href="{% url 'items-pregenerate' study_slug=view.experiment.study.slug slug=view.experiment.slug %}"
-       class="btn btn-outline-primary btn-sm mx-1 bg-white" role="button">
+       class="btn btn-primary btn-sm mx-1" role="button">
         Pregenerate Items
     </a>
     <a href="{% url 'textitem-upload' study_slug=view.experiment.study.slug slug=view.experiment.slug %}"
-       class="btn btn-outline-primary btn-sm mx-1 bg-white" role="button">
+       class="btn btn-primary btn-sm mx-1" role="button">
         Upload CSV
     </a>
     <form method="post">
         {% csrf_token %}
-        <button type="submit" name="action" value="validate" class="btn btn-outline-primary btn-sm mx-1 bg-white">
+        <button type="submit" name="action" value="validate" class="btn btn-primary btn-sm mx-1">
             Validate
         </button>
     </form>
     <a href="{% url 'textitems-delete' study_slug=view.experiment.study.slug slug=view.experiment.slug %}"
-       class="btn btn-outline-danger btn-sm mx-1 bg-white" role="button">
+       class="btn btn-danger btn-sm mx-1" role="button">
         Delete All
     </a>
 </div>
