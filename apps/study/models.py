@@ -102,7 +102,7 @@ class Study(models.Model):
         from apps.trial.models import Trial
         if not self.is_published:
             return StudyStatus.DRAFT
-        if self.end_date and self.end_date < timezone.now():
+        if self.end_date and self.end_date < timezone.now().date():
             return StudyStatus.FINISHED
         if self.trial_limit  and self.trial_limit <= Trial.objects.filter(questionnaire__study=self).count():
             return StudyStatus.FINISHED
