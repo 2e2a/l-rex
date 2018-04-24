@@ -20,11 +20,9 @@
     <tbody>
     {% for item_list in itemlist_list %}
     <tr>
-        <td class="col-md-1">{{ item_list.number }}</td>
+        <td>{{ item_list.number }}</td>
         <td>
-            {% for item in item_list.items.all %}
-                {{ item }},
-            {% endfor %}
+            {% for item in item_list.items.all %}{{ item }}{% if not forloop.last %},{% endif %}{% endfor %}
         </td>
     </tr>
     {% endfor %}
