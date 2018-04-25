@@ -1,5 +1,4 @@
 {% extends "lrex_home/base.html" %}
-{% load static %}
 
 {% block title %}L-REX{% endblock %}
 
@@ -7,13 +6,10 @@
 
 <div class="card my-2">
     <div class="card-body">
-        <h2 class="card-title">
-            <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                <use xlink:href="{% static 'icons/fa-solid.svg' %}#info-circle">
-                </use>
-            </svg>
-            About
-        </h2>
+        <div class="d-flex justify-content-between">
+            <h2 class="card-title">About</h2>
+            {% include 'lrex_contrib/icon_snippet.html' with icon='info-circle' %}
+        </div>
         <p class="card-text">
             L-REX is a platform for Linguistic Rating Experiments.
         </p>
@@ -22,7 +18,10 @@
 
 <div class="card my-2">
     <div class="card-body">
-        <h2 class="card-title">Create and Run Experiment Studies</h2>
+        <div class="d-flex justify-content-between">
+            <h2 class="card-title">Create and Run Experiment Studies</h2>
+            {% include 'lrex_contrib/icon_snippet.html' with icon='graduation-cap' %}
+        </div>
         <p class="card-text">
             Here are your Experiment Studys. User account required.
         </p>
@@ -32,7 +31,10 @@
 
 <div class="card my-2">
     <div class="card-body">
-        <h2 class="card-title">Documentation</h2>
+        <div class="d-flex justify-content-between">
+            <h2 class="card-title">Documentation</h2>
+            {% include 'lrex_contrib/icon_snippet.html' with icon='book' %}
+        </div>
         <p class="card-text">
             Platform description and usage help.
         </p>
@@ -42,7 +44,10 @@
 
 <div class="card my-2">
     <div class="card-body">
-        <h2 class="card-title">Contribute</h2>
+        <div class="d-flex justify-content-between">
+            <h2 class="card-title">Contribute</h2>
+            {% include 'lrex_contrib/icon_snippet.html' with icon='users' %}
+        </div>
         <p class="card-text">
             This software ist free and open source. Submit your issues and feature requests. Create pull requests.
         </p>
