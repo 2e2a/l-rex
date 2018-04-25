@@ -10,5 +10,5 @@ urlpatterns = [
     path('update/<int:pk>/', views.TextItemUpdateView.as_view(), name='textitem-update'),
     path('delete/<int:pk>/', views.TextItemDeleteView.as_view(), name='textitem-delete'),
     path('', views.TextItemListView.as_view(), name='textitems'),
-    path('lists/$', views.ItemListListView.as_view(), name='itemlists'),
+    path('lists/', views.ItemListListView.as_view(), name='itemlists'),
 ]
