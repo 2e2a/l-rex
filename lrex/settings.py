@@ -12,9 +12,6 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 
 import os
 
-# Import local settings
-from .local import *
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -86,14 +83,7 @@ WSGI_APPLICATION = 'lrex.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': PSQL_DB,
-        'USER': PSQL_USER,
-        'PASSWORD': PSQL_PASSWORD,
-    }
-}
+DATABASES = {}
 
 # User
 LOGIN_REDIRECT_URL = '/study/'
@@ -142,7 +132,16 @@ STATIC_URL = '/static/'
 # Other
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
-# Security
+# Security (set all True in production)
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
 X_FRAME_OPTIONS = 'DENY'
+SECURE_HSTS_SECONDS = False
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
+SECURE_SSL_REDIRECT = False
+SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+
+# Import local settings
+from .local import *
+
