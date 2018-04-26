@@ -19,17 +19,14 @@ install:
 
 
 .PHONY: js
-build:
-	cp -ra lrex/static/js/ static/
-	cp -ra lrex/static/icons/ static/
-	cp $(NODE_MODULES)/jquery/dist/jquery.slim.min.js static/js/
-	cp $(NODE_MODULES)/popper.js/dist/umd/popper.min.js static/js/
-	cp $(NODE_MODULES)/bootstrap/dist/js/bootstrap.min.js static/js/
+js:
+	cp $(NODE_MODULES)/jquery/dist/jquery.slim.min.js lrex/static/js/
+	cp $(NODE_MODULES)/popper.js/dist/umd/popper.min.js lrex/static/js/
+	cp $(NODE_MODULES)/bootstrap/dist/js/bootstrap.min.js lrex/static/js/
 
 .PHONY: scss
 scss:
-	mkdir -p static/css
-	$(NODE_BIN)/node-sass lrex/static/scss/style.scss > static/css/lrex.css
+	$(NODE_BIN)/node-sass lrex/assets/scss/style.scss > lrex/static/css/lrex.css
 
 .PHONY: build
 build: js scss
