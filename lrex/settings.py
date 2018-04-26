@@ -149,6 +149,9 @@ SECURE_SSL_REDIRECT = False
 SECURE_HSTS_INCLUDE_SUBDOMAINS = False
 SECURE_HSTS_PRELOAD = False
 
+# deployment dependant static content
+IMPRINT = 'Please define an imprint in local.py'
+
 # Import local settings
 from .local import *
 
