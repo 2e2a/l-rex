@@ -3,7 +3,6 @@
 /.env
 /.idea
 /lrex/local.py
-/lrex/static/js/
-/lrex/static/css/
+/lrex/static/
 /node_modules/
 /static/

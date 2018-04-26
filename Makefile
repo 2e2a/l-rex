@@ -20,12 +20,14 @@ install:
 
 .PHONY: js
 js:
+	mkdir -p lrex/static/js
 	cp $(NODE_MODULES)/jquery/dist/jquery.slim.min.js lrex/static/js/
 	cp $(NODE_MODULES)/popper.js/dist/umd/popper.min.js lrex/static/js/
 	cp $(NODE_MODULES)/bootstrap/dist/js/bootstrap.min.js lrex/static/js/
 
 .PHONY: scss
 scss:
+	mkdir -p lrex/static/css
 	$(NODE_BIN)/node-sass lrex/assets/scss/style.scss > lrex/static/css/lrex.css
 
 .PHONY: build
