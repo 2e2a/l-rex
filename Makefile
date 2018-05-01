@@ -16,6 +16,11 @@ install:
 	$(VIRTUAL_ENV)/bin/python3 -m pip install -r requirements.txt
 	wget -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/advanced-options/svg-sprites/fa-solid.svg -P lrex/static/icons/
 
+.PHONY: update
+update:
+	npm update
+	$(VIRTUAL_ENV)/bin/python3 -m pip install --upgrade -r requirements.txt
+
 
 .PHONY: js
 js:
