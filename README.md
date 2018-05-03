@@ -35,4 +35,4 @@ Configuration parameters (e.g. `DATABASES`) can be overwritten in `lrex/local.co
     make run
 ```
 
-Use Django Admin to create further users under /admin/.
+Use Django Admin to create further users under `/admin/`.
