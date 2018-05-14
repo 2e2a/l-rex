@@ -45,7 +45,6 @@ class Study(models.Model):
         null=True,
         help_text='TODO',
     )
-
     password = models.CharField(
         max_length=200,
         help_text='TODO',
@@ -53,7 +52,6 @@ class Study(models.Model):
     allow_anonymous = models.BooleanField(
         help_text='TODO',
     )
-
     end_date = models.DateField(
         blank=True,
         null=True,
@@ -64,7 +62,6 @@ class Study(models.Model):
         blank=True,
         help_text='TODO',
     )
-
     is_published = models.BooleanField(
         default=False,
         help_text='TODO',
