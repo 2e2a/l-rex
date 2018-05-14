@@ -12,9 +12,18 @@
             </em>
         </p>
         <hr>
+        {% if view.trial_item.item.textitem %}
         <p>
             {{ view.trial_item.item.textitem.text }}
         </p>
+        {% else %}
+        <div class="row justify-content-center my-2">
+            <audio controls="controls" autoplay="autoplay">
+                <source src="{{ view.trial_item.item.audiolinkitem.url }}">
+                Your browser does not support the <code>audio</code> element.
+            </audio>
+        </div>
+        {% endif %}
         <form action="" method="post">
             {% csrf_token %}
             <div class="btn-group d-flex" role="group">
