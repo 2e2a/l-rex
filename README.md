@@ -19,8 +19,8 @@ Platform for linguistic rating experiments.
 ## Installation
 
 ```
-    make install
-    make build
+make install
+make build
 ```
 
 ## Configuration
@@ -30,9 +30,9 @@ Configuration parameters (e.g. `DATABASES`) can be overwritten in `lrex/local.co
 ## Usage
 
 ```
-    ./manage.py migrate
-    ./manage.py createsuperuser
-    make run
+./manage.py migrate
+./manage.py createsuperuser
+make run
 ```
 
 Use Django Admin to create further users under `/admin/`.
