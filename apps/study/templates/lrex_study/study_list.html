@@ -4,7 +4,7 @@
 {% block content %}
 <div class="row justify-content-center mb-2">
     <a href="{% url 'study-create' %}" class="btn btn-primary btn-sm mx-1" role="button">
-        New Study
+        New study
     </a>
 </div>
 <ul class="list-group">
@@ -18,7 +18,7 @@
             <a href="{% url 'study' slug=study.slug %}"
                class="btn {% if view.study.status.name == 'ACTIVE' %} btn-outline-primary {% else %} btn-outline-primary {% endif %} btn-sm mx-1"
                role="button">
-                Create/Edit
+                Create/edit
             </a>
 
             <a href="{% url 'study-run' slug=study.slug %}"
@@ -48,7 +48,7 @@
         </span>
     </li>
     {% empty %}
-    <li class="list-group-item my-1">No studies yet.</li>
+    <li class="list-group-item my-1">There are currently no studies. Click on 'New study' to create one.</li>
     {% endfor %}
 </ul>
 {% endblock %}

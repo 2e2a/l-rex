@@ -34,7 +34,7 @@ class NextStepsMixin:
 
 class StudyDetailView(LoginRequiredMixin, NextStepsMixin, generic.DetailView):
     model = models.Study
-    title = 'Create Study'
+    title = 'Edit study'
 
     @property
     def study(self):
@@ -50,7 +50,7 @@ class StudyDetailView(LoginRequiredMixin, NextStepsMixin, generic.DetailView):
 
 class StudyRunView(LoginRequiredMixin, NextStepsMixin, generic.DetailView):
     model = models.Study
-    title = 'Run Study'
+    title = 'Run study'
     template_name = 'lrex_study/study_run.html'
 
     @property
@@ -67,7 +67,7 @@ class StudyRunView(LoginRequiredMixin, NextStepsMixin, generic.DetailView):
 
 class StudyCreateView(LoginRequiredMixin, generic.CreateView):
     model = models.Study
-    title = 'Create Study'
+    title = 'Create study'
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.StudyForm
     success_message = 'Study successfully created.'
@@ -81,7 +81,7 @@ class StudyCreateView(LoginRequiredMixin, generic.CreateView):
 
 class StudyUpdateView(LoginRequiredMixin, SuccessMessageMixin, generic.UpdateView):
     model = models.Study
-    title = 'Edit Study'
+    title = 'Edit study'
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.StudyForm
     success_message = 'Study successfully updated.'
@@ -142,7 +142,7 @@ class StudyListView(LoginRequiredMixin, generic.ListView):
 
 class ScaleUpdateView(LoginRequiredMixin, NextStepsMixin, generic.TemplateView):
     model = models.Study
-    title = 'Edit Rating Scale'
+    title = 'Edit rating scale'
     template_name = 'lrex_study/study_scale.html'
 
     formset = None

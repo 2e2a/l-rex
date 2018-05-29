@@ -10,7 +10,7 @@ class TrialForm(crispy_forms.CrispyModelForm):
     password = forms.CharField(
         max_length=200,
         widget=forms.PasswordInput,
-        help_text='TODO',
+        help_text='Provide a password (as instructed by the experimenter).',
     )
 
     class Meta:

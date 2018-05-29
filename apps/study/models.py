@@ -17,7 +17,7 @@ class StudyStatus(Enum):
 class Study(models.Model):
     title = models.CharField(
         max_length=200,
-        help_text='TODO',
+        help_text='Give your study a name.',
         )
     slug = models.SlugField(unique=True)
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -31,40 +31,41 @@ class Study(models.Model):
     )
     rating_instructions = models.TextField(
         max_length=1024,
-        help_text='TODO',
+        help_text='These instructions will be presented to the participant before the experiment begins.',
     )
     rating_question = models.CharField(
         max_length=200,
         blank=True,
         null=True,
-        help_text='TODO',
+        help_text='This text will precede each stimulus (e.g. "How acceptable is this sentence?")',
     )
     rating_legend = models.TextField(
         max_length=1024,
         blank=True,
         null=True,
-        help_text='TODO',
+        help_text='This legend will appear below each stimulus to clarify the scale (e.g. "1 = bad, 5 = good").',
     )
     password = models.CharField(
         max_length=200,
-        help_text='TODO',
+        help_text='This password will be required to participate in the study.',
     )
     allow_anonymous = models.BooleanField(
-        help_text='TODO',
+        help_text='Check this box if you want to allow participation without entering a name/ID.',
     )
     end_date = models.DateField(
         blank=True,
         null=True,
-        help_text='TODO',
+        help_text='If you want to set a participation deadline, enter a date in the format YYYY-MM-DD.',
     )
     trial_limit = models.IntegerField(
         null=True,
         blank=True,
-        help_text='TODO',
+        help_text='If you want to set a maximal number of participants, enter a number.',
+        verbose_name='Maximal number of participants',
     )
     is_published = models.BooleanField(
         default=False,
-        help_text='TODO',
+        help_text='Check this box to publish your study. It will then be available for participation.',
     )
 
     PROGRESS_STD_CREATED = '00sc'
@@ -221,7 +222,7 @@ class ScaleValue(models.Model):
     number = models.IntegerField()
     label = models.CharField(
         max_length=50,
-        help_text='TODO',
+        help_text='Provide a label for this point of the scale.',
     )
 
     class Meta:

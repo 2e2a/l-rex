@@ -3,11 +3,11 @@
 {% block content %}
 <div class="card my-2">
     <div class="card-body">
-        <h2 class="card-title">User Trials</h2>
+        <h2 class="card-title">User trials</h2>
         <p class="card-text">
-            Create and run user trials. View individual results.
+            Make the study accessible to your participants. View the completed individual questionnaires.
         </p>
-        <a  class="card-link" href="{% url 'trials' study_slug=object.slug %}">User Trials</a>
+        <a  class="card-link" href="{% url 'trials' study_slug=object.slug %}">User trials</a>
     </div>
 </div>
 
@@ -15,7 +15,7 @@
     <div class="card-body">
         <h2 class="card-title">Results</h2>
         <p class="card-text">
-            See the current results for your experiments.
+            View a summary of the current results.
         </p>
         <a  class="card-link" href="{% url 'experiment-result-list' object.slug %}">Results</a>
     </div>

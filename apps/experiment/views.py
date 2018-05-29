@@ -16,7 +16,7 @@ from . import models
 
 class ExperimentDetailView(LoginRequiredMixin, study_views.NextStepsMixin, generic.DetailView):
     model = models.Experiment
-    title = 'Experiment Overview'
+    title = 'Edit experiment'
 
     @property
     def study(self):
@@ -38,7 +38,7 @@ class ExperimentDetailView(LoginRequiredMixin, study_views.NextStepsMixin, gener
 
 class ExperimentCreateView(LoginRequiredMixin, generic.CreateView):
     model = models.Experiment
-    title = 'Create Experiment'
+    title = 'Create experiment'
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.ExperimentForm
 
@@ -131,7 +131,7 @@ class ExperimentListView(LoginRequiredMixin, study_views.NextStepsMixin, generic
 
 class ExperimentResultListView(LoginRequiredMixin, generic.ListView):
     model = models.Experiment
-    title = 'Experiment Results'
+    title = 'Results'
     template_name = 'lrex_experiment/experiment_result_list.html'
 
     def dispatch(self, *args, **kwargs):
@@ -153,7 +153,7 @@ class ExperimentResultListView(LoginRequiredMixin, generic.ListView):
 
 class ExperimentResultsView(LoginRequiredMixin, generic.DetailView):
     model = models.Experiment
-    title = 'Experiment Results'
+    title = 'Results'
     template_name = 'lrex_experiment/experiment_results.html'
     aggregate_by = ['subject']
     page = 1
