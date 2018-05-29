@@ -12,7 +12,7 @@ class StudyForm(crispy_forms.CrispyModelForm):
 
     class Meta:
         model = models.Study
-        fields = ['title', 'rating_instructions', 'rating_question', 'rating_legend', 'end_date', 'trial_limit',
+        fields = ['title', 'item_type', 'rating_instructions', 'rating_question', 'rating_legend', 'end_date', 'trial_limit',
                   'password', 'allow_anonymous']
 
 

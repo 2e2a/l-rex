@@ -40,7 +40,7 @@ class TextItemCreateView(LoginRequiredMixin, generic.CreateView):
 
     def get_success_url(self):
         exp = self.object.experiment
-        return reverse('textitems', args=[exp.study.slug, exp.slug])
+        return reverse('items', args=[exp.study.slug, exp.slug])
 
     @property
     def breadcrumbs(self):
@@ -51,7 +51,7 @@ class TextItemCreateView(LoginRequiredMixin, generic.CreateView):
             (study.title, reverse('study', args=[study.slug])),
             ('experiments',reverse('experiments', args=[study.slug])),
             (exp.title, reverse('experiment', args=[study.slug, exp.slug])),
-            ('items', reverse('textitems', args=[study.slug, exp.slug])),
+            ('items', reverse('items', args=[study.slug, exp.slug])),
             ('create', '')
         ]
 
@@ -74,7 +74,7 @@ class TextItemUpdateView(LoginRequiredMixin, SuccessMessageMixin, generic.Update
 
     def get_success_url(self):
         exp = self.object.experiment
-        return reverse('textitems', args=[exp.study.slug, exp.slug])
+        return reverse('items', args=[exp.study.slug, exp.slug])
 
     @property
     def breadcrumbs(self):
@@ -85,13 +85,87 @@ class TextItemUpdateView(LoginRequiredMixin, SuccessMessageMixin, generic.Update
             (study.title, reverse('study', args=[study.slug])),
             ('experiments',reverse('experiments', args=[study.slug])),
             (exp.title, reverse('experiment', args=[study.slug, exp.slug])),
-            ('items', reverse('textitems', args=[study.slug, exp.slug])),
+            ('items', reverse('items', args=[study.slug, exp.slug])),
             (self.object, ''),
         ]
 
 
-class TextItemDeleteView(LoginRequiredMixin, contrib_views.DefaultDeleteView):
-    model = models.TextItem
+class AudioLinkItemCreateView(LoginRequiredMixin, generic.CreateView):
+    model = models.AudioLinkItem
+    title = 'Add Item'
+    template_name = 'lrex_contrib/crispy_form.html'
+    form_class = forms.AudioLinkItemForm
+
+    def dispatch(self, *args, **kwargs):
+        experiment_slug = self.kwargs['slug']
+        self.experiment = experiment_models.Experiment.objects.get(slug=experiment_slug)
+        return super().dispatch(*args, **kwargs)
+
+    @property
+    def study(self):
+        return self.experiment.study
+
+    def form_valid(self, form):
+        form.instance.experiment = self.experiment
+        result = super().form_valid(form)
+        self.experiment.set_progress(experiment_models.Experiment.PROGRESS_EXP_ITEMS_CREATED)
+        messages.success(self.request, study_views.progress_success_message(self.experiment.progress))
+        return result
+
+    def get_success_url(self):
+        exp = self.object.experiment
+        return reverse('items', args=[exp.study.slug, exp.slug])
+
+    @property
+    def breadcrumbs(self):
+        exp = self.experiment
+        study = exp.study
+        return [
+            ('studies', reverse('studies')),
+            (study.title, reverse('study', args=[study.slug])),
+            ('experiments',reverse('experiments', args=[study.slug])),
+            (exp.title, reverse('experiment', args=[study.slug, exp.slug])),
+            ('items', reverse('items', args=[study.slug, exp.slug])),
+            ('create', '')
+        ]
+
+
+class AudioLinkItemUpdateView(LoginRequiredMixin, SuccessMessageMixin, generic.UpdateView):
+    model = models.AudioLinkItem
+    title = 'Edit Item'
+    template_name = 'lrex_contrib/crispy_form.html'
+    form_class = forms.AudioLinkItemForm
+    success_message = 'Item successfully updated.'
+
+    def form_valid(self, form):
+        result = super().form_valid(form)
+        self.object.experiment.set_progress(self.object.experiment.PROGRESS_EXP_ITEMS_CREATED)
+        return result
+
+    @property
+    def study(self):
+        return self.object.experiment.study
+
+    def get_success_url(self):
+        exp = self.object.experiment
+        return reverse('items', args=[exp.study.slug, exp.slug])
+
+    @property
+    def breadcrumbs(self):
+        exp = self.object.experiment
+        study = exp.study
+        return [
+            ('studies', reverse('studies')),
+            (study.title, reverse('study', args=[study.slug])),
+            ('experiments',reverse('experiments', args=[study.slug])),
+            (exp.title, reverse('experiment', args=[study.slug, exp.slug])),
+            ('items', reverse('items', args=[study.slug, exp.slug])),
+            (self.object, ''),
+        ]
+
+
+class ItemDeleteView(LoginRequiredMixin, contrib_views.DefaultDeleteView):
+    model = models.Item
 
     def delete(self, *args, **kwargs):
         response = super().delete(*args, **kwargs)
@@ -111,18 +185,18 @@ class TextItemDeleteView(LoginRequiredMixin, contrib_views.DefaultDeleteView):
             (study.title, reverse('study', args=[study.slug])),
             ('experiments',reverse('experiments', args=[study.slug])),
             (exp.title, reverse('experiment', args=[study.slug, exp.slug])),
-            ('items', reverse('textitems', args=[study.slug, exp.slug])),
-            (self.object, reverse('textitem-update', args=[study.slug, exp.slug, self.object.pk])),
+            ('items', reverse('items', args=[study.slug, exp.slug])),
+            (self.object, reverse('text-item-update', args=[study.slug, exp.slug, self.object.pk])),
             ('delete','')
         ]
 
     def get_success_url(self):
         exp = self.object.experiment
-        return reverse('textitems', args=[exp.study.slug, exp.slug])
+        return reverse('items', args=[exp.study.slug, exp.slug])
 
 
-class TextItemListView(LoginRequiredMixin, study_views.NextStepsMixin, generic.ListView):
-    model = models.TextItem
+class ItemListView(LoginRequiredMixin, study_views.NextStepsMixin, generic.ListView):
+    model = models.Item
     title = 'Items'
     paginate_by = 16
 
@@ -144,7 +218,7 @@ class TextItemListView(LoginRequiredMixin, study_views.NextStepsMixin, generic.L
                 messages.success(self.request, study_views.progress_success_message(self.experiment.progress))
             except AssertionError as e:
                 messages.error(request, str(e))
-        return redirect('textitems',study_slug=self.experiment.study.slug, slug=self.experiment.slug)
+        return redirect('items',study_slug=self.experiment.study.slug, slug=self.experiment.slug)
 
     def get_queryset(self):
         return super().get_queryset().filter(experiment=self.experiment)
@@ -158,7 +232,7 @@ class TextItemListView(LoginRequiredMixin, study_views.NextStepsMixin, generic.L
             (study.title, reverse('study', args=[study.slug])),
             ('experiments',reverse('experiments', args=[study.slug])),
             (exp.title, reverse('experiment', args=[study.slug, exp.slug])),
-            ('items', reverse('textitems', args=[study.slug, exp.slug])),
+            ('items', reverse('items', args=[study.slug, exp.slug])),
         ]
 
 
@@ -176,11 +250,19 @@ class ItemPregenerateView(LoginRequiredMixin, SuccessMessageMixin, generic.FormV
     def _pregenerate_items(self, n_items, n_conditions):
         for n_item in range(1, n_items + 1):
             for condition in ascii_lowercase[:n_conditions]:
-                models.TextItem.objects.create(
-                    number=n_item,
-                    condition=condition,
-                    experiment=self.experiment,
-                )
+                if self.experiment.study.has_text_items:
+                    models.TextItem.objects.create(
+                        number=n_item,
+                        condition=condition,
+                        experiment=self.experiment,
+                    )
+                elif self.experiment.study.has_audiolink_items:
+                    models.AudioLinkItem.objects.create(
+                        number=n_item,
+                        condition=condition,
+                        experiment=self.experiment,
+                    )
+
 
     def form_valid(self, form):
         result =  super().form_valid(form)
@@ -191,7 +273,7 @@ class ItemPregenerateView(LoginRequiredMixin, SuccessMessageMixin, generic.FormV
         return result
 
     def get_success_url(self):
-        return reverse('textitems', args=[self.experiment.study.slug, self.experiment.slug])
+        return reverse('items', args=[self.experiment.study.slug, self.experiment.slug])
 
     @property
     def study(self):
@@ -206,14 +288,14 @@ class ItemPregenerateView(LoginRequiredMixin, SuccessMessageMixin, generic.FormV
             (study.title, reverse('study', args=[study.slug])),
             ('experiments',reverse('experiments', args=[study.slug])),
             (exp.title, reverse('experiment', args=[study.slug, exp.slug])),
-            ('items', reverse('textitems', args=[study.slug, exp.slug])),
+            ('items', reverse('items', args=[study.slug, exp.slug])),
             ('pregenerate', ''),
         ]
 
 
-class TextItemUploadView(LoginRequiredMixin, generic.FormView):
+class ItemUploadView(LoginRequiredMixin, generic.FormView):
     title = 'Items'
-    form_class = forms.UploadTextItemsForm
+    form_class = forms.UploadItemsForm
     template_name = 'lrex_contrib/crispy_form.html'
 
     def dispatch(self, *args, **kwargs):
@@ -232,19 +314,27 @@ class TextItemUploadView(LoginRequiredMixin, generic.FormView):
         reader = csv.reader(StringIO(data), dialect)
         models.Item.objects.filter(experiment=self.experiment).delete()
         for row in reader:
-            models.TextItem.objects.create(
-                number=row[num_col - 1],
-                condition=row[cond_col - 1],
-                text=row[text_col - 1],
-                experiment=self.experiment,
-            )
+            if self.experiment.study.has_text_items:
+                models.TextItem.objects.create(
+                    number=row[num_col - 1],
+                    condition=row[cond_col - 1],
+                    text=row[text_col - 1],
+                    experiment=self.experiment,
+                )
+            elif self.experiment.study.has_audiolink_items:
+                models.AudioLinkItem.objects.create(
+                    number=row[num_col - 1],
+                    condition=row[cond_col - 1],
+                    url=row[text_col - 1],
+                    experiment=self.experiment,
+                )
 
         self.experiment.set_progress(self.experiment.PROGRESS_EXP_ITEMS_CREATED)
         messages.success(self.request, study_views.progress_success_message(self.experiment.progress))
         return result
 
     def get_success_url(self):
-        return reverse('textitems', args=[self.experiment.study.slug, self.experiment.slug])
+        return reverse('items', args=[self.experiment.study.slug, self.experiment.slug])
 
     @property
     def study(self):
@@ -259,13 +349,12 @@ class TextItemUploadView(LoginRequiredMixin, generic.FormView):
             (study.title, reverse('study', args=[study.slug])),
             ('experiments',reverse('experiments', args=[study.slug])),
             (exp.title, reverse('experiment', args=[study.slug, exp.slug])),
-            ('items', reverse('textitems', args=[study.slug, exp.slug])),
+            ('items', reverse('items', args=[study.slug, exp.slug])),
             ('upload', ''),
         ]
 
 
-
-class TextItemDeleteAllView(LoginRequiredMixin, generic.TemplateView):
+class ItemDeleteAllView(LoginRequiredMixin, generic.TemplateView):
     title = 'Confirm Delete'
     template_name = 'lrex_contrib/confirm_delete.html'
     message =  'Delete all items?'
@@ -289,12 +378,12 @@ class TextItemDeleteAllView(LoginRequiredMixin, generic.TemplateView):
             (study.title, reverse('study', args=[study.slug])),
             ('experiments',reverse('experiments', args=[study.slug])),
             (self.experiment.title, reverse('experiment', args=[study.slug, self.experiment.slug])),
-            ('items', reverse('textitems', args=[study.slug, self.experiment.slug])),
+            ('items', reverse('items', args=[study.slug, self.experiment.slug])),
             ('delete-all','')
         ]
 
     def get_success_url(self):
-        return reverse('textitems', args=[self.experiment.study.slug, self.experiment.slug])
+        return reverse('items', args=[self.experiment.study.slug, self.experiment.slug])
 
 
 class ItemListListView(LoginRequiredMixin, study_views.NextStepsMixin, generic.ListView):

@@ -29,7 +29,16 @@ class TextItem(Item):
     )
 
     def get_absolute_url(self):
-        return reverse('textitem-update', args=[self.experiment.study.slug, self.experiment.slug, self.pk])
+        return reverse('text-item-update', args=[self.experiment.study.slug, self.experiment.slug, self.pk])
+
+
+class AudioLinkItem(Item):
+    url = models.URLField(
+        help_text='TODO',
+    )
+
+    def get_absolute_url(self):
+        return reverse('audiolink-item-update', args=[self.experiment.study.slug, self.experiment.slug, self.pk])
 
 
 class ItemList(models.Model):

@@ -16,6 +16,13 @@ class TextItemForm(crispy_forms.CrispyModelForm):
         fields = ['number', 'condition', 'text']
 
 
+class AudioLinkItemForm(crispy_forms.CrispyModelForm):
+
+    class Meta:
+        model = models.AudioLinkItem
+        fields = ['number', 'condition', 'url']
+
+
 class PregenerateItemsForm(crispy_forms.CrispyForm):
     num_items = forms.IntegerField(
         label='number of items',
@@ -27,7 +34,7 @@ class PregenerateItemsForm(crispy_forms.CrispyForm):
 )
 
 
-class UploadTextItemsForm(crispy_forms.CrispyForm):
+class UploadItemsForm(crispy_forms.CrispyForm):
     file = forms.FileField()
     number_column = forms.IntegerField(initial=1)
     condition_column = forms.IntegerField(initial=2)

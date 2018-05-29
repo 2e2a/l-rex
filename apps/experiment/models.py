@@ -67,8 +67,13 @@ class Experiment(models.Model):
 
         item_number = 0
         for i, item in enumerate(items):
-            if not item.textitem.text:
-                raise AssertionError('Item {} has no text.'.format(item))
+            if hasattr(item, 'textitem'):
+                if not item.textitem.text:
+                    raise AssertionError('Item {} has no text.'.format(item))
+            elif hasattr(item, 'audiolinkitem'):
+                if not item.audiolinkitem.url:
+                    raise AssertionError('Item {} has no URL.'.format(item))
+
             if i % condition_count == 0:
                 item_number += 1
             if item.number != item_number or item.condition != conditions[i % condition_count]:
@@ -103,8 +108,9 @@ class Experiment(models.Model):
             row['subject'] = rating.trial_item.trial.id
             row['item'] = item.number
             row['condition'] = item.condition
-            row['text'] =  item.textitem.text
             row['rating'] = rating.scale_value.number
+            if hasattr(item, 'textitem'):
+                row['text'] = item.textitem.text
 
             results.append(row)
 
@@ -152,11 +158,16 @@ class Experiment(models.Model):
 
     def results_csv(self, fileobj):
         writer = csv.writer(fileobj)
-        writer.writerow(['Subject', 'item', 'Condition', 'Rating', 'Text'])
+        csv_row = ['Subject', 'item', 'Condition', 'Rating']
+        if self.study.has_text_items:
+            csv_row.append('Text')
+        writer.writerow(csv_row)
         results = self.results()
         for row in results:
-            writer.writerow(
-                [ row['subject'], row['item'], row['condition'], row['rating'], row['text']])
+            csv_row = [row['subject'], row['item'], row['condition'], row['rating']]
+            if self.study.has_text_items:
+                csv_row.append(row['text'])
+            writer.writerow(csv_row)
 
     @staticmethod
     def progress_description(progress):
@@ -167,11 +178,11 @@ class Experiment(models.Model):
 
     def progress_url(self, progress):
         if progress == self.PROGRESS_EXP_ITEMS_CREATED:
-            return reverse('textitems', args=[self.study, self])
+            return reverse('items', args=[self.study, self])
         elif progress == self.PROGRESS_EXP_ITEMS_CREATED:
-            return reverse('textitems', args=[self.study, self])
+            return reverse('items', args=[self.study, self])
         elif progress == self.PROGRESS_EXP_ITEMS_VALIDATED:
-            return reverse('textitems', args=[self.study, self])
+            return reverse('items', args=[self.study, self])
         elif progress == self.PROGRESS_EXP_LISTS_CREATED:
             return reverse('itemlists', args=[self.study, self])
         return None

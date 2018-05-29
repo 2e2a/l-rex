@@ -21,14 +21,19 @@ class Study(models.Model):
         )
     slug = models.SlugField(unique=True)
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    ITEM_TYPE_TXT = 'txt'
+    ITEM_TYPE_AUDIO_LINK = 'aul'
     ITEM_TYPE = (
-        ('txt', 'Text'),
+        (ITEM_TYPE_TXT, 'Text'),
+        (ITEM_TYPE_AUDIO_LINK, 'Audio Link'),
     )
     item_type = models.CharField(
         max_length=3,
         choices=ITEM_TYPE,
-        default='txt',
+        default=ITEM_TYPE_TXT,
     )
+
     rating_instructions = models.TextField(
         max_length=1024,
         help_text='These instructions will be presented to the participant before the experiment begins.',
@@ -95,8 +100,12 @@ class Study(models.Model):
         return self.experiment_set.all()
 
     @property
-    def is_textitem(self):
-        return self.item_type == 'txt'
+    def has_text_items(self):
+        return self.item_type == self.ITEM_TYPE_TXT
+
+    @property
+    def has_audiolink_items(self):
+        return self.item_type == self.ITEM_TYPE_AUDIO_LINK
 
     @property
     def status(self):
@@ -211,7 +220,6 @@ class Study(models.Model):
                 url = self.progress_url(next_step)
                 next_steps.append(( description, url, ))
         return next_steps
-
 
 
 class ScaleValue(models.Model):

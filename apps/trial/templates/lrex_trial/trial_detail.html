@@ -5,8 +5,7 @@
     <thead>
     <tr>
         <th class="col-md-1">Item</th>
-        <th>Experiment</th>
-        <th>Text</th>
+        <th>Content</th>
         <th class="col-md-2">Rating</th>
     </tr>
     </thead>
@@ -16,10 +15,14 @@
         <td class="col-md-1">
             {{ trialitem.item }}
         </td>
-        <td>{{ trialitem.item.experiment }}</td>
         <td>
             {% if trialitem.item.textitem %}
                 {{ trialitem.item.textitem.text }}
+            {% else %}
+                <audio controls="controls">
+                    <source src="{{ trialitem.item.audiolinkitem.url }}">
+                    Your browser does not support the <code>audio</code> element.
+                </audio>
             {% endif %}
         </td>
         <td class="col-md-2">

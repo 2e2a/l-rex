@@ -159,5 +159,8 @@ SECURE_HSTS_PRELOAD = False
 IMPRINT = 'Please define an imprint in local.py'
 
 # Import local settings
-from .local import *
+try:
+    from .local import *
+except ImportError:
+    pass
 

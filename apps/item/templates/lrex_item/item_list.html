@@ -2,7 +2,12 @@
 
 {% block content %}
 <div class="row justify-content-center mb-2">
-    <a href="{% url 'textitem-create' study_slug=view.experiment.study.slug slug=view.experiment.slug %}"
+    <a
+        {% if view.study.has_text_items %}
+        href="{% url 'text-item-create' study_slug=view.experiment.study.slug slug=view.experiment.slug %}"
+        {% else %}
+        href="{% url 'audio-link-item-create' study_slug=view.experiment.study.slug slug=view.experiment.slug %}"
+        {% endif %}
        class="btn btn-primary btn-sm mx-1" role="button">
         Add item
     </a>
@@ -10,7 +15,7 @@
        class="btn btn-primary btn-sm mx-1" role="button">
         Pregenerate items
     </a>
-    <a href="{% url 'textitem-upload' study_slug=view.experiment.study.slug slug=view.experiment.slug %}"
+    <a href="{% url 'items-upload' study_slug=view.experiment.study.slug slug=view.experiment.slug %}"
        class="btn btn-primary btn-sm mx-1" role="button">
         Upload CSV
     </a>
@@ -20,24 +25,37 @@
             Validate
         </button>
     </form>
-    <a href="{% url 'textitems-delete' study_slug=view.experiment.study.slug slug=view.experiment.slug %}"
+    <a href="{% url 'items-delete' study_slug=view.experiment.study.slug slug=view.experiment.slug %}"
        class="btn btn-danger btn-sm mx-1" role="button">
         Delete all
     </a>
 </div>
 <ul class="list-group">
-    {% for item in textitem_list %}
+    {% for item in item_list %}
     <li class="list-group-item d-flex justify-content-between align-items-center">
+        {% if item.textitem %}
         <span>
-            <strong>{{ item }}</strong> {{ item.text }}
+            <strong>{{ item }}</strong>
+            {{ item.textitem.text }}
         </span>
-        {{ experiment.title }}
+        {% else %}
+        <strong>{{ item }}</strong>
+        <audio controls="controls">
+            <source src="{{ item.audiolinkitem.url }}">
+            Your browser does not support the <code>audio</code> element.
+        </audio>
+        {% endif %}
         <span>
-            <a href="{% url 'textitem-update' study_slug=view.experiment.study.slug slug=view.experiment.slug pk=item.pk %}"
+            <a
+               {% if view.study.has_text_items %}
+               href="{% url 'text-item-update' study_slug=view.experiment.study.slug slug=view.experiment.slug pk=item.pk %}"
+               {% else %}
+               href="{% url 'audio-link-item-update' study_slug=view.experiment.study.slug slug=view.experiment.slug pk=item.pk %}"
+               {% endif %}
                class="btn btn-outline-primary btn-sm mx-1" role="button">
                 Edit
             </a>
-            <a href="{% url 'textitem-delete' view.experiment.study.slug  view.experiment.study.slug item.pk %}"
+            <a href="{% url 'item-delete' view.experiment.study.slug  view.experiment.study.slug item.pk %}"
                class="btn btn-outline-danger btn-sm mx-1" role="button">
                 Delete
             </a>

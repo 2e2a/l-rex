@@ -20,7 +20,7 @@
             An experiment contains a set of items. Each item needs to be provided in the same number of conditions.
         </p>
         {% if view.experiment|is_progress_exp_created_reached %}
-        <a  class="card-link" href="{% url 'textitems' study_slug=object.study.slug slug=object.slug %}">
+        <a  class="card-link" href="{% url 'items' study_slug=object.study.slug slug=object.slug %}">
             Add/edit items
         </a>
         {% else %}
