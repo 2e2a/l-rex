@@ -19,7 +19,8 @@ install:
 .PHONY: update
 update:
 	npm update
-	$(VIRTUAL_ENV)/bin/python3 -m pip install --upgrade -r requirements.txt
+	$(VIRTUAL_ENV)/bin/python3 -m pip install --upgrade -r requirements-dev.txt
+	$(VIRTUAL_ENV)/bin/python3 -m pip freeze > requirements.txt
 
 
 .PHONY: js
