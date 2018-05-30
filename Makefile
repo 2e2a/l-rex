@@ -38,6 +38,10 @@ scss:
 .PHONY: build
 build: js scss
 
+.PHONY: migrate
+migrate:
+	$(VIRTUAL_ENV)/bin/python3 manage.py migrate
+
 .PHONY: run
 run:
 	$(VIRTUAL_ENV)/bin/python3 manage.py runserver 8000
@@ -48,3 +52,10 @@ reset:
 	psql -U postgres -c 'CREATE DATABASE lrex OWNER django'
 	$(VIRTUAL_ENV)/bin/python3 manage.py migrate
 	#$(VIRTUAL_ENV)/bin/python3 manage.py loaddata fixtures/init.json
+
+.PHONY: pull
+pull:
+	git pull
+
+.PHONY: deploy
+deploy: pull install build migrate
