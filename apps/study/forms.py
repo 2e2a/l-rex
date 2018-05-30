@@ -25,19 +25,24 @@ class ScaleValueForm(ModelForm):
         fields = ['label', 'delete']
 
 
+def scaleformset_factory(extra=0):
+    return modelformset_factory(models.ScaleValue, form=ScaleValueForm, min_num=1, extra=extra)
+
+
 class ScaleFormSetHelper(FormHelper):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.render_unmentioned_fields = True
 
 
-scaleformset_factory = modelformset_factory(models.ScaleValue, form=ScaleValueForm, min_num=1, extra=1)
-
 scale_formset_helper = ScaleFormSetHelper()
 scale_formset_helper.add_layout(
     Layout(
         Fieldset('Scale Value {{ forloop.counter }}'),
     ),
+)
+scale_formset_helper.add_input(
+    Submit("add", "Add"),
 )
 scale_formset_helper.add_input(
     Submit("submit", "Submit"),

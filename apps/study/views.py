@@ -151,13 +151,13 @@ class ScaleUpdateView(LoginRequiredMixin, NextStepsMixin, generic.TemplateView):
     def dispatch(self, *args, **kwargs):
         study_slug = self.kwargs['slug']
         self.study = models.Study.objects.get(slug=study_slug)
-        self.formset = forms.scaleformset_factory(
+        self.formset = forms.scaleformset_factory()(
             queryset=models.ScaleValue.objects.filter(study=self.study)
         )
         return super().dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        self.formset = forms.scaleformset_factory(request.POST, request.FILES)
+        self.formset = forms.scaleformset_factory()(request.POST, request.FILES)
         if self.formset.is_valid():
             instances = self.formset.save(commit=False)
             for instance in instances:
@@ -173,15 +173,22 @@ class ScaleUpdateView(LoginRequiredMixin, NextStepsMixin, generic.TemplateView):
                         form.instance.number = i
                         form.instance.save()
                         i = i + 1
-            self.formset = forms.scaleformset_factory(
+
+            if 'add' in request.POST:
+                extra = 1
+            else:
+                extra = 0
+                if self.study.experiment_set.exists():
+                    self.study.set_progress(self.study.PROGRESS_STD_EXP_CREATED)
+                else:
+                    self.study.set_progress(self.study.PROGRESS_STD_SCALE_CONFIGURED)
+                    messages.success(request, progress_success_message(self.study.progress))
+
+
+            self.formset = forms.scaleformset_factory(extra)(
                 queryset=models.ScaleValue.objects.filter(study=self.study)
             )
 
-            if self.study.experiment_set.exists():
-                self.study.set_progress(self.study.PROGRESS_STD_EXP_CREATED)
-            else:
-                self.study.set_progress(self.study.PROGRESS_STD_SCALE_CONFIGURED)
-                messages.success(request, progress_success_message(self.study.progress))
         return super().get(request, *args, **kwargs)
 
     @property
