@@ -58,7 +58,7 @@ class TrialCreateView(LoginRequiredMixin, generic.CreateView):
     def _trial_by_id(self, id):
         if id:
             try:
-                return models.Trial.objects.get(id=id)
+                return models.Trial.objects.get(questionnaire__study=self.study, id=id)
             except models.Trial.DoesNotExist:
                 pass
         return None
@@ -87,6 +87,9 @@ class TrialListView(LoginRequiredMixin, generic.ListView):
         study_slug = self.kwargs['study_slug']
         self.study = study_models.Study.objects.get(slug=study_slug)
         return super().dispatch(*args, **kwargs)
+
+    def get_queryset(self):
+        return super().get_queryset().filter(questionnaire__study=self.study)
 
     def show_counter(self):
         return not self.study.allow_anonymous
