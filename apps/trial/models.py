@@ -1,7 +1,7 @@
 import random
 import uuid
-from datetime import datetime, timedelta
-from enum import Enum, auto
+from datetime import timedelta
+from enum import Enum
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
@@ -43,10 +43,10 @@ class Questionnaire(models.Model):
 
 
 class TrialStatus(Enum):
-    CREATED = auto()
-    STARTED = auto()
-    FINISHED = auto()
-    ABANDONED = auto()
+    CREATED = 1
+    STARTED = 2
+    FINISHED = 3
+    ABANDONED = 4
 
 
 class Trial(models.Model):

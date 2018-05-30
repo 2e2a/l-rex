@@ -9,9 +9,9 @@ from apps.contrib import math
 
 
 class StudyStatus(Enum):
-    DRAFT = auto()
-    ACTIVE = auto()
-    FINISHED = auto()
+    DRAFT = 1
+    ACTIVE = 2
+    FINISHED = 3
 
 
 class Study(models.Model):
