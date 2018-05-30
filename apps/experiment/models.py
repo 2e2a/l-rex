@@ -11,6 +11,7 @@ class Experiment(models.Model):
     title = models.CharField(
         max_length=200,
         help_text='TODO',
+        unique=True,
     )
     slug = models.SlugField(unique=True)
     study = models.ForeignKey(

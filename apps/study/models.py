@@ -1,4 +1,4 @@
-from enum import Enum, auto
+from enum import Enum
 from django.conf import settings
 from django.db import models
 from django.urls import reverse
@@ -18,6 +18,7 @@ class Study(models.Model):
     title = models.CharField(
         max_length=200,
         help_text='TODO',
+        unique=True,
         )
     slug = models.SlugField(unique=True)
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
