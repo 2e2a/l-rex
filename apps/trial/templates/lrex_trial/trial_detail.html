@@ -4,6 +4,7 @@
 <table class="table bg-white">
     <thead>
     <tr>
+        <th>Experiment</th>
         <th class="col-md-1">Item</th>
         <th>Content</th>
         <th class="col-md-2">Rating</th>
@@ -12,6 +13,7 @@
     <tbody>
     {% for trialitem in object.trialitem_set.all %}
     <tr>
+        <td>{{ trialitem.item.experiment }}</td>
         <td class="col-md-1">
             {{ trialitem.item }}
         </td>
