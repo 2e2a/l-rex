@@ -105,7 +105,7 @@ class TrialListView(LoginRequiredMixin, generic.ListView):
 
 class TrialDetailView(LoginRequiredMixin, generic.DetailView):
     model = models.Trial
-    title = 'Trial Overview'
+    title = 'Trial overview'
 
     def dispatch(self, *args, **kwargs):
         study_slug = self.kwargs['study_slug']

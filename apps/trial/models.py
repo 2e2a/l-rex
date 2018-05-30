@@ -64,7 +64,8 @@ class Trial(models.Model):
         max_length=200,
         blank=True,
         null=True,
-        help_text='TODO',
+        help_text='Provide an identification number/name (as instructed by the experimenter).',
+        verbose_name='ID',
     )
 
     class Meta:

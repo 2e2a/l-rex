@@ -6,41 +6,43 @@
   <div class="card-body">
     <h2 class="card-title">Settings</h2>
     <p class="card-text">
-        Edit Expriment Settings, such as name.
+        Change the settings of the experiment (like the title).
     </p>
-    <a href="{% url 'experiment-update' object.study.slug object.slug %}" class="card-link">Edit</a>
+    <a href="{% url 'experiment-update' object.study.slug object.slug %}" class="card-link">Edit settings</a>
   </div>
 </div>
 
+{% if object.study.is_textitem %}
 <div class="card my-2 {% if view.experiment|is_progress_exp_created_reached and not view.experiment|is_progress_exp_items_validated_reached %} border-primary {% endif %}">
     <div class="card-body">
         <h2 class="card-title">Items</h2>
         <p class="card-text">
-            Experiment Items configuration
+            An experiment contains a set of items. Each item needs to be provided in the same number of conditions.
         </p>
         {% if view.experiment|is_progress_exp_created_reached %}
         <a  class="card-link" href="{% url 'items' study_slug=object.study.slug slug=object.slug %}">
-            Items
+            Add/edit items
         </a>
         {% else %}
-        <a class="card-link text-muted">Items</a>
+        <a class="card-link text-muted">Add/edit items</a>
         {% endif %}
     </div>
 </div>
 
 <div class="card my-2 {% if view.experiment|is_progress_exp_items_validated %} border-primary {% endif %}">
     <div class="card-body">
-        <h2 class="card-title">Item Lists</h2>
+        <h2 class="card-title">Lists</h2>
         <p class="card-text">
-            Experiment items list configuration
+            The items of the experiment will be automatically distributed across participants using lists.
         </p>
         {% if view.experiment|is_progress_exp_items_validated_reached %}
         <a  class="card-link" href="{% url 'itemlists' study_slug=object.study.slug slug=object.slug %}">
-            Item Lists
+            Item lists
         </a>
         {% else %}
-        <a class="card-link text-muted">Item Lists</a>
+        <a class="card-link text-muted">Generate lists</a>
         {% endif %}
     </div>
 </div>
+{% endif %}
 {% endblock %}

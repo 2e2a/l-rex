@@ -10,7 +10,7 @@ from apps.trial import models as trial_models
 class Experiment(models.Model):
     title = models.CharField(
         max_length=200,
-        help_text='TODO',
+        help_text='Give your experiment a name.',
         unique=True,
     )
     slug = models.SlugField(unique=True)
@@ -25,7 +25,7 @@ class Experiment(models.Model):
     PROGRESS = (
         (PROGRESS_EXP_CREATED, 'Create an experiment'),
         (PROGRESS_EXP_ITEMS_CREATED, 'Create or upload experiment items'),
-        (PROGRESS_EXP_ITEMS_VALIDATED, 'Validate the experiment items consistency'),
+        (PROGRESS_EXP_ITEMS_VALIDATED, 'Validate consistency of the items'),
         (PROGRESS_EXP_LISTS_CREATED, 'Generate item lists'),
     )
     progress = models.CharField(

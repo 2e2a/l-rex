@@ -38,7 +38,7 @@ class ScaleFormSetHelper(FormHelper):
 scale_formset_helper = ScaleFormSetHelper()
 scale_formset_helper.add_layout(
     Layout(
-        Fieldset('Scale Value {{ forloop.counter }}'),
+        Fieldset('Scale value {{ forloop.counter }}'),
     ),
 )
 scale_formset_helper.add_input(

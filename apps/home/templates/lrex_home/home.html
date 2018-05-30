@@ -11,21 +11,32 @@
             {% include 'lrex_contrib/icon_snippet.html' with icon='info-circle' %}
         </div>
         <p class="card-text">
-            L-REX is a platform for Linguistic Rating Experiments.
+            Welcome to L-Rex, a free and open-source platform for creating and running rating experiments.
         </p>
+        <p class="card-text">
+            L-Rex is designed for experiments in which participants are asked to rate stimuli on a scale. This type of experiment is commonly used in linguistics, psychology, and other human sciences. 
+You can quickly set up your experiment with L-Rex if...
+        <ul>
+            <li>...your stimuli are texts or audio files.</li>
+            <li>...you want to collect one rating per stimulus.</li>
+            <li>...the rating is binary or on an n-point scale (e.g., a scale from 1-5).</li>
+            <li>...you want to distribute the stimuli using a Latin Square Design.</li>
+            <li>...you want to present your stimuli in randomized order.</li>
+        </ul>
+       </p>
     </div>
 </div>
 
 <div class="card my-2">
     <div class="card-body">
         <div class="d-flex justify-content-between">
-            <h2 class="card-title">Create and Run Experiment Studies</h2>
+            <h2 class="card-title">Create and run experimental studies</h2>
             {% include 'lrex_contrib/icon_snippet.html' with icon='graduation-cap' %}
         </div>
         <p class="card-text">
-            Here are your Experiment Studys. User account required.
+            Start creating experiments with L-Rex or edit your existing studies. A user account is required - you will be asked to log in or register.
         </p>
-        <a  class="card-link" href="{% url 'studies' %}">My Studies</a>
+        <a  class="card-link" href="{% url 'studies' %}">My studies</a>
     </div>
 </div>
 
@@ -36,9 +47,9 @@
             {% include 'lrex_contrib/icon_snippet.html' with icon='book' %}
         </div>
         <p class="card-text">
-            Platform description and usage help.
+            This wiki provides a step-by-step guide to setting up experimental studies with L-Rex.
         </p>
-        <a  class="card-link" target="_blank" href="https://github.com/2e2a/l-rex/wiki">Documentation</a>
+        <a  class="card-link" target="_blank" href="https://github.com/2e2a/l-rex/wiki">L-Rex Wiki</a>
     </div>
 </div>
 
@@ -49,9 +60,9 @@
             {% include 'lrex_contrib/icon_snippet.html' with icon='users' %}
         </div>
         <p class="card-text">
-            This software ist free and open source. Submit your issues and feature requests. Create pull requests.
+            L-Rex is free and open-source. Please feel free to submit your issues, feature requests, and pull requests.
         </p>
-        <a  class="card-link" target="_blank" href="https://github.com/2e2a/l-rex/">Contribute</a>
+        <a  class="card-link" target="_blank" href="https://github.com/2e2a/l-rex/">L-Rex on GitHub</a>
     </div>
 </div>
 

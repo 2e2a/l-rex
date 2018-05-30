@@ -18,7 +18,7 @@ from . import models
 
 class TextItemCreateView(LoginRequiredMixin, generic.CreateView):
     model = models.TextItem
-    title = 'Add Item'
+    title = 'Add item'
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.TextItemForm
 
@@ -58,7 +58,7 @@ class TextItemCreateView(LoginRequiredMixin, generic.CreateView):
 
 class TextItemUpdateView(LoginRequiredMixin, SuccessMessageMixin, generic.UpdateView):
     model = models.TextItem
-    title = 'Edit Item'
+    title = 'Edit item'
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.TextItemForm
     success_message = 'Item successfully updated.'
@@ -237,7 +237,7 @@ class ItemListView(LoginRequiredMixin, study_views.NextStepsMixin, generic.ListV
 
 
 class ItemPregenerateView(LoginRequiredMixin, SuccessMessageMixin, generic.FormView):
-    title = 'Pregenerate Items'
+    title = 'Pregenerate items'
     form_class = forms.PregenerateItemsForm
     template_name = 'lrex_contrib/crispy_form.html'
     success_message = 'Items successfully generated.'
@@ -388,7 +388,7 @@ class ItemDeleteAllView(LoginRequiredMixin, generic.TemplateView):
 
 class ItemListListView(LoginRequiredMixin, study_views.NextStepsMixin, generic.ListView):
     model = models.ItemList
-    title = 'Item Lists'
+    title = 'Item lists'
 
     def dispatch(self, *args, **kwargs):
         experiment_slug = self.kwargs['slug']

@@ -9,11 +9,11 @@
         href="{% url 'audio-link-item-create' study_slug=view.experiment.study.slug slug=view.experiment.slug %}"
         {% endif %}
        class="btn btn-primary btn-sm mx-1" role="button">
-        Add Item
+        Add item
     </a>
     <a href="{% url 'items-pregenerate' study_slug=view.experiment.study.slug slug=view.experiment.slug %}"
        class="btn btn-primary btn-sm mx-1" role="button">
-        Pregenerate Items
+        Pregenerate items
     </a>
     <a href="{% url 'items-upload' study_slug=view.experiment.study.slug slug=view.experiment.slug %}"
        class="btn btn-primary btn-sm mx-1" role="button">
@@ -27,7 +27,7 @@
     </form>
     <a href="{% url 'items-delete' study_slug=view.experiment.study.slug slug=view.experiment.slug %}"
        class="btn btn-danger btn-sm mx-1" role="button">
-        Delete All
+        Delete all
     </a>
 </div>
 <ul class="list-group">
@@ -62,7 +62,7 @@
         </span>
     </li>
     {% empty %}
-    <li class="list-group-item my-1">No item yet.</li>
+    <li class="list-group-item my-1">There are currently no items.</li>
     {% endfor %}
 </ul>
 <nav aria-label="Pagination">

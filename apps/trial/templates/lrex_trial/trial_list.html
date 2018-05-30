@@ -3,15 +3,15 @@
 {% block content %}
 <div class="card  my-2">
     <div class="card-body">
-        <h2>Run Trial</h2>
+        <h2>Study access</h2>
         {% if not view.study.is_published %}
         <p class="card-text">
-            Pubish your study first.
+            Publish your study first.
         </p>
         {% endif %}
         <p class="card-text">
             Share <a href="{% url 'trial-create' study_slug=view.study.slug %}">this link</a> with your participants
-            along with the password set for the study.
+            along with the password that you set for the study.
         </p>
     </div>
 </div>
@@ -39,7 +39,7 @@
         </span>
     </li>
     {% empty %}
-    <li class="list-group-item my-1">No trials yet.</li>
+    <li class="list-group-item my-1">No trials have been completed yet.</li>
     {% endfor %}
 </ul>
 <nav aria-label="Pagination">

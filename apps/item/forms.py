@@ -24,8 +24,14 @@ class AudioLinkItemForm(crispy_forms.CrispyModelForm):
 
 
 class PregenerateItemsForm(crispy_forms.CrispyForm):
-    num_items = forms.IntegerField()
-    num_conditions = forms.IntegerField()
+    num_items = forms.IntegerField(
+        label='number of items',
+        help_text='Empty text fields will be pregenerated to accommodate this number of items.',
+    )
+    num_conditions = forms.IntegerField(
+        label='number of conditions',
+        help_text='Empty text fields will be pregenerated to accommodate this number of conditions.',
+)
 
 
 class UploadItemsForm(crispy_forms.CrispyForm):

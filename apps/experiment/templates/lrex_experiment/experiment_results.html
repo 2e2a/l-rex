@@ -8,8 +8,8 @@
             Aggregated by: {{ view.aggregate_by_label }}
         </button>
         <div class="dropdown-menu" aria-labelledby="dropdownAggregateBy">
-            <a class="dropdown-item" href="?{{ view.aggregate_by_subject_url_par }}">Subject</a>
-            <a class="dropdown-item" href="?{{ view.aggregate_by_subject_and_item_url_par }}">Subject+Item</a>
+            <a class="dropdown-item" href="?{{view.aggregate_by_subject_url_par }}">subject</a>
+            <a class="dropdown-item" href="?{{view.aggregate_by_subject_and_item_url_par }}">subject+item</a>
         </div>
     </div>
     <a href="{% url 'experiment-results-csv' study_slug=view.object.study.slug slug=view.object.slug %}"

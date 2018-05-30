@@ -4,11 +4,11 @@ from django.db import models
 
 class Item(models.Model):
     number = models.IntegerField(
-        help_text='TODO',
+        help_text='Number of the item',
     )
     condition = models.CharField(
         max_length=8,
-        help_text='TODO',
+        help_text='Condition of the item (character limit: 8)',
     )
     experiment = models.ForeignKey(
         'lrex_experiment.Experiment',
@@ -25,7 +25,7 @@ class Item(models.Model):
 class TextItem(Item):
     text = models.TextField(
         max_length=1024,
-        help_text='TODO',
+        help_text='Content of the item (character limit: 1024).',
     )
 
     def get_absolute_url(self):
