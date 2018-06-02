@@ -12,7 +12,6 @@
   </div>
 </div>
 
-{% if object.study.is_textitem %}
 <div class="card my-2 {% if view.experiment|is_progress_exp_created_reached and not view.experiment|is_progress_exp_items_validated_reached %} border-primary {% endif %}">
     <div class="card-body">
         <h2 class="card-title">Items</h2>
@@ -44,5 +43,4 @@
         {% endif %}
     </div>
 </div>
-{% endif %}
 {% endblock %}
