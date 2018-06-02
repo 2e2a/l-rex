@@ -1,4 +1,5 @@
 Django
 django-crispy-forms
+django-allauth
 psycopg2
 pytz
