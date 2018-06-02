@@ -1,7 +1,7 @@
 {% extends "account/base.html" %}
 {% load crispy_forms_tags %}
 
-{% block title %}Login{% endblock %}
+{% block title %}Log in{% endblock %}
 
 {% block account_content %}
 <form class="login" method="POST" action="{% url 'account_login' %}">
@@ -17,7 +17,7 @@
         Don't have an account? Register <a href="{% url 'account_signup' %}">here</a>.
     </p>
     <p>
-        Forgot password? Reset it <a href="{% url 'account_reset_password' %}">here</a>.
+        Forgot your password? Reset it <a href="{% url 'account_reset_password' %}">here</a>.
     </p>
 </div>
 {% endblock %}

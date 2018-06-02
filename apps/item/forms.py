@@ -35,10 +35,22 @@ class PregenerateItemsForm(crispy_forms.CrispyForm):
 
 
 class UploadItemsForm(crispy_forms.CrispyForm):
-    file = forms.FileField()
-    number_column = forms.IntegerField(initial=1)
-    condition_column = forms.IntegerField(initial=2)
-    text_column = forms.IntegerField(initial=3)
+    file = forms.FileField(
+        help_text='The CSV file must contain columns for item number, condition, and text/link to the audio file. '
+                  'Valid column delimiters: colon, semicolon, comma, space, or tab.',
+    )
+    number_column = forms.IntegerField(
+        initial=1,
+        help_text='Specify which column contains the item number.',
+    )
+    condition_column = forms.IntegerField(
+        initial=2,
+        help_text='Specify which column contains the condition.',
+    )
+    text_column = forms.IntegerField(
+        initial=3,
+        help_text='Specify which column contains the text or the link to the audio file.',
+    )
 
     def clean(self):
         cleaned_data = super().clean()

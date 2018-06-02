@@ -34,7 +34,8 @@ class TextItem(Item):
 
 class AudioLinkItem(Item):
     url = models.URLField(
-        help_text='TODO',
+        verbose_name='URL',
+        help_text='Link to the audio file (e.g., https://yourserver.org/item1a.ogg).',
     )
 
     def get_absolute_url(self):

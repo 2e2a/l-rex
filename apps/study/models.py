@@ -33,6 +33,7 @@ class Study(models.Model):
         max_length=3,
         choices=ITEM_TYPE,
         default=ITEM_TYPE_TXT,
+        help_text='The items can be plain text or links to audio files (self-hosted).',
     )
 
     rating_instructions = models.TextField(

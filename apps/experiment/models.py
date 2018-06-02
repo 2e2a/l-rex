@@ -159,7 +159,7 @@ class Experiment(models.Model):
 
     def results_csv(self, fileobj):
         writer = csv.writer(fileobj)
-        csv_row = ['Subject', 'item', 'Condition', 'Rating']
+        csv_row = ['subject', 'item', 'condition', 'rating']
         if self.study.has_text_items:
             csv_row.append('Text')
         writer.writerow(csv_row)
