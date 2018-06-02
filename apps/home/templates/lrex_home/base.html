@@ -39,13 +39,13 @@
                     {{ user.username }}
                 </a>
                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                    <a class="dropdown-item" href="{% url 'password_change' %}">Change Password</a>
-                    <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
+                    <a class="dropdown-item" href="{% url 'account_change_password' %}">Change Password</a>
+                    <a class="dropdown-item" href="{% url 'account_logout' %}">Logout</a>
                 </div>
             </li>
             {% else %}
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'login' %}">Login</a>
+                <a class="nav-link" href="{% url 'account_login' %}">Login</a>
             </li>
             {% endif %}
         </ul>

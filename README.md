@@ -7,7 +7,7 @@ Platform for linguistic rating experiments.
 - [python](https://www.python.org/)
 - [Django](https://www.djangoproject.com/)
 - [django-crispy-forms](https://github.com/django-crispy-forms/django-crispy-forms)
-- [pytz](https://pythonhosted.org/pytz/) (Django dependency)
+- [django-allauth](https://github.com/pennersr/django-allauth)
 - [psycopg2](http://initd.org/psycopg/) (When using PostgreSQL)
 - [bootstrap](https://getbootstrap.com/)
 - [jquery](https://jquery.com/)
@@ -26,6 +26,7 @@ make build
 ## Configuration
 
 Configuration parameters (e.g. `DATABASES`) can be overwritten in `lrex/local.conf`.
+Add a `Site` for your domain (used by allauth).
 
 ## Usage
 
