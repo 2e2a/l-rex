@@ -189,10 +189,11 @@ class Experiment(models.Model):
         return None
 
     def set_progress(self, progress):
-        # USE IT
         self.progress = progress
         self.save()
-        if self.study.progress != self.study.PROGRESS_STD_EXP_CREATED:
+        if progress == self.PROGRESS_EXP_LISTS_CREATED:
+            self.study.set_progress(self.study.PROGRESS_STD_EXP_COMPLETED)
+        elif self.study.progress != self.study.PROGRESS_STD_EXP_CREATED:
             self.study.set_progress(self.study.PROGRESS_STD_EXP_CREATED)
 
 

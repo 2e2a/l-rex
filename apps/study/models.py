@@ -78,12 +78,14 @@ class Study(models.Model):
     PROGRESS_STD_CREATED = '00sc'
     PROGRESS_STD_SCALE_CONFIGURED = '01ss'
     PROGRESS_STD_EXP_CREATED = '02se'
-    PROGRESS_STD_QUESTIONNARES_GENERATED = '06sq'
+    PROGRESS_STD_EXP_COMPLETED = '10ec'
+    PROGRESS_STD_QUESTIONNARES_GENERATED = '11sq'
     PROGRESS_STD_PUBLISHED = '20sp'
     PROGRESS = (
         (PROGRESS_STD_CREATED, 'Create a study'),
         (PROGRESS_STD_SCALE_CONFIGURED, 'Configure the rating scale'),
         (PROGRESS_STD_EXP_CREATED, 'Create an experiment'),
+        (PROGRESS_STD_EXP_COMPLETED, 'Complete the experiment creation'),
         (PROGRESS_STD_QUESTIONNARES_GENERATED, 'Generate questionnaires'),
         (PROGRESS_STD_PUBLISHED, 'Publish the study'),
     )
@@ -187,6 +189,8 @@ class Study(models.Model):
             return reverse('study-scale', args=[self])
         elif progress == self.PROGRESS_STD_EXP_CREATED:
             return reverse('experiments', args=[self])
+        elif progress == self.PROGRESS_STD_EXP_COMPLETED:
+            return reverse('study', args=[self])
         elif progress == self.PROGRESS_STD_QUESTIONNARES_GENERATED:
             return reverse('questionnaires', args=[self])
         elif progress == self.PROGRESS_STD_PUBLISHED:
@@ -203,6 +207,8 @@ class Study(models.Model):
         elif progress == self.PROGRESS_STD_SCALE_CONFIGURED:
             return [ self.PROGRESS_STD_EXP_CREATED ]
         elif progress == self.PROGRESS_STD_EXP_CREATED:
+            return [ self.PROGRESS_STD_EXP_COMPLETED ]
+        elif progress == self.PROGRESS_STD_EXP_COMPLETED:
             return [ self.PROGRESS_STD_EXP_CREATED, self.PROGRESS_STD_QUESTIONNARES_GENERATED ]
         elif progress == self.PROGRESS_STD_QUESTIONNARES_GENERATED:
             return [ self.PROGRESS_STD_PUBLISHED ]

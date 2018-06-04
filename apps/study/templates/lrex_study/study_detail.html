@@ -13,7 +13,7 @@
     </div>
 </div>
 
-<div class="card my-2 {% if view.study|is_progress_std_scale_configured_reached and not view.study|is_progress_exp_lists_created_reached %} border-primary {% endif %}">
+<div class="card my-2 {% if view.study|is_progress_std_scale_configured_reached and not view.study|is_progress_std_exp_completed_reached %} border-primary {% endif %}">
     <div class="card-body">
         <h2 class="card-title">Experiments</h2>
         <p class="card-text">
@@ -28,13 +28,13 @@ the same questionnaire.
     </div>
 </div>
 
-<div class="card my-2 {% if view.study|is_progress_exp_lists_created %} border-primary {% endif %}">
+<div class="card my-2 {% if view.study|is_progress_std_exp_completed %} border-primary {% endif %}">
     <div class="card-body">
         <h2 class="card-title">Questionnaires</h2>
         <p class="card-text">
             A questionnaire is the ordered list of stimuli that an individual participant will see.
         </p>
-        {% if view.study|is_progress_exp_lists_created_reached  %}
+        {% if view.study|is_progress_std_exp_completed_reached  %}
         <a  class="card-link" href="{% url 'questionnaires' study_slug=object.slug %}">Generate questionnaires</a></p>
         {% else %}
         <a  class="card-link text-muted">Generate questionnaires</a></p>

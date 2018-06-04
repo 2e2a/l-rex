@@ -27,12 +27,12 @@ def is_progress_std_scale_configured_reached(study):
 
 
 @register.filter
-def is_progress_exp_created(study):
+def is_progress_std_exp_created(study):
     return study.progress == Study.PROGRESS_STD_EXP_CREATED
 
 
 @register.filter
-def is_progress_exp_created_reached(study):
+def is_progress_std_exp_created_reached(study):
     return study.progress_reached(Study.PROGRESS_STD_EXP_CREATED)
 
 
@@ -62,8 +62,18 @@ def is_progress_exp_lists_created(experiment):
 
 
 @register.filter
-def is_progress_exp_lists_created_reached(study):
-    return study.progress_reached(Experiment.PROGRESS_EXP_LISTS_CREATED)
+def is_progress_exp_lists_created_reached(experiment):
+    experiment.progress_reached(Experiment.PROGRESS_EXP_LISTS_CREATED)
+
+
+@register.filter
+def is_progress_std_exp_completed(study):
+    return study.progress == Study.PROGRESS_STD_EXP_COMPLETED
+
+
+@register.filter
+def is_progress_std_exp_completed_reached(study):
+    return study.progress_reached(Study.PROGRESS_STD_EXP_COMPLETED)
 
 
 @register.filter
