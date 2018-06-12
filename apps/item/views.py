@@ -305,14 +305,21 @@ class ItemUploadView(LoginRequiredMixin, generic.FormView):
 
     def form_valid(self, form):
         result =  super().form_valid(form)
+        models.Item.objects.filter(experiment=self.experiment).delete()
+
         file = form.cleaned_data['file']
         num_col = form.cleaned_data['number_column']
         cond_col = form.cleaned_data['condition_column']
         text_col = form.cleaned_data['text_column']
+
         data = file.read().decode()
+        has_header = csv.Sniffer().has_header(data[:128])
         dialect = csv.Sniffer().sniff(data[:128])
         reader = csv.reader(StringIO(data), dialect)
-        models.Item.objects.filter(experiment=self.experiment).delete()
+
+        if has_header:
+            next(reader)
+
         for row in reader:
             if self.experiment.study.has_text_items:
                 models.TextItem.objects.create(

@@ -1,7 +1,5 @@
 import csv
 from io import StringIO
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit
 from django import forms
 
 from apps.contrib import forms as crispy_forms
@@ -58,7 +56,10 @@ class UploadItemsForm(crispy_forms.CrispyForm):
         try:
             data = file.read().decode()
             dialect = csv.Sniffer().sniff(data[:128])
+            has_header = csv.Sniffer().has_header(data[:128])
             reader = csv.reader(StringIO(data), dialect)
+            if has_header:
+                next(reader)
             try:
                 for row in reader:
                     assert len(row) >= cleaned_data['number_column']
