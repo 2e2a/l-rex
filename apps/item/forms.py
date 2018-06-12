@@ -67,7 +67,7 @@ class UploadItemsForm(crispy_forms.CrispyForm):
                     assert int(row[cleaned_data['number_column'] - 1])
                     assert row[cleaned_data['condition_column'] - 1]
                     assert row[cleaned_data['text_column'] - 1]
-            except AssertionError:
+            except (ValueError, AssertionError):
                 raise forms.ValidationError(
                     'File: Unexpected format in line %(n_line)s.',
                     code='invalid',
