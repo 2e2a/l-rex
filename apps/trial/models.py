@@ -98,7 +98,7 @@ class Trial(models.Model):
 
     def generate_items(self):
         items = self.questionnaire.items
-        random.shuffle(items)
+        random.SystemRandom().shuffle(items)
         for i, item in enumerate(items):
             TrialItem.objects.create(number=i, trial=self, item=item)
 
