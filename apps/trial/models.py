@@ -1,5 +1,7 @@
 import random
+import string
 import uuid
+
 from datetime import timedelta
 from enum import Enum
 from django.db import models
@@ -67,6 +69,11 @@ class Trial(models.Model):
         help_text='Provide an identification number/name (as instructed by the experimenter).',
         verbose_name='ID',
     )
+    rating_proof = models.CharField(
+        max_length=8,
+        blank=True,
+        null=True,
+    )
 
     class Meta:
         ordering = ['creation_date']
@@ -112,6 +119,17 @@ class Trial(models.Model):
         except IndexError:
             self.id = 1
         self.save()
+
+    def generate_rating_proof(self):
+        if self.rating_proof:
+            return self.rating_proof
+        if self.status == TrialStatus.FINISHED:
+            self.rating_proof = ''.join(
+                random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(8)
+            )
+            self.save()
+            return self.rating_proof
+        return None
 
     def get_absolute_url(self):
         return reverse('trial', args=[self.study.slug, self.slug])

@@ -1,6 +1,15 @@
 {% extends "lrex_home/base.html" %}
 
 {% block content %}
+<div class="row justify-content-center mb-2">
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="action" value="download_proofs"
+                class="btn btn-primary btn-sm mx-1">
+            Download proof codes
+        </button>
+    </form>
+</div>
 <div class="card  my-2">
     <div class="card-body">
         <h2>Study access</h2>
@@ -16,7 +25,6 @@
     </div>
 </div>
 
-<h2>Trials</h2>
 <ul class="list-group">
     {% for trial in trial_list %}
     <li class="list-group-item d-flex justify-content-between align-items-center my-1">
@@ -28,6 +36,9 @@
             {% endif %}
             <span class="badge badge-primary">{{ trial.status.name }}</span>
             <span class="badge badge-secondary">Questionnaire {{ trial.questionnaire.number }}</span>
+            {% if trial.rating_proof %}
+            <span class="badge badge-secondary">Proof {{ trial.rating_proof }}</span>
+            {% endif %}
         </span>
         <span>
                 <a href="{% url 'trial' study_slug=view.study.slug slug=trial.slug %}" class="btn btn-outline-primary btn-sm mx-1" role="button">

@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.views import generic
@@ -88,6 +89,16 @@ class TrialListView(LoginRequiredMixin, generic.ListView):
         self.study = study_models.Study.objects.get(slug=study_slug)
         return super().dispatch(*args, **kwargs)
 
+    def post(self, request, *args, **kwargs):
+        action = request.POST.get('action', None)
+        if action and action == 'download_proofs':
+            filename = self.study.slug + '-proofs.csv'
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
+            self.study.rating_proofs_csv(response)
+            return response
+        return redirect('trials', study_slug=self.study.slug)
+
     def get_queryset(self):
         return super().get_queryset().filter(questionnaire__study=self.study)
 
@@ -174,6 +185,7 @@ class RatingOutroView(generic.TemplateView):
         trial_slug = self.kwargs['slug']
         self.trial = models.Trial.objects.get(slug=trial_slug)
         self.study = self.trial.questionnaire.study
+        self.generated_rating_proof = self.trial.generate_rating_proof()
         return super().dispatch(*args, **kwargs)
 
 

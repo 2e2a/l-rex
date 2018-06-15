@@ -1,3 +1,5 @@
+import csv
+
 from enum import Enum
 from django.conf import settings
 from django.db import models
@@ -169,6 +171,24 @@ class Study(models.Model):
         last_questionnaire = None
         for i in range(questionnaire_count):
             last_questionnaire = self._create_next_questionnaire(i, last_questionnaire)
+
+    def rating_proofs_csv(self, fileobj):
+        from apps.trial.models import Trial
+        writer = csv.writer(fileobj)
+        csv_row = [
+            'Subject',
+            'Proof code'
+        ]
+        writer.writerow(csv_row)
+        trials = Trial.objects.filter(
+            questionnaire__study=self
+        )
+        for trial in trials:
+            csv_row = [
+                trial.id,
+                trial.rating_proof
+            ]
+            writer.writerow(csv_row)
 
     def progress_reached(self, progress):
         return self.progress >= progress
