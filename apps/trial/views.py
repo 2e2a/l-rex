@@ -67,7 +67,7 @@ class TrialCreateView(LoginRequiredMixin, generic.CreateView):
     def form_valid(self, form):
         active_trial = self._trial_by_id(form.instance.id)
         if active_trial:
-            return redirect('rating-intro', self.study.slug, active_trial.slug)
+            return reverse('rating-create', args=[self.study.slug, active_trial.slug, 0])
         form.instance.study = self.study
         form.instance.init(self.study)
         response = super().form_valid(form)
@@ -76,7 +76,7 @@ class TrialCreateView(LoginRequiredMixin, generic.CreateView):
         return response
 
     def get_success_url(self):
-        return reverse('rating-intro', args=[self.study.slug, self.object.slug])
+        return reverse('rating-create', args=[self.study.slug, self.object.slug, 0])
 
 
 class TrialListView(LoginRequiredMixin, generic.ListView):
@@ -153,31 +153,6 @@ class TrialDeleteView(LoginRequiredMixin, contrib_views.DefaultDeleteView):
         return reverse('trials', args=[self.study.slug])
 
 
-class RatingIntroView(generic.TemplateView):
-    template_name = 'lrex_trial/rating_intro.html'
-
-    def _redirect_started(self):
-        try:
-            if self.trial.status == models.TrialStatus.FINISHED:
-                return reverse('rating-taken', args=[self.study.slug, self.trial.slug])
-            n_ratings = len(models.Rating.objects.filter(trial_item__trial=self.trial))
-            return reverse('rating-create', args=[self.study.slug, self.trial.slug, n_ratings])
-        except models.Rating.DoesNotExist:
-            pass
-        except models.TrialItem.DoesNotExist:
-            pass
-        return None
-
-    def dispatch(self, *args, **kwargs):
-        trial_slug = self.kwargs['slug']
-        self.trial = models.Trial.objects.get(slug=trial_slug)
-        self.study = self.trial.questionnaire.study
-        redirect_link = self._redirect_started()
-        if redirect_link:
-            return redirect(redirect_link)
-        return super().dispatch(*args, **kwargs)
-
-
 class RatingOutroView(generic.TemplateView):
     template_name = 'lrex_trial/rating_outro.html'
 
@@ -197,13 +172,27 @@ class RatingCreateView(generic.CreateView):
     model = models.Rating
     form_class = forms.RatingForm
 
+    def _redirect_active(self, num):
+        try:
+            if self.trial.status == models.TrialStatus.FINISHED:
+                return reverse('rating-taken', args=[self.study.slug, self.trial.slug])
+            n_ratings = len(models.Rating.objects.filter(trial_item__trial=self.trial))
+            if n_ratings != num:
+                return reverse('rating-create', args=[self.study.slug, self.trial.slug, n_ratings])
+        except models.Rating.DoesNotExist:
+            pass
+        except models.TrialItem.DoesNotExist:
+            pass
+        return None
+
     def dispatch(self, *args, **kwargs):
         trial_slug = self.kwargs['slug']
-        self.num = int(self.kwargs['num'])
         self.trial = models.Trial.objects.get(slug=trial_slug)
-        if self.trial.status == models.TrialStatus.FINISHED:
-            return redirect(reverse('rating-taken', args=[self.study.slug, self.trial.slug]))
+        self.num = int(self.kwargs['num'])
         self.study = self.trial.questionnaire.study
+        redirect_link = self._redirect_active(self.num)
+        if redirect_link:
+            return redirect(redirect_link)
         self.trial_item = models.TrialItem.objects.get(
             trial__slug=trial_slug,
             number=self.num

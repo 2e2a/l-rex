@@ -6,6 +6,9 @@
 <div class="row justify-content-center">
     <div class="my-2 p-4 border col-6 bg-white">
         {% if view.study.status.name == 'ACTIVE' %}
+        <p>
+            {{ view.study.rating_instructions }}
+        </p>
         {% crispy form form.helper %}
         {% elif view.study.status.name == 'DRAFT' %}
         <p>Experiment is not yet published.</p>

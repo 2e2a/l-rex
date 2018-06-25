@@ -4,16 +4,18 @@ from django import forms
 
 
 class CrispyForm(forms.Form):
+    submit_label = 'Submit'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.add_input(Submit('submit', 'Submit'))
+        self.helper.add_input(Submit('submit', self.submit_label))
 
 
 class CrispyModelForm(forms.ModelForm):
+    submit_label = 'Submit'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.add_input(Submit('submit', 'Submit'))
+        self.helper.add_input(Submit('submit', self.submit_label))
