@@ -58,8 +58,9 @@ class Study(models.Model):
         max_length=200,
         help_text='This password will be required to participate in the study.',
     )
-    allow_anonymous = models.BooleanField(
-        help_text='Check this box if you want to allow participation without entering a name/ID.',
+    require_participant_id = models.BooleanField(
+        default=False,
+        help_text='Enable if you want participants to enter some ID before participation.',
     )
     end_date = models.DateField(
         blank=True,
@@ -74,7 +75,7 @@ class Study(models.Model):
     )
     is_published = models.BooleanField(
         default=False,
-        help_text='Check this box to publish your study. It will then be available for participation.',
+        help_text='Enable to publish your study. It will then be available for participation.',
     )
 
     PROGRESS_STD_CREATED = '00sc'

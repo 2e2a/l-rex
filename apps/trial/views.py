@@ -103,7 +103,7 @@ class TrialListView(LoginRequiredMixin, generic.ListView):
         return super().get_queryset().filter(questionnaire__study=self.study)
 
     def show_counter(self):
-        return not self.study.allow_anonymous
+        return self.study.require_participant_id
 
     @property
     def breadcrumbs(self):
