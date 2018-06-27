@@ -17,9 +17,9 @@ class StudyForm(crispy_forms.CrispyModelForm):
             'item_type',
             'rating_instructions',
             'require_participant_id',
+            'password',
             'rating_question',
             'rating_legend',
-            'password',
             'end_date',
             'trial_limit'
         ]
