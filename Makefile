@@ -59,3 +59,8 @@ pull:
 
 .PHONY: deploy
 deploy: pull install build migrate
+
+fixvenv:
+	rm -r $(VIRTUAL_ENV)
+	python3 -m venv $(VIRTUAL_ENV)
+	$(VIRTUAL_ENV)/bin/python3 -m pip install -r requirements.txt
