@@ -1,4 +1,4 @@
-VIRTUAL_ENV ?= .env
+VIRTUAL_ENV ?= .venv
 NODE_MODULES = node_modules
 NODE_BIN = $(NODE_MODULES)/.bin
 

@@ -1,7 +1,7 @@
 *.mo
 *__pycache__/
 db.sqlite3
-/.env
+/.venv
 /.idea
 /lrex/local.py
 /lrex/static/
