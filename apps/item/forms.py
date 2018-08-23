@@ -54,7 +54,11 @@ class UploadItemsForm(crispy_forms.CrispyForm):
         cleaned_data = super().clean()
         file = cleaned_data['file']
         try:
-            data = file.read().decode()
+            try:
+                data = file.read().decode('utf-8')
+            except UnicodeDecodeError:
+                file.seek(0)
+                data = file.read().decode('latin-1')
             dialect = csv.Sniffer().sniff(data[:128])
             has_header = csv.Sniffer().has_header(data[:128])
             reader = csv.reader(StringIO(data), dialect)
@@ -73,6 +77,8 @@ class UploadItemsForm(crispy_forms.CrispyForm):
                     'File: Unexpected format in line %(n_line)s.',
                     code='invalid',
                     params={'n_line': reader.line_num})
+        except UnicodeDecodeError:
+            raise forms.ValidationError('Unsupported file encoding. Supported are UTF-8 and Latin-1.')
         except csv.Error:
             raise forms.ValidationError('Unsupported CSV format.')
         file.seek(0)

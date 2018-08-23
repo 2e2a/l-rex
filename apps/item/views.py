@@ -312,7 +312,11 @@ class ItemUploadView(LoginRequiredMixin, generic.FormView):
         cond_col = form.cleaned_data['condition_column']
         text_col = form.cleaned_data['text_column']
 
-        data = file.read().decode()
+        try:
+            data = file.read().decode('utf-8')
+        except UnicodeDecodeError:
+            file.seek(0)
+            data = file.read().decode('latin-1')
         has_header = csv.Sniffer().has_header(data[:128])
         dialect = csv.Sniffer().sniff(data[:128])
         reader = csv.reader(StringIO(data), dialect)
