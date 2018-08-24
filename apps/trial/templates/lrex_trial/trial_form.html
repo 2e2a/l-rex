@@ -7,7 +7,7 @@
     <div class="my-2 p-4 border col-6 bg-white">
         {% if view.study.status.name == 'ACTIVE' %}
         <p>
-            {{ view.study.rating_instructions }}
+            {{ view.study.rating_instructions|linebreaks }}
         </p>
         {% crispy form form.helper %}
         {% elif view.study.status.name == 'DRAFT' %}
