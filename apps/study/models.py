@@ -42,18 +42,6 @@ class Study(models.Model):
         max_length=1024,
         help_text='These instructions will be presented to the participant before the experiment begins.',
     )
-    rating_question = models.CharField(
-        max_length=200,
-        blank=True,
-        null=True,
-        help_text='This text will precede each stimulus (e.g. "How acceptable is this sentence?")',
-    )
-    rating_legend = models.TextField(
-        max_length=1024,
-        blank=True,
-        null=True,
-        help_text='This legend will appear below each stimulus to clarify the scale (e.g. "1 = bad, 5 = good").',
-    )
     password = models.CharField(
         max_length=200,
         help_text='This password will be required to participate in the study.',
@@ -207,7 +195,7 @@ class Study(models.Model):
         if progress == self.PROGRESS_STD_CREATED:
             return reverse('study-create', args=[])
         elif progress == self.PROGRESS_STD_SCALE_CONFIGURED:
-            return reverse('study-scale', args=[self])
+            return reverse('study-questions', args=[self])
         elif progress == self.PROGRESS_STD_EXP_CREATED:
             return reverse('experiments', args=[self])
         elif progress == self.PROGRESS_STD_EXP_COMPLETED:
@@ -251,9 +239,41 @@ class Study(models.Model):
         return next_steps
 
 
-class ScaleValue(models.Model):
+class Question(models.Model):
     study = models.ForeignKey(
         Study,
+        on_delete=models.CASCADE
+    )
+    question = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text='TODO This text will precede the stimulus (e.g. "How acceptable is this sentence?")',
+    )
+    legend = models.TextField(
+        max_length=1024,
+        blank=True,
+        null=True,
+        help_text='TODO This legend will appear below the stimulus to clarify the scale (e.g. "1 = bad, 5 = good").',
+    )
+
+    class Meta:
+        ordering = ['pk']
+
+    @property
+    def num(self):
+        return list(Question.objects.filter(study=self.study)).index(self) + 1
+
+    def get_absolute_url(self):
+        return reverse('study-question', args=[self.study.slug, self.pk])
+
+    def __str__(self):
+        return self.question
+
+
+class ScaleValue(models.Model):
+    question = models.ForeignKey(
+        Question,
         on_delete=models.CASCADE
     )
     number = models.IntegerField()

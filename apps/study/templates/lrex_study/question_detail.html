@@ -1,0 +1,28 @@
+{% extends "lrex_home/base.html" %}
+{% load progress_tags %}
+
+{% block content %}
+<div class="card  my-2">
+    <div class="card-body">
+        <h2 class="card-title">Settings</h2>
+        <h4>Question</h4>
+        <p class="card-text">
+            {{ object.question }}
+        </p>
+        <h4>Legend</h4>
+        <p class="card-text">
+            {{ object.legend }}
+        </p>
+        <a  class="card-link" href="{% url 'study-question-update' slug=object.study.slug pk=object.pk %}">Edit</a>
+    </div>
+</div>
+<div class="card  my-2">
+    <div class="card-body">
+        <h2 class="card-title">Scale</h2>
+        <p class="card-text">
+            lalala
+        </p>
+        <a  class="card-link" href="{% url 'study-question-scale' slug=object.study.slug pk=object.pk %}">Create/edit</a>
+    </div>
+</div>
+{% endblock %}

@@ -18,10 +18,18 @@ class StudyForm(crispy_forms.CrispyModelForm):
             'rating_instructions',
             'require_participant_id',
             'password',
-            'rating_question',
-            'rating_legend',
             'end_date',
             'trial_limit'
+        ]
+
+
+class QuestionForm(crispy_forms.CrispyModelForm):
+
+    class Meta:
+        model = models.Question
+        fields = [
+            'question',
+            'legend',
         ]
 
 

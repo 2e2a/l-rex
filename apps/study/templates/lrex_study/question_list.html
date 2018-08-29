@@ -1,0 +1,28 @@
+{% extends "lrex_home/base.html" %}
+{% load progress_tags %}
+
+{% block content %}
+<div class="row justify-content-center mb-2">
+    <a href="{% url 'study-question-create' slug=view.study %}" class="btn btn-primary btn-sm mx-1" role="button">
+        New question
+    </a>
+</div>
+<ul class="list-group">
+    {% for question in question_list %}
+    <li class="list-group-item d-flex justify-content-between align-items-center my-1">
+        {{ forloop.counter }} {{ question.question }}
+        <span>
+            <a href="{% url 'study-question' slug=question.study.slug pk=question.pk %}" class="btn btn-outline-primary btn-sm mx-1" role="button">
+                Edit
+            </a>
+            <a href="{% url 'study-question-delete' slug=question.study.slug pk=question.pk %}" class="btn btn-outline-danger btn-sm mx-1" role="button">
+                Delete
+            </a>
+        </span>
+    </li>
+    {% empty %}
+    <li class="list-group-item my-1">There are currently no questions. Click on 'New question' to create one.</li>
+    {% endfor %}
+</ul>
+{% endblock %}
+

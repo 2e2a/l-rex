@@ -140,19 +140,134 @@ class StudyListView(LoginRequiredMixin, generic.ListView):
         ]
 
 
+class QuestionListView(LoginRequiredMixin, generic.ListView):
+    model = models.Question
+    title = 'Questions'
+
+    def dispatch(self, *args, **kwargs):
+        study_slug = self.kwargs['slug']
+        self.study = models.Study.objects.get(slug=study_slug)
+        return super().dispatch(*args, **kwargs)
+
+    def get_queryset(self):
+        return super().get_queryset().filter(study=self.study)
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('questions', ''),
+        ]
+
+
+class QuestionCreateView(LoginRequiredMixin, generic.CreateView):
+    model = models.Question
+    title = 'Create question'
+    template_name = 'lrex_contrib/crispy_form.html'
+    form_class = forms.QuestionForm
+    success_message = 'Question successfully created.'
+
+    def dispatch(self, *args, **kwargs):
+        study_slug = self.kwargs['slug']
+        self.study = models.Study.objects.get(slug=study_slug)
+        return super().dispatch(*args, **kwargs)
+
+    def form_valid(self, form):
+        form.instance.study = self.study
+        response = super().form_valid(form)
+        return response
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('questions', reverse('study-questions', args=[self.study.slug])),
+            ('create', ''),
+        ]
+
+
+class QuestionUpdateView(LoginRequiredMixin, generic.UpdateView):
+    model = models.Question
+    title = 'Edit question'
+    template_name = 'lrex_contrib/crispy_form.html'
+    form_class = forms.QuestionForm
+    success_message = 'Question successfully updated.'
+
+    @property
+    def study(self):
+        return self.object.study
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('questions', reverse('study-questions', args=[self.study.slug])),
+            (self.object.num, reverse('study-question', args=[self.study.slug, self.object.pk])),
+            ('edit', ''),
+        ]
+
+
+class QuestionDetailView(LoginRequiredMixin, generic.DetailView):
+    model = models.Question
+
+    @property
+    def title(self):
+        return 'Question {}'.format(self.object.num)
+
+    @property
+    def study(self):
+        return self.object.study
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('questions', reverse('study-questions', args=[self.study.slug])),
+            (self.object.num,''),
+        ]
+
+
+class QuestionDeleteView(LoginRequiredMixin, contib_views.DefaultDeleteView):
+    model = models.Question
+
+    @property
+    def study(self):
+        return self.object.study
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('questions', reverse('study-questions', args=[self.study.slug])),
+            (self.object.num, reverse('study-question', args=[self.study.slug, self.object.pk])),
+            ('delete' ''),
+        ]
+
+    def get_success_url(self):
+        return reverse('study-questions', args=[self.study.slug])
+
+
 class ScaleUpdateView(LoginRequiredMixin, NextStepsMixin, generic.TemplateView):
-    model = models.Study
     title = 'Edit rating scale'
     template_name = 'lrex_study/study_scale.html'
 
     formset = None
     helper = forms.scale_formset_helper
 
+    @property
+    def study(self):
+        return self.question.study
+
     def dispatch(self, *args, **kwargs):
-        study_slug = self.kwargs['slug']
-        self.study = models.Study.objects.get(slug=study_slug)
+        question_pk = self.kwargs['pk']
+        self.question = models.Question.objects.get(pk=question_pk)
         self.formset = forms.scaleformset_factory()(
-            queryset=models.ScaleValue.objects.filter(study=self.study)
+            queryset=models.ScaleValue.objects.filter(question=self.question)
         )
         return super().dispatch(*args, **kwargs)
 
@@ -162,7 +277,7 @@ class ScaleUpdateView(LoginRequiredMixin, NextStepsMixin, generic.TemplateView):
             instances = self.formset.save(commit=False)
             for instance in instances:
                 instance.number = 0
-                instance.study = self.study
+                instance.question = self.question
                 instance.save()
             i = 1
             for form in self.formset.forms:
@@ -186,7 +301,7 @@ class ScaleUpdateView(LoginRequiredMixin, NextStepsMixin, generic.TemplateView):
 
 
             self.formset = forms.scaleformset_factory(extra)(
-                queryset=models.ScaleValue.objects.filter(study=self.study)
+                queryset=models.ScaleValue.objects.filter(question=self.question)
             )
 
         return super().get(request, *args, **kwargs)
@@ -196,5 +311,7 @@ class ScaleUpdateView(LoginRequiredMixin, NextStepsMixin, generic.TemplateView):
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
-            ('scale', ''),
+            ('questions', reverse('study-questions', args=[self.study.slug])),
+            (self.question.num, reverse('study-question', args=[self.study.slug, self.question.pk])),
+            ('scale',''),
         ]
