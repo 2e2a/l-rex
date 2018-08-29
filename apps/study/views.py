@@ -276,18 +276,13 @@ class ScaleUpdateView(LoginRequiredMixin, NextStepsMixin, generic.TemplateView):
         if self.formset.is_valid():
             instances = self.formset.save(commit=False)
             for instance in instances:
-                instance.number = 0
                 instance.question = self.question
                 instance.save()
-            i = 1
+
             for form in self.formset.forms:
                 if form.instance.id:
                     if form.cleaned_data['delete']:
                         form.instance.delete()
-                    else:
-                        form.instance.number = i
-                        form.instance.save()
-                        i = i + 1
 
             if 'add' in request.POST:
                 extra = 1

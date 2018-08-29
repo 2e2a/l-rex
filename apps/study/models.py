@@ -276,14 +276,17 @@ class ScaleValue(models.Model):
         Question,
         on_delete=models.CASCADE
     )
-    number = models.IntegerField()
     label = models.CharField(
         max_length=50,
         help_text='Provide a label for this point of the scale.',
     )
 
     class Meta:
-        ordering = ['number']
+        ordering = ['pk']
+
+    @property
+    def num(self):
+        return list(ScaleValue.objects.filter(question=self.question)).index(self) + 1
 
     def __str__(self):
         return self.label
