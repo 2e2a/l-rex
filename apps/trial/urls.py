@@ -10,5 +10,6 @@ urlpatterns = [
     path('<slug:slug>/rating/outro/', views.RatingOutroView.as_view(), name='rating-outro'),
     path('<slug:slug>/rating/taken/', views.RatingTakenView.as_view(), name='rating-taken'),
     path('<slug:slug>/rating/<int:num>/', views.RatingCreateView.as_view(), name='rating-create'),
+    path('<slug:slug>/ratings/<int:num>/', views.RatingsCreateView.as_view(), name='ratings-create'),
     path('<slug:slug>/', views.TrialDetailView.as_view(), name='trial'),
 ]

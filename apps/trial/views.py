@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ValidationError
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -176,8 +177,9 @@ class RatingCreateView(generic.CreateView):
         try:
             if self.trial.status == models.TrialStatus.FINISHED:
                 return reverse('rating-taken', args=[self.study.slug, self.trial.slug])
-            n_ratings = len(models.Rating.objects.filter(trial_item__trial=self.trial))
-            if n_ratings != num:
+            n_ratings = models.Rating.objects.filter(trial_item__trial=self.trial).count()
+            n_questions = self.study.question_set.count()
+            if n_ratings/n_questions != num:
                 return reverse('rating-create', args=[self.study.slug, self.trial.slug, n_ratings])
         except models.Rating.DoesNotExist:
             pass
@@ -191,12 +193,15 @@ class RatingCreateView(generic.CreateView):
         self.num = int(self.kwargs['num'])
         self.study = self.trial.questionnaire.study
         redirect_link = self._redirect_active(self.num)
+        if not redirect_link and self.study.question_set.count() > 1:
+            redirect_link = reverse('ratings-create', args=[self.study.slug, self.trial.slug, self.num])
         if redirect_link:
             return redirect(redirect_link)
         self.trial_item = models.TrialItem.objects.get(
             trial__slug=trial_slug,
             number=self.num
         )
+        self.question = self.study.question_set.first()
         return super().dispatch(*args, **kwargs)
 
     def progress(self):
@@ -204,7 +209,7 @@ class RatingCreateView(generic.CreateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['study'] = self.study
+        kwargs['question'] = self.question
         return kwargs
 
     def form_valid(self, form):
@@ -216,3 +221,51 @@ class RatingCreateView(generic.CreateView):
         if self.num < (len(self.trial.items) - 1):
             return reverse('rating-create', args=[self.study.slug, self.trial.slug, self.num + 1])
         return reverse('rating-outro', args=[self.study.slug, self.trial.slug])
+
+
+class RatingsCreateView(generic.TemplateView):
+    model = models.Rating
+    template_name = 'lrex_trial/ratings_form.html'
+
+    formset = None
+    helper = forms.rating_formset_helper
+
+    def dispatch(self, *args, **kwargs):
+        trial_slug = self.kwargs['slug']
+        self.trial = models.Trial.objects.get(slug=trial_slug)
+        self.num = int(self.kwargs['num'])
+        self.study = self.trial.questionnaire.study
+        self.trial_item = models.TrialItem.objects.get(
+            trial__slug=trial_slug,
+            number=self.num
+        )
+        self.questions = study_models.Question.objects.filter(
+            study=self.study
+        )
+        self.formset = forms.ratingformset_factory(len(self.questions))(
+            queryset=models.Rating.objects.none()
+        )
+        forms.customize_to_questions(self.formset, self.questions)
+        return super().dispatch(*args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.formset = forms.ratingformset_factory(len(self.questions))(request.POST, request.FILES)
+        forms.customize_to_questions(self.formset, self.questions)
+        if self.formset.is_valid():
+            instances = self.formset.save(commit=False)
+            if len(instances) < len(self.questions):
+                self.formset._non_form_errors = \
+                    self.formset.error_class(ValidationError('Please answer all questions.').error_list)
+            else:
+                for instance in instances:
+                    if not instance.scale_value:
+                        raise ValidationError('Please answer all questions.')
+                    instance.trial_item = self.trial_item
+                    instance.save()
+                if self.num < (len(self.trial.items) - 1):
+                    return redirect('rating-create', study_slug=self.study.slug, slug=self.trial.slug, num=self.num + 1)
+                return redirect('rating-outro', study_slug=self.study.slug, slug=self.trial.slug)
+        return super().get(request, *args, **kwargs)
+
+    def progress(self):
+        return self.num * 100 / len(self.trial.items)
