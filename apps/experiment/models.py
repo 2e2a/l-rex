@@ -19,10 +19,10 @@ class Experiment(models.Model):
         'lrex_study.Study',
         on_delete=models.CASCADE
     )
-    PROGRESS_EXP_CREATED = '03ec'
-    PROGRESS_EXP_ITEMS_CREATED = '03ic'
-    PROGRESS_EXP_ITEMS_VALIDATED = '04iv'
-    PROGRESS_EXP_LISTS_CREATED = '05lc'
+    PROGRESS_EXP_CREATED = '21-exp-crt'
+    PROGRESS_EXP_ITEMS_CREATED = '22-exp-itm-crt'
+    PROGRESS_EXP_ITEMS_VALIDATED = '23-exp-itm-vld'
+    PROGRESS_EXP_LISTS_CREATED = '24-exp-lst-gen'
     PROGRESS = (
         (PROGRESS_EXP_CREATED, 'Create an experiment'),
         (PROGRESS_EXP_ITEMS_CREATED, 'Create or upload experiment items'),
@@ -30,7 +30,7 @@ class Experiment(models.Model):
         (PROGRESS_EXP_LISTS_CREATED, 'Generate item lists'),
     )
     progress = models.CharField(
-        max_length=4,
+        max_length=16,
         choices=PROGRESS,
         default=PROGRESS_EXP_CREATED,
     )

@@ -66,22 +66,24 @@ class Study(models.Model):
         help_text='Enable to publish your study. It will then be available for participation.',
     )
 
-    PROGRESS_STD_CREATED = '00sc'
-    PROGRESS_STD_SCALE_CONFIGURED = '01ss'
-    PROGRESS_STD_EXP_CREATED = '02se'
-    PROGRESS_STD_EXP_COMPLETED = '10ec'
-    PROGRESS_STD_QUESTIONNARES_GENERATED = '11sq'
-    PROGRESS_STD_PUBLISHED = '20sp'
+    PROGRESS_STD_CREATED = '00-std-crt'
+    PROGRESS_STD_QUESTION_CREATED = '10-qst-crt'
+    PROGRESS_STD_QUESTION_COMPLETED = '19-qst-cmp'
+    PROGRESS_STD_EXP_CREATED = '20-exp-crt'
+    PROGRESS_STD_EXP_COMPLETED = '29-exp-cmp'
+    PROGRESS_STD_QUESTIONNARES_GENERATED = '30-std-qnr-gen'
+    PROGRESS_STD_PUBLISHED = '40-std-pub'
     PROGRESS = (
         (PROGRESS_STD_CREATED, 'Create a study'),
-        (PROGRESS_STD_SCALE_CONFIGURED, 'Configure the rating scale'),
+        (PROGRESS_STD_QUESTION_CREATED, 'Create a question'),
+        (PROGRESS_STD_QUESTION_COMPLETED, 'Complete a question creation'),
         (PROGRESS_STD_EXP_CREATED, 'Create an experiment'),
         (PROGRESS_STD_EXP_COMPLETED, 'Complete the experiment creation'),
         (PROGRESS_STD_QUESTIONNARES_GENERATED, 'Generate questionnaires'),
         (PROGRESS_STD_PUBLISHED, 'Publish the study'),
     )
     progress = models.CharField(
-        max_length=4,
+        max_length=16,
         choices=PROGRESS,
         default=PROGRESS_STD_CREATED,
     )
@@ -194,7 +196,7 @@ class Study(models.Model):
     def progress_url(self, progress):
         if progress == self.PROGRESS_STD_CREATED:
             return reverse('study-create', args=[])
-        elif progress == self.PROGRESS_STD_SCALE_CONFIGURED:
+        elif progress == self.PROGRESS_STD_QUESTION_CREATED:
             return reverse('study-questions', args=[self])
         elif progress == self.PROGRESS_STD_EXP_CREATED:
             return reverse('experiments', args=[self])
@@ -212,9 +214,11 @@ class Study(models.Model):
 
     def next_progress_steps(self, progress):
         if progress == self.PROGRESS_STD_CREATED:
-            return [ self.PROGRESS_STD_SCALE_CONFIGURED ]
-        elif progress == self.PROGRESS_STD_SCALE_CONFIGURED:
-            return [ self.PROGRESS_STD_EXP_CREATED ]
+            return [ self.PROGRESS_STD_QUESTION_CREATED]
+        elif progress == self.PROGRESS_STD_QUESTION_CREATED:
+            return [ self.PROGRESS_STD_QUESTION_COMPLETED ]
+        elif progress == self.PROGRESS_STD_QUESTION_COMPLETED:
+            return [ self.PROGRESS_STD_QUESTION_CREATED, self.PROGRESS_STD_EXP_CREATED ]
         elif progress == self.PROGRESS_STD_EXP_CREATED:
             return [ self.PROGRESS_STD_EXP_COMPLETED ]
         elif progress == self.PROGRESS_STD_EXP_COMPLETED:
@@ -226,10 +230,16 @@ class Study(models.Model):
 
     def next_steps(self):
         next_steps = []
-        if self.progress == self.PROGRESS_STD_EXP_CREATED:
-            for experiment in self.experiments:
-                next_exp_steps = experiment.next_steps()
+        if self.progress == self.PROGRESS_STD_QUESTION_CREATED:
+            for question in self.question_set.all():
+                next_exp_steps = question.next_steps()
                 next_steps.extend(next_exp_steps)
+
+        if not next_steps:
+            if self.progress == self.PROGRESS_STD_EXP_CREATED:
+                for experiment in self.experiments:
+                    next_exp_steps = experiment.next_steps()
+                    next_steps.extend(next_exp_steps)
 
         if not next_steps:
             for next_step in self.next_progress_steps(self.progress):
@@ -257,6 +267,18 @@ class Question(models.Model):
         help_text='TODO This legend will appear below the stimulus to clarify the scale (e.g. "1 = bad, 5 = good").',
     )
 
+    PROGRESS_QST_CREATED = '11-qst-crt'
+    PROGRESS_QST_SCALE_CREATED = '12-qst-scl'
+    PROGRESS = (
+        (PROGRESS_QST_CREATED, 'Create a question'),
+        (PROGRESS_QST_SCALE_CREATED, 'Create scale for question'),
+    )
+    progress = models.CharField(
+        max_length=16,
+        choices=PROGRESS,
+        default=PROGRESS_QST_CREATED,
+    )
+
     class Meta:
         ordering = ['pk']
 
@@ -266,6 +288,43 @@ class Question(models.Model):
 
     def get_absolute_url(self):
         return reverse('study-question', args=[self.study.slug, self.pk])
+
+    @staticmethod
+    def progress_description(progress):
+        return dict(Question.PROGRESS)[progress]
+
+    def progress_reached(self, progress):
+        return self.progress >= progress
+
+    def progress_url(self, progress):
+        if progress == self.PROGRESS_QST_CREATED:
+            return reverse('study-questions', args=[self.study])
+        elif progress == self.PROGRESS_QST_SCALE_CREATED:
+            return reverse('study-question-scale', args=[self.study, self.pk])
+        return None
+
+    def set_progress(self, progress):
+        self.progress = progress
+        self.save()
+        if progress == self.PROGRESS_QST_SCALE_CREATED:
+            self.study.set_progress(self.study.PROGRESS_STD_QUESTION_CREATED)
+        elif self.study.progress != self.study.PROGRESS_STD_QUESTION_COMPLETED:
+            self.study.set_progress(self.study.PROGRESS_STD_QUESTION_COMPLETED)
+
+
+    def next_progress_steps(self, progress):
+        if progress == self.PROGRESS_QST_CREATED:
+            return [ self.PROGRESS_QST_SCALE_CREATED ]
+        elif progress == self.PROGRESS_QST_SCALE_CREATED:
+            return []
+
+    def next_steps(self):
+        next_steps = []
+        for next_step in self.next_progress_steps(self.progress):
+            description = '{} [ {} ]'.format(self.progress_description(next_step), self)
+            url = self.progress_url(next_step)
+            next_steps.append(( description, url, ))
+        return next_steps
 
     def __str__(self):
         return self.question

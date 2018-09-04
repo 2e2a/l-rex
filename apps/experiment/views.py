@@ -89,7 +89,7 @@ class ExperimentDeleteView(LoginRequiredMixin, contrib_views.DefaultDeleteView):
         response = super().delete(*args, **kwargs)
         study = self.object.study
         if not models.Experiment.objects.filter(study=study).exists():
-            study.set_progress(study.PROGRESS_STD_SCALE_CONFIGURED)
+            study.set_progress(study.PROGRESS_STD_QUESTION_CREATED)
         else:
             study.set_progress(study.PROGRESS_STD_EXP_CREATED)
         return response
