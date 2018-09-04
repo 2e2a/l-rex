@@ -84,8 +84,15 @@ class Trial(models.Model):
         return items
 
     @property
+    def ratings_completed(self):
+        n_questions = self.questionnaire.study.question_set.count()
+        n_ratings = Rating.objects.filter(trial_item__trial=self).count()
+        return int(n_ratings / n_questions)
+
+
+    @property
     def status(self):
-        n_ratings = len(Rating.objects.filter(trial_item__trial=self))
+        n_ratings = self.ratings_completed
         if n_ratings > 0:
             n_trial_items = len(self.items)
             if n_ratings == n_trial_items:
@@ -135,7 +142,7 @@ class Trial(models.Model):
         return reverse('trial', args=[self.study.slug, self.slug])
 
     def __str__(self):
-        return self.id
+        return 'Trial {}'.format(self.id)
 
 
 class TrialItem(models.Model):
@@ -148,6 +155,5 @@ class TrialItem(models.Model):
 
 
 class Rating(models.Model):
-    number = models.IntegerField()
-    trial_item = models.OneToOneField(TrialItem, on_delete=models.CASCADE)
+    trial_item = models.ForeignKey(TrialItem, on_delete=models.CASCADE)
     scale_value = models.ForeignKey(study_models.ScaleValue, on_delete=models.CASCADE)

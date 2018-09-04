@@ -24,8 +24,10 @@
     {% if 'item' not in view.aggregate_by %}<th scope="col">Item</th>{% endif %}
     {% if 'condition' not in view.aggregate_by %}<th scope="col">Condition</th>{% endif %}
     <th scope="col">N</th>
-    {% for scale_value in view.study.scalevalue_set.all %}
+    {% for question in view.study.question_set.all %}
+        {% for scale_value in question.scalevalue_set.all %}
     <th scope="col" class="table-primary">{{ scale_value.label }}</th>
+        {% endfor %}
     {% endfor %}
 </tr>
 </thead>

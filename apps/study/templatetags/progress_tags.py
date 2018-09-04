@@ -17,13 +17,23 @@ def is_progress_std_created_reached(study):
 
 
 @register.filter
-def is_progress_std_scale_configured(study):
-    return study.progress == Study.PROGRESS_STD_SCALE_CONFIGURED
+def is_progress_std_question_created(study):
+    return study.progress == Study.PROGRESS_STD_QUESTION_CREATED
 
 
 @register.filter
-def is_progress_std_scale_configured_reached(study):
-    return study.progress_reached(Study.PROGRESS_STD_SCALE_CONFIGURED)
+def is_progress_std_question_created_reached(study):
+    return study.progress_reached(Study.PROGRESS_STD_QUESTION_CREATED)
+
+
+@register.filter
+def is_progress_std_question_completed(study):
+    return study.progress == Study.PROGRESS_STD_QUESTION_COMPLETED
+
+
+@register.filter
+def is_progress_std_question_completed_reached(study):
+    return study.progress_reached(Study.PROGRESS_STD_QUESTION_COMPLETED)
 
 
 @register.filter

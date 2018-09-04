@@ -4,6 +4,7 @@ from django.db import models
 from django.utils.text import slugify
 
 from apps.item import models as item_models
+from apps.study import models as study_models
 from apps.trial import models as trial_models
 
 
@@ -109,7 +110,8 @@ class Experiment(models.Model):
             row['subject'] = rating.trial_item.trial.id
             row['item'] = item.number
             row['condition'] = item.condition
-            row['rating'] = rating.scale_value.number
+            row['question'] = rating.scale_value.question.num
+            row['rating'] = rating.scale_value.num
             if hasattr(item, 'textitem'):
                 row['text'] = item.textitem.text
 
@@ -118,6 +120,25 @@ class Experiment(models.Model):
         results_sorted = sorted(results, key=lambda r: (r['subject'], r['item'], r['condition']))
         return results_sorted
 
+    def _result_lists_for_questions(self, results):
+        aggregated_results = []
+
+        for row in results:
+            match = self._matching_row(row, aggregated_results, ['subject', 'item', 'condition'])
+            if match >= 0:
+                aggregated_results[match]['ratings'][row['question'] - 1] = row['rating']
+            else:
+                new_row = {}
+                n_questions = self.study.question_set.count()
+                for col in ['subject', 'item', 'condition']:
+                    new_row[col] = row[col]
+                if 'text' in row:
+                    new_row['text'] =  row['text']
+                new_row['ratings'] = [-1] * n_questions
+                new_row['ratings'][row['question'] - 1] = row['rating']
+                aggregated_results.append(new_row)
+        return aggregated_results
+
     def _aggregation_columns(self):
         return ['subject', 'item', 'condition']
 
@@ -125,8 +146,7 @@ class Experiment(models.Model):
         match = -1
         for i, result_row in enumerate(aggregated_results):
             match = i
-            colums_left = list(set(self._aggregation_columns())-set(columns))
-            for col in colums_left:
+            for col in columns:
                 if result_row[col] != row[col]:
                     match = -1
                     break
@@ -134,23 +154,38 @@ class Experiment(models.Model):
                 break
         return match
 
+    def _question_scale_offset(self):
+        question_scale_offset =  []
+        offset = 0
+        for question in self.study.question_set.all():
+            question_scale_offset.append(offset)
+            offset += question.scalevalue_set.count()
+        return question_scale_offset
+
     def aggregate(self, results, columns):
         aggregated_results = []
+        scale_value_count = study_models.ScaleValue.objects.filter(question__study=self.study).count()
+        question_scale_offset = self._question_scale_offset()
+        columns_left = list(set(self._aggregation_columns())-set(columns))
         for row in results:
-            matching_row = self._matching_row(row, aggregated_results, columns)
+            matching_row = self._matching_row(row, aggregated_results, columns_left)
             if matching_row >= 0:
                 aggregated_row = aggregated_results[matching_row]
                 aggregated_row['rating_count'] += 1
-                aggregated_row['ratings'][row['rating'] - 1] += 1
+                aggregated_row['ratings'][question_scale_offset[row['question'] - 1] + row['rating'] - 1] += 1
             else:
                 for aggregated_column in columns:
                     row[aggregated_column] = ''
                 row['rating_count'] = 1
-                row['ratings'] = [0.0] * len(self.study.scalevalue_set.all())
-                row['ratings'][row['rating'] - 1] = 1.0
+                row['ratings'] = [0.0] * scale_value_count
+
+                row['ratings'][question_scale_offset[row['question'] - 1] + row['rating'] - 1] = 1.0
                 aggregated_results.append(row)
 
+        num_questions = self.study.question_set.count()
         for aggregated_row in aggregated_results:
+            aggregated_row['rating_count'] = aggregated_row['rating_count'] / num_questions
+
             aggregated_row['ratings'] = list(map(lambda x: x/aggregated_row['rating_count'], aggregated_row['ratings']))
 
         aggregated_results_sorted = sorted(aggregated_results, key=lambda r: (r['subject'], r['item'], r['condition']))
@@ -159,13 +194,18 @@ class Experiment(models.Model):
 
     def results_csv(self, fileobj):
         writer = csv.writer(fileobj)
-        csv_row = ['subject', 'item', 'condition', 'rating']
+        csv_row = ['subject', 'item', 'condition']
+        for i, _ in enumerate(self.study.question_set.all()):
+            csv_row.append('rating{}'.format(i))
         if self.study.has_text_items:
             csv_row.append('Text')
         writer.writerow(csv_row)
         results = self.results()
+        results = self._result_lists_for_questions(results)
         for row in results:
-            csv_row = [row['subject'], row['item'], row['condition'], row['rating']]
+            csv_row = [row['subject'], row['item'], row['condition']]
+            for rating in row['ratings']:
+                csv_row.append(rating)
             if self.study.has_text_items:
                 csv_row.append(row['text'])
             writer.writerow(csv_row)

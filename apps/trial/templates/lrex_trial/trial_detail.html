@@ -7,7 +7,9 @@
         <th>Experiment</th>
         <th class="col-md-1">Item</th>
         <th>Content</th>
+        {% for qustions in object.questionnaire.study.question_set.all %}
         <th class="col-md-2">Rating</th>
+        {% endfor %}
     </tr>
     </thead>
     <tbody>
@@ -27,9 +29,11 @@
                 </audio>
             {% endif %}
         </td>
+        {% for rating in trialitem.rating_set.all %}
         <td class="col-md-2">
-            {{ trialitem.rating.scale_value.label }}
+            {{ rating.scale_value.label }}
         </td>
+        {% endfor %}
     </tr>
     {% endfor %}
     </tbody>

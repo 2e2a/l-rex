@@ -1,3 +1,5 @@
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Fieldset, Layout, Submit
 from django import forms
 
 from apps.contrib import forms as crispy_forms
@@ -39,7 +41,52 @@ class RatingForm(crispy_forms.CrispyModelForm):
         fields = ['scale_value']
 
     def __init__(self, *args, **kwargs):
-        study = kwargs.pop('study')
+        question = kwargs.pop('question')
         super().__init__(*args, **kwargs)
         self.fields['scale_value'].empty_label = None
-        self.fields['scale_value'].queryset = study_models.ScaleValue.objects.filter(study=study)
+        self.fields['scale_value'].queryset = study_models.ScaleValue.objects.filter(question=question)
+
+
+class RatingFormsetForm(forms.ModelForm):
+    helper = FormHelper()
+
+    class Meta:
+        model = models.Rating
+        fields = ['scale_value']
+        widgets = {
+            'scale_value': forms.RadioSelect(
+            ),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['scale_value'].empty_label = None
+        self.fields['scale_value'].required = False
+
+
+def ratingformset_factory(n_questions=1):
+    return forms.modelformset_factory(
+        models.Rating,
+        form=RatingFormsetForm,
+        min_num=n_questions,
+        max_num=n_questions,
+        extra=0,
+        validate_max=True,
+    )
+
+def customize_to_questions(ratingformset, questions):
+    for question, form in zip(questions, ratingformset):
+        scale_value = form.fields.get('scale_value')
+        scale_value.queryset = scale_value.queryset.filter(question=question)
+        scale_value.label = question.question
+        scale_value.help_text = question.legend
+
+
+class RatingFormSetHelper(FormHelper):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+rating_formset_helper = RatingFormSetHelper()
+rating_formset_helper.add_input(
+    Submit("submit", "Submit"),
+)

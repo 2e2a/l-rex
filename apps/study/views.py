@@ -140,7 +140,7 @@ class StudyListView(LoginRequiredMixin, generic.ListView):
         ]
 
 
-class QuestionListView(LoginRequiredMixin, generic.ListView):
+class QuestionListView(LoginRequiredMixin, NextStepsMixin, generic.ListView):
     model = models.Question
     title = 'Questions'
 
@@ -176,6 +176,8 @@ class QuestionCreateView(LoginRequiredMixin, generic.CreateView):
     def form_valid(self, form):
         form.instance.study = self.study
         response = super().form_valid(form)
+        self.study.set_progress(self.study.PROGRESS_STD_QUESTION_CREATED)
+        messages.success(self.request, progress_success_message(self.study.progress))
         return response
 
     @property
@@ -210,7 +212,7 @@ class QuestionUpdateView(LoginRequiredMixin, generic.UpdateView):
         ]
 
 
-class QuestionDetailView(LoginRequiredMixin, generic.DetailView):
+class QuestionDetailView(LoginRequiredMixin, NextStepsMixin, generic.DetailView):
     model = models.Question
 
     @property
@@ -245,7 +247,7 @@ class QuestionDeleteView(LoginRequiredMixin, contib_views.DefaultDeleteView):
             (self.study.title, reverse('study', args=[self.study.slug])),
             ('questions', reverse('study-questions', args=[self.study.slug])),
             (self.object.num, reverse('study-question', args=[self.study.slug, self.object.pk])),
-            ('delete' ''),
+            ('delete', ''),
         ]
 
     def get_success_url(self):
@@ -288,11 +290,9 @@ class ScaleUpdateView(LoginRequiredMixin, NextStepsMixin, generic.TemplateView):
                 extra = 1
             else:
                 extra = 0
-                if self.study.experiment_set.exists():
-                    self.study.set_progress(self.study.PROGRESS_STD_EXP_CREATED)
-                else:
-                    self.study.set_progress(self.study.PROGRESS_STD_SCALE_CONFIGURED)
-                    messages.success(request, progress_success_message(self.study.progress))
+                self.question.set_progress(self.question.PROGRESS_QST_SCALE_CREATED)
+                self.study.set_progress(self.study.PROGRESS_STD_QUESTION_COMPLETED)
+                messages.success(request, progress_success_message(self.study.progress))
 
 
             self.formset = forms.scaleformset_factory(extra)(
