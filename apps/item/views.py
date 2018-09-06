@@ -304,14 +304,19 @@ class ItemUploadView(LoginRequiredMixin, generic.FormView):
         self.experiment = experiment_models.Experiment.objects.get(slug=experiment_slug)
         return super().dispatch(*args, **kwargs)
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['questions'] = self.experiment.study.question_set.all()
+        return kwargs
+
     def form_valid(self, form):
         result =  super().form_valid(form)
         models.Item.objects.filter(experiment=self.experiment).delete()
 
         file = form.cleaned_data['file']
-        num_col = form.cleaned_data['number_column']
-        cond_col = form.cleaned_data['condition_column']
-        text_col = form.cleaned_data['text_column']
+        num_col = form.cleaned_data['number_column'] - 1
+        cond_col = form.cleaned_data['condition_column'] - 1
+        text_col = form.cleaned_data['text_column'] - 1
 
         try:
             data = file.read().decode('utf-8')
@@ -326,20 +331,32 @@ class ItemUploadView(LoginRequiredMixin, generic.FormView):
             next(reader)
 
         for row in reader:
+            item = None
             if self.experiment.study.has_text_items:
-                models.TextItem.objects.create(
-                    number=row[num_col - 1],
-                    condition=row[cond_col - 1],
-                    text=row[text_col - 1],
+                item = models.TextItem.objects.create(
+                    number=row[num_col],
+                    condition=row[cond_col],
+                    text=row[text_col],
                     experiment=self.experiment,
                 )
             elif self.experiment.study.has_audiolink_items:
-                models.AudioLinkItem.objects.create(
-                    number=row[num_col - 1],
-                    condition=row[cond_col - 1],
-                    url=row[text_col - 1],
+                item = models.AudioLinkItem.objects.create(
+                    number=row[num_col],
+                    condition=row[cond_col],
+                    url=row[text_col],
                     experiment=self.experiment,
                 )
+            for i, question in enumerate(self.experiment.study.question_set.all()):
+                question_col = form.cleaned_data['question_{}_question_column'.format(i+1)] - 1
+                if question_col > 0:
+                    scale_col = form.cleaned_data['question_{}_scale_column'.format(i+1)] - 1
+                    legend_col = form.cleaned_data['question_{}_legend_column'.format(i+1)] - 1
+                    models.ItemQuestion.objects.create(
+                        item=item,
+                        question=row[question_col],
+                        scale_labels=row[scale_col] if scale_col>0 else None,
+                        legend=row[legend_col] if legend_col>0 else None,
+                    )
 
         self.experiment.set_progress(self.experiment.PROGRESS_EXP_ITEMS_CREATED)
         messages.success(self.request, study_views.progress_success_message(self.experiment.progress))

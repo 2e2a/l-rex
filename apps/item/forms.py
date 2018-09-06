@@ -53,6 +53,41 @@ class UploadItemsForm(crispy_forms.CrispyForm):
         help_text='Specify which column contains the text or the link to the audio file.',
     )
 
+    def __init__(self, *args, **kwargs):
+        self.questions = kwargs.pop('questions')
+        super().__init__(*args, **kwargs)
+        for i, _ in enumerate(self.questions):
+            self.fields.update(
+                {
+                    'question_{}_question_column'.format(i+1):
+                    forms.IntegerField(
+                        initial=0,
+                        help_text='TODO Specify which column contains the question per item; '
+                                  '0 use question from study'
+                     )
+                }
+            )
+            self.fields.update(
+                {
+                    'question_{}_scale_column'.format(i+1):
+                        forms.IntegerField(
+                            initial=0,
+                            help_text='TODO Specify which column contains the comma separated question scale values;'
+                                      ' 0 use scale from study question'
+                        )
+                }
+            )
+            self.fields.update(
+                {
+                    'question_{}_legend_column'.format(i+1):
+                        forms.IntegerField(
+                            initial=0,
+                            help_text='TODO Specify which column contains the question legend per item;'
+                                      ' 0 use scale from study question'
+                        )
+                }
+            )
+
     def clean(self):
         cleaned_data = super().clean()
         file = cleaned_data['file']
@@ -72,9 +107,26 @@ class UploadItemsForm(crispy_forms.CrispyForm):
                     assert len(row) >= cleaned_data['number_column']
                     assert len(row) >= cleaned_data['condition_column']
                     assert len(row) >= cleaned_data['text_column']
+                    for i, _ in enumerate(self.questions):
+                        if cleaned_data['question_{}_question_column'.format(i+1)] > 0:
+                            assert len(row) >= cleaned_data['question_{}_question_column'.format(i+1)]
+                        if cleaned_data['question_{}_scale_column'.format(i+1)] > 0:
+                            assert len(row) >= cleaned_data['question_{}_scale_column'.format(i+1)]
+                        if cleaned_data['question_{}_legend_column'.format(i+1)] > 0:
+                            assert len(row) >= cleaned_data['question_{}_legend_column'.format(i+1)]
+
                     assert int(row[cleaned_data['number_column'] - 1])
                     assert row[cleaned_data['condition_column'] - 1]
                     assert row[cleaned_data['text_column'] - 1]
+                    for i, question in enumerate(self.questions):
+                        if cleaned_data['question_{}_question_column'.format(i+1)] > 0:
+                            assert row[cleaned_data['question_{}_question_column'.format(i+1)] - 1 ]
+                        if cleaned_data['question_{}_scale_column'.format(i+1)] > 0:
+                            assert row[cleaned_data['question_{}_scale_column'.format(i+1)] - 1]
+                            assert len(row[cleaned_data['question_{}_scale_column'.format(i+1)] - 1].split(',')) == \
+                                   question.scalevalue_set.count()
+                        if cleaned_data['question_{}_legend_column'.format(i+1)] > 0:
+                            assert row[cleaned_data['question_{}_legend_column'.format(i+1)] - 1]
             except (ValueError, AssertionError):
                 raise forms.ValidationError(
                     'File: Unexpected format in line %(n_line)s.',
