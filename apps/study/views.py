@@ -256,8 +256,7 @@ class QuestionDeleteView(LoginRequiredMixin, contib_views.DefaultDeleteView):
 
 class ScaleUpdateView(LoginRequiredMixin, NextStepsMixin, generic.TemplateView):
     title = 'Edit rating scale'
-    template_name = 'lrex_study/study_scale.html'
-
+    template_name = 'lrex_contrib/crispy_formset_form.html'
     formset = None
     helper = forms.scale_formset_helper
 
