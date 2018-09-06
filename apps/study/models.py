@@ -256,8 +256,6 @@ class Question(models.Model):
     )
     question = models.CharField(
         max_length=200,
-        blank=True,
-        null=True,
         help_text='TODO This text will precede the stimulus (e.g. "How acceptable is this sentence?")',
     )
     legend = models.TextField(
