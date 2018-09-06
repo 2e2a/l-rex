@@ -5,3 +5,4 @@ from . import models
 
 admin.site.register(models.TextItem)
 admin.site.register(models.ItemList)
+admin.site.register(models.ItemQuestion)

@@ -11,6 +11,7 @@ urlpatterns = [
     path('update/text/<int:pk>/', views.TextItemUpdateView.as_view(), name='text-item-update'),
     path('create/audio-link/', views.AudioLinkItemCreateView.as_view(), name='audio-link-item-create'),
     path('update/audio-link/<int:pk>/', views.AudioLinkItemUpdateView.as_view(), name='audio-link-item-update'),
+    path('questions/<int:pk>/', views.ItemQuestionsUpdateView.as_view(), name='item-questions'),
     path('', views.ItemListView.as_view(), name='items'),
     path('lists/', views.ItemListListView.as_view(), name='itemlists'),
 ]

@@ -4,6 +4,7 @@ from string import ascii_lowercase
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
+from django.core.exceptions import ValidationError
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.views import generic
@@ -431,4 +432,62 @@ class ItemListListView(LoginRequiredMixin, study_views.NextStepsMixin, generic.L
             ('experiments',reverse('experiments', args=[study.slug])),
             (exp.title, reverse('experiment', args=[study.slug, exp.slug])),
             ('itemlists', reverse('itemlists', args=[study.slug, exp.slug])),
+        ]
+
+
+class ItemQuestionsUpdateView(LoginRequiredMixin, study_views.NextStepsMixin, generic.TemplateView):
+    title = 'Customize item questions'
+    template_name = 'lrex_contrib/crispy_formset_form.html'
+
+    formset = None
+    helper = forms.itemquestion_formset_helper
+
+    @property
+    def study(self):
+        return self.experiment.study
+
+    def dispatch(self, *args, **kwargs):
+        experiment_slug = kwargs.get('slug')
+        self.experiment = experiment_models.Experiment.objects.get(slug=experiment_slug)
+        item_pk = self.kwargs.get('pk')
+        self.item = models.Item.objects.get(pk=item_pk)
+        self.formset = forms.itemquestion_factory(self.study.question_set.count())(
+            queryset=models.ItemQuestion.objects.filter(item=self.item)
+        )
+        forms.initialize_with_questions(self.formset, self.study.question_set.all())
+        return super().dispatch(*args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        n_questions = self.study.question_set.count()
+        if 'submit' in request.POST:
+            self.formset = forms.itemquestion_factory(n_questions)(request.POST, request.FILES)
+            if self.formset.is_valid():
+                instances = self.formset.save(commit=False)
+                scale_labels_valid = True
+                for i, (form, instance, question) in enumerate(zip(self.formset, instances, self.study.question_set.all())):
+                    if instance.scale_labels \
+                            and len(instance.scale_labels.split(',')) != question.scalevalue_set.count():
+                        self.formset._errors[i]['scale_labels'] = \
+                            self.formset.error_class(ValidationError('TEST').error_list)
+                        scale_labels_valid = False
+                        break
+                    instance.item = self.item
+
+                if scale_labels_valid:
+                    for instance in instances:
+                        instance.save()
+        else: # reset
+            self.item.itemquestion_set.all().delete()
+        forms.initialize_with_questions(self.formset, self.study.question_set.all())
+        return super().get(request, *args, **kwargs)
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('experiments',reverse('experiments', args=[self.study.slug])),
+            (self.experiment.title, reverse('experiment', args=[self.study.slug, self.experiment.slug])),
+            ('items', reverse('items', args=[self.study.slug, self.experiment.slug])),
+            ('{}-questions'.format(self.item),'')
         ]

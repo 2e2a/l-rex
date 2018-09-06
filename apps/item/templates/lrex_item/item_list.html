@@ -55,7 +55,11 @@
                class="btn btn-outline-primary btn-sm mx-1" role="button">
                 Edit
             </a>
-            <a href="{% url 'item-delete' view.experiment.study.slug  view.experiment.study.slug item.pk %}"
+            <a href="{% url 'item-questions' view.experiment.study.slug  view.experiment.slug item.pk %}"
+               class="btn btn-outline-secondary btn-sm mx-1" role="button">
+                Customize questions
+            </a>
+            <a href="{% url 'item-delete' view.experiment.study.slug  view.experiment.slug item.pk %}"
                class="btn btn-outline-danger btn-sm mx-1" role="button">
                 Delete
             </a>

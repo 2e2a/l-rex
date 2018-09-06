@@ -42,13 +42,20 @@ class RatingForm(crispy_forms.CrispyModelForm):
 
     def __init__(self, *args, **kwargs):
         question = kwargs.pop('question')
+        item_question = kwargs.pop('item_question', None)
         super().__init__(*args, **kwargs)
         self.fields['scale_value'].empty_label = None
         self.fields['scale_value'].queryset = study_models.ScaleValue.objects.filter(question=question)
+        if item_question and item_question.scale_labels:
+            custom_choices = []
+            for (pk, _ ), custom_label \
+                    in zip(self.fields['scale_value'].choices, item_question.scale_labels.split(',')):
+                custom_choices.append((pk, custom_label))
+            self.fields['scale_value'].choices = custom_choices
+
 
 
 class RatingFormsetForm(forms.ModelForm):
-    helper = FormHelper()
 
     class Meta:
         model = models.Rating
@@ -74,12 +81,19 @@ def ratingformset_factory(n_questions=1):
         validate_max=True,
     )
 
-def customize_to_questions(ratingformset, questions):
-    for question, form in zip(questions, ratingformset):
+def customize_to_questions(ratingformset, questions, item_questions):
+    for i, (question, form) in enumerate(zip(questions, ratingformset)):
         scale_value = form.fields.get('scale_value')
         scale_value.queryset = scale_value.queryset.filter(question=question)
-        scale_value.label = question.question
-        scale_value.help_text = question.legend
+        scale_value.label = \
+            item_questions[i].question if item_questions else question.question
+        scale_value.help_text = \
+            item_questions[i].legend if item_questions and item_questions[i].legend else question.legend
+        if item_questions and item_questions[i].scale_labels:
+            custom_choices = []
+            for (pk, _ ), custom_label in zip(scale_value.choices, item_questions[i].scale_labels.split(',')):
+                custom_choices.append((pk, custom_label))
+            scale_value.choices = custom_choices
 
 
 class RatingFormSetHelper(FormHelper):

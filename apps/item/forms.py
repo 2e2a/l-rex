@@ -1,6 +1,9 @@
 import csv
-from io import StringIO
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Fieldset, Layout, Submit
 from django import forms
+from django.forms import modelformset_factory
+from io import StringIO
 
 from apps.contrib import forms as crispy_forms
 
@@ -83,3 +86,40 @@ class UploadItemsForm(crispy_forms.CrispyForm):
             raise forms.ValidationError('Unsupported CSV format.')
         file.seek(0)
         return cleaned_data
+
+
+class ItemQuestionForm(forms.ModelForm):
+
+    class Meta:
+        model = models.ItemQuestion
+        fields = ['question', 'scale_labels', 'legend']
+
+
+def itemquestion_factory(n_questions):
+    return modelformset_factory(
+        models.ItemQuestion,
+        form=ItemQuestionForm,
+        min_num=n_questions,
+        max_num=n_questions,
+        extra=0,
+    )
+
+def initialize_with_questions(itemquestion_formset, questions):
+    for question, form in zip(questions, itemquestion_formset):
+        if not form['question'].initial:
+            form['question'].initial = question.question
+            form['legend'].initial = question.legend
+
+
+itemquestion_formset_helper = FormHelper()
+itemquestion_formset_helper.add_layout(
+    Layout(
+        Fieldset('Question {{ forloop.counter }}', None, 'question', 'scale_labels', 'legend'),
+    ),
+)
+itemquestion_formset_helper.add_input(
+    Submit("submit", "Submit"),
+)
+itemquestion_formset_helper.add_input(
+    Submit("reset", "Reset"),
+)

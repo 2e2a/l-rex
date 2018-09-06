@@ -1,5 +1,6 @@
-from django.urls import reverse
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.urls import reverse
 
 
 class Item(models.Model):
@@ -61,3 +62,29 @@ class ItemList(models.Model):
         if not next_list:
             next_list =  ItemList.objects.first()
         return next_list
+
+
+class ItemQuestion(models.Model):
+    item = models.ForeignKey(
+        Item,
+        on_delete=models.CASCADE
+    )
+    question = models.CharField(
+        max_length=200,
+        help_text='TODO This text will precede the stimulus (e.g. "How acceptable is this sentence?")',
+    )
+    scale_labels = models.CharField(
+        max_length=500,
+        help_text='TODO comma separated',
+        blank=True,
+        null=True,
+    )
+    legend = models.TextField(
+        max_length=1024,
+        help_text='TODO This legend will appear below the stimulus to clarify the scale (e.g. "1 = bad, 5 = good").',
+        blank=True,
+        null=True,
+    )
+
+    class Meta:
+        ordering = ['question']

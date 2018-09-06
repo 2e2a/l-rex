@@ -202,6 +202,7 @@ class RatingCreateView(generic.CreateView):
             number=self.num
         )
         self.question = self.study.question_set.first()
+        self.item_questions = self.trial_item.item.itemquestion_set.all()
         return super().dispatch(*args, **kwargs)
 
     def progress(self):
@@ -210,6 +211,8 @@ class RatingCreateView(generic.CreateView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['question'] = self.question
+        if self.item_questions:
+            kwargs['item_question'] = self.item_questions[0]
         return kwargs
 
     def form_valid(self, form):
@@ -221,6 +224,19 @@ class RatingCreateView(generic.CreateView):
         if self.num < (len(self.trial.items) - 1):
             return reverse('rating-create', args=[self.study.slug, self.trial.slug, self.num + 1])
         return reverse('rating-outro', args=[self.study.slug, self.trial.slug])
+
+    @property
+    def item_question(self):
+        if self.item_questions:
+            return self.item_questions[0].question
+        return self.question.question
+
+    @property
+    def item_legend(self):
+        if self.item_questions:
+            return self.item_questions[0].legend
+        return self.question.legend
+
 
 
 class RatingsCreateView(generic.TemplateView):
@@ -242,24 +258,23 @@ class RatingsCreateView(generic.TemplateView):
         self.questions = study_models.Question.objects.filter(
             study=self.study
         )
+        self.item_questions = self.trial_item.item.itemquestion_set.all()
         self.formset = forms.ratingformset_factory(len(self.questions))(
             queryset=models.Rating.objects.none()
         )
-        forms.customize_to_questions(self.formset, self.questions)
+        forms.customize_to_questions(self.formset, self.questions, self.item_questions)
         return super().dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         self.formset = forms.ratingformset_factory(len(self.questions))(request.POST, request.FILES)
-        forms.customize_to_questions(self.formset, self.questions)
+        forms.customize_to_questions(self.formset, self.questions, self.item_questions)
         if self.formset.is_valid():
             instances = self.formset.save(commit=False)
             if len(instances) < len(self.questions):
                 self.formset._non_form_errors = \
-                    self.formset.error_class(ValidationError('Please answer all questions.').error_list)
+                    self.formset.error_class(ValidationError('Please answer all questions').error_list)
             else:
                 for instance in instances:
-                    if not instance.scale_value:
-                        raise ValidationError('Please answer all questions.')
                     instance.trial_item = self.trial_item
                     instance.save()
                 if self.num < (len(self.trial.items) - 1):
