@@ -17,7 +17,11 @@
         <p class="card-text">
             View a summary of the current results.
         </p>
+        {% if object.experiment_set.count == 1 %}
+        <a  class="card-link" href="{% url 'experiment-results' object.slug object.experiment_set.first %}">Results</a>
+        {% else %}
         <a  class="card-link" href="{% url 'experiment-result-list' object.slug %}">Results</a>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
