@@ -46,6 +46,7 @@ def scaleformset_factory(extra=0):
 
 
 class ScaleFormSetHelper(FormHelper):
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.render_unmentioned_fields = True
