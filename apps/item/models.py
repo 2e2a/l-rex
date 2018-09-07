@@ -70,7 +70,7 @@ class ItemQuestion(models.Model):
         on_delete=models.CASCADE
     )
     question = models.CharField(
-        max_length=200,
+        max_length=1000,
         help_text='TODO This text will precede the stimulus (e.g. "How acceptable is this sentence?")',
     )
     scale_labels = models.CharField(
@@ -79,8 +79,8 @@ class ItemQuestion(models.Model):
         blank=True,
         null=True,
     )
-    legend = models.TextField(
-        max_length=1024,
+    legend = models.CharField(
+        max_length=1000,
         help_text='TODO This legend will appear below the stimulus to clarify the scale (e.g. "1 = bad, 5 = good").',
         blank=True,
         null=True,
