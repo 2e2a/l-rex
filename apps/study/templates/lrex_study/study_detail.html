@@ -13,14 +13,14 @@
     </div>
 </div>
 
-<div class="card my-2 {% if view.study|is_progress_std_question_completed_reached and not view.study|is_progress_std_exp_completed_reached %} border-primary {% endif %}">
+<div class="card my-2 {% if view.study|is_progress_std_question_created_reached and not view.study|is_progress_std_exp_completed_reached %} border-primary {% endif %}">
     <div class="card-body">
         <h2 class="card-title">Experiments</h2>
         <p class="card-text">
             A study can contain one or more experiments. Fillers count as a separate experiment. Items of all experiments that are part of the same study will be intermixed with each other within 
 the same questionnaire.
         </p>
-        {% if view.study|is_progress_std_question_completed_reached %}
+        {% if view.study|is_progress_std_question_created_reached %}
         <a  class="card-link" href="{% url 'experiments' study_slug=object.slug %}">Create/edit experiments</a>
         {% else %}
         <a  class="card-link disabled text-muted">Create/edit experiments</a>

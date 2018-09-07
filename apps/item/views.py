@@ -468,11 +468,14 @@ class ItemQuestionsUpdateView(LoginRequiredMixin, study_views.NextStepsMixin, ge
         self.experiment = experiment_models.Experiment.objects.get(slug=experiment_slug)
         item_pk = self.kwargs.get('pk')
         self.item = models.Item.objects.get(pk=item_pk)
+        return super().dispatch(*args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
         self.formset = forms.itemquestion_factory(self.study.question_set.count())(
             queryset=models.ItemQuestion.objects.filter(item=self.item)
         )
         forms.initialize_with_questions(self.formset, self.study.question_set.all())
-        return super().dispatch(*args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         n_questions = self.study.question_set.count()
@@ -481,7 +484,7 @@ class ItemQuestionsUpdateView(LoginRequiredMixin, study_views.NextStepsMixin, ge
             if self.formset.is_valid():
                 instances = self.formset.save(commit=False)
                 scale_labels_valid = True
-                for i, (form, instance, question) in enumerate(zip(self.formset, instances, self.study.question_set.all())):
+                for i, (instance, question) in enumerate(zip(instances, self.study.question_set.all())):
                     if instance.scale_labels \
                             and len(instance.scale_labels.split(',')) != question.scalevalue_set.count():
                         self.formset._errors[i]['scale_labels'] = \

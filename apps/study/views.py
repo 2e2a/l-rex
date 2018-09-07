@@ -140,164 +140,56 @@ class StudyListView(LoginRequiredMixin, generic.ListView):
         ]
 
 
-class QuestionListView(LoginRequiredMixin, NextStepsMixin, generic.ListView):
-    model = models.Question
+class QuestionUpdateView(LoginRequiredMixin, NextStepsMixin, generic.TemplateView):
     title = 'Questions'
-
-    def dispatch(self, *args, **kwargs):
-        study_slug = self.kwargs['slug']
-        self.study = models.Study.objects.get(slug=study_slug)
-        return super().dispatch(*args, **kwargs)
-
-    def get_queryset(self):
-        return super().get_queryset().filter(study=self.study)
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            ('questions', ''),
-        ]
-
-
-class QuestionCreateView(LoginRequiredMixin, generic.CreateView):
-    model = models.Question
-    title = 'Create question'
-    template_name = 'lrex_contrib/crispy_form.html'
-    form_class = forms.QuestionForm
-    success_message = 'Question successfully created.'
-
-    def dispatch(self, *args, **kwargs):
-        study_slug = self.kwargs['slug']
-        self.study = models.Study.objects.get(slug=study_slug)
-        return super().dispatch(*args, **kwargs)
-
-    def form_valid(self, form):
-        form.instance.study = self.study
-        response = super().form_valid(form)
-        self.study.set_progress(self.study.PROGRESS_STD_QUESTION_CREATED)
-        messages.success(self.request, progress_success_message(self.study.progress))
-        return response
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            ('questions', reverse('study-questions', args=[self.study.slug])),
-            ('create', ''),
-        ]
-
-
-class QuestionUpdateView(LoginRequiredMixin, generic.UpdateView):
-    model = models.Question
-    title = 'Edit question'
-    template_name = 'lrex_contrib/crispy_form.html'
-    form_class = forms.QuestionForm
-    success_message = 'Question successfully updated.'
-
-    @property
-    def study(self):
-        return self.object.study
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            ('questions', reverse('study-questions', args=[self.study.slug])),
-            (self.object.num, reverse('study-question', args=[self.study.slug, self.object.pk])),
-            ('edit', ''),
-        ]
-
-
-class QuestionDetailView(LoginRequiredMixin, NextStepsMixin, generic.DetailView):
-    model = models.Question
-
-    @property
-    def title(self):
-        return 'Question {}'.format(self.object.num)
-
-    @property
-    def study(self):
-        return self.object.study
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            ('questions', reverse('study-questions', args=[self.study.slug])),
-            (self.object.num,''),
-        ]
-
-
-class QuestionDeleteView(LoginRequiredMixin, contib_views.DefaultDeleteView):
-    model = models.Question
-
-    @property
-    def study(self):
-        return self.object.study
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            ('questions', reverse('study-questions', args=[self.study.slug])),
-            (self.object.num, reverse('study-question', args=[self.study.slug, self.object.pk])),
-            ('delete', ''),
-        ]
-
-    def get_success_url(self):
-        return reverse('study-questions', args=[self.study.slug])
-
-
-class ScaleUpdateView(LoginRequiredMixin, NextStepsMixin, generic.TemplateView):
-    title = 'Edit rating scale'
     template_name = 'lrex_contrib/crispy_formset_form.html'
     formset = None
-    helper = forms.scale_formset_helper
-
-    @property
-    def study(self):
-        return self.question.study
+    helper = forms.question_formset_helper
 
     def dispatch(self, *args, **kwargs):
-        question_pk = self.kwargs['pk']
-        self.question = models.Question.objects.get(pk=question_pk)
-        self.formset = forms.scaleformset_factory()(
-            queryset=models.ScaleValue.objects.filter(question=self.question)
-        )
+        study_slug = self.kwargs['slug']
+        self.study = models.Study.objects.get(slug=study_slug)
+        self.n_questions = self.study.question_set.count()
         return super().dispatch(*args, **kwargs)
 
+    def get(self, request, *args, **kwargs):
+        self.formset = forms.question_formset_factory(self.n_questions, 0 if self.n_questions > 0 else 1)(
+            queryset=models.Question.objects.filter(study=self.study)
+        )
+        forms.initialize_with_questions(self.formset, self.study.question_set.all())
+        return super().get(request, *args, **kwargs)
+
     def post(self, request, *args, **kwargs):
-        self.formset = forms.scaleformset_factory()(request.POST, request.FILES)
-        if self.formset.is_valid():
-            instances = self.formset.save(commit=False)
-            for instance in instances:
-                instance.question = self.question
-                instance.save()
-
-            for form in self.formset.forms:
-                if form.instance.id:
-                    if form.cleaned_data['delete']:
-                        form.instance.delete()
-
-            if 'add' in request.POST:
-                extra = 1
-            else:
-                extra = 0
-                self.question.set_progress(self.question.PROGRESS_QST_SCALE_CREATED)
-                self.study.set_progress(self.study.PROGRESS_STD_QUESTION_COMPLETED)
-                messages.success(request, progress_success_message(self.study.progress))
-
-
-            self.formset = forms.scaleformset_factory(extra)(
-                queryset=models.ScaleValue.objects.filter(question=self.question)
+        self.formset = forms.question_formset_factory(self.n_questions)(request.POST, request.FILES)
+        extra = len(self.formset.forms) - self.n_questions
+        if 'submit' in request.POST:
+            if self.formset.is_valid():
+                instances = self.formset.save(commit=False)
+                for instance, form in zip(instances, self.formset):
+                    instance.study = self.study
+                    instance.scalevalue_set.all().delete()
+                    for scale_label in form.cleaned_data['scale_labels'].split(','):
+                        if scale_label:
+                            models.ScaleValue.objects.create(
+                                question=instance,
+                                label=scale_label,
+                            )
+            self.study.set_progress(self.study.PROGRESS_STD_QUESTION_CREATED)
+            messages.success(request, progress_success_message(self.study.progress))
+        elif 'add' in request.POST:
+            self.formset = forms.question_formset_factory(self.n_questions, extra + 1)(
+                queryset=models.Question.objects.filter(study=self.study)
             )
-
+        else: # delete last
+            if extra > 0:
+                extra -= 1
+            elif self.n_questions > 0:
+                self.study.question_set.last().delete()
+                self.n_questions -= 1
+            self.formset = forms.question_formset_factory(self.n_questions, extra)(
+                queryset=models.Question.objects.filter(study=self.study)
+            )
+        forms.initialize_with_questions(self.formset, self.study.question_set.all())
         return super().get(request, *args, **kwargs)
 
     @property
@@ -305,7 +197,5 @@ class ScaleUpdateView(LoginRequiredMixin, NextStepsMixin, generic.TemplateView):
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
-            ('questions', reverse('study-questions', args=[self.study.slug])),
-            (self.question.num, reverse('study-question', args=[self.study.slug, self.question.pk])),
-            ('scale',''),
+            ('questions', ''),
         ]

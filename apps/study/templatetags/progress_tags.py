@@ -27,16 +27,6 @@ def is_progress_std_question_created_reached(study):
 
 
 @register.filter
-def is_progress_std_question_completed(study):
-    return study.progress == Study.PROGRESS_STD_QUESTION_COMPLETED
-
-
-@register.filter
-def is_progress_std_question_completed_reached(study):
-    return study.progress_reached(Study.PROGRESS_STD_QUESTION_COMPLETED)
-
-
-@register.filter
 def is_progress_std_exp_created(study):
     return study.progress == Study.PROGRESS_STD_EXP_CREATED
 

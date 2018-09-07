@@ -160,6 +160,8 @@ def initialize_with_questions(itemquestion_formset, questions):
     for question, form in zip(questions, itemquestion_formset):
         if not form['question'].initial:
             form['question'].initial = question.question
+            scale_labels = [scale_value.label for scale_value in question.scalevalue_set.all()]
+            form['scale_labels'].initial = ','.join(scale_labels)
             form['legend'].initial = question.legend
 
 
