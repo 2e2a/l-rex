@@ -6,7 +6,7 @@
     <div class="card-body">
         <h2 class="card-title">Study settings</h2>
         <p class="card-text">
-            Change the general settings (title, instructions, question, label, end date, trial limit, password) of your study or adjust the TODO rating scale (number of points and labels).
+            Change the general settings (title, instructions, end date, trial limit, password) of your study or add/edit questions.
         </p>
         <a  class="card-link" href="{% url 'study-update' object.slug %}">Edit settings</a>
         <a  class="card-link" href="{% url 'study-questions' object.slug %}">Questions</a>

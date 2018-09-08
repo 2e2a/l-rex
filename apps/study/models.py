@@ -247,13 +247,13 @@ class Question(models.Model):
     )
     question = models.CharField(
         max_length=1000,
-        help_text='TODO This text will precede the stimulus (e.g. "How acceptable is this sentence?")',
+        help_text='Question text for this item (e.g. "How acceptable is this sentence?")',
     )
     legend = models.CharField(
         max_length=1000,
         blank=True,
         null=True,
-        help_text='TODO This legend will appear below the stimulus to clarify the scale (e.g. "1 = bad, 5 = good").',
+        help_text='Legend to clarify the scale (e.g. "1 = bad, 5 = good")',
     )
 
     class Meta:

@@ -71,17 +71,19 @@ class ItemQuestion(models.Model):
     )
     question = models.CharField(
         max_length=1000,
-        help_text='TODO This text will precede the stimulus (e.g. "How acceptable is this sentence?")',
+        help_text='Individual question text for this item (e.g. "How acceptable is this sentence?")',
     )
     scale_labels = models.CharField(
         max_length=500,
-        help_text='TODO comma separated',
+        help_text='Individual rating scale labels for this item, separated by commas (e.g. "1,2,3,4,5"). Note that '
+                  'this will only overwrite the displayed labels, but the responses will be saved according to the '
+                  'general scale specified in the study settings.',
         blank=True,
         null=True,
     )
     legend = models.CharField(
         max_length=1000,
-        help_text='TODO This legend will appear below the stimulus to clarify the scale (e.g. "1 = bad, 5 = good").',
+        help_text='Individual legend for this item to clarify the scale (e.g. "1 = bad, 5 = good")',
         blank=True,
         null=True,
     )

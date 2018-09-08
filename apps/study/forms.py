@@ -26,7 +26,7 @@ class QuestionForm(crispy_forms.CrispyModelForm):
     scale_labels = forms.CharField(
         max_length=200,
         required=True,
-        help_text='TODO, comma separated'
+        help_text='Rating scale labels, separated by commas (e.g. "1,2,3,4,5")'
     )
 
     class Meta:
