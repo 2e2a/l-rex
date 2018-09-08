@@ -168,6 +168,7 @@ class QuestionUpdateView(LoginRequiredMixin, NextStepsMixin, generic.TemplateVie
                 for instance, form in zip(instances, self.formset):
                     instance.study = self.study
                     instance.scalevalue_set.all().delete()
+                    instance.save()
                     for scale_label in form.cleaned_data['scale_labels'].split(','):
                         if scale_label:
                             models.ScaleValue.objects.create(
