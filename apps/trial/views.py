@@ -238,7 +238,9 @@ class RatingCreateView(generic.CreateView):
     def item_legend(self):
         if self.item_questions:
             return self.item_questions[0].legend
-        return self.question.legend
+        if self.question.legend:
+            return self.question.legend
+        return ''
 
 
 
