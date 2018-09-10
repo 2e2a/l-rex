@@ -1,4 +1,5 @@
 import csv
+import random
 
 from enum import Enum
 from django.conf import settings
@@ -144,14 +145,12 @@ class Study(models.Model):
     def _create_next_questionnaire(self, questionnaire_num, last_questionnaire):
         from apps.trial.models import Questionnaire
         questionnaire = Questionnaire.objects.create(number=questionnaire_num, study=self)
-
         if questionnaire_num == 0:
             questionnaire_item_lists = self._init_questionnaire_lists()
         else:
             questionnaire_item_lists = self._next_questionnaire_lists(last_questionnaire)
-
-        [questionnaire.item_lists.add(item_list) for item_list in questionnaire_item_lists]
-
+        for item_list in questionnaire_item_lists:
+            questionnaire.item_lists.add(item_list)
         return questionnaire
 
     def generate_questionnaires(self):
@@ -160,6 +159,15 @@ class Study(models.Model):
         last_questionnaire = None
         for i in range(questionnaire_count):
             last_questionnaire = self._create_next_questionnaire(i, last_questionnaire)
+
+    def randomize_questionnaires(self):
+        questionnaires = list(self.questionnaire_set.all())
+        sys_random = random.SystemRandom()
+        sys_random.shuffle(questionnaires)
+        for i, questionnaire in enumerate(questionnaires):
+            questionnaire.number = i
+            questionnaire.save()
+
 
     def rating_proofs_csv(self, fileobj):
         from apps.trial.models import Trial

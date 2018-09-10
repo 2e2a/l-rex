@@ -25,10 +25,13 @@ class QuestionnaireListView(LoginRequiredMixin, study_views.NextStepsMixin, gene
 
     def post(self, request, *args, **kwargs):
         action = request.POST.get('action', None)
-        if action and action == 'generate_questionnaires':
+        if action and action == 'generate_ordered':
             self.study.generate_questionnaires()
-            self.study.set_progress(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED)
-            messages.success(request, study_views.progress_success_message(self.study.progress))
+        elif action and action == 'generate_random':
+            self.study.generate_questionnaires()
+            self.study.randomize_questionnaires()
+        self.study.set_progress(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED)
+        messages.success(request, study_views.progress_success_message(self.study.progress))
         return redirect('questionnaires',study_slug=self.study.slug)
 
     def get_queryset(self):

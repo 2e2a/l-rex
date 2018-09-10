@@ -2,13 +2,22 @@
 
 {% block content %}
 <div class="row justify-content-center mb-2">
-    <form method="post">
+    <form name="actionForm" id="actionForm" method="POST"/>
         {% csrf_token %}
-        <button type="submit" name="action" value="generate_questionnaires"
-                class="btn btn-primary btn-sm mx-1">
-            Generate questionnaires
-        </button>
+        <input class="span2" id="action" name="action" type="text" hidden="hidden">
+        <div class="btn-group">
+            <button class="btn  btn-primary btn-sm mx-1 dropdown-toggle" type="button" id="dropdownAggregateBy"
+                    data-toggle="dropdown"
+                    aria-haspopup="true" aria-expanded="false">
+                Generate questionnaires
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownAction">
+                <a href="#" class="dropdown-item"  onclick="$('#action').val('generate_ordered'); $('#actionForm').submit()">Keep item order</a>
+                <a href="#" class="dropdown-item" onclick="$('#action').val('generate_random'); $('#actionForm').submit()">Random</a>
+            </ul>
+        </div>
     </form>
+    </div>
 </div>
 <table class="table bg-white">
     <thead>
@@ -19,12 +28,12 @@
     </thead>
     <tbody>
     {% for questionnaire in questionnaire_list %}
-        <tr>
-            <td>{{ questionnaire.number }}</td>
-            <td>
-                {% for item_list in questionnaire.item_lists.all %}{% for item in item_list.items.all %}{{ item.experiment }}-{{ item }}{% if not forloop.last %},{% endif %}{% endfor %}{% endfor %}
-            </td>
-        </tr>
+    <tr>
+        <td>{{ questionnaire.number }}</td>
+        <td>
+            {% for item_list in questionnaire.item_lists.all %}{% for item in item_list.items.all %}{{ item.experiment }}-{{ item }}{% if not forloop.last %},{% endif %}{% endfor %}{% endfor %}
+        </td>
+    </tr>
     {% endfor %}
     </tbody>
 </table>
