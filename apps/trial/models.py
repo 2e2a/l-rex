@@ -13,7 +13,6 @@ from apps.study import models as study_models
 
 
 class Questionnaire(models.Model):
-    number = models.IntegerField()
     study = models.ForeignKey(
         'lrex_study.Study',
         on_delete=models.CASCADE
@@ -21,27 +20,49 @@ class Questionnaire(models.Model):
     item_lists = models.ManyToManyField(item_models.ItemList)
 
     class Meta:
-        ordering = ['number']
-
-    def __str__(self):
-        return '{}-{}'.format(self.study, self.number)
+        ordering = ['pk']
 
     def get_absolute_url(self):
         return reverse('questionnaire', args=[self.study.slug, self.slug])
 
     @property
-    def items(self):
+    def item_list_items(self):
         items = []
         for item_list in self.item_lists.all():
             items.extend(item_list.items.all())
         return items
 
     @property
+    def items(self):
+        return [questionnaire_item.item for questionnaire_item in self.questionnaireitem_set.all()]
+
+    @property
     def next(self):
-        questionnaire =  self.study.questionnaire_set.filter(number__gt=self.number).first()
+        questionnaire =  self.study.questionnaire_set.filter(pk__gt=self.pk).first()
         if not questionnaire:
             questionnaire = Questionnaire.objects.first()
         return questionnaire
+
+    @property
+    def num(self):
+        return list(Questionnaire.objects.filter(study=self.study)).index(self) + 1
+
+    def generate_items(self):
+        for i, item in enumerate(self.item_list_items):
+            QuestionnaireItem.objects.create(
+                number=i,
+                questionnaire=self,
+                item=item,
+            )
+
+
+class QuestionnaireItem(models.Model):
+    number = models.IntegerField()
+    questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE)
+    item = models.ForeignKey(item_models.Item, on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ['number']
 
 
 class TrialStatus(Enum):
@@ -80,13 +101,20 @@ class Trial(models.Model):
 
     @property
     def items(self):
-        items = [trial_item.item for trial_item in self.trialitem_set.all()]
-        return items
+        return self.questionnaire.items
+
+    @property
+    def item_ratings(self):
+        item_ratings = []
+        for questionnaire_item in self.questionnaire.questionnaireitem_set.all():
+            ratings = Rating.objects.filter(trial=self, questionnaire_item=questionnaire_item).all()
+            item_ratings.append((questionnaire_item.item, ratings))
+        return item_ratings
 
     @property
     def ratings_completed(self):
         n_questions = self.questionnaire.study.question_set.count()
-        n_ratings = Rating.objects.filter(trial_item__trial=self).count()
+        n_ratings = Rating.objects.filter(trial=self).count()
         return int(n_ratings / n_questions)
 
 
@@ -94,8 +122,8 @@ class Trial(models.Model):
     def status(self):
         n_ratings = self.ratings_completed
         if n_ratings > 0:
-            n_trial_items = len(self.items)
-            if n_ratings == n_trial_items:
+            n_items = len(self.items)
+            if n_ratings == n_items:
                 return TrialStatus.FINISHED
             if self.creation_date + timedelta(1) < timezone.now():
                 return TrialStatus.ABANDONED
@@ -109,12 +137,6 @@ class Trial(models.Model):
         else:
             questionnaire = Questionnaire.objects.filter(study=study).first()
         self.questionnaire = questionnaire
-
-    def generate_items(self):
-        items = self.questionnaire.items
-        random.SystemRandom().shuffle(items)
-        for i, item in enumerate(items):
-            TrialItem.objects.create(number=i, trial=self, item=item)
 
     def generate_id(self):
         if self.id:
@@ -145,15 +167,7 @@ class Trial(models.Model):
         return 'Trial {}'.format(self.id)
 
 
-class TrialItem(models.Model):
-    number = models.IntegerField()
-    trial = models.ForeignKey(Trial, on_delete=models.CASCADE)
-    item = models.ForeignKey(item_models.Item, on_delete=models.CASCADE)
-
-    class Meta:
-        ordering = ['number']
-
-
 class Rating(models.Model):
-    trial_item = models.ForeignKey(TrialItem, on_delete=models.CASCADE)
+    trial = models.ForeignKey(Trial, on_delete=models.CASCADE)
+    questionnaire_item = models.ForeignKey(QuestionnaireItem, on_delete=models.CASCADE)
     scale_value = models.ForeignKey(study_models.ScaleValue, on_delete=models.CASCADE)

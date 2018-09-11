@@ -29,7 +29,7 @@ class QuestionnaireListView(LoginRequiredMixin, study_views.NextStepsMixin, gene
             self.study.generate_questionnaires()
         elif action and action == 'generate_random':
             self.study.generate_questionnaires()
-            self.study.randomize_questionnaires()
+            self.study.randomize_questionnaire_items()
         self.study.set_progress(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED)
         messages.success(request, study_views.progress_success_message(self.study.progress))
         return redirect('questionnaires',study_slug=self.study.slug)
@@ -76,7 +76,6 @@ class TrialCreateView(LoginRequiredMixin, generic.CreateView):
         form.instance.init(self.study)
         response = super().form_valid(form)
         form.instance.generate_id()
-        form.instance.generate_items()
         return response
 
     def get_success_url(self):
@@ -180,13 +179,11 @@ class RatingCreateView(generic.CreateView):
         try:
             if self.trial.status == models.TrialStatus.FINISHED:
                 return reverse('rating-taken', args=[self.study.slug, self.trial.slug])
-            n_ratings = models.Rating.objects.filter(trial_item__trial=self.trial).count()
+            n_ratings = models.Rating.objects.filter(trial=self.trial).count()
             n_questions = self.study.question_set.count()
             if n_ratings/n_questions != num:
                 return reverse('rating-create', args=[self.study.slug, self.trial.slug, n_ratings])
         except models.Rating.DoesNotExist:
-            pass
-        except models.TrialItem.DoesNotExist:
             pass
         return None
 
@@ -200,12 +197,12 @@ class RatingCreateView(generic.CreateView):
             redirect_link = reverse('ratings-create', args=[self.study.slug, self.trial.slug, self.num])
         if redirect_link:
             return redirect(redirect_link)
-        self.trial_item = models.TrialItem.objects.get(
-            trial__slug=trial_slug,
+        self.questionnaire_item = models.QuestionnaireItem.objects.get(
+            questionnaire=self.trial.questionnaire,
             number=self.num
         )
         self.question = self.study.question_set.first()
-        self.item_questions = self.trial_item.item.itemquestion_set.all()
+        self.item_questions = self.questionnaire_item.item.itemquestion_set.all()
         return super().dispatch(*args, **kwargs)
 
     def progress(self):
@@ -219,8 +216,8 @@ class RatingCreateView(generic.CreateView):
         return kwargs
 
     def form_valid(self, form):
-        form.instance.number = self.num
-        form.instance.trial_item = self.trial_item
+        form.instance.trial = self.trial
+        form.instance.questionnaire_item = self.questionnaire_item
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -256,14 +253,14 @@ class RatingsCreateView(generic.TemplateView):
         self.trial = models.Trial.objects.get(slug=trial_slug)
         self.num = int(self.kwargs['num'])
         self.study = self.trial.questionnaire.study
-        self.trial_item = models.TrialItem.objects.get(
-            trial__slug=trial_slug,
+        self.questionnaire_item = models.QuestionnaireItem.objects.get(
+            questionnaire=self.trial.questionnaire,
             number=self.num
         )
         self.questions = study_models.Question.objects.filter(
             study=self.study
         )
-        self.item_questions = self.trial_item.item.itemquestion_set.all()
+        self.item_questions = self.questionnaire_item.item.itemquestion_set.all()
         self.formset = forms.ratingformset_factory(len(self.questions))(
             queryset=models.Rating.objects.none()
         )
@@ -280,7 +277,8 @@ class RatingsCreateView(generic.TemplateView):
                     self.formset.error_class(ValidationError('Please answer all questions').error_list)
             else:
                 for instance in instances:
-                    instance.trial_item = self.trial_item
+                    instance.trial = self.trial
+                    instance.questionnaire_item = self.questionnaire_item
                     instance.save()
                 if self.num < (len(self.trial.items) - 1):
                     return redirect('rating-create', study_slug=self.study.slug, slug=self.trial.slug, num=self.num + 1)

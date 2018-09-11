@@ -29,9 +29,9 @@
     <tbody>
     {% for questionnaire in questionnaire_list %}
     <tr>
-        <td>{{ questionnaire.number }}</td>
+        <td>{{ forloop.counter }}</td>
         <td>
-            {% for item_list in questionnaire.item_lists.all %}{% for item in item_list.items.all %}{{ item.experiment }}-{{ item }}{% if not forloop.last %},{% endif %}{% endfor %}{% endfor %}
+            {% for item in questionnaire.items %}{{ item.experiment }}-{{ item }}{% if not forloop.last %},{% endif %}{% endfor %}
         </td>
     </tr>
     {% endfor %}

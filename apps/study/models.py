@@ -142,32 +142,32 @@ class Study(models.Model):
             questionnaire_item_list.append(next_item_list)
         return questionnaire_item_list
 
-    def _create_next_questionnaire(self, questionnaire_num, last_questionnaire):
-        from apps.trial.models import Questionnaire
-        questionnaire = Questionnaire.objects.create(number=questionnaire_num, study=self)
-        if questionnaire_num == 0:
+    def _create_next_questionnaire(self, last_questionnaire):
+        from apps.trial.models import Questionnaire, QuestionnaireItem
+        questionnaire = Questionnaire.objects.create(study=self)
+        if not last_questionnaire:
             questionnaire_item_lists = self._init_questionnaire_lists()
         else:
             questionnaire_item_lists = self._next_questionnaire_lists(last_questionnaire)
         for item_list in questionnaire_item_lists:
             questionnaire.item_lists.add(item_list)
+        questionnaire.generate_items()
         return questionnaire
 
     def generate_questionnaires(self):
         self.questionnaire_set.all().delete()
         questionnaire_count = self._questionnaire_count()
         last_questionnaire = None
-        for i in range(questionnaire_count):
-            last_questionnaire = self._create_next_questionnaire(i, last_questionnaire)
+        for _ in range(questionnaire_count):
+            last_questionnaire = self._create_next_questionnaire(last_questionnaire)
 
-    def randomize_questionnaires(self):
-        questionnaires = list(self.questionnaire_set.all())
-        sys_random = random.SystemRandom()
-        sys_random.shuffle(questionnaires)
-        for i, questionnaire in enumerate(questionnaires):
-            questionnaire.number = i
-            questionnaire.save()
-
+    def randomize_questionnaire_items(self):
+        for questionnaire in self.questionnaire_set.all():
+            questionnaire_items = list(questionnaire.questionnaireitem_set.all())
+            random.SystemRandom().shuffle(questionnaire_items)
+            for i, questionnaire_item in enumerate(questionnaire_items):
+                questionnaire_item.number = i
+                questionnaire_item.save()
 
     def rating_proofs_csv(self, fileobj):
         from apps.trial.models import Trial

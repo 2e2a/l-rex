@@ -101,13 +101,13 @@ class Experiment(models.Model):
     def results(self):
         results = []
         ratings = trial_models.Rating.objects.filter(
-            trial_item__item__experiment=self
+            questionnaire_item__item__experiment=self
         )
         for rating in ratings:
             row = {}
-            item = rating.trial_item.item
+            item = rating.questionnaire_item.item
 
-            row['subject'] = rating.trial_item.trial.id
+            row['subject'] = rating.trial.id
             row['item'] = item.number
             row['condition'] = item.condition
             row['question'] = rating.scale_value.question.num
