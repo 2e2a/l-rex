@@ -346,17 +346,31 @@ class ItemUploadView(LoginRequiredMixin, generic.FormView):
                     url=row[text_col],
                     experiment=self.experiment,
                 )
-            for i, question in enumerate(self.experiment.study.question_set.all()):
-                question_col = form.cleaned_data['question_{}_question_column'.format(i+1)] - 1
-                if question_col > 0:
-                    scale_col = form.cleaned_data['question_{}_scale_column'.format(i+1)] - 1
-                    legend_col = form.cleaned_data['question_{}_legend_column'.format(i+1)] - 1
-                    models.ItemQuestion.objects.create(
-                        item=item,
-                        question=row[question_col],
-                        scale_labels=row[scale_col] if scale_col>0 else None,
-                        legend=row[legend_col] if legend_col>0 else None,
-                    )
+            create_item_questions = False
+            for i in range(self.experiment.study.question_set.count()):
+                if form.cleaned_data['question_{}_question_column'.format(i+1)] > 0:
+                    create_item_questions = True
+                    break
+            if create_item_questions:
+                for i, question in enumerate(self.experiment.study.question_set.all()):
+                    question_col = form.cleaned_data['question_{}_question_column'.format(i+1)] - 1
+                    if question_col > 0:
+                        scale_col = form.cleaned_data['question_{}_scale_column'.format(i+1)] - 1
+                        legend_col = form.cleaned_data['question_{}_legend_column'.format(i+1)] - 1
+                        models.ItemQuestion.objects.create(
+                            item=item,
+                            question=row[question_col],
+                            scale_labels=row[scale_col] if scale_col>0 else None,
+                            legend=row[legend_col] if legend_col>0 else None,
+                        )
+                    else:
+                        models.ItemQuestion.objects.create(
+                            item=item,
+                            question=question,
+                            scale_labels=None,
+                            legend=None,
+                        )
+
 
         self.experiment.set_progress(self.experiment.PROGRESS_EXP_ITEMS_CREATED)
         messages.success(self.request, study_views.progress_success_message(self.experiment.progress))
