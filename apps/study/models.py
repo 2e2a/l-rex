@@ -25,7 +25,6 @@ class Study(models.Model):
         )
     slug = models.SlugField(unique=True)
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-
     ITEM_TYPE_TXT = 'txt'
     ITEM_TYPE_AUDIO_LINK = 'aul'
     ITEM_TYPE = (
@@ -38,9 +37,8 @@ class Study(models.Model):
         default=ITEM_TYPE_TXT,
         help_text='The items can be plain text or links to audio files (self-hosted).',
     )
-
-    rating_instructions = models.TextField(
-        max_length=1024,
+    instructions = models.TextField(
+        max_length=5000,
         help_text='These instructions will be presented to the participant before the experiment begins.',
     )
     password = models.CharField(
@@ -104,6 +102,14 @@ class Study(models.Model):
         return self.item_type == self.ITEM_TYPE_AUDIO_LINK
 
     @property
+    def item_blocks(self):
+        item_bocks = set()
+        for experiment in self.experiments:
+            for item in experiment.item_set.all():
+                item_bocks.add(item.block)
+        return sorted(item_bocks)
+
+    @property
     def status(self):
         from apps.trial.models import Trial
         if not self.is_published:
@@ -119,6 +125,14 @@ class Study(models.Model):
 
     def get_absolute_url(self):
         return reverse('study', args=[self.slug])
+
+    @property
+    def randomization_reqiured(self):
+        from apps.trial.models import QuestionnaireBlock
+        for questionnaire_block in self.questionnaireblock_set.all():
+            if questionnaire_block.randomization == QuestionnaireBlock.RANDOMIZATION_TRUE:
+                return True
+        return False
 
     def _questionnaire_count(self):
         questionnaire_lcm = 1
@@ -143,7 +157,7 @@ class Study(models.Model):
         return questionnaire_item_list
 
     def _create_next_questionnaire(self, last_questionnaire):
-        from apps.trial.models import Questionnaire, QuestionnaireItem
+        from apps.trial.models import Questionnaire
         questionnaire = Questionnaire.objects.create(study=self)
         if not last_questionnaire:
             questionnaire_item_lists = self._init_questionnaire_lists()
@@ -161,13 +175,22 @@ class Study(models.Model):
         for _ in range(questionnaire_count):
             last_questionnaire = self._create_next_questionnaire(last_questionnaire)
 
+    def generate_questionnaire_permutations(self, permutations=4):
+        from apps.trial.models import Questionnaire
+        if self.randomization_reqiured:
+            questionnaires = list(self.questionnaire_set.all())
+            for i in range(1, permutations):
+                for questionnaire in questionnaires:
+                    questionnaire_permutation=Questionnaire.objects.create(
+                        study=self,
+                    )
+                    questionnaire_permutation.item_lists.set(questionnaire.item_lists.all())
+                    questionnaire_permutation.generate_items()
+                    questionnaire_permutation.save()
+
     def randomize_questionnaire_items(self):
         for questionnaire in self.questionnaire_set.all():
-            questionnaire_items = list(questionnaire.questionnaireitem_set.all())
-            random.SystemRandom().shuffle(questionnaire_items)
-            for i, questionnaire_item in enumerate(questionnaire_items):
-                questionnaire_item.number = i
-                questionnaire_item.save()
+            questionnaire.randomize_items()
 
     def rating_proofs_csv(self, fileobj):
         from apps.trial.models import Trial

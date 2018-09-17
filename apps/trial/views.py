@@ -21,21 +21,46 @@ class QuestionnaireListView(LoginRequiredMixin, study_views.NextStepsMixin, gene
     def dispatch(self, *args, **kwargs):
         study_slug = self.kwargs['study_slug']
         self.study = study_models.Study.objects.get(slug=study_slug)
+        self.blocks = self.study.item_blocks
         return super().dispatch(*args, **kwargs)
+
+    def _create_default_questionnaire_block(self, randomization):
+        models.QuestionnaireBlock.objects.create(
+            study=self.study,
+            block=self.blocks[0],
+            randomization=randomization,
+        )
 
     def post(self, request, *args, **kwargs):
         action = request.POST.get('action', None)
-        if action and action == 'generate_ordered':
-            self.study.generate_questionnaires()
-        elif action and action == 'generate_random':
-            self.study.generate_questionnaires()
-            self.study.randomize_questionnaire_items()
+        if len(self.blocks)>1:
+            return redirect('questionnaire-generate',study_slug=self.study.slug)
+        randomization = models.QuestionnaireBlock.RANDOMIZATION_TRUE if action == 'generate_random' \
+            else models.QuestionnaireBlock.RANDOMIZATION_NONE
+        self._create_default_questionnaire_block(randomization)
+        self.study.generate_questionnaires()
+        self.study.generate_questionnaire_permutations()
+        self.study.randomize_questionnaire_items()
         self.study.set_progress(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED)
         messages.success(request, study_views.progress_success_message(self.study.progress))
         return redirect('questionnaires',study_slug=self.study.slug)
 
     def get_queryset(self):
         return super().get_queryset().filter(study=self.study)
+
+    @property
+    def consider_blocks(self):
+        return len(self.blocks) > 1
+
+    def items_by_block(self):
+        questionnaires = []
+        for questionnaire in self.object_list:
+            blocks = []
+            for block_items in questionnaire.questionnaire_items_by_block().items():
+                blocks.append(block_items)
+            questionnaires.append((questionnaire, blocks))
+        return questionnaires
+
 
     @property
     def breadcrumbs(self):
@@ -46,7 +71,53 @@ class QuestionnaireListView(LoginRequiredMixin, study_views.NextStepsMixin, gene
         ]
 
 
-class TrialCreateView(LoginRequiredMixin, generic.CreateView):
+class QuestionnaireGenerateView(LoginRequiredMixin, generic.TemplateView):
+    title = 'Generate questionnaires'
+    template_name = 'lrex_contrib/crispy_formset_form.html'
+
+    formset = None
+    helper = forms.questionnaire_block_formset_helper
+
+    def dispatch(self, *args, **kwargs):
+        study_slug = self.kwargs['study_slug']
+        self.study = study_models.Study.objects.get(slug=study_slug)
+        self.blocks = self.study.item_blocks
+        return super().dispatch(*args, **kwargs)
+
+    def _initialize_questionnaire_blocks(self):
+        models.QuestionnaireBlock.objects.filter(study=self.study).delete()
+        for block in self.blocks:
+            models.QuestionnaireBlock.objects.create(
+                study=self.study,
+                block=block,
+            )
+
+    def get(self, request, *args, **kwargs):
+        self._initialize_questionnaire_blocks()
+        self.formset = forms.questionnaire_block_factory(len(self.blocks))(
+            queryset=models.QuestionnaireBlock.objects.filter(study=self.study)
+        )
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        if 'submit' in request.POST:
+            self.formset = forms.questionnaire_block_factory(len(self.blocks))(request.POST, request.FILES)
+            if self.formset.is_valid():
+                instances = self.formset.save(commit=True)
+                self.study.generate_questionnaires()
+                self.study.generate_questionnaire_permutations()
+                self.study.randomize_questionnaire_items()
+                self.study.set_progress(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED)
+                messages.success(request, study_views.progress_success_message(self.study.progress))
+                return redirect('questionnaires', study_slug=self.study.slug)
+        return super().get(request, *args, **kwargs)
+
+
+class QuestionnaireBlockUpdateView(LoginRequiredMixin, generic.TemplateView):
+    pass
+
+
+class TrialCreateView(generic.CreateView):
     model = models.Trial
     form_class = forms.TrialForm
 
@@ -79,6 +150,13 @@ class TrialCreateView(LoginRequiredMixin, generic.CreateView):
         return response
 
     def get_success_url(self):
+        first_questionnaire_item = models.QuestionnaireItem.objects.get(
+            questionnaire=self.object.questionnaire,
+            number=0
+        )
+        questionnaire_block = models.QuestionnaireBlock.objects.get(block=first_questionnaire_item.item.block)
+        if questionnaire_block.instructions:
+            return reverse('rating-block-instructions', args=[self.study.slug, self.object.slug, 0])
         return reverse('rating-create', args=[self.study.slug, self.object.slug, 0])
 
 
@@ -171,7 +249,20 @@ class RatingTakenView(generic.TemplateView):
     template_name = 'lrex_trial/rating_taken.html'
 
 
-class RatingCreateView(generic.CreateView):
+class RatingCreateMixin():
+
+    def get_next_url(self):
+        trial_items = self.trial.items
+        if self.num < len(trial_items) - 1:
+            if trial_items[self.num].block != trial_items[self.num + 1].block:
+                questionnaire_block = models.QuestionnaireBlock.objects.get(block=trial_items[self.num + 1].block)
+                if questionnaire_block.instructions:
+                    return reverse('rating-block-instructions', args=[self.study.slug, self.trial.slug, self.num + 1])
+            return reverse('rating-create', args=[self.study.slug, self.trial.slug, self.num + 1])
+        return reverse('rating-outro', args=[self.study.slug, self.trial.slug])
+
+
+class RatingCreateView(RatingCreateMixin, generic.CreateView):
     model = models.Rating
     form_class = forms.RatingForm
 
@@ -221,9 +312,7 @@ class RatingCreateView(generic.CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        if self.num < (len(self.trial.items) - 1):
-            return reverse('rating-create', args=[self.study.slug, self.trial.slug, self.num + 1])
-        return reverse('rating-outro', args=[self.study.slug, self.trial.slug])
+        return self.get_next_url()
 
     @property
     def item_question(self):
@@ -241,7 +330,7 @@ class RatingCreateView(generic.CreateView):
 
 
 
-class RatingsCreateView(generic.TemplateView):
+class RatingsCreateView(RatingCreateMixin, generic.TemplateView):
     model = models.Rating
     template_name = 'lrex_trial/ratings_form.html'
 
@@ -280,10 +369,31 @@ class RatingsCreateView(generic.TemplateView):
                     instance.trial = self.trial
                     instance.questionnaire_item = self.questionnaire_item
                     instance.save()
-                if self.num < (len(self.trial.items) - 1):
-                    return redirect('rating-create', study_slug=self.study.slug, slug=self.trial.slug, num=self.num + 1)
-                return redirect('rating-outro', study_slug=self.study.slug, slug=self.trial.slug)
+                return redirect(self.get_next_url())
         return super().get(request, *args, **kwargs)
+
+    def progress(self):
+        return self.num * 100 / len(self.trial.items)
+
+
+class RatingBlockInstructionsView(generic.TemplateView):
+    template_name = 'lrex_trial/rating_block_instructions.html'
+
+    def dispatch(self, *args, **kwargs):
+        trial_slug = self.kwargs['slug']
+        self.trial = models.Trial.objects.get(slug=trial_slug)
+        self.num = int(self.kwargs['num'])
+        self.study = self.trial.questionnaire.study
+        self.questionnaire_item = models.QuestionnaireItem.objects.get(
+            questionnaire=self.trial.questionnaire,
+            number=self.num
+        )
+        return super().dispatch(*args, **kwargs)
+
+    @property
+    def block_instructions(self):
+        questionnaire_block = models.QuestionnaireBlock.objects.get(block=self.questionnaire_item.item.block)
+        return questionnaire_block.instructions
 
     def progress(self):
         return self.num * 100 / len(self.trial.items)

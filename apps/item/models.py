@@ -15,9 +15,13 @@ class Item(models.Model):
         'lrex_experiment.Experiment',
         on_delete=models.CASCADE
     )
+    block = models.IntegerField(
+        help_text='TODO',
+        default=1
+    )
 
     class Meta:
-        ordering = ['number', 'condition']
+        ordering = ['block', 'number', 'condition']
 
     def __str__(self):
         return '{}{}'.format(self.number, self.condition)

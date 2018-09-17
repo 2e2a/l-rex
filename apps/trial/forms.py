@@ -1,11 +1,39 @@
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Fieldset, Layout, Submit
 from django import forms
+from django.forms import modelformset_factory
 
 from apps.contrib import forms as crispy_forms
 from apps.study import models as study_models
 
 from . import models
+
+
+class QuestionnaireBlockForm(forms.ModelForm):
+
+    class Meta:
+        model = models.QuestionnaireBlock
+        fields = ['instructions', 'randomization']
+
+
+def questionnaire_block_factory(n_blocks):
+    return modelformset_factory(
+        models.QuestionnaireBlock,
+        form=QuestionnaireBlockForm,
+        min_num=n_blocks,
+        max_num=n_blocks,
+    )
+
+
+questionnaire_block_formset_helper = FormHelper()
+questionnaire_block_formset_helper.add_layout(
+    Layout(
+        Fieldset('Item block {{ forloop.counter }}', None, 'instructions', 'randomization'),
+    ),
+)
+questionnaire_block_formset_helper.add_input(
+    Submit("submit", "Submit"),
+)
 
 
 class TrialForm(crispy_forms.CrispyModelForm):

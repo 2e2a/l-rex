@@ -31,11 +31,15 @@
     </a>
 </div>
 <ul class="list-group">
+    {% with consider_blocks=view.consider_blocks %}
     {% for item in item_list %}
     <li class="list-group-item d-flex justify-content-between align-items-center">
         {% if item.textitem %}
         <span>
             <strong>{{ item }}</strong>
+            {% if consider_blocks %}
+            <span class="badge badge-secondary">block {{ item.block }}</span>
+            {% endif %}
             {{ item.textitem.text }}
         </span>
         {% else %}
@@ -68,6 +72,7 @@
     {% empty %}
     <li class="list-group-item my-1">There are currently no items.</li>
     {% endfor %}
+    {% endwith %}
 </ul>
 <nav aria-label="Pagination">
     <ul class="pagination justify-content-center mt-2">

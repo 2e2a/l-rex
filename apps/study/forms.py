@@ -14,7 +14,7 @@ class StudyForm(crispy_forms.CrispyModelForm):
         fields = [
             'title',
             'item_type',
-            'rating_instructions',
+            'instructions',
             'require_participant_id',
             'password',
             'end_date',

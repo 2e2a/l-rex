@@ -2,6 +2,7 @@ import random
 import string
 import uuid
 
+from collections import OrderedDict
 from datetime import timedelta
 from enum import Enum
 from django.db import models
@@ -30,7 +31,8 @@ class Questionnaire(models.Model):
         items = []
         for item_list in self.item_lists.all():
             items.extend(item_list.items.all())
-        return items
+        items_sorted = sorted(items, key=lambda i: i.block)
+        return items_sorted
 
     @property
     def items(self):
@@ -47,6 +49,18 @@ class Questionnaire(models.Model):
     def num(self):
         return list(Questionnaire.objects.filter(study=self.study)).index(self) + 1
 
+    def questionnaire_items_by_block(self):
+        blocks = OrderedDict()
+        for questionnaire_item in self.questionnaireitem_set.all():
+            if questionnaire_item.item.block in blocks:
+                blocks[questionnaire_item.item.block].append(questionnaire_item)
+            else:
+                blocks[questionnaire_item.item.block] = [questionnaire_item]
+        return blocks
+
+    def block_items(self, block):
+        return self.questionnaire_items_by_block()[block]
+
     def generate_items(self):
         for i, item in enumerate(self.item_list_items):
             QuestionnaireItem.objects.create(
@@ -54,6 +68,53 @@ class Questionnaire(models.Model):
                 questionnaire=self,
                 item=item,
             )
+
+    def _block_randomization(self):
+        block_randomization = OrderedDict()
+        questionnaire_blocks = self.study.questionnaireblock_set.all()
+        for questionnaire_block in questionnaire_blocks:
+            block_randomization[questionnaire_block.block] = questionnaire_block.randomization
+        return block_randomization
+
+    def randomize_items(self):
+        block_randomization = self._block_randomization()
+        block_offset = 0
+        for block, block_items in self.questionnaire_items_by_block().items():
+            if block_randomization[block] == QuestionnaireBlock.RANDOMIZATION_TRUE:
+                random.SystemRandom().shuffle(block_items)
+                for i, questionnaire_item in enumerate(block_items):
+                    questionnaire_item.number = block_offset + i
+                    questionnaire_item.save()
+            block_offset += len(block_items)
+
+
+class QuestionnaireBlock(models.Model):
+    block = models.IntegerField()
+    instructions = models.TextField(
+        max_length=5000,
+        help_text='These instructions will be presented to the participant before the experiment begins.',
+        blank=True,
+        null=True,
+    )
+    RANDOMIZATION_NONE = 'none'
+    RANDOMIZATION_TRUE = 'true'
+    RANDOMIZATION_TYPE = (
+        (RANDOMIZATION_NONE, 'Keep item order'),
+        (RANDOMIZATION_TRUE, 'Randomize'),
+    )
+    randomization = models.CharField(
+        max_length=8,
+        choices=RANDOMIZATION_TYPE,
+        default=RANDOMIZATION_TRUE,
+        help_text='Randomize items in each questionnaire block',
+    )
+    study = models.ForeignKey(
+        'lrex_study.Study',
+        on_delete=models.CASCADE
+    )
+
+    class Meta:
+        ordering = ['block']
 
 
 class QuestionnaireItem(models.Model):
@@ -63,6 +124,10 @@ class QuestionnaireItem(models.Model):
 
     class Meta:
         ordering = ['number']
+
+
+    def __str__(self):
+        return '{} questionnaire {} item {}'.format(self.pk, self.questionnaire.num, self.item)
 
 
 class TrialStatus(Enum):

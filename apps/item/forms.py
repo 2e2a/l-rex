@@ -14,14 +14,14 @@ class TextItemForm(crispy_forms.CrispyModelForm):
 
     class Meta:
         model = models.TextItem
-        fields = ['number', 'condition', 'text']
+        fields = ['number', 'condition', 'text', 'block']
 
 
 class AudioLinkItemForm(crispy_forms.CrispyModelForm):
 
     class Meta:
         model = models.AudioLinkItem
-        fields = ['number', 'condition', 'url']
+        fields = ['number', 'condition', 'url', 'block']
 
 
 class PregenerateItemsForm(crispy_forms.CrispyForm):
@@ -51,6 +51,10 @@ class UploadItemsForm(crispy_forms.CrispyForm):
     text_column = forms.IntegerField(
         initial=3,
         help_text='Specify which column contains the text or the link to the audio file.',
+    )
+    block_column = forms.IntegerField(
+        initial=0,
+        help_text='Specify which column contains the item block definiton; 0 use single item block',
     )
 
     def __init__(self, *args, **kwargs):
@@ -107,6 +111,7 @@ class UploadItemsForm(crispy_forms.CrispyForm):
                     assert len(row) >= cleaned_data['number_column']
                     assert len(row) >= cleaned_data['condition_column']
                     assert len(row) >= cleaned_data['text_column']
+                    assert len(row) >= cleaned_data['block_column']
                     for i, _ in enumerate(self.questions):
                         if cleaned_data['question_{}_question_column'.format(i+1)] > 0:
                             assert len(row) >= cleaned_data['question_{}_question_column'.format(i+1)]
@@ -118,6 +123,8 @@ class UploadItemsForm(crispy_forms.CrispyForm):
                     assert int(row[cleaned_data['number_column'] - 1])
                     assert row[cleaned_data['condition_column'] - 1]
                     assert row[cleaned_data['text_column'] - 1]
+                    if cleaned_data['block_column'] > 0:
+                        assert int(row[cleaned_data['block_column'] - 1])
                     for i, question in enumerate(self.questions):
                         if cleaned_data['question_{}_question_column'.format(i+1)] > 0:
                             assert row[cleaned_data['question_{}_question_column'.format(i+1)] - 1 ]
