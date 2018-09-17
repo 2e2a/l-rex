@@ -90,8 +90,8 @@ class Experiment(models.Model):
         item_lists = []
         conditions = self.conditions
         condition_count = len(conditions)
-        for i in range(condition_count):
-            item_list = item_models.ItemList.objects.create(number=i, experiment=self)
+        for _ in range(condition_count):
+            item_list = item_models.ItemList.objects.create(experiment=self)
             item_lists.append(item_list)
 
         for i, item in enumerate(self.item_set.all()):

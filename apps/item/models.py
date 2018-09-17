@@ -44,7 +44,6 @@ class AudioLinkItem(Item):
 
 
 class ItemList(models.Model):
-    number = models.IntegerField()
     experiment = models.ForeignKey(
         'lrex_experiment.Experiment',
         on_delete=models.CASCADE
@@ -52,13 +51,14 @@ class ItemList(models.Model):
     items = models.ManyToManyField(Item)
 
     class Meta:
-        ordering = ['number']
+        ordering = ['pk']
 
-    def __str__(self):
-        return '{}-list-{}'.format(self.experiment, self.number)
+    @property
+    def num(self):
+        return list(ItemList.objects.filter(experiment=self.experiment)).index(self) + 1
 
     def next(self):
-        next_list =  self.experiment.itemlist_set.filter(number__gt=self.number).first()
+        next_list =  self.experiment.itemlist_set.filter(pk__gt=self.pk).first()
         if not next_list:
             next_list =  ItemList.objects.first()
         return next_list
