@@ -1,4 +1,5 @@
 import csv
+import decimal
 from django.urls import reverse
 from django.db import models
 from django.utils.text import slugify
@@ -186,7 +187,8 @@ class Experiment(models.Model):
         for aggregated_row in aggregated_results:
             aggregated_row['rating_count'] = aggregated_row['rating_count'] / num_questions
 
-            aggregated_row['ratings'] = list(map(lambda x: x/aggregated_row['rating_count'], aggregated_row['ratings']))
+            aggregated_row['ratings'] = \
+                list(map(lambda x: round(x/aggregated_row['rating_count'], 4), aggregated_row['ratings']))
 
         aggregated_results_sorted = sorted(aggregated_results, key=lambda r: (r['subject'], r['item'], r['condition']))
 
