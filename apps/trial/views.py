@@ -114,7 +114,31 @@ class QuestionnaireGenerateView(LoginRequiredMixin, generic.TemplateView):
 
 
 class QuestionnaireBlockUpdateView(LoginRequiredMixin, generic.TemplateView):
-    pass
+    title = 'Edit questionnaire blocks'
+    template_name = 'lrex_contrib/crispy_formset_form.html'
+
+    formset = None
+    helper = forms.questionnaire_block_update_formset_helper
+
+    def dispatch(self, *args, **kwargs):
+        study_slug = self.kwargs['study_slug']
+        self.study = study_models.Study.objects.get(slug=study_slug)
+        self.blocks = self.study.item_blocks
+        return super().dispatch(*args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        self.formset = forms.questionnaire_block_update_factory(len(self.blocks))(
+            queryset=models.QuestionnaireBlock.objects.filter(study=self.study)
+        )
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        if 'submit' in request.POST:
+            self.formset = forms.questionnaire_block_update_factory(len(self.blocks))(request.POST, request.FILES)
+            if self.formset.is_valid():
+                self.formset.save(commit=True)
+                return redirect('questionnaires', study_slug=self.study.slug)
+        return super().get(request, *args, **kwargs)
 
 
 class TrialCreateView(generic.CreateView):

@@ -36,6 +36,33 @@ questionnaire_block_formset_helper.add_input(
 )
 
 
+class QuestionnaireBlockUpdateForm(forms.ModelForm):
+
+    class Meta:
+        model = models.QuestionnaireBlock
+        fields = ['instructions']
+
+
+def questionnaire_block_update_factory(n_blocks):
+    return modelformset_factory(
+        models.QuestionnaireBlock,
+        form=QuestionnaireBlockUpdateForm,
+        min_num=n_blocks,
+        max_num=n_blocks,
+    )
+
+
+questionnaire_block_update_formset_helper = FormHelper()
+questionnaire_block_update_formset_helper.add_layout(
+    Layout(
+        Fieldset('Item block {{ forloop.counter }}', None, 'instructions'),
+    ),
+)
+questionnaire_block_update_formset_helper.add_input(
+    Submit("submit", "Submit"),
+)
+
+
 class TrialForm(crispy_forms.CrispyModelForm):
     password = forms.CharField(
         max_length=200,
