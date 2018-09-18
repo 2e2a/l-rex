@@ -332,8 +332,10 @@ class ItemUploadView(LoginRequiredMixin, generic.FormView):
         except UnicodeDecodeError:
             file.seek(0)
             data = file.read().decode('latin-1')
-        has_header = csv.Sniffer().has_header(data[:128])
-        dialect = csv.Sniffer().sniff(data[:128])
+        data_len = len(data)
+        sniff_data = data[:500 if data_len > 500 else data_len]
+        has_header = csv.Sniffer().has_header(sniff_data)
+        dialect = csv.Sniffer().sniff(sniff_data)
         reader = csv.reader(StringIO(data), dialect)
 
         if has_header:

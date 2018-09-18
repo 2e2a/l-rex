@@ -101,8 +101,10 @@ class UploadItemsForm(crispy_forms.CrispyForm):
             except UnicodeDecodeError:
                 file.seek(0)
                 data = file.read().decode('latin-1')
-            dialect = csv.Sniffer().sniff(data[:128])
-            has_header = csv.Sniffer().has_header(data[:128])
+            data_len = len(data)
+            sniff_data = data[:500 if data_len > 500 else data_len]
+            dialect = csv.Sniffer().sniff(sniff_data)
+            has_header = csv.Sniffer().has_header(sniff_data)
             reader = csv.reader(StringIO(data), dialect)
             if has_header:
                 next(reader)
