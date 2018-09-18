@@ -325,8 +325,7 @@ class ItemUploadView(LoginRequiredMixin, generic.FormView):
         num_col = form.cleaned_data['number_column'] - 1
         cond_col = form.cleaned_data['condition_column'] - 1
         text_col = form.cleaned_data['text_column'] - 1
-        if form.cleaned_data['block_column'] > 0:
-            block_col = form.cleaned_data['block_column'] - 1
+        block_col = form.cleaned_data['block_column'] - 1 if form.cleaned_data['block_column'] > 0 else None
 
         try:
             data = file.read().decode('utf-8')

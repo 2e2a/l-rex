@@ -154,7 +154,10 @@ class TrialCreateView(generic.CreateView):
             questionnaire=self.object.questionnaire,
             number=0
         )
-        questionnaire_block = models.QuestionnaireBlock.objects.get(block=first_questionnaire_item.item.block)
+        questionnaire_block = models.QuestionnaireBlock.objects.get(
+            study=self.study,
+            block=first_questionnaire_item.item.block
+        )
         if questionnaire_block.instructions:
             return reverse('rating-block-instructions', args=[self.study.slug, self.object.slug, 0])
         return reverse('rating-create', args=[self.study.slug, self.object.slug, 0])
