@@ -188,7 +188,7 @@ class Experiment(models.Model):
             aggregated_row['rating_count'] = aggregated_row['rating_count'] / num_questions
 
             aggregated_row['ratings'] = \
-                list(map(lambda x: round(x/aggregated_row['rating_count'], 4), aggregated_row['ratings']))
+                list(map(lambda x: round(x/aggregated_row['rating_count'], 2), aggregated_row['ratings']))
 
         aggregated_results_sorted = sorted(aggregated_results, key=lambda r: (r['subject'], r['item'], r['condition']))
 
