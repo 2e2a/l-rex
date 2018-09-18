@@ -258,7 +258,10 @@ class RatingCreateMixin():
         trial_items = self.trial.items
         if self.num < len(trial_items) - 1:
             if trial_items[self.num].block != trial_items[self.num + 1].block:
-                questionnaire_block = models.QuestionnaireBlock.objects.get(block=trial_items[self.num + 1].block)
+                questionnaire_block = models.QuestionnaireBlock.objects.get(
+                    study=self.study,
+                    block=trial_items[self.num + 1].block
+                )
                 if questionnaire_block.instructions:
                     return reverse('rating-block-instructions', args=[self.study.slug, self.trial.slug, self.num + 1])
             return reverse('rating-create', args=[self.study.slug, self.trial.slug, self.num + 1])
@@ -395,7 +398,10 @@ class RatingBlockInstructionsView(generic.TemplateView):
 
     @property
     def block_instructions(self):
-        questionnaire_block = models.QuestionnaireBlock.objects.get(block=self.questionnaire_item.item.block)
+        questionnaire_block = models.QuestionnaireBlock.objects.get(
+            study=self.study,
+            block=self.questionnaire_item.item.block
+        )
         return questionnaire_block.instructions
 
     def progress(self):

@@ -37,13 +37,14 @@
         {% if item.textitem %}
         <span>
             <strong>{{ item }}</strong>
-            {% if consider_blocks %}
-            <span class="badge badge-secondary">block {{ item.block }}</span>
-            {% endif %}
+            {% if consider_blocks %}<span class="badge badge-secondary">block {{ item.block }}</span>{% endif %}
             {{ item.textitem.text }}
         </span>
         {% else %}
-        <strong>{{ item }}</strong>
+        <span>
+            <strong>{{ item }}</strong>
+            {% if consider_blocks %}<span class="badge badge-secondary">block {{ item.block }}</span>{% endif %}
+        </span>
         <audio controls="controls">
             <source src="{{ item.audiolinkitem.url }}">
             Your browser does not support the <code>audio</code> element.
