@@ -402,6 +402,7 @@ class RatingsCreateView(RatingCreateMixin, generic.TemplateView):
                 return redirect(self.get_next_url())
         return super().get(request, *args, **kwargs)
 
+    @property
     def progress(self):
         return self.num * 100 / len(self.trial.items)
 
