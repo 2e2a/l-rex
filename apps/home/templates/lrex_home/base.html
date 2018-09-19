@@ -71,7 +71,9 @@
         <h1 >{{ view.title }}</h1>
     </div>
     {% endif %}
-    {% block content %}{% endblock %}
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
 </div>
 </body>
 </html>

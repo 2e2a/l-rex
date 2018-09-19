@@ -2,8 +2,7 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="p-4 border col-8 bg-white">
+<div class="p-4 border bg-white">
 <form action="" method="post">{% csrf_token %}
     <p class="row justify-content-center">{{ view.message }}</p>
     <div class="row justify-content-center">
@@ -13,6 +12,5 @@
     </span>
     </div>
 </form>
-    </div>
 </div>
 {% endblock %}

@@ -2,46 +2,44 @@
 
 {% block content %}
 <h1 class="row justify-content-center mt-2">Participate in the experiment</h1>
-<div class="row justify-content-center">
-    <div class="my-2 p-4 border col-6 bg-white">
-        <div class="progress" style="height: 2px;">
-            <div class="progress-bar" role="progressbar" style="width: {{ view.progress }}%" aria-valuenow="{{ view.progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+<div class="my-2 p-4 border bg-white">
+    <div class="progress" style="height: 2px;">
+        <div class="progress-bar" role="progressbar" style="width: {{ view.progress }}%" aria-valuenow="{{ view.progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+    {% if view.questionnaire_item.item.textitem %}
+    <p>
+        {{ view.questionnare_item.item.textitem.text|linebreaks }}
+    </p>
+    {% else %}
+    <div class="row justify-content-center my-2">
+        <audio controls="controls" autoplay="autoplay">
+            <source src="{{ view.questionnaire_item.item.audiolinkitem.url }}">
+            Your browser does not support the <code>audio</code> element.
+        </audio>
+    </div>
+    {% endif %}
+    <p>
+        <em>
+            {{ view.item_question }}
+        </em>
+    </p>
+    <form action="" method="post">
+        {% csrf_token %}
+        <div class="btn-group d-flex" role="group">
+            {% for choice in form.scale_value.field.choices %}
+            <button class="btn btn-outline-primary mx-1 w-100" type="submit" name="scale_value" value="{{ choice.0 }}">
+                {{ choice.1 }}
+            </button>
+            {% endfor %}
         </div>
-        {% if view.questionnaire_item.item.textitem %}
-        <p>
-            {{ view.questionnare_item.item.textitem.text|linebreaks }}
-        </p>
-        {% else %}
-        <div class="row justify-content-center my-2">
-            <audio controls="controls" autoplay="autoplay">
-                <source src="{{ view.questionnaire_item.item.audiolinkitem.url }}">
-                Your browser does not support the <code>audio</code> element.
-            </audio>
-        </div>
-        {% endif %}
-        <p>
-            <em>
-                {{ view.item_question }}
-            </em>
-        </p>
-        <form action="" method="post">
-            {% csrf_token %}
-            <div class="btn-group d-flex" role="group">
-                {% for choice in form.scale_value.field.choices %}
-                <button class="btn btn-outline-primary mx-1 w-100" type="submit" name="scale_value" value="{{ choice.0 }}">
-                    {{ choice.1 }}
-                </button>
-                {% endfor %}
-            </div>
-        </form>
-        <p>
-            <small>
-                {{ view.item_legend }}
-            </small>
-        </p>
-        <div class="progress" style="height: 2px;">
-            <div class="progress-bar" role="progressbar" style="width: {{ view.progress }}%" aria-valuenow="{{ view.progress }}" aria-valuemin="0" aria-valuemax="100"></div>
-        </div>
+    </form>
+    <p>
+        <small>
+            {{ view.item_legend }}
+        </small>
+    </p>
+    <div class="progress" style="height: 2px;">
+        <div class="progress-bar" role="progressbar" style="width: {{ view.progress }}%" aria-valuenow="{{ view.progress }}" aria-valuemin="0" aria-valuemax="100"></div>
     </div>
 </div>
 
