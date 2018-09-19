@@ -352,7 +352,7 @@ class RatingCreateView(RatingCreateMixin, generic.CreateView):
 
     @property
     def item_legend(self):
-        if self.item_questions:
+        if self.item_questions and self.item_questions[0].legend:
             return self.item_questions[0].legend
         if self.question.legend:
             return self.question.legend
