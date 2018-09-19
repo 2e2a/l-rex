@@ -64,7 +64,7 @@ class ItemList(models.Model):
     def next(self):
         next_list =  self.experiment.itemlist_set.filter(pk__gt=self.pk).first()
         if not next_list:
-            next_list =  ItemList.objects.first()
+            next_list =  self.experiment.itemlist_set.first()
         return next_list
 
 
