@@ -54,7 +54,7 @@ class Experiment(models.Model):
 
     def validate_items(self):
         conditions = []
-        items = self.item_set.all()
+        items = self.item_set.all().order_by('number', 'condition')
         if len(items) == 0:
             raise AssertionError('No items.')
 
