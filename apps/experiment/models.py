@@ -4,6 +4,7 @@ from django.urls import reverse
 from django.db import models
 from django.utils.text import slugify
 
+from apps.contrib.utils import slugify_unique
 from apps.item import models as item_models
 from apps.study import models as study_models
 from apps.trial import models as trial_models
@@ -13,7 +14,6 @@ class Experiment(models.Model):
     title = models.CharField(
         max_length=200,
         help_text='Give your experiment a name.',
-        unique=True,
     )
     slug = models.SlugField(unique=True)
     study = models.ForeignKey(
@@ -37,7 +37,8 @@ class Experiment(models.Model):
     )
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.title)
+        slug = '{}--{}'.format(self.study.slug, self.title)
+        self.slug = slugify_unique(slug, Experiment, self.id)
         return super().save(*args, **kwargs)
 
     @property

@@ -1,14 +1,13 @@
 import csv
-import random
 
 from enum import Enum
 from django.conf import settings
 from django.db import models
 from django.urls import reverse
-from django.utils.text import slugify
 from django.utils import timezone
 
 from apps.contrib import math
+from apps.contrib.utils import slugify_unique
 
 
 class StudyStatus(Enum):
@@ -21,7 +20,6 @@ class Study(models.Model):
     title = models.CharField(
         max_length=200,
         help_text='Give your study a name.',
-        unique=True,
         )
     slug = models.SlugField(unique=True)
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -86,7 +84,7 @@ class Study(models.Model):
     )
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.title)
+        self.slug = slugify_unique(self.title, Study, self.id)
         return super().save(*args, **kwargs)
 
     @property
