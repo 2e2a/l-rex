@@ -1,4 +1,3 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.paginator import Paginator
@@ -44,7 +43,8 @@ class ExperimentObjectMixin(ExperimentMixin):
         return self.experiment_object
 
 
-class ExperimentListView(LoginRequiredMixin, study_views.StudyMixin, study_views.NextStepsMixin, generic.ListView):
+class ExperimentListView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, study_views.NextStepsMixin,
+                         generic.ListView):
     model = models.Experiment
     title = 'Experiments'
 
@@ -60,7 +60,7 @@ class ExperimentListView(LoginRequiredMixin, study_views.StudyMixin, study_views
         ]
 
 
-class ExperimentCreateView(LoginRequiredMixin, study_views.StudyMixin, generic.CreateView):
+class ExperimentCreateView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, generic.CreateView):
     model = models.Experiment
     title = 'Create experiment'
     template_name = 'lrex_contrib/crispy_form.html'
@@ -83,7 +83,8 @@ class ExperimentCreateView(LoginRequiredMixin, study_views.StudyMixin, generic.C
         ]
 
 
-class ExperimentDetailView(LoginRequiredMixin, ExperimentObjectMixin, study_views.NextStepsMixin, generic.DetailView):
+class ExperimentDetailView(ExperimentObjectMixin, study_views.CheckStudyCreatorMixin, study_views.NextStepsMixin,
+                           generic.DetailView):
     model = models.Experiment
     title = 'Edit experiment'
 
@@ -97,7 +98,8 @@ class ExperimentDetailView(LoginRequiredMixin, ExperimentObjectMixin, study_view
         ]
 
 
-class ExperimentUpdateView(LoginRequiredMixin, ExperimentObjectMixin, SuccessMessageMixin, generic.UpdateView):
+class ExperimentUpdateView(ExperimentObjectMixin, study_views.CheckStudyCreatorMixin, SuccessMessageMixin,
+                           generic.UpdateView):
     model = models.Experiment
     title = 'Edit Experiment'
     template_name = 'lrex_contrib/crispy_form.html'
@@ -115,7 +117,7 @@ class ExperimentUpdateView(LoginRequiredMixin, ExperimentObjectMixin, SuccessMes
         ]
 
 
-class ExperimentDeleteView(LoginRequiredMixin, ExperimentObjectMixin, contrib_views.DefaultDeleteView):
+class ExperimentDeleteView(ExperimentObjectMixin, study_views.CheckStudyCreatorMixin, contrib_views.DefaultDeleteView):
     model = models.Experiment
 
     def delete(self, *args, **kwargs):
@@ -140,7 +142,7 @@ class ExperimentDeleteView(LoginRequiredMixin, ExperimentObjectMixin, contrib_vi
         return reverse('experiments', args=[self.study.slug])
 
 
-class ExperimentResultListView(LoginRequiredMixin, study_views.StudyMixin, generic.ListView):
+class ExperimentResultListView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, generic.ListView):
     model = models.Experiment
     title = 'Results'
     template_name = 'lrex_experiment/experiment_result_list.html'
@@ -157,7 +159,7 @@ class ExperimentResultListView(LoginRequiredMixin, study_views.StudyMixin, gener
         ]
 
 
-class ExperimentResultsView(LoginRequiredMixin, ExperimentObjectMixin, generic.DetailView):
+class ExperimentResultsView(ExperimentObjectMixin, study_views.CheckStudyCreatorMixin, generic.DetailView):
     model = models.Experiment
     title = 'Results'
     template_name = 'lrex_experiment/experiment_results.html'
@@ -206,7 +208,7 @@ class ExperimentResultsView(LoginRequiredMixin, ExperimentObjectMixin, generic.D
         ]
 
 
-class ExperimentResultsCSVDownloadView(LoginRequiredMixin, ExperimentObjectMixin, generic.DetailView):
+class ExperimentResultsCSVDownloadView(ExperimentObjectMixin, study_views.CheckStudyCreatorMixin, generic.DetailView):
     model = models.Experiment
 
     def get(self, request, *args, **kwargs):

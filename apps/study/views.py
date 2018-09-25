@@ -1,4 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
 from django.shortcuts import redirect
@@ -58,6 +59,12 @@ class StudyObjectMixin(StudyMixin):
         return self.study_object
 
 
+class CheckStudyCreatorMixin(UserPassesTestMixin):
+
+    def test_func(self):
+        return self.request.user == self.study.creator
+
+
 class StudyListView(LoginRequiredMixin, generic.ListView):
     model = models.Study
     title = 'Studies'
@@ -102,7 +109,7 @@ class StudyCreateView(LoginRequiredMixin, generic.CreateView):
         return response
 
 
-class StudyDetailView(LoginRequiredMixin, StudyObjectMixin, NextStepsMixin, generic.DetailView):
+class StudyDetailView(StudyObjectMixin, CheckStudyCreatorMixin, NextStepsMixin, generic.DetailView):
     model = models.Study
     title = 'Edit study'
 
@@ -114,7 +121,7 @@ class StudyDetailView(LoginRequiredMixin, StudyObjectMixin, NextStepsMixin, gene
         ]
 
 
-class StudyRunView(LoginRequiredMixin, StudyObjectMixin, NextStepsMixin, generic.DetailView):
+class StudyRunView(StudyObjectMixin, CheckStudyCreatorMixin, NextStepsMixin, generic.DetailView):
     model = models.Study
     title = 'Run study'
     template_name = 'lrex_study/study_run.html'
@@ -127,7 +134,7 @@ class StudyRunView(LoginRequiredMixin, StudyObjectMixin, NextStepsMixin, generic
         ]
 
 
-class StudyUpdateView(LoginRequiredMixin, StudyObjectMixin, SuccessMessageMixin, generic.UpdateView):
+class StudyUpdateView(StudyObjectMixin, CheckStudyCreatorMixin, SuccessMessageMixin, generic.UpdateView):
     model = models.Study
     title = 'Edit study'
     template_name = 'lrex_contrib/crispy_form.html'
@@ -143,7 +150,7 @@ class StudyUpdateView(LoginRequiredMixin, StudyObjectMixin, SuccessMessageMixin,
         ]
 
 
-class StudyDeleteView(LoginRequiredMixin, StudyObjectMixin, contib_views.DefaultDeleteView):
+class StudyDeleteView(StudyObjectMixin, CheckStudyCreatorMixin, contib_views.DefaultDeleteView):
     model = models.Study
 
     @property
@@ -158,7 +165,7 @@ class StudyDeleteView(LoginRequiredMixin, StudyObjectMixin, contib_views.Default
         return reverse('studies')
 
 
-class QuestionUpdateView(LoginRequiredMixin, StudyMixin, NextStepsMixin, generic.DetailView):
+class QuestionUpdateView(StudyMixin, CheckStudyCreatorMixin, NextStepsMixin, generic.DetailView):
     model = models.Study
     title = 'Questions'
     template_name = 'lrex_contrib/crispy_formset_form.html'

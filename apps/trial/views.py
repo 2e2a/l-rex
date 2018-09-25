@@ -1,5 +1,4 @@
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.http import HttpResponse
 from django.shortcuts import redirect
@@ -39,7 +38,8 @@ class TrialObjectMixin(TrialMixin):
         return self.trial_object
 
 
-class QuestionnaireListView(LoginRequiredMixin, study_views.StudyMixin, study_views.NextStepsMixin, generic.ListView):
+class QuestionnaireListView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, study_views.NextStepsMixin,
+                            generic.ListView):
     model = models.Questionnaire
     title = 'Questionnaires'
 
@@ -94,7 +94,7 @@ class QuestionnaireListView(LoginRequiredMixin, study_views.StudyMixin, study_vi
         ]
 
 
-class QuestionnaireGenerateView(LoginRequiredMixin, study_views.StudyMixin, generic.TemplateView):
+class QuestionnaireGenerateView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, generic.TemplateView):
     title = 'Generate questionnaires'
     template_name = 'lrex_contrib/crispy_formset_form.html'
     formset = None
@@ -133,7 +133,7 @@ class QuestionnaireGenerateView(LoginRequiredMixin, study_views.StudyMixin, gene
         return super().get(request, *args, **kwargs)
 
 
-class QuestionnaireBlockUpdateView(LoginRequiredMixin, study_views.StudyMixin, generic.TemplateView):
+class QuestionnaireBlockUpdateView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, generic.TemplateView):
     title = 'Edit questionnaire blocks'
     template_name = 'lrex_contrib/crispy_formset_form.html'
     formset = None
@@ -158,7 +158,7 @@ class QuestionnaireBlockUpdateView(LoginRequiredMixin, study_views.StudyMixin, g
         return super().get(request, *args, **kwargs)
 
 
-class TrialListView(LoginRequiredMixin, study_views.StudyMixin, generic.ListView):
+class TrialListView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, generic.ListView):
     model = models.Trial
     title = 'Trials'
     paginate_by = 16
@@ -230,7 +230,7 @@ class TrialCreateView(study_views.StudyMixin, generic.CreateView):
         return reverse('rating-create', args=[self.object.slug, 0])
 
 
-class TrialDetailView(LoginRequiredMixin, TrialObjectMixin, generic.DetailView):
+class TrialDetailView(TrialObjectMixin, study_views.CheckStudyCreatorMixin, generic.DetailView):
     model = models.Trial
     title = 'Trial overview'
 
@@ -244,7 +244,7 @@ class TrialDetailView(LoginRequiredMixin, TrialObjectMixin, generic.DetailView):
         ]
 
 
-class TrialDeleteView(LoginRequiredMixin, TrialObjectMixin, contrib_views.DefaultDeleteView):
+class TrialDeleteView(TrialObjectMixin, study_views.CheckStudyCreatorMixin, contrib_views.DefaultDeleteView):
     model = models.Trial
 
     @property

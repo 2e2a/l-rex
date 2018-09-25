@@ -1,7 +1,6 @@
 import csv
 from io import StringIO
 from string import ascii_lowercase
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import ValidationError
@@ -47,7 +46,8 @@ class ItemObjectMixin(ItemMixin):
         return self.item_object
 
 
-class ItemListView(LoginRequiredMixin, experiment_views.ExperimentMixin, study_views.NextStepsMixin, generic.ListView):
+class ItemListView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin, study_views.NextStepsMixin,
+                   generic.ListView):
     model = models.Item
     title = 'Items'
     paginate_by = 16
@@ -84,7 +84,7 @@ class ItemListView(LoginRequiredMixin, experiment_views.ExperimentMixin, study_v
         ]
 
 
-class TextItemCreateView(LoginRequiredMixin, experiment_views.ExperimentMixin, generic.CreateView):
+class TextItemCreateView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin, generic.CreateView):
     model = models.TextItem
     title = 'Add item'
     template_name = 'lrex_contrib/crispy_form.html'
@@ -112,7 +112,7 @@ class TextItemCreateView(LoginRequiredMixin, experiment_views.ExperimentMixin, g
         ]
 
 
-class TextItemUpdateView(LoginRequiredMixin, SuccessMessageMixin, ItemObjectMixin, generic.UpdateView):
+class TextItemUpdateView(SuccessMessageMixin, ItemObjectMixin, study_views.CheckStudyCreatorMixin, generic.UpdateView):
     model = models.TextItem
     title = 'Edit item'
     template_name = 'lrex_contrib/crispy_form.html'
@@ -139,7 +139,7 @@ class TextItemUpdateView(LoginRequiredMixin, SuccessMessageMixin, ItemObjectMixi
         ]
 
 
-class AudioLinkItemCreateView(LoginRequiredMixin, experiment_views.ExperimentMixin, generic.CreateView):
+class AudioLinkItemCreateView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin, generic.CreateView):
     model = models.AudioLinkItem
     title = 'Add Item'
     template_name = 'lrex_contrib/crispy_form.html'
@@ -167,7 +167,7 @@ class AudioLinkItemCreateView(LoginRequiredMixin, experiment_views.ExperimentMix
         ]
 
 
-class AudioLinkItemUpdateView(LoginRequiredMixin, ItemObjectMixin, SuccessMessageMixin, generic.UpdateView):
+class AudioLinkItemUpdateView(ItemObjectMixin, study_views.CheckStudyCreatorMixin, SuccessMessageMixin, generic.UpdateView):
     model = models.AudioLinkItem
     title = 'Edit Item'
     template_name = 'lrex_contrib/crispy_form.html'
@@ -194,7 +194,7 @@ class AudioLinkItemUpdateView(LoginRequiredMixin, ItemObjectMixin, SuccessMessag
         ]
 
 
-class ItemDeleteView(LoginRequiredMixin, ItemObjectMixin, contrib_views.DefaultDeleteView):
+class ItemDeleteView(ItemObjectMixin, study_views.CheckStudyCreatorMixin, contrib_views.DefaultDeleteView):
     model = models.Item
 
     def delete(self, *args, **kwargs):
@@ -221,7 +221,8 @@ class ItemDeleteView(LoginRequiredMixin, ItemObjectMixin, contrib_views.DefaultD
         ]
 
 
-class ItemPregenerateView(LoginRequiredMixin, experiment_views.ExperimentMixin, SuccessMessageMixin, generic.FormView):
+class ItemPregenerateView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin, SuccessMessageMixin,
+                          generic.FormView):
     title = 'Pregenerate items'
     form_class = forms.PregenerateItemsForm
     template_name = 'lrex_contrib/crispy_form.html'
@@ -266,7 +267,7 @@ class ItemPregenerateView(LoginRequiredMixin, experiment_views.ExperimentMixin, 
         ]
 
 
-class ItemUploadView(LoginRequiredMixin, experiment_views.ExperimentMixin, generic.FormView):
+class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin, generic.FormView):
     title = 'Items'
     form_class = forms.UploadItemsForm
     template_name = 'lrex_contrib/crispy_form.html'
@@ -363,7 +364,7 @@ class ItemUploadView(LoginRequiredMixin, experiment_views.ExperimentMixin, gener
         ]
 
 
-class ItemDeleteAllView(LoginRequiredMixin, experiment_views.ExperimentMixin, generic.TemplateView):
+class ItemDeleteAllView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin, generic.TemplateView):
     title = 'Confirm Delete'
     template_name = 'lrex_contrib/confirm_delete.html'
     message =  'Delete all items?'
@@ -389,7 +390,8 @@ class ItemDeleteAllView(LoginRequiredMixin, experiment_views.ExperimentMixin, ge
         return reverse('items', args=[self.experiment.slug])
 
 
-class ItemQuestionsUpdateView(LoginRequiredMixin, ItemMixin, study_views.NextStepsMixin, generic.TemplateView):
+class ItemQuestionsUpdateView(ItemMixin, study_views.CheckStudyCreatorMixin, study_views.NextStepsMixin,
+                              generic.TemplateView):
     title = 'Customize item questions'
     template_name = 'lrex_contrib/crispy_formset_form.html'
     formset = None
@@ -438,7 +440,7 @@ class ItemQuestionsUpdateView(LoginRequiredMixin, ItemMixin, study_views.NextSte
         ]
 
 
-class ItemListListView(LoginRequiredMixin, experiment_views.ExperimentMixin, study_views.NextStepsMixin,
+class ItemListListView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin, study_views.NextStepsMixin,
                        generic.ListView):
     model = models.ItemList
     title = 'Item lists'
