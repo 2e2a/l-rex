@@ -93,7 +93,7 @@ class Experiment(models.Model):
             item_list = item_models.ItemList.objects.create(experiment=self)
             item_lists.append(item_list)
 
-        for i, item in enumerate(self.item_set.all()):
+        for i, item in enumerate(self.item_set.all().order_by('number', 'condition')):
             shift =  (i - (item.number - 1)) % condition_count
             item_list = item_lists[shift]
             item_list.items.add(item)
