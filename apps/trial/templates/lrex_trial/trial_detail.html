@@ -7,13 +7,13 @@
         <th>Experiment</th>
         <th class="col-md-1">Item</th>
         <th>Content</th>
-        {% for qustions in object.questionnaire.study.question_set.all %}
+        {% for qustions in trial.questionnaire.study.question_set.all %}
         <th class="col-md-2">Rating</th>
         {% endfor %}
     </tr>
     </thead>
     <tbody>
-    {% for item, ratings in object.item_ratings %}
+    {% for item, ratings in trial.item_ratings %}
     <tr>
         <td>{{ item.experiment }}</td>
         <td class="col-md-1">

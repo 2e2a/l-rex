@@ -1,9 +1,8 @@
 import csv
-import decimal
 from django.urls import reverse
 from django.db import models
-from django.utils.text import slugify
 
+from apps.contrib.utils import slugify_unique
 from apps.item import models as item_models
 from apps.study import models as study_models
 from apps.trial import models as trial_models
@@ -13,7 +12,6 @@ class Experiment(models.Model):
     title = models.CharField(
         max_length=200,
         help_text='Give your experiment a name.',
-        unique=True,
     )
     slug = models.SlugField(unique=True)
     study = models.ForeignKey(
@@ -37,7 +35,8 @@ class Experiment(models.Model):
     )
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.title)
+        slug = '{}--{}'.format(self.study.slug, self.title)
+        self.slug = slugify_unique(slug, Experiment, self.id)
         return super().save(*args, **kwargs)
 
     @property
@@ -50,7 +49,7 @@ class Experiment(models.Model):
         return self.slug
 
     def get_absolute_url(self):
-        return reverse('experiment', args=[self.study.slug, self.slug])
+        return reverse('experiment', args=[self.slug])
 
     def validate_items(self):
         conditions = []
@@ -221,13 +220,13 @@ class Experiment(models.Model):
 
     def progress_url(self, progress):
         if progress == self.PROGRESS_EXP_ITEMS_CREATED:
-            return reverse('items', args=[self.study, self])
+            return reverse('items', args=[self])
         elif progress == self.PROGRESS_EXP_ITEMS_CREATED:
-            return reverse('items', args=[self.study, self])
+            return reverse('items', args=[self])
         elif progress == self.PROGRESS_EXP_ITEMS_VALIDATED:
-            return reverse('items', args=[self.study, self])
+            return reverse('items', args=[self])
         elif progress == self.PROGRESS_EXP_LISTS_CREATED:
-            return reverse('itemlists', args=[self.study, self])
+            return reverse('itemlists', args=[self])
         return None
 
     def set_progress(self, progress):

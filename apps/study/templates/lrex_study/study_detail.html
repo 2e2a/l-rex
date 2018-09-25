@@ -2,40 +2,40 @@
 {% load progress_tags %}
 
 {% block content %}
-<div class="card  my-2 {% if view.study|is_progress_std_created %} border-primary {% endif %}">
+<div class="card  my-2 {% if study|is_progress_std_created %} border-primary {% endif %}">
     <div class="card-body">
         <h2 class="card-title">Study settings</h2>
         <p class="card-text">
             Change the general settings (title, instructions, end date, trial limit, password) of your study or add/edit questions.
         </p>
-        <a  class="card-link" href="{% url 'study-update' object.slug %}">Edit settings</a>
-        <a  class="card-link" href="{% url 'study-questions' object.slug %}">Questions</a>
+        <a  class="card-link" href="{% url 'study-update' study.slug %}">Edit settings</a>
+        <a  class="card-link" href="{% url 'study-questions' study.slug %}">Questions</a>
     </div>
 </div>
 
-<div class="card my-2 {% if view.study|is_progress_std_question_created_reached and not view.study|is_progress_std_exp_completed_reached %} border-primary {% endif %}">
+<div class="card my-2 {% if study|is_progress_std_question_created_reached and not study|is_progress_std_exp_completed_reached %} border-primary {% endif %}">
     <div class="card-body">
         <h2 class="card-title">Experiments</h2>
         <p class="card-text">
             A study can contain one or more experiments. Fillers count as a separate experiment. Items of all experiments that are part of the same study will be intermixed with each other within 
 the same questionnaire.
         </p>
-        {% if view.study|is_progress_std_question_created_reached %}
-        <a  class="card-link" href="{% url 'experiments' study_slug=object.slug %}">Create/edit experiments</a>
+        {% if study|is_progress_std_question_created_reached %}
+        <a  class="card-link" href="{% url 'experiments' study.slug %}">Create/edit experiments</a>
         {% else %}
         <a  class="card-link disabled text-muted">Create/edit experiments</a>
         {% endif %}
     </div>
 </div>
 
-<div class="card my-2 {% if view.study|is_progress_std_exp_completed %} border-primary {% endif %}">
+<div class="card my-2 {% if study|is_progress_std_exp_completed %} border-primary {% endif %}">
     <div class="card-body">
         <h2 class="card-title">Questionnaires</h2>
         <p class="card-text">
             A questionnaire is the ordered list of stimuli that an individual participant will see.
         </p>
-        {% if view.study|is_progress_std_exp_completed_reached  %}
-        <a  class="card-link" href="{% url 'questionnaires' study_slug=object.slug %}">Generate questionnaires</a></p>
+        {% if study|is_progress_std_exp_completed_reached  %}
+        <a  class="card-link" href="{% url 'questionnaires' study.slug %}">Generate questionnaires</a></p>
         {% else %}
         <a  class="card-link text-muted">Generate questionnaires</a></p>
         {% endif %}

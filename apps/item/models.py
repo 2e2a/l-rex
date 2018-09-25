@@ -1,9 +1,10 @@
-from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls import reverse
 
+from apps.contrib.utils import slugify_unique
 
 class Item(models.Model):
+    slug = models.SlugField(unique=True)
     number = models.IntegerField(
         help_text='Number of the item',
     )
@@ -25,6 +26,11 @@ class Item(models.Model):
 
     def __str__(self):
         return '{}{}'.format(self.number, self.condition)
+
+    def save(self, *args, **kwargs):
+        slug = '{}--{}{}'.format(self.experiment.slug, self.number, self.condition)
+        self.slug = slugify_unique(slug, Item, self.id)
+        return super().save(*args, **kwargs)
 
 
 class TextItem(Item):

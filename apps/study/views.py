@@ -32,82 +32,30 @@ class NextStepsMixin:
         return response
 
 
-class StudyDetailView(LoginRequiredMixin, NextStepsMixin, generic.DetailView):
-    model = models.Study
-    title = 'Edit study'
+class StudyMixin:
+    slug_url_kwarg = 'study_slug'
+    study_object = None
 
     @property
     def study(self):
-        return self.object
+        if not self.study_object:
+            study_slug = self.kwargs['study_slug']
+            self.study_object = models.Study.objects.get(slug=study_slug)
+        return self.study_object
 
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, ''),
-        ]
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['study'] = self.study
+        return data
 
 
-class StudyRunView(LoginRequiredMixin, NextStepsMixin, generic.DetailView):
-    model = models.Study
-    title = 'Run study'
-    template_name = 'lrex_study/study_run.html'
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, ''),
-        ]
+class StudyObjectMixin(StudyMixin):
 
     @property
     def study(self):
-        return self.get_object()
-
-
-class StudyCreateView(LoginRequiredMixin, generic.CreateView):
-    model = models.Study
-    title = 'Create study'
-    template_name = 'lrex_contrib/crispy_form.html'
-    form_class = forms.StudyForm
-    success_message = 'Study successfully created.'
-
-    def form_valid(self, form):
-        form.instance.creator = self.request.user
-        response = super().form_valid(form)
-        messages.success(self.request, progress_success_message(form.instance.progress))
-        return response
-
-
-class StudyUpdateView(LoginRequiredMixin, SuccessMessageMixin, generic.UpdateView):
-    model = models.Study
-    title = 'Edit study'
-    template_name = 'lrex_contrib/crispy_form.html'
-    form_class = forms.StudyForm
-    success_message = 'Study successfully updated.'
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.object.title, reverse('study', args=[self.object.slug])),
-            ('settings', ''),
-        ]
-
-
-class StudyDeleteView(LoginRequiredMixin, contib_views.DefaultDeleteView):
-    model = models.Study
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.object.title, reverse('study', args=[self.object.slug])),
-            ('delete', ''),
-        ]
-
-    def get_success_url(self):
-        return reverse('studies')
+        if not self.study_object:
+            self.study_object =  self.get_object()
+        return self.study_object
 
 
 class StudyListView(LoginRequiredMixin, generic.ListView):
@@ -140,15 +88,84 @@ class StudyListView(LoginRequiredMixin, generic.ListView):
         ]
 
 
-class QuestionUpdateView(LoginRequiredMixin, NextStepsMixin, generic.TemplateView):
+class StudyCreateView(LoginRequiredMixin, generic.CreateView):
+    model = models.Study
+    title = 'Create study'
+    template_name = 'lrex_contrib/crispy_form.html'
+    form_class = forms.StudyForm
+    success_message = 'Study successfully created.'
+
+    def form_valid(self, form):
+        form.instance.creator = self.request.user
+        response = super().form_valid(form)
+        messages.success(self.request, progress_success_message(form.instance.progress))
+        return response
+
+
+class StudyDetailView(LoginRequiredMixin, StudyObjectMixin, NextStepsMixin, generic.DetailView):
+    model = models.Study
+    title = 'Edit study'
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            (self.study.title, ''),
+        ]
+
+
+class StudyRunView(LoginRequiredMixin, StudyObjectMixin, NextStepsMixin, generic.DetailView):
+    model = models.Study
+    title = 'Run study'
+    template_name = 'lrex_study/study_run.html'
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            (self.study.title, ''),
+        ]
+
+
+class StudyUpdateView(LoginRequiredMixin, StudyObjectMixin, SuccessMessageMixin, generic.UpdateView):
+    model = models.Study
+    title = 'Edit study'
+    template_name = 'lrex_contrib/crispy_form.html'
+    form_class = forms.StudyForm
+    success_message = 'Study successfully updated.'
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('settings', ''),
+        ]
+
+
+class StudyDeleteView(LoginRequiredMixin, StudyObjectMixin, contib_views.DefaultDeleteView):
+    model = models.Study
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('delete', ''),
+        ]
+
+    def get_success_url(self):
+        return reverse('studies')
+
+
+class QuestionUpdateView(LoginRequiredMixin, StudyMixin, NextStepsMixin, generic.DetailView):
+    model = models.Study
     title = 'Questions'
     template_name = 'lrex_contrib/crispy_formset_form.html'
     formset = None
     helper = forms.question_formset_helper
 
     def dispatch(self, *args, **kwargs):
-        study_slug = self.kwargs['slug']
-        self.study = models.Study.objects.get(slug=study_slug)
         self.n_questions = self.study.question_set.count()
         return super().dispatch(*args, **kwargs)
 

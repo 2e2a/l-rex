@@ -3,11 +3,11 @@
 {% block content %}
 <div class="row justify-content-center mb-2">
     {% if view.consider_blocks %}
-    <a href="{% url 'questionnaire-generate' study_slug=view.study.slug %}"
+    <a href="{% url 'questionnaire-generate' study.slug %}"
        class="btn btn-primary btn-sm mx-1" role="button">
         Generate questionnaires
     </a>
-    <a href="{% url 'questionnaire-blocks' study_slug=view.study.slug %}"
+    <a href="{% url 'questionnaire-blocks' study.slug %}"
        class="btn btn-secondary btn-sm mx-1" role="button">
         Edit block instuctions
     </a>

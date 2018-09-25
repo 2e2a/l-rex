@@ -3,19 +3,19 @@
 {% block content %}
 <div class="row justify-content-center mb-2">
     <a
-        {% if view.study.has_text_items %}
-        href="{% url 'text-item-create' study_slug=view.experiment.study.slug slug=view.experiment.slug %}"
+        {% if study.has_text_items %}
+        href="{% url 'text-item-create' experiment.slug %}"
         {% else %}
-        href="{% url 'audio-link-item-create' study_slug=view.experiment.study.slug slug=view.experiment.slug %}"
+        href="{% url 'audio-link-item-create' experiment.slug %}"
         {% endif %}
        class="btn btn-primary btn-sm mx-1" role="button">
         Add item
     </a>
-    <a href="{% url 'items-pregenerate' study_slug=view.experiment.study.slug slug=view.experiment.slug %}"
+    <a href="{% url 'items-pregenerate' experiment.slug %}"
        class="btn btn-primary btn-sm mx-1" role="button">
         Pregenerate items
     </a>
-    <a href="{% url 'items-upload' study_slug=view.experiment.study.slug slug=view.experiment.slug %}"
+    <a href="{% url 'items-upload' experiment.slug %}"
        class="btn btn-primary btn-sm mx-1" role="button">
         Upload CSV
     </a>
@@ -25,7 +25,7 @@
             Validate
         </button>
     </form>
-    <a href="{% url 'items-delete' study_slug=view.experiment.study.slug slug=view.experiment.slug %}"
+    <a href="{% url 'items-delete' experiment.slug %}"
        class="btn btn-danger btn-sm mx-1" role="button">
         Delete all
     </a>
@@ -51,19 +51,19 @@
         </div>
         <div class="col-4">
             <a
-               {% if view.study.has_text_items %}
-               href="{% url 'text-item-update' study_slug=view.experiment.study.slug slug=view.experiment.slug pk=item.pk %}"
+               {% if study.has_text_items %}
+               href="{% url 'text-item-update' item_slug=item.slug %}"
                {% else %}
-               href="{% url 'audio-link-item-update' study_slug=view.experiment.study.slug slug=view.experiment.slug pk=item.pk %}"
+               href="{% url 'audio-link-item-update' item_slug=item.slug %}"
                {% endif %}
                class="btn btn-outline-primary btn-sm mx-1" role="button">
                 Edit
             </a>
-            <a href="{% url 'item-questions' view.experiment.study.slug  view.experiment.slug item.pk %}"
+            <a href="{% url 'item-questions' item_slug=item.slug %}"
                class="btn btn-outline-secondary btn-sm mx-1" role="button">
                 Customize questions
             </a>
-            <a href="{% url 'item-delete' view.experiment.study.slug  view.experiment.slug item.pk %}"
+            <a href="{% url 'item-delete' item_slug=item.slug %}"
                class="btn btn-outline-danger btn-sm mx-1" role="button">
                 Delete
             </a>

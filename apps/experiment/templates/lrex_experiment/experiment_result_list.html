@@ -6,7 +6,8 @@
     <li class="list-group-item d-flex justify-content-between align-items-center my-1">
         {{ experiment.title }}
         <span>
-            <a href="{% url 'experiment-results' study_slug=view.study.slug slug=experiment.slug %}" class="btn btn-outline-primary btn-sm mx-1" role="button">
+            <a href="{% url 'experiment-results' experiment.slug %}"
+               class="btn btn-outline-primary btn-sm mx-1" role="button">
                 Results
             </a>
         </span>

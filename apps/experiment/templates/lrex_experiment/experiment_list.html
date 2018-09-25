@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="row justify-content-center mb-2">
-    <a href="{% url 'experiment-create' study_slug=view.study.slug %}"
+    <a href="{% url 'experiment-create' study.slug %}"
        class="btn btn-primary btn-sm mx-1"
        role="button">
         New Experiment
@@ -13,10 +13,12 @@
     <li class="list-group-item d-flex justify-content-between align-items-center my-1">
         {{ experiment.title }}
         <span>
-            <a href="{% url 'experiment' study_slug=view.study.slug slug=experiment.slug %}" class="btn btn-outline-primary btn-sm mx-1" role="button">
+            <a href="{% url 'experiment' experiment.slug %}"
+               class="btn btn-outline-primary btn-sm mx-1" role="button">
                 Edit
             </a>
-            <a href="{% url 'experiment-delete' study_slug=view.study.slug slug=experiment.slug %}" class="btn btn-outline-danger btn-sm mx-1" role="button">
+            <a href="{% url 'experiment-delete' experiment.slug %}"
+               class="btn btn-outline-danger btn-sm mx-1" role="button">
                 Delete
             </a>
         </span>

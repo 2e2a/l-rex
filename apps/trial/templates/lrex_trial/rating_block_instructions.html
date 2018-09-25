@@ -8,7 +8,7 @@
     </div>
     <p>
         {{ view.block_instructions|linebreaks }}
-        <a href="{% url 'rating-create' study_slug=view.study.slug slug=view.trial.slug num=view.num %}"
+        <a href="{% url 'rating-create' view.trial.slug view.num %}"
            class="btn btn-primary btn-sm mx-1" role="button">
             Continue
         </a>

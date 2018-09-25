@@ -15,13 +15,13 @@
             <span class="badge badge-primary">{{ study.status.name }}</span>
         </span>
         <span>
-            <a href="{% url 'study' slug=study.slug %}"
-               class="btn {% if view.study.status.name == 'ACTIVE' %} btn-outline-primary {% else %} btn-outline-primary {% endif %} btn-sm mx-1"
+            <a href="{% url 'study' study.slug %}"
+               class="btn {% if study.status.name == 'ACTIVE' %} btn-outline-primary {% else %} btn-outline-primary {% endif %} btn-sm mx-1"
                role="button">
                 Create/edit
             </a>
 
-            <a href="{% url 'study-run' slug=study.slug %}"
+            <a href="{% url 'study-run' study.slug %}"
                class="btn btn-outline-primary btn-sm mx-1 {% if not study|is_progress_std_questionnares_generated_reached %} disabled {% endif %}"
                role="button">
                 Run
@@ -42,7 +42,7 @@
                 {% endif %}
             </form>
 
-            <a href="{% url 'study-delete' slug=study.slug %}" class="btn btn-outline-danger btn-sm mx-1" role="button">
+            <a href="{% url 'study-delete' study.slug %}" class="btn btn-outline-danger btn-sm mx-1" role="button">
                 Delete
             </a>
         </span>
