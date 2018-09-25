@@ -33,24 +33,23 @@
 <ul class="list-group">
     {% with consider_blocks=view.consider_blocks %}
     {% for item in item_list %}
-    <li class="list-group-item d-flex justify-content-between align-items-center">
-        {% if item.textitem %}
-        <span>
+    <li class="list-group-item">
+        <div class="row">
+        <div class="col-2">
             <strong>{{ item }}</strong>
             {% if consider_blocks %}<span class="badge badge-secondary">block {{ item.block }}</span>{% endif %}
-            {{ item.textitem.text }}
-        </span>
-        {% else %}
-        <span>
-            <strong>{{ item }}</strong>
-            {% if consider_blocks %}<span class="badge badge-secondary">block {{ item.block }}</span>{% endif %}
-        </span>
-        <audio controls="controls">
-            <source src="{{ item.audiolinkitem.url }}">
-            Your browser does not support the <code>audio</code> element.
-        </audio>
-        {% endif %}
-        <span>
+        </div>
+        <div class="col-5">
+            {% if item.textitem %}
+            {{ item.textitem.text|linebreaks }}
+            {% else %}
+            <audio controls="controls">
+                <source src="{{ item.audiolinkitem.url }}">
+                Your browser does not support the <code>audio</code> element.
+            </audio>
+            {% endif %}
+        </div>
+        <div class="col-4">
             <a
                {% if view.study.has_text_items %}
                href="{% url 'text-item-update' study_slug=view.experiment.study.slug slug=view.experiment.slug pk=item.pk %}"
@@ -68,7 +67,7 @@
                class="btn btn-outline-danger btn-sm mx-1" role="button">
                 Delete
             </a>
-        </span>
+        </div>
     </li>
     {% empty %}
     <li class="list-group-item my-1">There are currently no items.</li>
