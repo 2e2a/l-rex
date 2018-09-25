@@ -62,7 +62,7 @@ class StudyObjectMixin(StudyMixin):
 class CheckStudyCreatorMixin(UserPassesTestMixin):
 
     def test_func(self):
-        return self.request.user == self.study.creator
+        return self.request.user.is_superuser or self.request.user == self.study.creator
 
 
 class StudyListView(LoginRequiredMixin, generic.ListView):
