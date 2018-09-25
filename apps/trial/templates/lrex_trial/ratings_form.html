@@ -4,9 +4,7 @@
 {% block content %}
 <h1 class="row justify-content-center mt-2">Participate in the experiment</h1>
 <div class="my-2 p-4 border bg-white">
-    <div class="progress" style="height: 2px;">
-        <div class="progress-bar" role="progressbar" style="width: {{ view.progress }}%" aria-valuenow="{{ view.progress }}" aria-valuemin="0" aria-valuemax="100"></div>
-    </div>
+    <hr>
     {% if view.questionnaire_item.item.textitem %}
     <p>
         {{ view.questionnaire_item.item.textitem.text|linebreaks }}
