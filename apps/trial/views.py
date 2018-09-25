@@ -48,6 +48,7 @@ class QuestionnaireListView(LoginRequiredMixin, study_views.StudyMixin, study_vi
         return super().dispatch(*args, **kwargs)
 
     def _create_default_questionnaire_block(self, randomization):
+        models.QuestionnaireBlock.objects.filter(study=self.study).delete()
         models.QuestionnaireBlock.objects.create(
             study=self.study,
             block=self.blocks[0],
