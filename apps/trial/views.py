@@ -208,7 +208,8 @@ class TrialCreateView(study_views.StudyMixin, generic.CreateView):
     def form_valid(self, form):
         active_trial = self._trial_by_id(form.instance.id)
         if active_trial:
-            return reverse('rating-create', args=[active_trial.slug, 0])
+            active_trial_url = reverse('rating-create', args=[active_trial.slug, 0])
+            return redirect(active_trial_url)
         form.instance.study = self.study
         form.instance.init(self.study)
         response = super().form_valid(form)
@@ -278,10 +279,10 @@ class RatingCreateView(RatingCreateMixin, TrialMixin, generic.CreateView):
     model = models.Rating
     form_class = forms.RatingForm
 
-    def _redirect_active(self, num):
+    def _redirect_active_link(self, num):
         try:
             if self.trial.status == models.TrialStatus.FINISHED:
-                return reverse('rating-taken', args=[self.study.slug, self.trial.slug])
+                return reverse('rating-taken', args=[self.trial.slug])
             n_ratings = models.Rating.objects.filter(trial=self.trial).count()
             n_questions = self.study.question_set.count()
             if n_ratings/n_questions != num:
@@ -292,7 +293,7 @@ class RatingCreateView(RatingCreateMixin, TrialMixin, generic.CreateView):
 
     def dispatch(self, *args, **kwargs):
         self.num = int(self.kwargs['num'])
-        redirect_link = self._redirect_active(self.num)
+        redirect_link = self._redirect_active_link(self.num)
         if not redirect_link and self.study.question_set.count() > 1:
             redirect_link = reverse('ratings-create', args=[self.study.slug, self.trial.slug, self.num])
         if redirect_link:
