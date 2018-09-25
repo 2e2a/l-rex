@@ -116,6 +116,9 @@ class QuestionnaireBlock(models.Model):
     class Meta:
         ordering = ['block']
 
+    def __str__(self):
+        return 'Questionnaire block {}-{}'.format(self.study, self.block)
+
 
 class QuestionnaireItem(models.Model):
     number = models.IntegerField()
