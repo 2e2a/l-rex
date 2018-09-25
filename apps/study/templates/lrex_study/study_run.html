@@ -7,7 +7,7 @@
         <p class="card-text">
             Make the study accessible to your participants. View the completed individual questionnaires.
         </p>
-        <a  class="card-link" href="{% url 'trials' study_slug=object.slug %}">User trials</a>
+        <a  class="card-link" href="{% url 'trials' study.slug %}">User trials</a>
     </div>
 </div>
 
@@ -17,10 +17,10 @@
         <p class="card-text">
             View a summary of the current results.
         </p>
-        {% if object.experiment_set.count == 1 %}
-        <a  class="card-link" href="{% url 'experiment-results' object.slug object.experiment_set.first %}">Results</a>
+        {% if study.experiment_set.count == 1 %}
+        <a  class="card-link" href="{% url 'experiment-results' study.experiment_set.first %}">Results</a>
         {% else %}
-        <a  class="card-link" href="{% url 'experiment-result-list' object.slug %}">Results</a>
+        <a  class="card-link" href="{% url 'experiment-result-list' study.slug %}">Results</a>
         {% endif %}
     </div>
 </div>

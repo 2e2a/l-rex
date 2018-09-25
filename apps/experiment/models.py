@@ -1,8 +1,6 @@
 import csv
-import decimal
 from django.urls import reverse
 from django.db import models
-from django.utils.text import slugify
 
 from apps.contrib.utils import slugify_unique
 from apps.item import models as item_models
@@ -51,7 +49,7 @@ class Experiment(models.Model):
         return self.slug
 
     def get_absolute_url(self):
-        return reverse('experiment', args=[self.study.slug, self.slug])
+        return reverse('experiment', args=[self.slug])
 
     def validate_items(self):
         conditions = []
@@ -222,13 +220,13 @@ class Experiment(models.Model):
 
     def progress_url(self, progress):
         if progress == self.PROGRESS_EXP_ITEMS_CREATED:
-            return reverse('items', args=[self.study, self])
+            return reverse('items', args=[self])
         elif progress == self.PROGRESS_EXP_ITEMS_CREATED:
-            return reverse('items', args=[self.study, self])
+            return reverse('items', args=[self])
         elif progress == self.PROGRESS_EXP_ITEMS_VALIDATED:
-            return reverse('items', args=[self.study, self])
+            return reverse('items', args=[self])
         elif progress == self.PROGRESS_EXP_LISTS_CREATED:
-            return reverse('itemlists', args=[self.study, self])
+            return reverse('itemlists', args=[self])
         return None
 
     def set_progress(self, progress):

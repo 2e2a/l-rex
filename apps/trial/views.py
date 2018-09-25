@@ -14,13 +14,36 @@ from . import forms
 from . import models
 
 
-class QuestionnaireListView(LoginRequiredMixin, study_views.NextStepsMixin, generic.ListView):
+class TrialMixin:
+    trial_object = None
+    slug_url_kwarg = 'trial_slug'
+
+    @property
+    def study(self):
+        return self.trial.questionnaire.study
+
+    @property
+    def trial(self):
+        if not self.trial_object:
+            trial_slug = self.kwargs['trial_slug']
+            self.trial_object = models.Trial.objects.get(slug=trial_slug)
+        return self.trial_object
+
+
+class TrialObjectMixin(TrialMixin):
+
+    @property
+    def trial(self):
+        if not self.trial_object:
+            self.trial_object =  self.get_object()
+        return self.trial_object
+
+
+class QuestionnaireListView(LoginRequiredMixin, study_views.StudyMixin, study_views.NextStepsMixin, generic.ListView):
     model = models.Questionnaire
     title = 'Questionnaires'
 
     def dispatch(self, *args, **kwargs):
-        study_slug = self.kwargs['study_slug']
-        self.study = study_models.Study.objects.get(slug=study_slug)
         self.blocks = self.study.item_blocks
         return super().dispatch(*args, **kwargs)
 
@@ -61,7 +84,6 @@ class QuestionnaireListView(LoginRequiredMixin, study_views.NextStepsMixin, gene
             questionnaires.append((questionnaire, blocks))
         return questionnaires
 
-
     @property
     def breadcrumbs(self):
         return [
@@ -71,16 +93,13 @@ class QuestionnaireListView(LoginRequiredMixin, study_views.NextStepsMixin, gene
         ]
 
 
-class QuestionnaireGenerateView(LoginRequiredMixin, generic.TemplateView):
+class QuestionnaireGenerateView(LoginRequiredMixin, study_views.StudyMixin, generic.TemplateView):
     title = 'Generate questionnaires'
     template_name = 'lrex_contrib/crispy_formset_form.html'
-
     formset = None
     helper = forms.questionnaire_block_formset_helper
 
     def dispatch(self, *args, **kwargs):
-        study_slug = self.kwargs['study_slug']
-        self.study = study_models.Study.objects.get(slug=study_slug)
         self.blocks = self.study.item_blocks
         return super().dispatch(*args, **kwargs)
 
@@ -113,16 +132,13 @@ class QuestionnaireGenerateView(LoginRequiredMixin, generic.TemplateView):
         return super().get(request, *args, **kwargs)
 
 
-class QuestionnaireBlockUpdateView(LoginRequiredMixin, generic.TemplateView):
+class QuestionnaireBlockUpdateView(LoginRequiredMixin, study_views.StudyMixin, generic.TemplateView):
     title = 'Edit questionnaire blocks'
     template_name = 'lrex_contrib/crispy_formset_form.html'
-
     formset = None
     helper = forms.questionnaire_block_update_formset_helper
 
     def dispatch(self, *args, **kwargs):
-        study_slug = self.kwargs['study_slug']
-        self.study = study_models.Study.objects.get(slug=study_slug)
         self.blocks = self.study.item_blocks
         return super().dispatch(*args, **kwargs)
 
@@ -141,61 +157,10 @@ class QuestionnaireBlockUpdateView(LoginRequiredMixin, generic.TemplateView):
         return super().get(request, *args, **kwargs)
 
 
-class TrialCreateView(generic.CreateView):
-    model = models.Trial
-    form_class = forms.TrialForm
-
-    def dispatch(self, *args, **kwargs):
-        study_slug = self.kwargs['study_slug']
-        self.study = study_models.Study.objects.get(slug=study_slug)
-        return super().dispatch(*args, **kwargs)
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['study'] = self.study
-        return kwargs
-
-    def _trial_by_id(self, id):
-        if id:
-            try:
-                return models.Trial.objects.get(questionnaire__study=self.study, id=id)
-            except models.Trial.DoesNotExist:
-                pass
-        return None
-
-    def form_valid(self, form):
-        active_trial = self._trial_by_id(form.instance.id)
-        if active_trial:
-            return reverse('rating-create', args=[self.study.slug, active_trial.slug, 0])
-        form.instance.study = self.study
-        form.instance.init(self.study)
-        response = super().form_valid(form)
-        form.instance.generate_id()
-        return response
-
-    def get_success_url(self):
-        first_questionnaire_item = models.QuestionnaireItem.objects.get(
-            questionnaire=self.object.questionnaire,
-            number=0
-        )
-        questionnaire_block = models.QuestionnaireBlock.objects.get(
-            study=self.study,
-            block=first_questionnaire_item.item.block
-        )
-        if questionnaire_block.instructions:
-            return reverse('rating-block-instructions', args=[self.study.slug, self.object.slug, 0])
-        return reverse('rating-create', args=[self.study.slug, self.object.slug, 0])
-
-
-class TrialListView(LoginRequiredMixin, generic.ListView):
+class TrialListView(LoginRequiredMixin, study_views.StudyMixin, generic.ListView):
     model = models.Trial
     title = 'Trials'
     paginate_by = 16
-
-    def dispatch(self, *args, **kwargs):
-        study_slug = self.kwargs['study_slug']
-        self.study = study_models.Study.objects.get(slug=study_slug)
-        return super().dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         action = request.POST.get('action', None)
@@ -222,14 +187,50 @@ class TrialListView(LoginRequiredMixin, generic.ListView):
         ]
 
 
-class TrialDetailView(LoginRequiredMixin, generic.DetailView):
+class TrialCreateView(study_views.StudyMixin, generic.CreateView):
+    model = models.Trial
+    form_class = forms.TrialForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['study'] = self.study
+        return kwargs
+
+    def _trial_by_id(self, id):
+        if id:
+            try:
+                return models.Trial.objects.get(questionnaire__study=self.study, id=id)
+            except models.Trial.DoesNotExist:
+                pass
+        return None
+
+    def form_valid(self, form):
+        active_trial = self._trial_by_id(form.instance.id)
+        if active_trial:
+            return reverse('rating-create', args=[active_trial.slug, 0])
+        form.instance.study = self.study
+        form.instance.init(self.study)
+        response = super().form_valid(form)
+        form.instance.generate_id()
+        return response
+
+    def get_success_url(self):
+        first_questionnaire_item = models.QuestionnaireItem.objects.get(
+            questionnaire=self.object.questionnaire,
+            number=0
+        )
+        questionnaire_block = models.QuestionnaireBlock.objects.get(
+            study=self.study,
+            block=first_questionnaire_item.item.block
+        )
+        if questionnaire_block.instructions:
+            return reverse('rating-block-instructions', args=[self.object.slug, 0])
+        return reverse('rating-create', args=[self.object.slug, 0])
+
+
+class TrialDetailView(LoginRequiredMixin, TrialObjectMixin, generic.DetailView):
     model = models.Trial
     title = 'Trial overview'
-
-    def dispatch(self, *args, **kwargs):
-        study_slug = self.kwargs['study_slug']
-        self.study = study_models.Study.objects.get(slug=study_slug)
-        return super().dispatch(*args, **kwargs)
 
     @property
     def breadcrumbs(self):
@@ -241,13 +242,8 @@ class TrialDetailView(LoginRequiredMixin, generic.DetailView):
         ]
 
 
-class TrialDeleteView(LoginRequiredMixin, contrib_views.DefaultDeleteView):
+class TrialDeleteView(LoginRequiredMixin, TrialObjectMixin, contrib_views.DefaultDeleteView):
     model = models.Trial
-
-    def dispatch(self, *args, **kwargs):
-        study_slug = self.kwargs['study_slug']
-        self.study = study_models.Study.objects.get(slug=study_slug)
-        return super().dispatch(*args, **kwargs)
 
     @property
     def breadcrumbs(self):
@@ -261,21 +257,6 @@ class TrialDeleteView(LoginRequiredMixin, contrib_views.DefaultDeleteView):
         return reverse('trials', args=[self.study.slug])
 
 
-class RatingOutroView(generic.TemplateView):
-    template_name = 'lrex_trial/rating_outro.html'
-
-    def dispatch(self, *args, **kwargs):
-        trial_slug = self.kwargs['slug']
-        self.trial = models.Trial.objects.get(slug=trial_slug)
-        self.study = self.trial.questionnaire.study
-        self.generated_rating_proof = self.trial.generate_rating_proof()
-        return super().dispatch(*args, **kwargs)
-
-
-class RatingTakenView(generic.TemplateView):
-    template_name = 'lrex_trial/rating_taken.html'
-
-
 class RatingCreateMixin():
 
     def get_next_url(self):
@@ -287,12 +268,12 @@ class RatingCreateMixin():
                     block=trial_items[self.num + 1].block
                 )
                 if questionnaire_block.instructions:
-                    return reverse('rating-block-instructions', args=[self.study.slug, self.trial.slug, self.num + 1])
-            return reverse('rating-create', args=[self.study.slug, self.trial.slug, self.num + 1])
-        return reverse('rating-outro', args=[self.study.slug, self.trial.slug])
+                    return reverse('rating-block-instructions', args=[self.trial.slug, self.num + 1])
+            return reverse('rating-create', args=[self.trial.slug, self.num + 1])
+        return reverse('rating-outro', args=[self.trial.slug])
 
 
-class RatingCreateView(RatingCreateMixin, generic.CreateView):
+class RatingCreateView(RatingCreateMixin, TrialMixin, generic.CreateView):
     model = models.Rating
     form_class = forms.RatingForm
 
@@ -303,16 +284,13 @@ class RatingCreateView(RatingCreateMixin, generic.CreateView):
             n_ratings = models.Rating.objects.filter(trial=self.trial).count()
             n_questions = self.study.question_set.count()
             if n_ratings/n_questions != num:
-                return reverse('rating-create', args=[self.study.slug, self.trial.slug, n_ratings])
+                return reverse('rating-create', args=[self.trial.slug, n_ratings])
         except models.Rating.DoesNotExist:
             pass
         return None
 
     def dispatch(self, *args, **kwargs):
-        trial_slug = self.kwargs['slug']
-        self.trial = models.Trial.objects.get(slug=trial_slug)
         self.num = int(self.kwargs['num'])
-        self.study = self.trial.questionnaire.study
         redirect_link = self._redirect_active(self.num)
         if not redirect_link and self.study.question_set.count() > 1:
             redirect_link = reverse('ratings-create', args=[self.study.slug, self.trial.slug, self.num])
@@ -359,8 +337,7 @@ class RatingCreateView(RatingCreateMixin, generic.CreateView):
         return ''
 
 
-
-class RatingsCreateView(RatingCreateMixin, generic.TemplateView):
+class RatingsCreateView(RatingCreateMixin, TrialMixin, generic.TemplateView):
     model = models.Rating
     template_name = 'lrex_trial/ratings_form.html'
 
@@ -368,10 +345,7 @@ class RatingsCreateView(RatingCreateMixin, generic.TemplateView):
     helper = forms.rating_formset_helper
 
     def dispatch(self, *args, **kwargs):
-        trial_slug = self.kwargs['slug']
-        self.trial = models.Trial.objects.get(slug=trial_slug)
         self.num = int(self.kwargs['num'])
-        self.study = self.trial.questionnaire.study
         self.questionnaire_item = models.QuestionnaireItem.objects.get(
             questionnaire=self.trial.questionnaire,
             number=self.num
@@ -407,14 +381,11 @@ class RatingsCreateView(RatingCreateMixin, generic.TemplateView):
         return self.num * 100 / len(self.trial.items)
 
 
-class RatingBlockInstructionsView(generic.TemplateView):
+class RatingBlockInstructionsView(TrialMixin, generic.TemplateView):
     template_name = 'lrex_trial/rating_block_instructions.html'
 
     def dispatch(self, *args, **kwargs):
-        trial_slug = self.kwargs['slug']
-        self.trial = models.Trial.objects.get(slug=trial_slug)
         self.num = int(self.kwargs['num'])
-        self.study = self.trial.questionnaire.study
         self.questionnaire_item = models.QuestionnaireItem.objects.get(
             questionnaire=self.trial.questionnaire,
             number=self.num
@@ -431,3 +402,17 @@ class RatingBlockInstructionsView(generic.TemplateView):
 
     def progress(self):
         return self.num * 100 / len(self.trial.items)
+
+
+class RatingOutroView(TrialMixin, generic.TemplateView):
+    template_name = 'lrex_trial/rating_outro.html'
+
+    def dispatch(self, *args, **kwargs):
+        self.generated_rating_proof = self.trial.generate_rating_proof()
+        return super().dispatch(*args, **kwargs)
+
+
+class RatingTakenView(TrialMixin, generic.TemplateView):
+    template_name = 'lrex_trial/rating_taken.html'
+
+

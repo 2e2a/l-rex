@@ -7,45 +7,64 @@ from django.urls import reverse
 from django.views import generic
 
 from apps.contrib import views as contrib_views
-from apps.study import models as study_models
 from apps.study import views as study_views
 
 from . import forms
 from . import models
 
 
-class ExperimentDetailView(LoginRequiredMixin, study_views.NextStepsMixin, generic.DetailView):
-    model = models.Experiment
-    title = 'Edit experiment'
+class ExperimentMixin:
+    experiment_object = None
+    slug_url_kwarg = 'experiment_slug'
 
     @property
     def study(self):
-        return self.object.study
+        return self.experiment.study
 
     @property
     def experiment(self):
-        return self.object
+        if not self.experiment_object:
+            experiment_slug = self.kwargs['experiment_slug']
+            self.experiment_object = models.Experiment.objects.get(slug=experiment_slug)
+        return self.experiment_object
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['study'] = self.study
+        data['experiment'] = self.experiment
+        return data
+
+
+class ExperimentObjectMixin(ExperimentMixin):
+
+    @property
+    def experiment(self):
+        if not self.experiment_object:
+            self.experiment_object =  self.get_object()
+        return self.experiment_object
+
+
+class ExperimentListView(LoginRequiredMixin, study_views.StudyMixin, study_views.NextStepsMixin, generic.ListView):
+    model = models.Experiment
+    title = 'Experiments'
+
+    def get_queryset(self):
+        return super().get_queryset().filter(study=self.study)
 
     @property
     def breadcrumbs(self):
         return [
             ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            ('experiments',reverse('experiments', args=[self.study.slug])),
-            (self.object.title, '')
+            (self.study.title, reverse('study',args=[self.study.slug])),
+            ('experiments','')
         ]
 
 
-class ExperimentCreateView(LoginRequiredMixin, generic.CreateView):
+class ExperimentCreateView(LoginRequiredMixin, study_views.StudyMixin, generic.CreateView):
     model = models.Experiment
     title = 'Create experiment'
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.ExperimentForm
-
-    def dispatch(self, *args, **kwargs):
-        study_slug = self.kwargs['study_slug']
-        self.study = study_models.Study.objects.get(slug=study_slug)
-        return super().dispatch(*args, **kwargs)
 
     def form_valid(self, form):
         form.instance.study = self.study
@@ -64,7 +83,21 @@ class ExperimentCreateView(LoginRequiredMixin, generic.CreateView):
         ]
 
 
-class ExperimentUpdateView(LoginRequiredMixin, SuccessMessageMixin, generic.UpdateView):
+class ExperimentDetailView(LoginRequiredMixin, ExperimentObjectMixin, study_views.NextStepsMixin, generic.DetailView):
+    model = models.Experiment
+    title = 'Edit experiment'
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('experiments',reverse('experiments', args=[self.study.slug])),
+            (self.experiment.title, '')
+        ]
+
+
+class ExperimentUpdateView(LoginRequiredMixin, ExperimentObjectMixin, SuccessMessageMixin, generic.UpdateView):
     model = models.Experiment
     title = 'Edit Experiment'
     template_name = 'lrex_contrib/crispy_form.html'
@@ -75,69 +108,42 @@ class ExperimentUpdateView(LoginRequiredMixin, SuccessMessageMixin, generic.Upda
     def breadcrumbs(self):
         return [
             ('studies', reverse('studies')),
-            (self.object.study.title, reverse('study', args=[self.object.study.slug])),
-            ('experiments',reverse('experiments', args=[self.object.study.slug])),
-            (self.object.title, reverse('experiment', args=[self.object.study.slug, self.object.slug])),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('experiments',reverse('experiments', args=[self.study.slug])),
+            (self.experiment.title, reverse('experiment', args=[self.object.slug])),
             ('edit','')
         ]
 
 
-class ExperimentDeleteView(LoginRequiredMixin, contrib_views.DefaultDeleteView):
+class ExperimentDeleteView(LoginRequiredMixin, ExperimentObjectMixin, contrib_views.DefaultDeleteView):
     model = models.Experiment
 
     def delete(self, *args, **kwargs):
         response = super().delete(*args, **kwargs)
-        study = self.object.study
-        if not models.Experiment.objects.filter(study=study).exists():
-            study.set_progress(study.PROGRESS_STD_QUESTION_CREATED)
+        if not models.Experiment.objects.filter(study=self.study).exists():
+            self.study.set_progress(self.study.PROGRESS_STD_QUESTION_CREATED)
         else:
-            study.set_progress(study.PROGRESS_STD_EXP_CREATED)
+            self.study.set_progress(self.study.PROGRESS_STD_EXP_CREATED)
         return response
 
     @property
     def breadcrumbs(self):
         return [
             ('studies', reverse('studies')),
-            (self.object.study.title, reverse('study', args=[self.object.study.slug])),
-            ('experiments',reverse('experiments', args=[self.object.study.slug])),
-            (self.object.title, reverse('experiment', args=[self.object.study.slug, self.object.slug])),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('experiments',reverse('experiments', args=[self.study.slug])),
+            (self.experiment.title, reverse('experiment', args=[self.object.slug])),
             ('delete','')
         ]
 
     def get_success_url(self):
-        return reverse('experiments', args=[self.object.study.slug])
+        return reverse('experiments', args=[self.study.slug])
 
 
-class ExperimentListView(LoginRequiredMixin, study_views.NextStepsMixin, generic.ListView):
-    model = models.Experiment
-    title = 'Experiments'
-
-    def dispatch(self, *args, **kwargs):
-        study_slug = self.kwargs['study_slug']
-        self.study = study_models.Study.objects.get(slug=study_slug)
-        return super().dispatch(*args, **kwargs)
-
-    def get_queryset(self):
-        return super().get_queryset().filter(study=self.study)
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study',args=[self.study.slug])),
-            ('experiments','')
-        ]
-
-
-class ExperimentResultListView(LoginRequiredMixin, generic.ListView):
+class ExperimentResultListView(LoginRequiredMixin, study_views.StudyMixin, generic.ListView):
     model = models.Experiment
     title = 'Results'
     template_name = 'lrex_experiment/experiment_result_list.html'
-
-    def dispatch(self, *args, **kwargs):
-        study_slug = self.kwargs['study_slug']
-        self.study = study_models.Study.objects.get(slug=study_slug)
-        return super().dispatch(*args, **kwargs)
 
     def get_queryset(self):
         return super().get_queryset().filter(study=self.study)
@@ -151,7 +157,7 @@ class ExperimentResultListView(LoginRequiredMixin, generic.ListView):
         ]
 
 
-class ExperimentResultsView(LoginRequiredMixin, generic.DetailView):
+class ExperimentResultsView(LoginRequiredMixin, ExperimentObjectMixin, generic.DetailView):
     model = models.Experiment
     title = 'Results'
     template_name = 'lrex_experiment/experiment_results.html'
@@ -190,27 +196,18 @@ class ExperimentResultsView(LoginRequiredMixin, generic.DetailView):
         data['results'] = self._aggregated_results()
         return data
 
-
-    @property
-    def study(self):
-        return self.object.study
-
     @property
     def breadcrumbs(self):
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study-run',args=[self.study.slug])),
             ('results', reverse('experiment-result-list',args=[self.study.slug])),
-            (self.object.title,'')
+            (self.experiment.title,'')
         ]
 
 
-class ExperimentResultsCSVDownloadView(generic.View):
-
-    def dispatch(self, *args, **kwargs):
-        experiment_slug = self.kwargs['slug']
-        self.experiment = models.Experiment.objects.get(slug=experiment_slug)
-        return super().dispatch(*args, **kwargs)
+class ExperimentResultsCSVDownloadView(LoginRequiredMixin, ExperimentObjectMixin, generic.DetailView):
+    model = models.Experiment
 
     def get(self, request, *args, **kwargs):
         filename = self.experiment.slug + '.csv'

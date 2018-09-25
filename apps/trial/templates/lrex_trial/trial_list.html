@@ -13,13 +13,13 @@
 <div class="card  my-2">
     <div class="card-body">
         <h2>Study access</h2>
-        {% if not view.study.is_published %}
+        {% if not study.is_published %}
         <p class="card-text">
             Publish your study first.
         </p>
         {% endif %}
         <p class="card-text">
-            Share <a href="{% url 'trial-create' study_slug=view.study.slug %}">this link</a> with your participants
+            Share <a href="{% url 'trial-create' study.slug %}">this link</a> with your participants
             along with the password that you set for the study.
         </p>
     </div>
@@ -41,10 +41,10 @@
             {% endif %}
         </span>
         <span>
-                <a href="{% url 'trial' study_slug=view.study.slug slug=trial.slug %}" class="btn btn-outline-primary btn-sm mx-1" role="button">
+                <a href="{% url 'trial' trial.slug %}" class="btn btn-outline-primary btn-sm mx-1" role="button">
                     View
                 </a>
-                <a href="{% url 'trial-delete' study_slug=view.study.slug slug=trial.slug %}" class="btn btn-outline-danger btn-sm mx-1" role="button">
+                <a href="{% url 'trial-delete' trial.slug %}" class="btn btn-outline-danger btn-sm mx-1" role="button">
                     Delete
                 </a>
         </span>

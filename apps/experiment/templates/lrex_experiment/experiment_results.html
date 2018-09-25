@@ -12,7 +12,7 @@
             <a class="dropdown-item" href="?{{view.aggregate_by_subject_and_item_url_par }}">subject+item</a>
         </div>
     </div>
-    <a href="{% url 'experiment-results-csv' study_slug=view.object.study.slug slug=view.object.slug %}"
+    <a href="{% url 'experiment-results-csv' experiment.slug %}"
        class="btn btn-primary btn-sm mx-1" role="button">
         Download CSV
     </a>
@@ -24,7 +24,7 @@
     {% if 'item' not in view.aggregate_by %}<th scope="col">Item</th>{% endif %}
     {% if 'condition' not in view.aggregate_by %}<th scope="col">Condition</th>{% endif %}
     <th scope="col">N</th>
-    {% for question in view.study.question_set.all %}
+    {% for question in study.question_set.all %}
         {% for scale_value in question.scalevalue_set.all %}
     <th scope="col" class="table-primary">{{ scale_value.label }}</th>
         {% endfor %}
