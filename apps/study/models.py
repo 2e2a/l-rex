@@ -246,6 +246,8 @@ class Study(models.Model):
             for experiment in self.experiments:
                 if experiment.progress != experiment.PROGRESS_EXP_LISTS_CREATED:
                     return
+        if progress < self.PROGRESS_STD_PUBLISHED:
+            self.is_published = False
         self.progress = progress
         self.save()
 
