@@ -5,10 +5,10 @@
     <thead>
     <tr>
         <th>Experiment</th>
-        <th class="col-md-1">Item</th>
+        <th>Item</th>
         <th>Content</th>
         {% for qustions in trial.questionnaire.study.question_set.all %}
-        <th class="col-md-2">Rating</th>
+        <th>Rating</th>
         {% endfor %}
     </tr>
     </thead>
@@ -16,12 +16,12 @@
     {% for item, ratings in trial.item_ratings %}
     <tr>
         <td>{{ item.experiment }}</td>
-        <td class="col-md-1">
+        <td>
             {{ item }}
         </td>
         <td>
             {% if item.textitem %}
-                {{ item.textitem.text }}
+                {{ item.textitem.text|linebreaks }}
             {% else %}
                 <audio controls="controls">
                     <source src="{{ item.audiolinkitem.url }}">
@@ -30,7 +30,7 @@
             {% endif %}
         </td>
         {% for rating in ratings %}
-        <td class="col-md-2">
+        <td>
             {{ rating.scale_value.label }}
         </td>
         {% endfor %}
