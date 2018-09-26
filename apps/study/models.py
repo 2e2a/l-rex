@@ -142,7 +142,7 @@ class Study(models.Model):
         if self.experiment_set.count() == 1:
             experiment = self.experiment_set.first()
             return reverse('experiment-results', args=[experiment.slug])
-        return reverse('study-results', args=[self.slug])
+        return reverse('experiment-result-list', args=[self.slug])
 
     @property
     def randomization_reqiured(self):
