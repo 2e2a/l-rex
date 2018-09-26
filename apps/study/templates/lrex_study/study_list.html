@@ -36,18 +36,30 @@
                         {% endif %}
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-md-2">
+                        <small>Password:</small>
+                    </div>
+                    <div class="col-md-4">
+                        <small>{{ study.password }}</small>
+                    </div>
+                    <div class="col-md-2">
+                    </div>
+                    <div class="col-md-4">
+                    </div>
+                </div>
                 {% endif %}
             </div>
             <div class="col-5">
                 <a href="{% url 'study' study.slug %}"
                    class="btn {% if study.status.name == 'ACTIVE' %} btn-outline-primary {% else %} btn-outline-primary {% endif %} btn-sm mx-1"
                    role="button">
-                    Create/edit
+                    Edit
                 </a>
                 <a href="{% url 'study-run' study.slug %}"
                    class="btn btn-outline-primary btn-sm mx-1 {% if not study|is_progress_std_questionnares_generated_reached %} disabled {% endif %}"
                    role="button">
-                    Run
+                    Results
                 </a>
                 <form class="form-inline" method="post">
                     {% csrf_token %}
