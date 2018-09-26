@@ -17,10 +17,7 @@
         <p class="card-text">
             View a summary of the current results.
         </p>
-        {% if study.experiment_set.count == 1 %}
-        <a  class="card-link" href="{% url 'experiment-results' study.experiment_set.first %}">Results</a>
-        {% else %}
-        <a  class="card-link" href="{% url 'experiment-result-list' study.slug %}">Results</a>
+        <a  class="card-link" href="{{ study.results_url ">Results</a>
         {% endif %}
     </div>
 </div>

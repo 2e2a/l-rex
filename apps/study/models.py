@@ -97,6 +97,12 @@ class Study(models.Model):
         self.slug = slugify_unique(self.title, Study, self.id)
         return super().save(*args, **kwargs)
 
+    def __str__(self):
+        return self.slug
+
+    def get_absolute_url(self):
+        return reverse('study', args=[self.slug])
+
     @property
     def experiments(self):
         return self.experiment_set.all()
@@ -131,11 +137,12 @@ class Study(models.Model):
             return StudyStatus.ACTIVE
         return StudyStatus.STARTED
 
-    def __str__(self):
-        return self.slug
-
-    def get_absolute_url(self):
-        return reverse('study', args=[self.slug])
+    @property
+    def results_url(self):
+        if self.experiment_set.count() == 1:
+            experiment = self.experiment_set.first()
+            return reverse('experiment-results', args=[experiment.slug])
+        return reverse('study-results', args=[self.slug])
 
     @property
     def randomization_reqiured(self):
