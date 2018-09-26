@@ -119,11 +119,6 @@ class TextItemUpdateView(SuccessMessageMixin, ItemObjectMixin, study_views.Check
     form_class = forms.TextItemForm
     success_message = 'Item successfully updated.'
 
-    def form_valid(self, form):
-        result = super().form_valid(form)
-        self.experiment.set_progress(self.experiment.PROGRESS_EXP_ITEMS_CREATED)
-        return result
-
     def get_success_url(self):
         return reverse('items', args=[self.experiment.slug])
 
@@ -173,11 +168,6 @@ class AudioLinkItemUpdateView(ItemObjectMixin, study_views.CheckStudyCreatorMixi
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.AudioLinkItemForm
     success_message = 'Item successfully updated.'
-
-    def form_valid(self, form):
-        result = super().form_valid(form)
-        self.experiment.set_progress(self.experiment.PROGRESS_EXP_ITEMS_CREATED)
-        return result
 
     def get_success_url(self):
         return reverse('items', args=[self.experiment.slug])
