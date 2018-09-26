@@ -12,8 +12,9 @@ from apps.contrib.utils import slugify_unique
 
 class StudyStatus(Enum):
     DRAFT = 1
-    ACTIVE = 2
-    FINISHED = 3
+    STARTED = 2
+    ACTIVE = 3
+    FINISHED = 4
 
 
 class Study(models.Model):
@@ -123,9 +124,12 @@ class Study(models.Model):
             return StudyStatus.DRAFT
         if self.end_date and self.end_date < timezone.now().date():
             return StudyStatus.FINISHED
-        if self.trial_limit  and self.trial_limit <= Trial.objects.filter(questionnaire__study=self).count():
+        trial_count = Trial.objects.filter(questionnaire__study=self).count()
+        if self.trial_limit  and self.trial_limit <= trial_count:
             return StudyStatus.FINISHED
-        return StudyStatus.ACTIVE
+        if trial_count > 0:
+            return StudyStatus.ACTIVE
+        return StudyStatus.STARTED
 
     def __str__(self):
         return self.slug
