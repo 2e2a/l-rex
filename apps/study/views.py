@@ -1,8 +1,8 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
+from django.db.models import Q
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.safestring import mark_safe
@@ -74,13 +74,15 @@ class CheckStudyCreatorMixin(UserPassesTestMixin):
         return False
 
 
-
 class StudyListView(LoginRequiredMixin, generic.ListView):
     model = models.Study
     title = 'Studies'
 
     def get_queryset(self):
-        return super().get_queryset().filter(creator=self.request.user)
+        return super().get_queryset().filter(
+            Q(creator=self.request.user) |
+            Q(shared_with__contains=self.request.user.username)
+        )
 
     def post(self, request, *args, **kwargs):
         study_slug = request.POST.get('publish', None)

@@ -14,10 +14,28 @@
             <div class="col-7">
                 <strong>{{ study.title }}</strong>
                 <span class="badge badge-primary">{{ study.status.name }}</span>
+                {% if study.creator != view.request.user %}
+                    <span class="badge badge-secondary">Shared</span>
+                {% endif %}
                 {%if study.is_published %}
-                <p><small>
-                    <a href="{% url 'trial-create' study.slug %}">Participation link</a>
-                </small></p>
+                <div class="row">
+                    <div class="col-md-2">
+                        <small>Participate:</small>
+                    </div>
+                    <div class="col-md-4">
+                        <small><a href="{% url 'trial-create' study.slug %}">Participant link</a></small>
+                    </div>
+                    <div class="col-md-2">
+                        {% if study.creator != view.request.user %}
+                        <small>Shared by:</small>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        {% if study.creator != view.request.user %}
+                        <small>{{ study.creator.username }}</small>
+                        {% endif %}
+                    </div>
+                </div>
                 {% endif %}
             </div>
             <div class="col-5">
