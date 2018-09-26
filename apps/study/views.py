@@ -1,5 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
 from django.shortcuts import redirect
@@ -62,7 +63,16 @@ class StudyObjectMixin(StudyMixin):
 class CheckStudyCreatorMixin(UserPassesTestMixin):
 
     def test_func(self):
-        return self.request.user.is_superuser or self.request.user == self.study.creator
+        if not self.request.user.is_authenticated:
+            return False
+        if self.request.user == self.study.creator:
+            return True
+        if self.request.user.username in self.study.shared_with:
+            return True
+        if self.request.user.is_superuser:
+            return True
+        return False
+
 
 
 class StudyListView(LoginRequiredMixin, generic.ListView):
@@ -224,3 +234,21 @@ class QuestionUpdateView(StudyMixin, CheckStudyCreatorMixin, NextStepsMixin, gen
             (self.study.title, reverse('study', args=[self.study.slug])),
             ('questions', ''),
         ]
+
+
+class SharedWithView(StudyObjectMixin, CheckStudyCreatorMixin, NextStepsMixin, generic.UpdateView):
+    model = models.Study
+    title = 'Share study'
+    form_class = forms.SharedWithForm
+    template_name = 'lrex_contrib/crispy_form.html'
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('share', ''),
+        ]
+
+    def get_success_url(self):
+        return reverse('study', args=[self.study.slug])

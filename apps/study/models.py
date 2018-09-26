@@ -62,6 +62,12 @@ class Study(models.Model):
         default=False,
         help_text='Enable to publish your study. It will then be available for participation.',
     )
+    shared_with = models.CharField(
+        null=True,
+        blank=True,
+        max_length=200,
+        help_text='Give other users access to the study, enter comma separated user names.',
+    )
 
     PROGRESS_STD_CREATED = '00-std-crt'
     PROGRESS_STD_QUESTION_CREATED = '10-qst-crt'

@@ -1,6 +1,7 @@
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Fieldset, Layout, Submit
 from django import forms
+from django.contrib.auth.models import User
 
 from apps.contrib import forms as crispy_forms
 
@@ -70,3 +71,19 @@ question_formset_helper.add_input(
 question_formset_helper.add_input(
     Submit("submit", "Submit"),
 )
+
+
+class SharedWithForm(crispy_forms.CrispyModelForm):
+
+    class Meta:
+        model = models.Study
+        fields = [
+            'shared_with'
+        ]
+
+    def clean_shared_with(self):
+        shared_with = self.cleaned_data['shared_with']
+        for username in shared_with.split(','):
+            if not User.objects.filter(username=username).exists():
+                raise forms.ValidationError('No user with username {} registered'.format(username))
+        return shared_with
