@@ -19,8 +19,6 @@ def progress_success_message(progress):
 
 
 class NextStepsMixin:
-    study = None
-    experiment = None
 
     def get(self, request, *args, **kwargs):
         response = super().get(request, *args, **kwargs)
@@ -31,6 +29,17 @@ class NextStepsMixin:
             if url and self.request.path != url:
                 message = message + ' (<a href="{}">here</a>)'.format(url)
             messages.info(request, mark_safe(message))
+        return response
+
+
+class ProceedWarningMixin:
+
+    def get(self, request, *args, **kwargs):
+        response = super().get(request, *args, **kwargs)
+        if self.study.status == models.StudyStatus.ACTIVE:
+            message = 'Important: Making changes would delete already submitted trials. ' \
+                      'Save your results first if needed (<a href="{}">here</a>).'.format(self.study.results_url)
+            messages.warning(request, mark_safe(message))
         return response
 
 
@@ -177,7 +186,7 @@ class StudyDeleteView(StudyObjectMixin, CheckStudyCreatorMixin, contib_views.Def
         return reverse('studies')
 
 
-class QuestionUpdateView(StudyMixin, CheckStudyCreatorMixin, NextStepsMixin, generic.DetailView):
+class QuestionUpdateView(StudyMixin, CheckStudyCreatorMixin, ProceedWarningMixin, NextStepsMixin, generic.DetailView):
     model = models.Study
     title = 'Questions'
     template_name = 'lrex_contrib/crispy_formset_form.html'

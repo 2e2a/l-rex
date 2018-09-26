@@ -184,7 +184,7 @@ class AudioLinkItemUpdateView(ItemObjectMixin, study_views.CheckStudyCreatorMixi
         ]
 
 
-class ItemDeleteView(ItemObjectMixin, study_views.CheckStudyCreatorMixin, contrib_views.DefaultDeleteView):
+class ItemDeleteView(ItemObjectMixin, study_views.CheckStudyCreatorMixin, study_views.ProceedWarningMixin, contrib_views.DefaultDeleteView):
     model = models.Item
 
     def delete(self, *args, **kwargs):
@@ -211,8 +211,8 @@ class ItemDeleteView(ItemObjectMixin, study_views.CheckStudyCreatorMixin, contri
         ]
 
 
-class ItemPregenerateView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin, SuccessMessageMixin,
-                          generic.FormView):
+class ItemPregenerateView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin,
+                          study_views.ProceedWarningMixin, SuccessMessageMixin, generic.FormView):
     title = 'Pregenerate items'
     form_class = forms.PregenerateItemsForm
     template_name = 'lrex_contrib/crispy_form.html'
@@ -257,7 +257,8 @@ class ItemPregenerateView(experiment_views.ExperimentMixin, study_views.CheckStu
         ]
 
 
-class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin, generic.FormView):
+class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin,
+                     study_views.ProceedWarningMixin, generic.FormView):
     title = 'Items'
     form_class = forms.UploadItemsForm
     template_name = 'lrex_contrib/crispy_form.html'
@@ -354,7 +355,8 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
         ]
 
 
-class ItemDeleteAllView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin, generic.TemplateView):
+class ItemDeleteAllView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin,
+                        study_views.ProceedWarningMixin, generic.TemplateView):
     title = 'Confirm Delete'
     template_name = 'lrex_contrib/confirm_delete.html'
     message =  'Delete all items?'
@@ -431,7 +433,7 @@ class ItemQuestionsUpdateView(ItemMixin, study_views.CheckStudyCreatorMixin, stu
 
 
 class ItemListListView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin, study_views.NextStepsMixin,
-                       generic.ListView):
+                       study_views.ProceedWarningMixin, generic.ListView):
     model = models.ItemList
     title = 'Item lists'
 

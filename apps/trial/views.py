@@ -39,7 +39,7 @@ class TrialObjectMixin(TrialMixin):
 
 
 class QuestionnaireListView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, study_views.NextStepsMixin,
-                            generic.ListView):
+                            study_views.ProceedWarningMixin, generic.ListView):
     model = models.Questionnaire
     title = 'Questionnaires'
 
@@ -94,7 +94,8 @@ class QuestionnaireListView(study_views.StudyMixin, study_views.CheckStudyCreato
         ]
 
 
-class QuestionnaireGenerateView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, generic.TemplateView):
+class QuestionnaireGenerateView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin,
+                                study_views.ProceedWarningMixin, generic.TemplateView):
     title = 'Generate questionnaires'
     template_name = 'lrex_contrib/crispy_formset_form.html'
     formset = None

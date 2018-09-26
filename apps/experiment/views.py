@@ -117,7 +117,8 @@ class ExperimentUpdateView(ExperimentObjectMixin, study_views.CheckStudyCreatorM
         ]
 
 
-class ExperimentDeleteView(ExperimentObjectMixin, study_views.CheckStudyCreatorMixin, contrib_views.DefaultDeleteView):
+class ExperimentDeleteView(ExperimentObjectMixin, study_views.CheckStudyCreatorMixin, study_views.ProceedWarningMixin,
+                           contrib_views.DefaultDeleteView):
     model = models.Experiment
 
     def delete(self, *args, **kwargs):
