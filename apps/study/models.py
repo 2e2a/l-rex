@@ -89,6 +89,9 @@ class Study(models.Model):
         default=PROGRESS_STD_CREATED,
     )
 
+    class Meta:
+        ordering = ['pk']
+
     def save(self, *args, **kwargs):
         self.slug = slugify_unique(self.title, Study, self.id)
         return super().save(*args, **kwargs)
