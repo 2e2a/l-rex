@@ -77,6 +77,11 @@ class QuestionnaireListView(study_views.StudyMixin, study_views.CheckStudyCreato
         return super().get_queryset().filter(study=self.study)
 
     @property
+    def pagination_offset(self):
+        return (int(self.page) - 1) * int(self.paginate_by)
+
+
+    @property
     def consider_blocks(self):
         return len(self.blocks) > 1
 
@@ -84,8 +89,6 @@ class QuestionnaireListView(study_views.StudyMixin, study_views.CheckStudyCreato
         questionnaires = []
         paginator = Paginator(self.object_list, self.paginate_by)
         questionnaires_on_page = paginator.get_page(self.page)
-        print(self.page)
-        print(list(questionnaires_on_page))
         for questionnaire in questionnaires_on_page:
             blocks = []
             for block_items in questionnaire.questionnaire_items_by_block().items():

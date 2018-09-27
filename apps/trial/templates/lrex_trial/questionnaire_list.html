@@ -46,7 +46,7 @@
     {% if not view.consider_blocks %}
     {% for questionnaire in questionnaire_list %}
     <tr>
-        <td>{{ forloop.counter }}</td>
+        <td>{{ forloop.counter|add:view.pagination_offset }}</td>
         <td>
             {% for item in questionnaire.items %}{{ item.experiment }}-{{ item }}{% if not forloop.last %},{% endif %}{% endfor %}
         </td>
