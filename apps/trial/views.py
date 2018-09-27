@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -42,8 +43,11 @@ class QuestionnaireListView(study_views.StudyMixin, study_views.CheckStudyCreato
                             study_views.ProceedWarningMixin, generic.ListView):
     model = models.Questionnaire
     title = 'Questionnaires'
+    page = 1
+    paginate_by = 16
 
     def dispatch(self, *args, **kwargs):
+        self.page = self.request.GET.get('page')
         self.blocks = self.study.item_blocks
         return super().dispatch(*args, **kwargs)
 
@@ -78,7 +82,11 @@ class QuestionnaireListView(study_views.StudyMixin, study_views.CheckStudyCreato
 
     def items_by_block(self):
         questionnaires = []
-        for questionnaire in self.object_list:
+        paginator = Paginator(self.object_list, self.paginate_by)
+        questionnaires_on_page = paginator.get_page(self.page)
+        print(self.page)
+        print(list(questionnaires_on_page))
+        for questionnaire in questionnaires_on_page:
             blocks = []
             for block_items in questionnaire.questionnaire_items_by_block().items():
                 blocks.append(block_items)
