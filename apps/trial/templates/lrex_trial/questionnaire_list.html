@@ -55,7 +55,7 @@
     {% else %}
     {% for questionnaire, block_items in view.items_by_block %}
     <tr>
-        <td>{{ forloop.counter }}</td>
+        <td>{{ forloop.counter|add:view.pagination_offset }}</td>
             {% for block, q_items in block_items %}
             <td>
                 {% for q_item in q_items %}{{ q_item.item.experiment }}-{{ q_item.item }}{% if not forloop.last %},{% endif %}{% endfor %}
