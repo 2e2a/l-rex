@@ -307,7 +307,7 @@ class RatingCreateView(RatingCreateMixin, TrialMixin, generic.CreateView):
         self.num = int(self.kwargs['num'])
         redirect_link = self._redirect_active_link(self.num)
         if not redirect_link and self.study.question_set.count() > 1:
-            redirect_link = reverse('ratings-create', args=[self.study.slug, self.trial.slug, self.num])
+            redirect_link = reverse('ratings-create', args=[self.trial.slug, self.num])
         if redirect_link:
             return redirect(redirect_link)
         self.questionnaire_item = models.QuestionnaireItem.objects.get(
