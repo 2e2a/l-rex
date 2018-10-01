@@ -47,7 +47,7 @@ class QuestionnaireListView(study_views.StudyMixin, study_views.CheckStudyCreato
     paginate_by = 16
 
     def dispatch(self, *args, **kwargs):
-        self.page = self.request.GET.get('page')
+        self.page = self.request.GET.get('page', 1)
         self.blocks = self.study.item_blocks
         return super().dispatch(*args, **kwargs)
 
