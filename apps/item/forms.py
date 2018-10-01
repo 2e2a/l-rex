@@ -141,8 +141,8 @@ class UploadItemsForm(crispy_forms.CrispyForm):
                     'File: Unexpected format in line %(n_line)s.',
                     code='invalid',
                     params={'n_line': reader.line_num})
-        except UnicodeDecodeError:
-            raise forms.ValidationError('Unsupported file encoding. Supported are UTF-8 and Latin-1.')
+        except (UnicodeDecodeError, TypeError):
+            raise forms.ValidationError('Unsupported file encoding. Use UTF-8 or Latin-1.')
         except csv.Error:
             raise forms.ValidationError('Unsupported CSV format.')
         file.seek(0)
