@@ -29,6 +29,12 @@ class TrialMixin:
             self.trial_object = models.Trial.objects.get(slug=trial_slug)
         return self.trial_object
 
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['study'] = self.study
+        data['trial'] = self.trial
+        return data
+
 
 class TrialObjectMixin(TrialMixin):
 

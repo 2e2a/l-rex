@@ -36,6 +36,13 @@ class ItemMixin:
             self.item_object = models.Item.objects.get(slug=item_slug)
         return self.item_object
 
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['study'] = self.study
+        data['experiment'] = self.experiment
+        data['item'] = self.item
+        return data
+
 
 class ItemObjectMixin(ItemMixin):
 
