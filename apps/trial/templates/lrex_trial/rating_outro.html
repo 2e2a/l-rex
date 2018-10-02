@@ -3,6 +3,11 @@
 {% block content %}
 <h1 class="row justify-content-center mt-2">Participate in the experiment</h1>
 <div class="my-2 p-4 border bg-white">
+    {% if study.outro %}
+    <p>
+        {{ study.outro|linebreaks }}
+    </p>
+    {% endif %}
     <p>
         If needed, save the following code as proof of your participation:
         <code>

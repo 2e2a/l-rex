@@ -18,6 +18,7 @@ class StudyForm(crispy_forms.CrispyModelForm):
             'instructions',
             'require_participant_id',
             'password',
+            'outro',
             'end_date',
             'trial_limit'
         ]

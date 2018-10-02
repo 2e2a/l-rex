@@ -48,6 +48,12 @@ class Study(models.Model):
         default=False,
         help_text='Enable if you want participants to enter some ID before participation.',
     )
+    outro = models.TextField(
+        blank=True,
+        null=True,
+        max_length=5000,
+        help_text='This text will be presented to the participant after the experiment is finished.',
+    )
     end_date = models.DateField(
         blank=True,
         null=True,
