@@ -382,6 +382,8 @@ class RatingsCreateView(RatingCreateMixin, TrialMixin, generic.TemplateView):
         return super().dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        if self.questionnaire_item.rating_set.filter(trial=self.trial).exists():
+            return redirect(self.get_next_url())
         self.formset = forms.ratingformset_factory(len(self.questions))(request.POST, request.FILES)
         forms.customize_to_questions(self.formset, self.questions, self.item_questions)
         if self.formset.is_valid():
