@@ -1,10 +1,10 @@
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Fieldset, Layout, Submit
 from django import forms
-from django.forms import modelformset_factory
 
 from apps.contrib import forms as crispy_forms
 from apps.study import models as study_models
+from apps.trial import models as trial_models
 
 from . import models
 
@@ -17,7 +17,7 @@ class QuestionnaireBlockForm(forms.ModelForm):
 
 
 def questionnaire_block_factory(n_blocks):
-    return modelformset_factory(
+    return forms.modelformset_factory(
         models.QuestionnaireBlock,
         form=QuestionnaireBlockForm,
         min_num=n_blocks,
@@ -44,7 +44,7 @@ class QuestionnaireBlockUpdateForm(forms.ModelForm):
 
 
 def questionnaire_block_update_factory(n_blocks):
-    return modelformset_factory(
+    return forms.modelformset_factory(
         models.QuestionnaireBlock,
         form=QuestionnaireBlockUpdateForm,
         min_num=n_blocks,
@@ -82,11 +82,11 @@ class TrialForm(crispy_forms.CrispyModelForm):
         else :
             self.fields['id'].widget = forms.HiddenInput()
 
-    def clean(self):
-        cleaned_data = super().clean()
-        if cleaned_data['password'] != self.study.password:
+    def clean_password(self):
+        password = self.cleaned_data['password']
+        if password != self.study.password:
             raise forms.ValidationError('Invalid password.')
-        return cleaned_data
+        return password
 
 
 class RatingForm(crispy_forms.CrispyModelForm):
