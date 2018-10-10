@@ -303,8 +303,9 @@ class RatingCreateView(RatingCreateMixin, TrialMixin, generic.CreateView):
                 return reverse('rating-taken', args=[self.trial.slug])
             n_ratings = models.Rating.objects.filter(trial=self.trial).count()
             n_questions = self.study.question_set.count()
-            if n_ratings/n_questions != num:
-                return reverse('rating-create', args=[self.trial.slug, n_ratings])
+            rating = int(n_ratings/n_questions)
+            if rating != num:
+                return reverse('rating-create', args=[self.trial.slug, rating])
         except models.Rating.DoesNotExist:
             pass
         return None
