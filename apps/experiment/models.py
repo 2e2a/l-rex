@@ -18,6 +18,9 @@ class Experiment(models.Model):
         'lrex_study.Study',
         on_delete=models.CASCADE
     )
+    is_filler = models.BooleanField(
+        default=False
+    )
     PROGRESS_EXP_CREATED = '21-exp-crt'
     PROGRESS_EXP_ITEMS_CREATED = '22-exp-itm-crt'
     PROGRESS_EXP_ITEMS_VALIDATED = '23-exp-itm-vld'

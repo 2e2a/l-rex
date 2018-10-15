@@ -7,4 +7,4 @@ class ExperimentForm(crispy_forms.CrispyModelForm):
 
     class Meta:
         model = models.Experiment
-        fields = ['title']
+        fields = ['title', 'is_filler']

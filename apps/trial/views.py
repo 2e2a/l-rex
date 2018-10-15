@@ -58,23 +58,29 @@ class QuestionnaireListView(study_views.StudyMixin, study_views.CheckStudyCreato
         return super().dispatch(*args, **kwargs)
 
     def _create_default_questionnaire_block(self, randomization):
-        models.QuestionnaireBlock.objects.filter(study=self.study).delete()
+        models.QuestionnaireBlock.objects.filter(study=self.study).delete() # TODO: do not delete
         models.QuestionnaireBlock.objects.create(
             study=self.study,
             block=self.blocks[0],
             randomization=randomization,
         )
 
+    def _get_randomization(self, action):
+        if action == 'generate_random':
+            return models.QuestionnaireBlock.RANDOMIZATION_TRUE
+        if action == 'generate_ordered':
+            return models.QuestionnaireBlock.RANDOMIZATION_NONE
+        if action == 'generate_pseudo':
+            return models.QuestionnaireBlock.RANDOMIZATION_PSEUDO
+
+
     def post(self, request, *args, **kwargs):
         action = request.POST.get('action', None)
         if len(self.blocks)>1:
             return redirect('questionnaire-generate',study_slug=self.study.slug)
-        randomization = models.QuestionnaireBlock.RANDOMIZATION_TRUE if action == 'generate_random' \
-            else models.QuestionnaireBlock.RANDOMIZATION_NONE
+        randomization = self._get_randomization(action)
         self._create_default_questionnaire_block(randomization)
         self.study.generate_questionnaires()
-        self.study.generate_questionnaire_permutations()
-        self.study.randomize_questionnaire_items()
         self.study.set_progress(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED)
         messages.success(request, study_views.progress_success_message(self.study.progress))
         return redirect('questionnaires',study_slug=self.study.slug)
@@ -123,7 +129,7 @@ class QuestionnaireGenerateView(study_views.StudyMixin, study_views.CheckStudyCr
         return super().dispatch(*args, **kwargs)
 
     def _initialize_questionnaire_blocks(self):
-        models.QuestionnaireBlock.objects.filter(study=self.study).delete()
+        models.QuestionnaireBlock.objects.filter(study=self.study).delete() # TODO: do not delete
         for block in self.blocks:
             models.QuestionnaireBlock.objects.create(
                 study=self.study,
@@ -143,8 +149,6 @@ class QuestionnaireGenerateView(study_views.StudyMixin, study_views.CheckStudyCr
             if self.formset.is_valid():
                 instances = self.formset.save(commit=True)
                 self.study.generate_questionnaires()
-                self.study.generate_questionnaire_permutations()
-                self.study.randomize_questionnaire_items()
                 self.study.set_progress(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED)
                 messages.success(request, study_views.progress_success_message(self.study.progress))
                 return redirect('questionnaires', study_slug=self.study.slug)

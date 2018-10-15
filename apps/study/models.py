@@ -154,7 +154,7 @@ class Study(models.Model):
     def randomization_reqiured(self):
         from apps.trial.models import QuestionnaireBlock
         for questionnaire_block in self.questionnaireblock_set.all():
-            if questionnaire_block.randomization == QuestionnaireBlock.RANDOMIZATION_TRUE:
+            if questionnaire_block.randomization != QuestionnaireBlock.RANDOMIZATION_NONE:
                 return True
         return False
 
@@ -189,17 +189,9 @@ class Study(models.Model):
             questionnaire_item_lists = self._next_questionnaire_lists(last_questionnaire)
         for item_list in questionnaire_item_lists:
             questionnaire.item_lists.add(item_list)
-        questionnaire.generate_items()
         return questionnaire
 
-    def generate_questionnaires(self):
-        self.questionnaire_set.all().delete()
-        questionnaire_count = self._questionnaire_count()
-        last_questionnaire = None
-        for _ in range(questionnaire_count):
-            last_questionnaire = self._create_next_questionnaire(last_questionnaire)
-
-    def generate_questionnaire_permutations(self, permutations=4):
+    def _generate_questionnaire_permutations(self, permutations=4):
         from apps.trial.models import Questionnaire
         if self.randomization_reqiured:
             questionnaires = list(self.questionnaire_set.all())
@@ -212,9 +204,15 @@ class Study(models.Model):
                     questionnaire_permutation.generate_items()
                     questionnaire_permutation.save()
 
-    def randomize_questionnaire_items(self):
-        for questionnaire in self.questionnaire_set.all():
-            questionnaire.randomize_items()
+    def generate_questionnaires(self):
+        self.questionnaire_set.all().delete()
+        questionnaire_count = self._questionnaire_count()
+        last_questionnaire = None
+        for _ in range(questionnaire_count):
+            last_questionnaire = self._create_next_questionnaire(last_questionnaire)
+            last_questionnaire.generate_items()
+        if self.randomization_reqiured:
+            self._generate_questionnaire_permutations()
 
     def rating_proofs_csv(self, fileobj):
         from apps.trial.models import Trial
