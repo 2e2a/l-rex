@@ -446,10 +446,12 @@ class ItemListListView(experiment_views.ExperimentMixin, study_views.CheckStudyC
 
     def post(self, request, *args, **kwargs):
         action = request.POST.get('action', None)
-        if action and action == 'generate_item_lists':
-            self.experiment.compute_item_lists()
-            self.experiment.set_progress(self.experiment.PROGRESS_EXP_LISTS_CREATED)
-            messages.success(self.request, study_views.progress_success_message(self.experiment.progress))
+        if action and action == 'generate_distributed':
+            self.experiment.compute_item_lists(distribute=True)
+        elif action and action == 'generate_single':
+            self.experiment.compute_item_lists(distribute=False)
+        self.experiment.set_progress(self.experiment.PROGRESS_EXP_LISTS_CREATED)
+        messages.success(self.request, study_views.progress_success_message(self.experiment.progress))
         return redirect('itemlists', experiment_slug=self.experiment.slug)
 
     def get_queryset(self):

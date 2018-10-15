@@ -83,20 +83,26 @@ class Experiment(models.Model):
 
         return None
 
-    def compute_item_lists(self):
+    def compute_item_lists(self, distribute=True):
         self.itemlist_set.all().delete()
 
         item_lists = []
-        conditions = self.conditions
-        condition_count = len(conditions)
-        for _ in range(condition_count):
-            item_list = item_models.ItemList.objects.create(experiment=self)
-            item_lists.append(item_list)
+        if distribute:
+            conditions = self.conditions
+            condition_count = len(conditions)
+            for _ in range(condition_count):
+                item_list = item_models.ItemList.objects.create(experiment=self)
+                item_lists.append(item_list)
 
-        for i, item in enumerate(self.item_set.all().order_by('number', 'condition')):
-            shift =  (i - (item.number - 1)) % condition_count
-            item_list = item_lists[shift]
-            item_list.items.add(item)
+            for i, item in enumerate(self.item_set.all().order_by('number', 'condition')):
+                shift =  (i - (item.number - 1)) % condition_count
+                item_list = item_lists[shift]
+                item_list.items.add(item)
+        else:
+            item_list = item_models.ItemList.objects.create(experiment=self)
+            items = list(self.item_set.all())
+            item_list.items.add(*items)
+
 
     def results(self):
         results = []

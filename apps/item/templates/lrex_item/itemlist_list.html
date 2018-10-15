@@ -2,12 +2,20 @@
 
 {% block content %}
 <div class="row justify-content-center mb-2">
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit" name="action" value="generate_item_lists"
-                class="btn btn-primary btn-sm mx-1">
+    <form name="actionForm" id="actionForm" method="POST"/>
+    {% csrf_token %}
+    <input class="span2" id="action" name="action" type="text" hidden="hidden">
+    <div class="btn-group">
+        <button class="btn  btn-primary btn-sm mx-1 dropdown-toggle" type="button" id="dropdownAggregateBy"
+                data-toggle="dropdown"
+                aria-haspopup="true" aria-expanded="false">
             Generate lists
         </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownAction">
+            <a href="#" class="dropdown-item"  onclick="$('#action').val('generate_distributed'); $('#actionForm').submit()">Distributed</a>
+            <a href="#" class="dropdown-item" onclick="$('#action').val('generate_single'); $('#actionForm').submit()">Single</a>
+        </div>
+    </div>
     </form>
 </div>
 <table class="table bg-white">
