@@ -128,9 +128,9 @@ class Questionnaire(models.Model):
 
 
     def _generate_items_pseudo_random(self, block_items, block_offset, block_slots):
-        items_by_experiment = self._pseudo_randomized_experiment_items(block_items)
         if len(block_slots) != len(block_items):
             raise RuntimeError('Block does not match master slots')
+        items_by_experiment = self._pseudo_randomized_experiment_items(block_items)
         for i, slot_experiment in enumerate(block_slots):
             item = items_by_experiment[slot_experiment].pop()
             if not item:
@@ -142,32 +142,41 @@ class Questionnaire(models.Model):
             )
 
     def _compute_block_slots(self, block_items):
-        slots = []
-        items = block_items.copy()
-        random.SystemRandom().shuffle(items)
-        colliding = []
-        last_item = None
-        for item in items:
-            if item.experiment.is_filler \
-                    or not last_item \
-                    or last_item.experiment.is_filler \
-                    or last_item.experiment != item.experiment:
-                slots.append(item.experiment)
+        n_tries = 10
+        while n_tries:
+            slots = []
+            items = block_items.copy()
+            random.SystemRandom().shuffle(items)
+            colliding = []
+            last_item = None
+            for item in items:
+                if item.experiment.is_filler \
+                        or not last_item \
+                        or last_item.experiment.is_filler \
+                        or last_item.experiment != item.experiment:
+                    slots.append(item.experiment)
+                else:
+                    colliding.append(item)
+                last_item = item
+            resolution_failed = False
+            for item in colliding:
+                slot_size = len(slots)
+                n_insert_tries =  int(slot_size / 4)
+                while n_insert_tries:
+                    pos = random.SystemRandom().randint(0, slot_size - 2)
+                    if item.experiment != slots[pos] and item.experiment != slots[pos + 1]:
+                        slots.insert(pos + 1, item.experiment)
+                        if len(slots) > len(block_items):
+                            import pdb;pdb.set_trace()
+                        break
+                    n_insert_tries -= 1
+                if not n_insert_tries:
+                    resolution_failed = True
+            if not resolution_failed:
+                return slots
             else:
-                colliding.append(item)
-            last_item = item
-        for item in colliding:
-            n_tries = 100
-            slot_size = len(slots)
-            while n_tries:
-                pos = random.SystemRandom().randint(0, slot_size - 2)
-                if item.experiment != slots[pos] and item.experiment != slots[pos + 1]:
-                    slots.insert(pos + 1, item.experiment)
-                    break
                 n_tries -= 1
-            if not n_tries:
-                raise RuntimeError('Unable to compute slots')
-        return slots
+        raise RuntimeError('Unable to compute slots')
 
     def _compute_slots(self):
         slots = {}
