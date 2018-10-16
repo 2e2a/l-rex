@@ -212,18 +212,18 @@ class QuestionnaireBlock(models.Model):
         blank=True,
         null=True,
     )
+    RANDOMIZATION_PSEUDO = 'pseudo'
     RANDOMIZATION_NONE = 'none'
     RANDOMIZATION_TRUE = 'true'
-    RANDOMIZATION_PSEUDO = 'pseudo'
     RANDOMIZATION_TYPE = (
+        (RANDOMIZATION_PSEUDO, 'Pseudo-randomize'),
         (RANDOMIZATION_NONE, 'Keep item order'),
         (RANDOMIZATION_TRUE, 'Randomize'),
-        (RANDOMIZATION_PSEUDO, 'Pseudo-randomize'),
     )
     randomization = models.CharField(
         max_length=8,
         choices=RANDOMIZATION_TYPE,
-        default=RANDOMIZATION_TRUE,
+        default=RANDOMIZATION_PSEUDO,
         help_text='Randomize items in each questionnaire block',
     )
     study = models.ForeignKey(
