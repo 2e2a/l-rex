@@ -4,7 +4,7 @@
 {% block content %}
 <h1 class="row justify-content-center mt-2">Participate in the experiment</h1>
 <div class="my-2 p-4 border bg-white">
-    {% if study.status.name == 'STARTED' or study.status.name == 'ACTIVE' %}
+    {% if study.is_rating_possible %}
     <p>
         {{ study.instructions|linebreaks }}
     </p>

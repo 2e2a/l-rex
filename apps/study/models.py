@@ -144,6 +144,10 @@ class Study(models.Model):
         return StudyStatus.STARTED
 
     @property
+    def is_rating_possible(self):
+        return self.status == StudyStatus.ACTIVE or self.status == StudyStatus.STARTED
+
+    @property
     def results_url(self):
         if self.experiment_set.count() == 1:
             experiment = self.experiment_set.first()
