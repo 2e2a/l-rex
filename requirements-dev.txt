@@ -1,5 +1,7 @@
 Django
-django-crispy-forms
 django-allauth
+django-allauth
+django-debug-toolbar
+django-crispy-forms
 psycopg2
 pytz
