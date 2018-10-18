@@ -5,6 +5,7 @@ from django.conf import settings
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.functional import cached_property
 
 from apps.contrib import math
 from apps.contrib.utils import slugify_unique
@@ -322,7 +323,7 @@ class Question(models.Model):
     class Meta:
         ordering = ['pk']
 
-    @property
+    @cached_property
     def num(self):
         return list(Question.objects.filter(study=self.study)).index(self) + 1
 
@@ -346,7 +347,7 @@ class ScaleValue(models.Model):
     class Meta:
         ordering = ['pk']
 
-    @property
+    @cached_property
     def num(self):
         return list(ScaleValue.objects.filter(question=self.question)).index(self) + 1
 

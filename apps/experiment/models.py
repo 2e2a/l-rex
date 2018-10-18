@@ -112,15 +112,22 @@ class Experiment(models.Model):
         ratings = trial_models.Rating.objects.filter(
             questionnaire_item__item__experiment=self
         )
+        scale_values = {}
+        questions = {}
+        for question in self.study.question_set.all():
+            for scale_value in question.scalevalue_set.all():
+                scale_values.update({scale_value.id: scale_value})
+            questions.update({question.id: question})
         for rating in ratings:
             row = {}
             item = rating.questionnaire_item.item
-
-            row['subject'] = rating.trial.id
+            scale_value = scale_values[rating.scale_value_id]
+            question = questions[scale_value.question_id]
+            row['subject'] = rating.trial_id
             row['item'] = item.number
             row['condition'] = item.condition
-            row['question'] = rating.scale_value.question.num
-            row['rating'] = rating.scale_value.num
+            row['question'] = question.num
+            row['rating'] = scale_value.num
             if hasattr(item, 'textitem'):
                 row['text'] = item.textitem.text
 
