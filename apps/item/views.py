@@ -272,7 +272,7 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['questions'] = self.study.question_set.all()
+        kwargs['questions'] = self.study.questions
         return kwargs
 
     def form_valid(self, form):
@@ -318,12 +318,12 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
                     block=row[block_col] if block_col else 1,
                 )
             create_item_questions = False
-            for i in range(self.study.question_set.count()):
+            for i, _ in enumerate(self.study.questions):
                 if form.cleaned_data['question_{}_question_column'.format(i+1)] > 0:
                     create_item_questions = True
                     break
             if create_item_questions:
-                for i, question in enumerate(self.study.question_set.all()):
+                for i, question in enumerate(self.study.questions):
                     question_col = form.cleaned_data['question_{}_question_column'.format(i+1)] - 1
                     if question_col > 0:
                         scale_col = form.cleaned_data['question_{}_scale_column'.format(i+1)] - 1
@@ -397,20 +397,21 @@ class ItemQuestionsUpdateView(ItemMixin, study_views.CheckStudyCreatorMixin, stu
     helper = forms.itemquestion_formset_helper
 
     def get(self, request, *args, **kwargs):
-        self.formset = forms.itemquestion_factory(self.study.question_set.count())(
+        n_questions = len(self.study.questions)
+        self.formset = forms.itemquestion_factory(n_questions)(
             queryset=models.ItemQuestion.objects.filter(item=self.item)
         )
-        forms.initialize_with_questions(self.formset, self.study.question_set.all())
+        forms.initialize_with_questions(self.formset, self.study.questions)
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        n_questions = self.study.question_set.count()
+        n_questions = len(self.study.questions)
         if 'submit' in request.POST:
             self.formset = forms.itemquestion_factory(n_questions)(request.POST, request.FILES)
             if self.formset.is_valid():
                 instances = self.formset.save(commit=False)
                 scale_labels_valid = True
-                for i, (instance, question) in enumerate(zip(instances, self.study.question_set.all())):
+                for i, (instance, question) in enumerate(zip(instances, self.study.questions)):
                     if instance.scale_labels \
                             and len(instance.scale_labels.split(',')) != question.scalevalue_set.count():
                         self.formset._errors[i]['scale_labels'] = \
@@ -424,7 +425,7 @@ class ItemQuestionsUpdateView(ItemMixin, study_views.CheckStudyCreatorMixin, stu
                         instance.save()
         else: # reset
             self.item.itemquestion_set.all().delete()
-        forms.initialize_with_questions(self.formset, self.study.question_set.all())
+        forms.initialize_with_questions(self.formset, self.study.questions)
         return super().get(request, *args, **kwargs)
 
     @property

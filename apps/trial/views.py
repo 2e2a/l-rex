@@ -73,7 +73,6 @@ class QuestionnaireListView(study_views.StudyMixin, study_views.CheckStudyCreato
         if action == 'generate_pseudo':
             return models.QuestionnaireBlock.RANDOMIZATION_PSEUDO
 
-
     def post(self, request, *args, **kwargs):
         action = request.POST.get('action', None)
         if len(self.blocks)>1:
@@ -306,7 +305,7 @@ class RatingCreateView(RatingCreateMixin, TrialMixin, generic.CreateView):
             if self.trial.status == models.TrialStatus.FINISHED:
                 return reverse('rating-taken', args=[self.trial.slug])
             n_ratings = models.Rating.objects.filter(trial=self.trial).count()
-            n_questions = self.study.question_set.count()
+            n_questions = len(self.study.questions)
             rating = int(n_ratings/n_questions)
             if rating != num:
                 return reverse('rating-create', args=[self.trial.slug, rating])
@@ -317,7 +316,7 @@ class RatingCreateView(RatingCreateMixin, TrialMixin, generic.CreateView):
     def dispatch(self, *args, **kwargs):
         self.num = int(self.kwargs['num'])
         redirect_link = self._redirect_active_link(self.num)
-        if not redirect_link and self.study.question_set.count() > 1:
+        if not redirect_link and len(self.study.questions) > 1:
             redirect_link = reverse('ratings-create', args=[self.trial.slug, self.num])
         if redirect_link:
             return redirect(redirect_link)
@@ -325,10 +324,11 @@ class RatingCreateView(RatingCreateMixin, TrialMixin, generic.CreateView):
             questionnaire=self.trial.questionnaire,
             number=self.num
         )
-        self.question = self.study.question_set.first()
+        self.question = self.study.questions.first()
         self.item_questions = self.questionnaire_item.item.itemquestion_set.all()
         return super().dispatch(*args, **kwargs)
 
+    @property
     def progress(self):
         return self.num * 100 / len(self.trial.items)
 
@@ -427,6 +427,7 @@ class RatingBlockInstructionsView(TrialMixin, generic.TemplateView):
         )
         return questionnaire_block.instructions
 
+    @property
     def progress(self):
         return self.num * 100 / len(self.trial.items)
 

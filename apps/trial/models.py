@@ -9,6 +9,7 @@ from datetime import timedelta
 from enum import Enum
 from django.db import models
 from django.urls import reverse
+from django.utils.functional import cached_property
 from django.utils import timezone
 
 from apps.item import models as item_models
@@ -36,21 +37,23 @@ class Questionnaire(models.Model):
         items_sorted = sorted(items, key=lambda i: i.block)
         return items_sorted
 
-    @property
+    @cached_property
     def items(self):
-        return [questionnaire_item.item for questionnaire_item in self.questionnaireitem_set.all()]
+        questionnaire_items = [questionnaire_item.item_id for questionnaire_item in self.questionnaireitem_set.all()]
+        return item_models.Item.objects.filter(id__in=questionnaire_items)
 
-    @property
+    @cached_property
     def next(self):
         questionnaire =  self.study.questionnaire_set.filter(pk__gt=self.pk).first()
         if not questionnaire:
             questionnaire = Questionnaire.objects.first()
         return questionnaire
 
-    @property
+    @cached_property
     def num(self):
         return list(Questionnaire.objects.filter(study=self.study)).index(self) + 1
 
+    @cached_property
     def questionnaire_items_by_block(self):
         blocks = OrderedDict()
         for questionnaire_item in self.questionnaireitem_set.all():
@@ -61,7 +64,7 @@ class Questionnaire(models.Model):
         return blocks
 
     def block_items(self, block):
-        return self.questionnaire_items_by_block()[block]
+        return self.questionnaire_items_by_block[block]
 
     def _block_randomization(self):
         block_randomization = OrderedDict()
@@ -285,7 +288,7 @@ class Trial(models.Model):
     class Meta:
         ordering = ['creation_date']
 
-    @property
+    @cached_property
     def items(self):
         return self.questionnaire.items
 
@@ -299,10 +302,9 @@ class Trial(models.Model):
 
     @property
     def ratings_completed(self):
-        n_questions = self.questionnaire.study.question_set.count()
+        n_questions = len(self.questionnaire.study.questions)
         n_ratings = Rating.objects.filter(trial=self).count()
         return int(n_ratings / n_questions)
-
 
     @property
     def status(self):

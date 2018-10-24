@@ -7,7 +7,7 @@
         <th>Experiment</th>
         <th>Item</th>
         <th>Content</th>
-        {% for qustions in trial.questionnaire.study.question_set.all %}
+        {% for qustions in trial.questionnaire.study.questions %}
         <th>Rating</th>
         {% endfor %}
     </tr>

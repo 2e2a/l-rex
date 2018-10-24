@@ -110,25 +110,29 @@ class Study(models.Model):
     def get_absolute_url(self):
         return reverse('study', args=[self.slug])
 
-    @property
+    @cached_property
     def experiments(self):
         return self.experiment_set.all()
 
-    @property
+    @cached_property
     def has_text_items(self):
         return self.item_type == self.ITEM_TYPE_TXT
 
-    @property
+    @cached_property
     def has_audiolink_items(self):
         return self.item_type == self.ITEM_TYPE_AUDIO_LINK
 
-    @property
+    @cached_property
     def item_blocks(self):
         item_bocks = set()
         for experiment in self.experiments:
             for item in experiment.item_set.all():
                 item_bocks.add(item.block)
         return sorted(item_bocks)
+
+    @cached_property
+    def questions(self):
+        return self.question_set.all()
 
     @property
     def status(self):
@@ -148,14 +152,14 @@ class Study(models.Model):
     def is_rating_possible(self):
         return self.status == StudyStatus.ACTIVE or self.status == StudyStatus.STARTED
 
-    @property
+    @cached_property
     def results_url(self):
         if self.experiment_set.count() == 1:
             experiment = self.experiment_set.first()
             return reverse('experiment-results', args=[experiment.slug])
         return reverse('experiment-result-list', args=[self.slug])
 
-    @property
+    @cached_property
     def randomization_reqiured(self):
         from apps.trial.models import QuestionnaireBlock
         for questionnaire_block in self.questionnaireblock_set.all():

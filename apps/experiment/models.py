@@ -114,7 +114,7 @@ class Experiment(models.Model):
         )
         scale_values = {}
         questions = {}
-        for question in self.study.question_set.all():
+        for question in self.study.questions:
             for scale_value in question.scalevalue_set.all():
                 scale_values.update({scale_value.id: scale_value})
             questions.update({question.id: question})
@@ -145,7 +145,7 @@ class Experiment(models.Model):
                 aggregated_results[match]['ratings'][row['question'] - 1] = row['rating']
             else:
                 new_row = {}
-                n_questions = self.study.question_set.count()
+                n_questions = len(self.study.questions)
                 for col in ['subject', 'item', 'condition']:
                     new_row[col] = row[col]
                 if 'text' in row:
@@ -173,7 +173,7 @@ class Experiment(models.Model):
     def _question_scale_offset(self):
         question_scale_offset =  []
         offset = 0
-        for question in self.study.question_set.all():
+        for question in self.study.questions:
             question_scale_offset.append(offset)
             offset += question.scalevalue_set.count()
         return question_scale_offset
@@ -198,7 +198,7 @@ class Experiment(models.Model):
                 row['ratings'][question_scale_offset[row['question'] - 1] + row['rating'] - 1] = 1.0
                 aggregated_results.append(row)
 
-        num_questions = self.study.question_set.count()
+        num_questions = len(self.study.questions)
         for aggregated_row in aggregated_results:
             aggregated_row['rating_count'] = aggregated_row['rating_count'] / num_questions
 
@@ -212,7 +212,7 @@ class Experiment(models.Model):
     def results_csv(self, fileobj):
         writer = csv.writer(fileobj)
         csv_row = ['subject', 'item', 'condition']
-        for i, _ in enumerate(self.study.question_set.all()):
+        for i, _ in enumerate(self.study.questions):
             csv_row.append('rating{}'.format(i))
         if self.study.has_text_items:
             csv_row.append('Text')
