@@ -7,6 +7,7 @@ from django.urls import reverse
 from django.views import generic
 
 from apps.contrib import views as contrib_views
+from apps.experiment import views as experiment_views
 from apps.study import models as study_models
 from apps.study import views as study_views
 
@@ -102,7 +103,7 @@ class QuestionnaireListView(study_views.StudyMixin, study_views.CheckStudyCreato
         questionnaires_on_page = paginator.get_page(self.page)
         for questionnaire in questionnaires_on_page:
             blocks = []
-            for block_items in questionnaire.questionnaire_items_by_block().items():
+            for block_items in questionnaire.questionnaire_items_by_block.items():
                 blocks.append(block_items)
             questionnaires.append((questionnaire, blocks))
         return questionnaires
@@ -268,6 +269,13 @@ class TrialDetailView(TrialObjectMixin, study_views.CheckStudyCreatorMixin, gene
 class TrialDeleteView(TrialObjectMixin, study_views.CheckStudyCreatorMixin, contrib_views.DefaultDeleteView):
     model = models.Trial
 
+    def delete(self, *args, **kwargs):
+        results = super().delete(*args, **kwargs)
+        for experiment in self.study.experiments:
+            experiment_views.ExperimentResultsView.clear_cache(experiment)
+        return results
+
+
     @property
     def breadcrumbs(self):
         return [
@@ -342,6 +350,8 @@ class RatingCreateView(RatingCreateMixin, TrialMixin, generic.CreateView):
     def form_valid(self, form):
         form.instance.trial = self.trial
         form.instance.questionnaire_item = self.questionnaire_item
+        for experiment in self.study.experiments:
+            experiment_views.ExperimentResultsView.clear_cache(experiment)
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -400,6 +410,8 @@ class RatingsCreateView(RatingCreateMixin, TrialMixin, generic.TemplateView):
                     instance.trial = self.trial
                     instance.questionnaire_item = self.questionnaire_item
                     instance.save()
+                for experiment in self.study.experiments:
+                    experiment_views.ExperimentResultsView.clear_cache(experiment)
                 return redirect(self.get_next_url())
         return super().get(request, *args, **kwargs)
 

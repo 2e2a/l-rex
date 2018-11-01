@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
+from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.urls import reverse
@@ -168,6 +169,20 @@ class ExperimentResultsView(ExperimentObjectMixin, study_views.CheckStudyCreator
     page = 1
     paginate_by = 16
 
+    @staticmethod
+    def clear_cache(experiment):
+        cache.delete_many([
+            '{}-results-subj'.format(experiment.slug),
+            '{}-results-subj-item'.format(experiment.slug),
+        ])
+
+
+    def _cache_key_results(self):
+        if self.aggregate_by == ['subject']:
+            return '{}-results-subj'.format(self.experiment.slug)
+        else:
+            return '{}-results-subj-item'.format(self.experiment.slug)
+
     def dispatch(self, request, *args, **kwargs):
         self.page = request.GET.get('page')
         aggregate_by = request.GET.get('aggregate_by')
@@ -188,8 +203,10 @@ class ExperimentResultsView(ExperimentObjectMixin, study_views.CheckStudyCreator
         return 'aggregate_by=' + ','.join(self.aggregate_by)
 
     def _aggregated_results(self):
-        results = self.object.results()
-        results = self.object.aggregate(results, self.aggregate_by)
+        results = cache.get(self._cache_key_results())
+        if not results:
+            results = self.object.aggregated_results(self.aggregate_by)
+            cache.set(self._cache_key_results(), results, 60*60*24)
         paginator = Paginator(results, self.paginate_by)
         results_on_page = paginator.get_page(self.page)
         return results_on_page

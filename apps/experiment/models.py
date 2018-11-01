@@ -1,6 +1,6 @@
 import csv
-from django.urls import reverse
 from django.db import models
+from django.urls import reverse
 
 from apps.contrib.utils import slugify_unique
 from apps.item import models as item_models
@@ -178,8 +178,9 @@ class Experiment(models.Model):
             offset += question.scalevalue_set.count()
         return question_scale_offset
 
-    def aggregate(self, results, columns):
+    def aggregated_results(self, columns):
         aggregated_results = []
+        results = self.results()
         scale_value_count = study_models.ScaleValue.objects.filter(question__study=self.study).count()
         question_scale_offset = self._question_scale_offset()
         columns_left = list(set(self._aggregation_columns())-set(columns))
