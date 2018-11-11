@@ -15,6 +15,38 @@ from . import forms
 from . import models
 
 
+class QuestionnaireMixin:
+    questionnaire_object = None
+    slug_url_kwarg = 'questionnaire_slug'
+
+    @property
+    def study(self):
+        return self.questionnaire.study
+
+    @property
+    def questionnaire(self):
+        if not self.questionnaire_object:
+            questionnaire_slug = self.kwargs['questionnaire_slug']
+            self.questionnaire_object = models.Questionnaire.objects.get(slug=questionnaire_slug)
+        return self.questionnaire_object
+
+
+class QuestionnaireObjectMixin(QuestionnaireMixin):
+
+    @property
+    def questionnaire(self):
+        if not self.questionnaire_object:
+            self.questionnaire_object =  self.get_object()
+        return self.questionnaire_object
+
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['study'] = self.study
+        data['questionnaire'] = self.questionnaire
+        return data
+
+
 class TrialMixin:
     trial_object = None
     slug_url_kwarg = 'trial_slug'
@@ -58,6 +90,10 @@ class QuestionnaireListView(study_views.StudyMixin, study_views.CheckStudyCreato
         self.blocks = self.study.item_blocks
         return super().dispatch(*args, **kwargs)
 
+    @property
+    def consider_blocks(self):
+        return len(self.blocks) > 1
+
     def _create_default_questionnaire_block(self, randomization):
         models.QuestionnaireBlock.objects.filter(study=self.study).delete() # TODO: do not delete
         models.QuestionnaireBlock.objects.create(
@@ -92,28 +128,35 @@ class QuestionnaireListView(study_views.StudyMixin, study_views.CheckStudyCreato
     def pagination_offset(self):
         return (int(self.page) - 1) * int(self.paginate_by)
 
-
-    @property
-    def consider_blocks(self):
-        return len(self.blocks) > 1
-
-    def items_by_block(self):
-        questionnaires = []
-        paginator = Paginator(self.object_list, self.paginate_by)
-        questionnaires_on_page = paginator.get_page(self.page)
-        for questionnaire in questionnaires_on_page:
-            blocks = []
-            for block_items in questionnaire.questionnaire_items_by_block.items():
-                blocks.append(block_items)
-            questionnaires.append((questionnaire, blocks))
-        return questionnaires
-
     @property
     def breadcrumbs(self):
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
             ('questionnaires', ''),
+        ]
+
+
+class QuestionnaireDetailView(QuestionnaireObjectMixin, study_views.CheckStudyCreatorMixin, study_views.NextStepsMixin,
+                              generic.DetailView):
+    model = models.Questionnaire
+    title = 'Questionnaire'
+
+    def dispatch(self, *args, **kwargs):
+        self.blocks = self.study.item_blocks
+        return super().dispatch(*args, **kwargs)
+
+    @property
+    def consider_blocks(self):
+        return len(self.blocks) > 1
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('questionnaires', reverse('questionnaires', args=[self.study.slug])),
+            (self.questionnaire.number, '')
         ]
 
 

@@ -14,6 +14,7 @@ urlpatterns = [
     path('experiments/', include(experiment_urls)),
     path('items/', include(item_urls)),
     path('trials/', include(trial_urls.urlpatterns)),
+    path('questionnaires/', include(trial_urls.urlpatterns_questionnaires)),
     path('accounts/', include(allauth_urls)),
     path('admin/', admin.site.urls),
     path('', include(home_urls))

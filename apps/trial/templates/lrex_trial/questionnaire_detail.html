@@ -1,0 +1,22 @@
+{% extends "lrex_home/base.html" %}
+
+{% block content %}
+<table class="table bg-white">
+    <thead>
+    <tr>
+        <th>Block</th>
+        <th>Items</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for block, items in questionnaire.questionnaire_items_by_block.items %}
+    <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>
+            {% for item in items %}{{ item.item.experiment }}-{{ item.item }}{% if not forloop.last %}, {% endif %}{% endfor %}
+        </td>
+    </tr>
+    </tbody>
+    {% endfor %}
+</table>
+{% endblock %}

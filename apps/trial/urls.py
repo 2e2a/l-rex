@@ -2,10 +2,14 @@ from django.urls import path
 
 from . import views
 
-urlpatterns_study_questionnaires = [
+urlpatterns_questionnaires_study = [
     path('', views.QuestionnaireListView.as_view(), name='questionnaires'),
     path('generate/', views.QuestionnaireGenerateView.as_view(), name='questionnaire-generate'),
     path('blocks/', views.QuestionnaireBlockUpdateView.as_view(), name='questionnaire-blocks'),
+]
+
+urlpatterns_questionnaires = [
+    path('<slug:questionnaire_slug>/', views.QuestionnaireDetailView.as_view(), name='questionnaire'),
 ]
 
 urlpatterns_study = [

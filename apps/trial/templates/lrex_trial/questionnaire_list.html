@@ -30,43 +30,25 @@
     </form>
     {% endif %}
 </div>
-<table class="table bg-white">
-    <thead>
-    <tr>
-        <th>#</th>
-        {% if not view.consider_blocks %}
-        <th>Items</th>
-        {% else %}
-            {% for block in view.blocks %}
-            <th>Item block {{ block }}</th>
-            {% endfor %}
-        {% endif %}
-    </tr>
-    </thead>
-    <tbody>
-    {% if not view.consider_blocks %}
+<ul class="list-group">
     {% for questionnaire in questionnaire_list %}
-    <tr>
-        <td>{{ forloop.counter|add:view.pagination_offset }}</td>
-        <td>
-            {% for item in questionnaire.items %}{{ item.experiment }}-{{ item }}{% if not forloop.last %},{% endif %}{% endfor %}
-        </td>
-    </tr>
+    <li class="list-group-item my-1">
+        <div class="row">
+            <div class="col-10">
+                <strong>#{{ questionnaire.number }}</strong>
+                {% for item in questionnaire.items_preview %}{{ item.experiment }}-{{ item }}{% if not forloop.last %}, {% else %}...{% endif %}{% endfor %}
+            </div>
+            <div class="col-2">
+                <a href="{% url 'questionnaire' questionnaire.slug %}" class="btn btn-outline-primary btn-sm mx-1" role="button">
+                    Details
+                </a>
+            </div>
+        </div>
+    </li>
+    {% empty %}
+    <li class="list-group-item my-1">No questionnaires generated yet.</li>
     {% endfor %}
-    {% else %}
-    {% for questionnaire, block_items in view.items_by_block %}
-    <tr>
-        <td>{{ forloop.counter|add:view.pagination_offset }}</td>
-            {% for block, q_items in block_items %}
-            <td>
-                {% for q_item in q_items %}{{ q_item.item.experiment }}-{{ q_item.item }}{% if not forloop.last %},{% endif %}{% endfor %}
-            </td>
-            {% endfor %}
-    </tr>
-    {% endfor %}
-    {% endif %}
-    </tbody>
-</table>
+</ul>
 <nav aria-label="Pagination">
     <ul class="pagination justify-content-center mt-2">
         {% if page_obj.has_previous %}
@@ -89,4 +71,5 @@
         <li class="page-item disabled"><a class="page-link">last &raquo;</a></li>
         {% endif %}
     </ul>
+</nav>
 {% endblock %}

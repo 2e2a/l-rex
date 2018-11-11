@@ -15,7 +15,7 @@ urlpatterns = [
     path('<slug:study_slug>/questions/', views.QuestionUpdateView.as_view(), name='study-questions'),
     path('<slug:study_slug>/share/', views.SharedWithView.as_view(), name='study-share'),
     path('<slug:study_slug>/experiments/', include(experiment_urls.urlpatterns_study)),
-    path('<slug:study_slug>/questionnaires/', include(trial_urls.urlpatterns_study_questionnaires)),
+    path('<slug:study_slug>/questionnaires/', include(trial_urls.urlpatterns_questionnaires_study)),
     path('<slug:study_slug>/run/', views.StudyRunView.as_view(), name='study-run'),
     path('<slug:study_slug>/trials/', include(trial_urls.urlpatterns_study)),
 ]
