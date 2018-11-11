@@ -1,6 +1,7 @@
 import csv
 from django.db import models
 from django.urls import reverse
+from django.utils.functional import cached_property
 
 from apps.contrib.utils import slugify_unique
 from apps.item import models as item_models
@@ -42,7 +43,7 @@ class Experiment(models.Model):
         self.slug = slugify_unique(slug, Experiment, self.id)
         return super().save(*args, **kwargs)
 
-    @property
+    @cached_property
     def conditions(self):
         items = self.item_set.filter(number=1)
         conditions = [item.condition for item in items]

@@ -12,6 +12,7 @@ from django.urls import reverse
 from django.utils.functional import cached_property
 from django.utils import timezone
 
+from apps.experiment import models as experiment_models
 from apps.item import models as item_models
 from apps.study import models as study_models
 
@@ -35,17 +36,15 @@ class Questionnaire(models.Model):
     def get_absolute_url(self):
         return reverse('questionnaire', args=[self.study.slug, self.slug])
 
-    @property
-    def item_list_items(self):
-        items = []
-        for item_list in self.item_lists.all():
-            items.extend(item_list.items.all())
-        items_sorted = sorted(items, key=lambda i: i.block)
-        return items_sorted
-
     @cached_property
     def items(self):
         questionnaire_items = [questionnaire_item.item_id for questionnaire_item in self.questionnaireitem_set.all()]
+        return item_models.Item.objects.filter(id__in=questionnaire_items)
+
+    @cached_property
+    def items_preview(self):
+        questionnaire_items = [questionnaire_item.item_id for questionnaire_item
+                               in self.questionnaireitem_set.all()[:4]]
         return item_models.Item.objects.filter(id__in=questionnaire_items)
 
     @cached_property
@@ -54,10 +53,6 @@ class Questionnaire(models.Model):
         if not questionnaire:
             questionnaire = Questionnaire.objects.first()
         return questionnaire
-
-    @cached_property
-    def num(self):
-        return list(Questionnaire.objects.filter(study=self.study)).index(self) + 1
 
     @cached_property
     def questionnaire_items_by_block(self):
@@ -79,22 +74,20 @@ class Questionnaire(models.Model):
             block_randomization[questionnaire_block.block] = questionnaire_block.randomization
         return block_randomization
 
-    def _generate_items_ordered(self, block_items, block_offset):
+    def _generate_block_items(self, block_items, block_offset):
+        questionnaire_items = []
         for i, item in enumerate(block_items):
-            QuestionnaireItem.objects.create(
+            questionnaire_item = QuestionnaireItem(
                 number=block_offset + i,
                 questionnaire=self,
                 item=item,
             )
+            questionnaire_items.append(questionnaire_item)
+        QuestionnaireItem.objects.bulk_create(questionnaire_items)
 
     def _generate_items_random(self, block_items, block_offset):
         random.SystemRandom().shuffle(block_items)
-        for i, item in enumerate(block_items):
-            QuestionnaireItem.objects.create(
-                number=block_offset + i,
-                questionnaire=self,
-                item=item,
-            )
+        self._generate_block_items(block_items, block_offset)
 
     def _experiment_items_with_alternating_conditions(self, experiment_items):
         n_tries = 100
@@ -118,39 +111,41 @@ class Questionnaire(models.Model):
                     bubble_fails += 1
                 last_item = item
             if len(items) == 0:
-                if not pseudo_random_items:
-                    import pdb;pdb.set_trace()
                 return pseudo_random_items
             n_tries -= 1
         raise RuntimeError('Unable to compute alternating conditions')
 
-    def _pseudo_randomized_experiment_items(self, block_items):
+    def _pseudo_randomized_experiment_items(self, block_items, experiments):
         items_by_experiment = {}
-        for experiment, experiment_items in groupby(block_items, lambda x: x.experiment):
-            if experiment.is_filler or len(experiment.conditions) == 1:
-                items = list(experiment_items)
+        for id, experiment_items in groupby(block_items, lambda x: x.experiment_id):
+            items = list(experiment_items)
+            if experiments[id].is_filler or len(experiments[id].conditions) == 1:
                 random.SystemRandom().shuffle(items)
             else:
-                items = self._experiment_items_with_alternating_conditions(experiment_items)
-            items_by_experiment[experiment] = items
+                items = self._experiment_items_with_alternating_conditions(items)
+            items_by_experiment[id] = items
         return items_by_experiment
 
 
-    def _generate_items_pseudo_random(self, block_items, block_offset, block_slots):
+    def _generate_items_pseudo_random(self, block_items, block_offset, block_slots, experiments):
+        questionnaire_items = []
         if len(block_slots) != len(block_items):
             raise RuntimeError('Block does not match master slots')
-        items_by_experiment = self._pseudo_randomized_experiment_items(block_items)
+        items_by_experiment = self._pseudo_randomized_experiment_items(block_items, experiments)
         for i, slot_experiment in enumerate(block_slots):
             item = items_by_experiment[slot_experiment].pop()
             if not item:
                 raise RuntimeError('Block does not match master slots')
-            QuestionnaireItem.objects.create(
+            questionnaire_item = QuestionnaireItem(
                 number=block_offset + i,
                 questionnaire=self,
                 item=item,
             )
+            questionnaire_items.append(questionnaire_item)
+        QuestionnaireItem.objects.bulk_create(questionnaire_items)
 
-    def _compute_block_slots(self, block_items):
+    def _compute_block_slots(self, block_items, experiments):
+        filler = list([ id for id, experiment in experiments.items() if experiment.is_filler])
         n_tries = 10
         while n_tries:
             slots = []
@@ -159,11 +154,11 @@ class Questionnaire(models.Model):
             colliding = []
             last_item = None
             for item in items:
-                if item.experiment.is_filler \
+                if item.experiment_id in filler \
                         or not last_item \
-                        or last_item.experiment.is_filler \
-                        or last_item.experiment != item.experiment:
-                    slots.append(item.experiment)
+                        or last_item.experiment_id in filler \
+                        or last_item.experiment_id != item.experiment_id:
+                    slots.append(item.experiment_id)
                 else:
                     colliding.append(item)
                 last_item = item
@@ -173,10 +168,8 @@ class Questionnaire(models.Model):
                 n_insert_tries =  int(slot_size / 4)
                 while n_insert_tries:
                     pos = random.SystemRandom().randint(0, slot_size - 2)
-                    if item.experiment != slots[pos] and item.experiment != slots[pos + 1]:
-                        slots.insert(pos + 1, item.experiment)
-                        if len(slots) > len(block_items):
-                            import pdb;pdb.set_trace()
+                    if item.experiment_id != slots[pos] and item.experiment_id != slots[pos + 1]:
+                        slots.insert(pos + 1, item.experiment_id)
                         break
                     n_insert_tries -= 1
                 if not n_insert_tries:
@@ -187,30 +180,40 @@ class Questionnaire(models.Model):
                 n_tries -= 1
         raise RuntimeError('Unable to compute slots')
 
-    def _compute_slots(self):
+    @cached_property
+    def _item_list_items(self):
+        item_lists = self.item_lists.all()
+        items = item_models.Item.objects.filter(itemlist__in=item_lists).order_by('block', 'experiment_id')
+        return list(items)
+
+    def _compute_slots(self, experiments, block_randomization):
         slots = {}
-        block_randomization = self._block_randomization()
-        items_by_block = groupby(self.item_list_items, lambda x: x.block)
+        items_by_block = groupby(self._item_list_items, lambda x: x.block)
         for block, block_items in items_by_block:
             block_items = list(block_items)
             if block_randomization[block] == QuestionnaireBlock.RANDOMIZATION_PSEUDO:
-                slots[block] = self._compute_block_slots(block_items)
+                slots[block] = self._compute_block_slots(block_items, experiments)
         return slots
 
-    def generate_items(self):
-        slots = self._compute_slots()
+    def generate_items(self, experiments=None):
+        if not experiments:
+            experiments = {e.id: e for e in experiment_models.Experiment.objects.filter(study=self.study)}
         block_randomization = self._block_randomization()
-        items_by_block = groupby(self.item_list_items, lambda x: x.block)
+        slots = self._compute_slots(experiments, block_randomization)
+        items_by_block = groupby(self._item_list_items, lambda x: x.block)
         block_offset = 0
         for block, block_items in items_by_block:
             block_items = list(block_items)
             if block_randomization[block] == QuestionnaireBlock.RANDOMIZATION_TRUE:
                 self._generate_items_random(block_items, block_offset)
             elif block_randomization[block] == QuestionnaireBlock.RANDOMIZATION_PSEUDO:
-                self._generate_items_pseudo_random(block_items, block_offset, slots[block])
+                self._generate_items_pseudo_random(block_items, block_offset, slots[block], experiments)
             else:
-                self._generate_items_ordered(block_items, block_offset)
+                self._generate_block_items(block_items, block_offset)
             block_offset += len(block_items)
+
+    def __str__(self):
+        return 'Questionnaire-{}'.format(self.slug)
 
 
 class QuestionnaireBlock(models.Model):
@@ -257,7 +260,7 @@ class QuestionnaireItem(models.Model):
 
 
     def __str__(self):
-        return '{} questionnaire {} item {}'.format(self.pk, self.questionnaire.num, self.item)
+        return '{} questionnaire {} item {}'.format(self.pk, self.questionnaire.number, self.item)
 
 
 class TrialStatus(Enum):
