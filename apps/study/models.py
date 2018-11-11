@@ -189,9 +189,9 @@ class Study(models.Model):
             questionnaire_item_list.append(next_item_list)
         return questionnaire_item_list
 
-    def _create_next_questionnaire(self, last_questionnaire):
+    def _create_next_questionnaire(self, last_questionnaire, num):
         from apps.trial.models import Questionnaire
-        questionnaire = Questionnaire.objects.create(study=self)
+        questionnaire = Questionnaire.objects.create(study=self, number=num)
         if not last_questionnaire:
             questionnaire_item_lists = self._init_questionnaire_lists()
         else:
@@ -200,28 +200,28 @@ class Study(models.Model):
             questionnaire.item_lists.add(item_list)
         return questionnaire
 
-    def _generate_questionnaire_permutations(self, permutations=4):
+    def _generate_questionnaire_permutations(self, experiments, permutations=4):
         from apps.trial.models import Questionnaire
         if self.randomization_reqiured:
             questionnaires = list(self.questionnaire_set.all())
-            for i in range(1, permutations):
-                for questionnaire in questionnaires:
-                    questionnaire_permutation=Questionnaire.objects.create(
-                        study=self,
-                    )
+            questionnaire_count = len(questionnaires)
+            for permutation in range(1, permutations):
+                for i, questionnaire in enumerate(questionnaires):
+                    num = questionnaire_count * permutation + i + 1
+                    questionnaire_permutation=Questionnaire.objects.create(study=self, number=num)
                     questionnaire_permutation.item_lists.set(questionnaire.item_lists.all())
-                    questionnaire_permutation.generate_items()
-                    questionnaire_permutation.save()
+                    questionnaire_permutation.generate_items(experiments)
 
     def generate_questionnaires(self):
         self.questionnaire_set.all().delete()
+        experiments = {e.id: e for e in self.experiments}
         questionnaire_count = self._questionnaire_count()
         last_questionnaire = None
-        for _ in range(questionnaire_count):
-            last_questionnaire = self._create_next_questionnaire(last_questionnaire)
-            last_questionnaire.generate_items()
+        for i in range(questionnaire_count):
+            last_questionnaire = self._create_next_questionnaire(last_questionnaire, i + 1)
+            last_questionnaire.generate_items(experiments)
         if self.randomization_reqiured:
-            self._generate_questionnaire_permutations()
+            self._generate_questionnaire_permutations(experiments)
 
     def rating_proofs_csv(self, fileobj):
         from apps.trial.models import Trial

@@ -21,6 +21,7 @@ class Questionnaire(models.Model):
         'lrex_study.Study',
         on_delete=models.CASCADE
     )
+    number = models.IntegerField()
     item_lists = models.ManyToManyField(item_models.ItemList)
 
     class Meta:
