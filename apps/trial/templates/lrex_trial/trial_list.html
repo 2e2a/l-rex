@@ -31,9 +31,9 @@
         <div class="row">
             <div class="col-10">
                 {% if view.show_counter %}
-                    {{ forloop.counter }}. {{ trial.id }}
+                <strong>#{{ forloop.counter }}</strong> {{ trial.id }}
                 {% else %}
-                    {{ trial.id }}
+                <strong>#{{ trial.id }}</strong>
                 {% endif %}
                 <span class="badge badge-primary">{{ trial.status.name }}</span>
                 <span class="badge badge-secondary">Questionnaire {{ trial.questionnaire.num }}</span>

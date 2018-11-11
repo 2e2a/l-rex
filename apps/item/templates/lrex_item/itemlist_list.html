@@ -30,7 +30,7 @@
     <tr>
         <td>{{ forloop.counter }}</td>
         <td>
-            {% for item in item_list.items.all %}{{ item }}{% if not forloop.last %},{% endif %}{% endfor %}
+            {% for item in item_list.items.all %}{{ item }}{% if not forloop.last %}, {% endif %}{% endfor %}
         </td>
     </tr>
     {% endfor %}
