@@ -17,6 +17,7 @@ from apps.study import models as study_models
 
 
 class Questionnaire(models.Model):
+    slug = models.SlugField(unique=True)
     study = models.ForeignKey(
         'lrex_study.Study',
         on_delete=models.CASCADE
@@ -26,6 +27,10 @@ class Questionnaire(models.Model):
 
     class Meta:
         ordering = ['pk']
+
+    def save(self, *args, **kwargs):
+        self.slug = '{}-{}'.format(self.study.slug, self.number)
+        return super().save(*args, **kwargs)
 
     def get_absolute_url(self):
         return reverse('questionnaire', args=[self.study.slug, self.slug])
