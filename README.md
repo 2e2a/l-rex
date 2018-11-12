@@ -20,8 +20,7 @@ Platform for linguistic rating experiments.
 ## Installation
 
 ```
-make install
-make build
+make deploy
 ```
 
 ## Configuration
@@ -32,9 +31,5 @@ Add a `Site` for your domain (used by allauth).
 ## Usage
 
 ```
-./manage.py migrate
-./manage.py createsuperuser
 make run
 ```
-
-Use Django Admin to create further users under `/admin/`.
