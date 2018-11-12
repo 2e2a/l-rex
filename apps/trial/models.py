@@ -49,9 +49,9 @@ class Questionnaire(models.Model):
 
     @cached_property
     def next(self):
-        questionnaire =  self.study.questionnaire_set.filter(pk__gt=self.pk).first()
+        questionnaire =  self.study.questionnaire_set.filter(study=self.study, pk__gt=self.pk).first()
         if not questionnaire:
-            questionnaire = Questionnaire.objects.first()
+            questionnaire =  self.study.questionnaire_set.filter(study=self.study).first()
         return questionnaire
 
     @cached_property
