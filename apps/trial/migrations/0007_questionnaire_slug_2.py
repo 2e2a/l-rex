@@ -2,7 +2,7 @@ from django.db import migrations
 
 
 def gen_slug(apps, schema_editor):
-    Questionnaire = apps.get_model('lrex_study', 'Study')
+    Questionnaire = apps.get_model('lrex_trial', 'Questionnaire')
     for questionnaire in Questionnaire.objects.all():
         questionnaire.slug = '{}-{}'.format(questionnaire.study.slug, questionnaire.number)
         questionnaire.save(update_fields=['slug'])
