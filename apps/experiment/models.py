@@ -20,7 +20,9 @@ class Experiment(models.Model):
         on_delete=models.CASCADE
     )
     is_filler = models.BooleanField(
-        default=False
+        default=False,
+        help_text='Mark the items of this experiment as fillers. '
+                  'This setting will be relevant if you choose to pseudo-randomize the questionnaire.',
     )
     PROGRESS_EXP_CREATED = '21-exp-crt'
     PROGRESS_EXP_ITEMS_CREATED = '22-exp-itm-crt'

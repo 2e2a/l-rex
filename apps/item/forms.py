@@ -54,7 +54,8 @@ class UploadItemsForm(crispy_forms.CrispyForm):
     )
     block_column = forms.IntegerField(
         initial=0,
-        help_text='Specify which column contains the item block definiton; 0 use single item block',
+        help_text='Optional: specify which column contains the questionnaire block. '
+                  'Set to 0 if the questionnaire does not contain more than one block.',
     )
 
     def __init__(self, *args, **kwargs):
@@ -66,8 +67,8 @@ class UploadItemsForm(crispy_forms.CrispyForm):
                     'question_{}_question_column'.format(i+1):
                     forms.IntegerField(
                         initial=0,
-                        help_text='TODO Specify which column contains the question per item; '
-                                  '0 use question from study'
+                        help_text='Optional: specify which column contains the item-specific question. '
+                                  'Set to 0 to use the default question as specified in the study settings.'
                      )
                 }
             )
@@ -76,8 +77,9 @@ class UploadItemsForm(crispy_forms.CrispyForm):
                     'question_{}_scale_column'.format(i+1):
                         forms.IntegerField(
                             initial=0,
-                            help_text='TODO Specify which column contains the comma separated question scale values;'
-                                      ' 0 use scale from study question'
+                            help_text='Optional: specify which column contains the item-specific '
+                                      'question scale values (comma-separated). '
+                                      'Set to 0 to use the default scale values as specified in the study settings.'
                         )
                 }
             )
@@ -86,8 +88,8 @@ class UploadItemsForm(crispy_forms.CrispyForm):
                     'question_{}_legend_column'.format(i+1):
                         forms.IntegerField(
                             initial=0,
-                            help_text='TODO Specify which column contains the question legend per item;'
-                                      ' 0 use scale from study question'
+                            help_text='Optional: specify which column contains the items-specific scale legend. '
+                                      'Set to 0 to use the default legend as specified in the study settings.'
                         )
                 }
             )
