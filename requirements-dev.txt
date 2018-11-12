@@ -3,5 +3,6 @@ django-allauth
 django-allauth
 django-debug-toolbar
 django-crispy-forms
+python-memcached
 psycopg2
 pytz

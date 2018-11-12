@@ -9,6 +9,7 @@ Platform for linguistic rating experiments.
 - [django-crispy-forms](https://github.com/django-crispy-forms/django-crispy-forms)
 - [django-allauth](https://github.com/pennersr/django-allauth)
 - [psycopg2](http://initd.org/psycopg/) (When using PostgreSQL)
+- [python-memcached ](https://github.com/linsomniac/python-memcached) (When using caching)
 - [bootstrap](https://getbootstrap.com/)
 - [jquery](https://jquery.com/)
 - [popper.js](https://popper.js.org/)
