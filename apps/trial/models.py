@@ -27,7 +27,7 @@ class Questionnaire(models.Model):
     item_lists = models.ManyToManyField(item_models.ItemList)
 
     class Meta:
-        ordering = ['pk']
+        ordering = ['number']
 
     def save(self, *args, **kwargs):
         self.slug = '{}-{}'.format(self.study.slug, self.number)
