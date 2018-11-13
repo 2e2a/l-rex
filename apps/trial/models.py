@@ -48,13 +48,6 @@ class Questionnaire(models.Model):
         return item_models.Item.objects.filter(id__in=questionnaire_items)
 
     @cached_property
-    def next(self):
-        questionnaire =  self.study.questionnaire_set.filter(study=self.study, pk__gt=self.pk).first()
-        if not questionnaire:
-            questionnaire =  self.study.questionnaire_set.filter(study=self.study).first()
-        return questionnaire
-
-    @cached_property
     def questionnaire_items_by_block(self):
         blocks = OrderedDict()
         for questionnaire_item in self.questionnaireitem_set.all():
@@ -328,12 +321,7 @@ class Trial(models.Model):
         return TrialStatus.CREATED
 
     def init(self, study):
-        last_trial = Trial.objects.filter(questionnaire__study=study).last()
-        if last_trial:
-            questionnaire = last_trial.questionnaire.next
-        else:
-            questionnaire = Questionnaire.objects.filter(study=study).first()
-        self.questionnaire = questionnaire
+        self.questionnaire = self.study.next_questionnaire
 
     def generate_id(self):
         if self.id:

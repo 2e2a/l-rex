@@ -1,4 +1,5 @@
 import csv
+from itertools import groupby
 
 from enum import Enum
 from django.conf import settings
@@ -166,6 +167,26 @@ class Study(models.Model):
             if questionnaire_block.randomization != QuestionnaireBlock.RANDOMIZATION_NONE:
                 return True
         return False
+
+    @property
+    def questionnaire_trial_count(self):
+        from apps.trial.models import Trial
+        questionnaires = self.questionnaire_set.all()
+        trials = Trial.objects.filter(
+            questionnaire_id__in=[questionnaire.id for questionnaire in questionnaires]
+        ).order_by('questionnaire_id')
+        trials_per_questionnaire = groupby(trials, lambda x: x.questionnaire_id)
+        trial_count_by_id = {q_id: len(list(q_trials)) for q_id, q_trials in trials_per_questionnaire}
+        trial_count = {}
+        for questionnaire in questionnaires:
+            trial_count.update({questionnaire: trial_count_by_id.get(questionnaire.id, 0)})
+        return trial_count
+
+    @property
+    def next_questionnaire(self):
+        trial_count = self.questionnaire_trial_count
+        next_questionnaire = min(trial_count, key=trial_count.get)
+        return next_questionnaire
 
     def _questionnaire_count(self):
         questionnaire_lcm = 1
