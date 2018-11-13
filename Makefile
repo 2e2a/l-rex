@@ -46,12 +46,11 @@ migrate:
 run:
 	$(VIRTUAL_ENV)/bin/python3 manage.py runserver 8000
 
-.PHONY: reset
-reset:
-	psql -U postgres -c 'DROP DATABASE lrex'
-	psql -U postgres -c 'CREATE DATABASE lrex OWNER django'
+.PHONY: reset-db
+reset-db:
+	./scripts/reset_db.sh
 	$(VIRTUAL_ENV)/bin/python3 manage.py migrate
-	#$(VIRTUAL_ENV)/bin/python3 manage.py loaddata fixtures/init.json
+	$(VIRTUAL_ENV)/bin/python3 manage.py loaddata fixtures/demo.json
 
 .PHONY: pull
 pull:
