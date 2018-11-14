@@ -126,7 +126,7 @@ class Experiment(models.Model):
             item = rating.questionnaire_item.item
             scale_value = scale_values[rating.scale_value_id]
             question = questions[scale_value.question_id]
-            row['subject'] = rating.trial_id
+            row['subject'] = rating.trial.id
             row['item'] = item.number
             row['condition'] = item.condition
             row['question'] = question.num
