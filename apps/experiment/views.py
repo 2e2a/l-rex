@@ -71,7 +71,7 @@ class ExperimentCreateView(study_views.StudyMixin, study_views.CheckStudyCreator
         form.instance.study = self.study
         response = super().form_valid(form)
         self.study.set_progress(self.study.PROGRESS_STD_EXP_CREATED)
-        messages.success(self.request, study_views.progress_success_message(self.study.progress))
+        messages.success(self.request, study_views.progress_success_message(self.study.PROGRESS_STD_EXP_CREATED))
         return response
 
     @property

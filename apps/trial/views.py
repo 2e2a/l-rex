@@ -118,7 +118,7 @@ class QuestionnaireListView(study_views.StudyMixin, study_views.CheckStudyCreato
         self._create_default_questionnaire_block(randomization)
         self.study.generate_questionnaires()
         self.study.set_progress(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED)
-        messages.success(request, study_views.progress_success_message(self.study.progress))
+        messages.success(request, study_views.progress_success_message(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED))
         return redirect('questionnaires',study_slug=self.study.slug)
 
     def get_queryset(self):
@@ -193,7 +193,7 @@ class QuestionnaireGenerateView(study_views.StudyMixin, study_views.CheckStudyCr
                 instances = self.formset.save(commit=True)
                 self.study.generate_questionnaires()
                 self.study.set_progress(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED)
-                messages.success(request, study_views.progress_success_message(self.study.progress))
+                messages.success(request, study_views.progress_success_message(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED))
                 return redirect('questionnaires', study_slug=self.study.slug)
         return super().get(request, *args, **kwargs)
 

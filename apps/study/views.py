@@ -129,7 +129,7 @@ class StudyDetailView(StudyObjectMixin, CheckStudyCreatorMixin, NextStepsMixin, 
             study = models.Study.objects.get(slug=study_slug)
             study.is_published = True
             study.set_progress(study.PROGRESS_STD_PUBLISHED)
-            messages.success(request, progress_success_message(study.progress))
+            messages.success(request, progress_success_message(study.PROGRESS_STD_PUBLISHED))
             study.save()
         study_slug = request.POST.get('unpublish', None)
         if study_slug:
@@ -218,7 +218,7 @@ class QuestionUpdateView(StudyMixin, CheckStudyCreatorMixin, ProceedWarningMixin
                                 label=scale_label,
                             )
             self.study.set_progress(self.study.PROGRESS_STD_QUESTION_CREATED)
-            messages.success(request, progress_success_message(self.study.progress))
+            messages.success(request, progress_success_message(self.study.PROGRESS_STD_QUESTION_CREATED))
         elif 'add' in request.POST:
             self.formset = forms.question_formset_factory(self.n_questions, extra + 1)(
                 queryset=models.Question.objects.filter(study=self.study)

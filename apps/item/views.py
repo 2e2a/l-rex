@@ -65,7 +65,7 @@ class ItemListView(experiment_views.ExperimentMixin, study_views.CheckStudyCreat
             try:
                 self.experiment.validate_items()
                 self.experiment.set_progress(self.experiment.PROGRESS_EXP_ITEMS_VALIDATED)
-                messages.success(self.request, study_views.progress_success_message(self.experiment.progress))
+                messages.success(self.request, study_views.progress_success_message(self.experiment.PROGRESS_EXP_ITEMS_VALIDATED))
             except AssertionError as e:
                 messages.error(request, str(e))
         return redirect('items', experiment_slug=self.experiment.slug)
@@ -101,7 +101,7 @@ class TextItemCreateView(experiment_views.ExperimentMixin, study_views.CheckStud
         form.instance.experiment = self.experiment
         result = super().form_valid(form)
         self.experiment.set_progress(experiment_models.Experiment.PROGRESS_EXP_ITEMS_CREATED)
-        messages.success(self.request, study_views.progress_success_message(self.experiment.progress))
+        messages.success(self.request, study_views.progress_success_message(self.experiment.PROGRESS_EXP_ITEMS_CREATED))
         return result
 
     def get_success_url(self):
@@ -151,7 +151,7 @@ class AudioLinkItemCreateView(experiment_views.ExperimentMixin, study_views.Chec
         form.instance.experiment = self.experiment
         result = super().form_valid(form)
         self.experiment.set_progress(experiment_models.Experiment.PROGRESS_EXP_ITEMS_CREATED)
-        messages.success(self.request, study_views.progress_success_message(self.experiment.progress))
+        messages.success(self.request, study_views.progress_success_message(self.experiment.PROGRESS_EXP_ITEMS_CREATED))
         return result
 
     def get_success_url(self):
@@ -344,7 +344,7 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
 
 
         self.experiment.set_progress(self.experiment.PROGRESS_EXP_ITEMS_CREATED)
-        messages.success(self.request, study_views.progress_success_message(self.experiment.progress))
+        messages.success(self.request, study_views.progress_success_message(self.experiment.PROGRESS_EXP_ITEMS_CREATED))
         return result
 
     def get_success_url(self):
@@ -452,7 +452,7 @@ class ItemListListView(experiment_views.ExperimentMixin, study_views.CheckStudyC
         elif action and action == 'generate_single':
             self.experiment.compute_item_lists(distribute=False)
         self.experiment.set_progress(self.experiment.PROGRESS_EXP_LISTS_CREATED)
-        messages.success(self.request, study_views.progress_success_message(self.experiment.progress))
+        messages.success(self.request, study_views.progress_success_message(self.experiment.PROGRESS_EXP_LISTS_CREATED))
         return redirect('itemlists', experiment_slug=self.experiment.slug)
 
     def get_queryset(self):
