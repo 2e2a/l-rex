@@ -99,7 +99,7 @@ class Study(models.Model):
     )
 
     class Meta:
-        ordering = ['pk']
+        ordering = ['-pk']
 
     def save(self, *args, **kwargs):
         self.slug = slugify_unique(self.title, Study, self.id)
