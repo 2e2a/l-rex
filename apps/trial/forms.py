@@ -23,6 +23,16 @@ def questionnaire_block_factory(n_blocks):
         max_num=n_blocks,
     )
 
+def customize_randomization(questionnaireblock_formset, study):
+    if not study.allow_pseudo_randomization:
+        for form in questionnaireblock_formset:
+            randomization = form.fields.get('randomization')
+            print(randomization.choices)
+            randomization.choices = [(k, v) for k,v in randomization.choices
+                                     if k != models.QuestionnaireBlock.RANDOMIZATION_PSEUDO]
+            print(randomization.choices)
+
+
 
 questionnaire_block_formset_helper = FormHelper()
 questionnaire_block_formset_helper.add_layout(
@@ -108,7 +118,6 @@ class RatingForm(crispy_forms.CrispyModelForm):
             self.fields['scale_value'].choices = custom_choices
 
 
-
 class RatingFormsetForm(forms.ModelForm):
 
     class Meta:
@@ -134,6 +143,7 @@ def ratingformset_factory(n_questions=1):
         extra=0,
         validate_max=True,
     )
+
 
 def customize_to_questions(ratingformset, questions, item_questions):
     for i, (question, form) in enumerate(zip(questions, ratingformset)):

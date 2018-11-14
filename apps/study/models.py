@@ -161,6 +161,10 @@ class Study(models.Model):
         return reverse('experiment-result-list', args=[self.slug])
 
     @cached_property
+    def allow_pseudo_randomization(self):
+        return self.experiment_set.filter(is_filler=True).count() > 0
+
+    @cached_property
     def randomization_reqiured(self):
         from apps.trial.models import QuestionnaireBlock
         for questionnaire_block in self.questionnaireblock_set.all():

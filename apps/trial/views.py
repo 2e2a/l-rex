@@ -186,11 +186,13 @@ class QuestionnaireGenerateView(study_views.StudyMixin, study_views.CheckStudyCr
         self.formset = forms.questionnaire_block_factory(len(self.blocks))(
             queryset=models.QuestionnaireBlock.objects.filter(study=self.study)
         )
+        forms.customize_randomization(self.formset, self.study)
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         if 'submit' in request.POST:
             self.formset = forms.questionnaire_block_factory(len(self.blocks))(request.POST, request.FILES)
+            forms.customize_randomization(self.formset, self.study)
             if self.formset.is_valid():
                 instances = self.formset.save(commit=True)
                 self.study.generate_questionnaires()
