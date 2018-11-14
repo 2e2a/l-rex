@@ -211,8 +211,8 @@ class QuestionnaireGenerateView(study_views.StudyMixin, study_views.CheckStudyCr
         ]
 
 
-class QuestionnaireBlockUpdateView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, generic.TemplateView):
-    title = 'Edit questionnaire blocks'
+class QuestionnaireBlockInstructionsUpdateView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, generic.TemplateView):
+    title = 'Edit questionnaire block instructions'
     template_name = 'lrex_contrib/crispy_formset_form.html'
     formset = None
     helper = forms.questionnaire_block_update_formset_helper
