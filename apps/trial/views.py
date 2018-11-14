@@ -95,7 +95,7 @@ class QuestionnaireListView(study_views.StudyMixin, study_views.CheckStudyCreato
         return len(self.blocks) > 1
 
     def _create_default_questionnaire_block(self, randomization):
-        models.QuestionnaireBlock.objects.filter(study=self.study).delete() # TODO: do not delete
+        models.QuestionnaireBlock.objects.filter(study=self.study).delete()
         models.QuestionnaireBlock.objects.create(
             study=self.study,
             block=self.blocks[0],
@@ -172,12 +172,14 @@ class QuestionnaireGenerateView(study_views.StudyMixin, study_views.CheckStudyCr
         return super().dispatch(*args, **kwargs)
 
     def _initialize_questionnaire_blocks(self):
-        models.QuestionnaireBlock.objects.filter(study=self.study).delete() # TODO: do not delete
-        for block in self.blocks:
-            models.QuestionnaireBlock.objects.create(
-                study=self.study,
-                block=block,
-            )
+        existing_blocks = models.QuestionnaireBlock.objects.filter(study=self.study)
+        if len(existing_blocks) != len(self.blocks):
+            for block in existing_blocks: block.delete()
+            for block in self.blocks:
+                models.QuestionnaireBlock.objects.create(
+                    study=self.study,
+                    block=block,
+                )
 
     def get(self, request, *args, **kwargs):
         self._initialize_questionnaire_blocks()
@@ -196,6 +198,15 @@ class QuestionnaireGenerateView(study_views.StudyMixin, study_views.CheckStudyCr
                 messages.success(request, study_views.progress_success_message(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED))
                 return redirect('questionnaires', study_slug=self.study.slug)
         return super().get(request, *args, **kwargs)
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('questionnaires', reverse('questionnaires', args=[self.study.slug])),
+            ('generate', '')
+        ]
 
 
 class QuestionnaireBlockUpdateView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, generic.TemplateView):
@@ -221,6 +232,15 @@ class QuestionnaireBlockUpdateView(study_views.StudyMixin, study_views.CheckStud
                 self.formset.save(commit=True)
                 return redirect('questionnaires', study_slug=self.study.slug)
         return super().get(request, *args, **kwargs)
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('questionnaires', reverse('questionnaires', args=[self.study.slug])),
+            ('block-instructions', '')
+        ]
 
 
 class TrialListView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, generic.ListView):

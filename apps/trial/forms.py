@@ -4,7 +4,6 @@ from django import forms
 
 from apps.contrib import forms as crispy_forms
 from apps.study import models as study_models
-from apps.trial import models as trial_models
 
 from . import models
 
@@ -13,7 +12,7 @@ class QuestionnaireBlockForm(forms.ModelForm):
 
     class Meta:
         model = models.QuestionnaireBlock
-        fields = ['instructions', 'randomization']
+        fields = ['randomization']
 
 
 def questionnaire_block_factory(n_blocks):
