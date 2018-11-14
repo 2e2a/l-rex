@@ -286,7 +286,7 @@ class Study(models.Model):
         elif progress == self.PROGRESS_STD_QUESTIONNARES_GENERATED:
             return reverse('questionnaires', args=[self])
         elif progress == self.PROGRESS_STD_PUBLISHED:
-            return reverse('studies', args=[])
+            return reverse('study', args=[self])
         return None
 
     def set_progress(self, progress):

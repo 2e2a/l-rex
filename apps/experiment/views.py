@@ -156,7 +156,7 @@ class ExperimentResultListView(study_views.StudyMixin, study_views.CheckStudyCre
     def breadcrumbs(self):
         return [
             ('studies', reverse('studies')),
-            (self.study.title, reverse('study-run',args=[self.study.slug])),
+            (self.study.title, reverse('study',args=[self.study.slug])),
             ('results','')
         ]
 
@@ -220,7 +220,7 @@ class ExperimentResultsView(ExperimentObjectMixin, study_views.CheckStudyCreator
     def breadcrumbs(self):
         return [
             ('studies', reverse('studies')),
-            (self.study.title, reverse('study-run',args=[self.study.slug])),
+            (self.study.title, reverse('study',args=[self.study.slug])),
             ('results', reverse('experiment-result-list',args=[self.study.slug])),
             (self.experiment.title,'')
         ]

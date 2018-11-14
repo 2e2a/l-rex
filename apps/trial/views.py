@@ -248,7 +248,7 @@ class TrialListView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, 
     def breadcrumbs(self):
         return [
             ('studies', reverse('studies')),
-            (self.study.title, reverse('study-run', args=[self.study.slug])),
+            (self.study.title, reverse('study', args=[self.study.slug])),
             ('trials', ''),
         ]
 
@@ -303,7 +303,7 @@ class TrialDetailView(TrialObjectMixin, study_views.CheckStudyCreatorMixin, gene
     def breadcrumbs(self):
         return [
             ('studies', reverse('studies')),
-            (self.study.title, reverse('study-run', args=[self.study.slug])),
+            (self.study.title, reverse('study', args=[self.study.slug])),
             ('trials', reverse('trials', args=[self.study.slug])),
             (self.object.id, ''),
         ]

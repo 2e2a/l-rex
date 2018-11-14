@@ -11,70 +11,17 @@
     {% for study in study_list %}
     <li class="list-group-item my-1">
         <div class="row">
-            <div class="col-7">
+            <div class="col-9">
                 <strong>{{ study.title }}</strong>
                 <span class="badge badge-primary">{{ study.status.name }}</span>
                 {% if study.creator != view.request.user %}
                     <span class="badge badge-secondary">Shared</span>
                 {% endif %}
-                {%if study.is_published %}
-                <div class="row">
-                    <div class="col-md-2">
-                        <small>Participate:</small>
-                    </div>
-                    <div class="col-md-4">
-                        <small><a href="{% url 'trial-create' study.slug %}">Participant link</a></small>
-                    </div>
-                    <div class="col-md-2">
-                        {% if study.creator != view.request.user %}
-                        <small>Shared by:</small>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-4">
-                        {% if study.creator != view.request.user %}
-                        <small>{{ study.creator.username }}</small>
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-2">
-                        <small>Password:</small>
-                    </div>
-                    <div class="col-md-4">
-                        <small>{{ study.password }}</small>
-                    </div>
-                    <div class="col-md-2">
-                    </div>
-                    <div class="col-md-4">
-                    </div>
-                </div>
-                {% endif %}
             </div>
-            <div class="col-5">
-                <a href="{% url 'study' study.slug %}"
-                   class="btn {% if study.status.name == 'ACTIVE' %} btn-outline-primary {% else %} btn-outline-primary {% endif %} btn-sm mx-1"
-                   role="button">
-                    Edit
+            <div class="col-3">
+                <a href="{% url 'study' study.slug %}" class="btn btn-outline-primary btn-sm mx-1" role="button">
+                    Details
                 </a>
-                <a href="{% url 'study-run' study.slug %}"
-                   class="btn btn-outline-primary btn-sm mx-1 {% if not study|is_progress_std_questionnares_generated_reached %} disabled {% endif %}"
-                   role="button">
-                    Results
-                </a>
-                <form class="form-inline" method="post">
-                    {% csrf_token %}
-                    {% if study.is_published %}
-                    <button type="submit" name="unpublish" value="{{ study.slug }}"
-                            class="btn btn-outline-warning btn-sm mx-1">
-                        Unpublish
-                    </button>
-                    {% else %}
-                    <button type="submit" name="publish" value="{{ study.slug }}"
-                            class="btn btn-outline-success btn-sm mx-1 {% if not study|is_progress_std_questionnares_generated_reached %} disabled {% endif %}">
-                        Publish
-                    </button>
-                    {% endif %}
-                </form>
                 <a href="{% url 'study-delete' study.slug %}" class="btn btn-outline-danger btn-sm mx-1" role="button">
                     Delete
                 </a>
@@ -85,5 +32,29 @@
     <li class="list-group-item my-1">There are currently no studies.</li>
     {% endfor %}
 </ul>
+
+<nav aria-label="Pagination">
+    <ul class="pagination justify-content-center mt-2">
+        {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page=1">&laquo; first</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">previous</a></li>
+        {% else %}
+        <li class="page-item disabled"><a class="page-link">&laquo; first</a></li>
+        <li class="page-item disabled"><a class="page-link">previous</a></li>
+        {% endif %}
+
+        <span class="my-2 mx-2">
+                {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+            </span>
+
+        {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">next</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a></li>
+        {% else %}
+        <li class="page-item disabled"><a class="page-link">next</a></li>
+        <li class="page-item disabled"><a class="page-link">last &raquo;</a></li>
+        {% endif %}
+    </ul>
+</nav>
 {% endblock %}
 

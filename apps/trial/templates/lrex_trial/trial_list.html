@@ -10,20 +10,6 @@
         </button>
     </form>
 </div>
-<div class="card  my-2">
-    <div class="card-body">
-        <h2>Study access</h2>
-        {% if not study.is_published %}
-        <p class="card-text">
-            Publish your study first.
-        </p>
-        {% endif %}
-        <p class="card-text">
-            Share <a href="{% url 'trial-create' study.slug %}">this link</a> with your participants
-            along with the password that you set for the study.
-        </p>
-    </div>
-</div>
 
 <ul class="list-group">
     {% for trial in trial_list %}

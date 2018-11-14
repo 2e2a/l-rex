@@ -8,6 +8,7 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.views import generic
 
+from apps.trial import models as trial_models
 from apps.contrib import views as contib_views
 
 from . import models
@@ -86,28 +87,13 @@ class CheckStudyCreatorMixin(UserPassesTestMixin):
 class StudyListView(LoginRequiredMixin, generic.ListView):
     model = models.Study
     title = 'Studies'
+    paginate_by = 16
 
     def get_queryset(self):
         return super().get_queryset().filter(
             Q(creator=self.request.user) |
             Q(shared_with__contains=self.request.user.username)
         )
-
-    def post(self, request, *args, **kwargs):
-        study_slug = request.POST.get('publish', None)
-        if study_slug:
-            study = models.Study.objects.get(slug=study_slug)
-            study.is_published = True
-            study.set_progress(study.PROGRESS_STD_PUBLISHED)
-            messages.success(request, progress_success_message(study.progress))
-            study.save()
-        study_slug = request.POST.get('unpublish', None)
-        if study_slug:
-            study = models.Study.objects.get(slug=study_slug)
-            study.is_published = False
-            study.set_progress(study.PROGRESS_STD_QUESTIONNARES_GENERATED)
-            messages.success(request, 'Study unpublished.')
-        return redirect('studies')
 
     @property
     def breadcrumbs(self):
@@ -132,20 +118,31 @@ class StudyCreateView(LoginRequiredMixin, generic.CreateView):
 
 class StudyDetailView(StudyObjectMixin, CheckStudyCreatorMixin, NextStepsMixin, generic.DetailView):
     model = models.Study
-    title = 'Edit study'
 
     @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, ''),
-        ]
+    def title(self):
+        return self.study.title
 
+    def post(self, request, *args, **kwargs):
+        study_slug = request.POST.get('publish', None)
+        if study_slug:
+            study = models.Study.objects.get(slug=study_slug)
+            study.is_published = True
+            study.set_progress(study.PROGRESS_STD_PUBLISHED)
+            messages.success(request, progress_success_message(study.progress))
+            study.save()
+        study_slug = request.POST.get('unpublish', None)
+        if study_slug:
+            study = models.Study.objects.get(slug=study_slug)
+            study.is_published = False
+            study.set_progress(study.PROGRESS_STD_QUESTIONNARES_GENERATED)
+            messages.success(request, 'Study unpublished.')
+        return redirect('study', study_slug=self.study.slug)
 
-class StudyRunView(StudyObjectMixin, CheckStudyCreatorMixin, NextStepsMixin, generic.DetailView):
-    model = models.Study
-    title = 'Run study'
-    template_name = 'lrex_study/study_run.html'
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['trial_count'] = trial_models.Trial.objects.filter(questionnaire__study=self.study).count()
+        return data
 
     @property
     def breadcrumbs(self):
