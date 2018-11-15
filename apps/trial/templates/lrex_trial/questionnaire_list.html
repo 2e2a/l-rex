@@ -24,8 +24,6 @@
             <div class="dropdown-menu" aria-labelledby="dropdownAction">
                 {% if study.allow_pseudo_randomization %}
                 <a href="#" class="dropdown-item" onclick="$('#action').val('generate_pseudo'); $('#actionForm').submit()">Pseudo-randomize</a>
-                {% else %}
-                <a href="#" class="dropdown-item text-muted">Pseudo-randomize</a>
                 {% endif %}
                 <a href="#" class="dropdown-item" onclick="$('#action').val('generate_random'); $('#actionForm').submit()">Randomize</a>
                 <a href="#" class="dropdown-item"  onclick="$('#action').val('generate_ordered'); $('#actionForm').submit()">Keep fixed item order</a>

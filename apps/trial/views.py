@@ -1,6 +1,5 @@
 from django.contrib import messages
 from django.core.exceptions import ValidationError
-from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -85,10 +84,12 @@ class QuestionnaireListView(study_views.StudyMixin, study_views.CheckStudyCreato
     page = 1
     paginate_by = 16
 
-    def dispatch(self, *args, **kwargs):
-        self.page = self.request.GET.get('page', 1)
+    def dispatch(self, request, *args, **kwargs):
+        self.page = request.GET.get('page', 1)
         self.blocks = self.study.item_blocks
-        return super().dispatch(*args, **kwargs)
+        if not self.study.allow_pseudo_randomization:
+            messages.info(request, 'Note: Define filler experiments to use pseudo randomization.')
+        return super().dispatch(request, *args, **kwargs)
 
     @property
     def consider_blocks(self):
@@ -167,9 +168,11 @@ class QuestionnaireGenerateView(study_views.StudyMixin, study_views.CheckStudyCr
     formset = None
     helper = forms.questionnaire_block_formset_helper
 
-    def dispatch(self, *args, **kwargs):
+    def dispatch(self, request, *args, **kwargs):
         self.blocks = self.study.item_blocks
-        return super().dispatch(*args, **kwargs)
+        if not self.study.allow_pseudo_randomization:
+            messages.info(request, 'Note: Define filler experiments to use pseudo randomization.')
+        return super().dispatch(request, *args, **kwargs)
 
     def _initialize_questionnaire_blocks(self):
         existing_blocks = models.QuestionnaireBlock.objects.filter(study=self.study)
