@@ -6,12 +6,12 @@
     <form class="form-inline" method="post">
         {% csrf_token %}
         {% if study.is_published %}
-        <button type="submit" name="unpublish" value="{{ study.slug }}"
+        <button type="submit" name="action" value="unpublish"
                 class="btn btn-warning btn-sm mx-1">
             Unpublish
         </button>
         {% else %}
-        <button type="submit" name="publish" value="{{ study.slug }}"
+        <button type="submit" name="action" value="publish"
                 class="btn btn-success btn-sm mx-1 {% if not study|is_progress_std_questionnares_generated_reached %} disabled {% endif %}">
             Publish
         </button>

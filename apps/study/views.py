@@ -124,19 +124,17 @@ class StudyDetailView(StudyObjectMixin, CheckStudyCreatorMixin, NextStepsMixin, 
         return self.study.title
 
     def post(self, request, *args, **kwargs):
-        study_slug = request.POST.get('publish', None)
-        if study_slug:
-            study = models.Study.objects.get(slug=study_slug)
-            study.is_published = True
-            study.set_progress(study.PROGRESS_STD_PUBLISHED)
-            messages.success(request, progress_success_message(study.PROGRESS_STD_PUBLISHED))
-            study.save()
-        study_slug = request.POST.get('unpublish', None)
-        if study_slug:
-            study = models.Study.objects.get(slug=study_slug)
-            study.is_published = False
-            study.set_progress(study.PROGRESS_STD_QUESTIONNARES_GENERATED)
+        action = request.POST.get('action', None)
+        if action == 'publish':
+            self.study.is_published = True
+            self.study.set_progress(self.study.PROGRESS_STD_PUBLISHED)
+            messages.success(request, progress_success_message(self.study.PROGRESS_STD_PUBLISHED))
+            self.study.save()
+        elif action == 'unpublish':
+            self.study.is_published = False
+            self.study.set_progress(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED)
             messages.success(request, 'Study unpublished.')
+            self.study.save()
         return redirect('study', study_slug=self.study.slug)
 
     def get_context_data(self, **kwargs):
