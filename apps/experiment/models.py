@@ -115,6 +115,10 @@ class Experiment(models.Model):
         ratings = trial_models.Rating.objects.filter(
             questionnaire_item__item__experiment=self
         )
+        if not self.study.require_participant_id:
+            trials =  list(trial_models.Trial.objects.filter(
+                questionnaire__study=self.study
+            ))
         scale_values = {}
         questions = {}
         for question in self.study.questions:
@@ -126,7 +130,8 @@ class Experiment(models.Model):
             item = rating.questionnaire_item.item
             scale_value = scale_values[rating.scale_value_id]
             question = questions[scale_value.question_id]
-            row['subject'] = rating.trial.id
+            trial = rating.trial
+            row['subject'] = trial.subject_id if self.study.require_participant_id else trials.index(trial)
             row['item'] = item.number
             row['condition'] = item.condition
             row['question'] = question.num

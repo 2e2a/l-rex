@@ -81,15 +81,15 @@ class TrialForm(crispy_forms.CrispyModelForm):
 
     class Meta:
         model = models.Trial
-        fields = ['id']
+        fields = ['subject_id']
 
     def __init__(self, *args, **kwargs):
         self.study = kwargs.pop('study')
         super().__init__(*args, **kwargs)
         if self.study.require_participant_id:
-            self.fields['id'].required = True
+            self.fields['subject_id'].required = True
         else :
-            self.fields['id'].widget = forms.HiddenInput()
+            self.fields['subject_id'].widget = forms.HiddenInput()
 
     def clean_password(self):
         password = self.cleaned_data['password']

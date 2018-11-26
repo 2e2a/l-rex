@@ -281,6 +281,13 @@ class Trial(models.Model):
         help_text='Provide an identification number/name (as instructed by the experimenter).',
         verbose_name='ID',
     )
+    subject_id = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text='Provide an identification number/name (as instructed by the experimenter).',
+        verbose_name='ID',
+    )
     rating_proof = models.CharField(
         max_length=8,
         blank=True,
@@ -322,16 +329,6 @@ class Trial(models.Model):
 
     def init(self, study):
         self.questionnaire = self.study.next_questionnaire
-
-    def generate_id(self):
-        if self.id:
-            return
-        try:
-            last_trial = Trial.objects.filter(questionnaire__study=self.questionnaire.study)\
-                             .order_by('-creation_date')[1:2][0]
-            self.id = int(last_trial.id) + 1
-        except IndexError:
-            self.id = 1
         self.save()
 
     def generate_rating_proof(self):

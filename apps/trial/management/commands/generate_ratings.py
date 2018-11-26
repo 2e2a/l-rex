@@ -30,7 +30,6 @@ class Command(BaseCommand):
             trial = trial_models.Trial.objects.create(
                 questionnaire=questionnaire
             )
-            trial.generate_id()
             for questionnaire_item in questionnaire.questionnaireitem_set.all():
                 for scale_values in question_scale_values:
                     scale_value = random.choice(scale_values)

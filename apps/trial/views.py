@@ -266,9 +266,6 @@ class TrialListView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, 
     def get_queryset(self):
         return super().get_queryset().filter(questionnaire__study=self.study)
 
-    def show_counter(self):
-        return self.study.require_participant_id
-
     @property
     def breadcrumbs(self):
         return [
@@ -302,9 +299,7 @@ class TrialCreateView(study_views.StudyMixin, generic.CreateView):
             return redirect(active_trial_url)
         form.instance.study = self.study
         form.instance.init(self.study)
-        response = super().form_valid(form)
-        form.instance.generate_id()
-        return response
+        return super().form_valid(form)
 
     def get_success_url(self):
         first_questionnaire_item = models.QuestionnaireItem.objects.get(
@@ -330,7 +325,7 @@ class TrialDetailView(TrialObjectMixin, study_views.CheckStudyCreatorMixin, gene
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
             ('trials', reverse('trials', args=[self.study.slug])),
-            (self.object.id, ''),
+            (self.trial.subject_id if self.trial.subject_id else self.trial.slug, ''),
         ]
 
 
