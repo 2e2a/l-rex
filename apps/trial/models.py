@@ -274,13 +274,6 @@ class Trial(models.Model):
     creation_date = models.DateTimeField(
         default=timezone.now
     )
-    id = models.CharField(
-        max_length=200,
-        blank=True,
-        null=True,
-        help_text='Provide an identification number/name (as instructed by the experimenter).',
-        verbose_name='ID',
-    )
     subject_id = models.CharField(
         max_length=200,
         blank=True,
