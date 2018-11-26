@@ -117,9 +117,12 @@ class QuestionnaireListView(study_views.StudyMixin, study_views.CheckStudyCreato
             return redirect('questionnaire-generate',study_slug=self.study.slug)
         randomization = self._get_randomization(action)
         self._create_default_questionnaire_block(randomization)
-        self.study.generate_questionnaires()
-        self.study.set_progress(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED)
-        messages.success(request, study_views.progress_success_message(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED))
+        try:
+            self.study.generate_questionnaires()
+            self.study.set_progress(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED)
+            messages.success(request, study_views.progress_success_message(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED))
+        except RuntimeError:
+            messages.error(request, 'Pseudo-randomization timed out. Retry or add more filler items.')
         return redirect('questionnaires',study_slug=self.study.slug)
 
     def get_queryset(self):
@@ -197,10 +200,13 @@ class QuestionnaireGenerateView(study_views.StudyMixin, study_views.CheckStudyCr
             self.formset = forms.questionnaire_block_factory(len(self.blocks))(request.POST, request.FILES)
             forms.customize_randomization(self.formset, self.study)
             if self.formset.is_valid():
-                instances = self.formset.save(commit=True)
-                self.study.generate_questionnaires()
-                self.study.set_progress(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED)
-                messages.success(request, study_views.progress_success_message(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED))
+                self.formset.save(commit=True)
+                try:
+                    self.study.generate_questionnaires()
+                    self.study.set_progress(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED)
+                    messages.success(request, study_views.progress_success_message(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED))
+                except RuntimeError:
+                    messages.error(request, 'Pseudo-randomization timed out. Retry or add more filler items and retry.')
                 return redirect('questionnaires', study_slug=self.study.slug)
         return super().get(request, *args, **kwargs)
 
