@@ -224,7 +224,7 @@ class Experiment(models.Model):
         for i, _ in enumerate(self.study.questions):
             csv_row.append('rating{}'.format(i))
         if self.study.has_text_items:
-            csv_row.append('Text')
+            csv_row.append('text')
         writer.writerow(csv_row)
         results = self.results()
         results = self._result_lists_for_questions(results)
