@@ -293,13 +293,13 @@ class TrialCreateView(study_views.StudyMixin, generic.CreateView):
     def _trial_by_id(self, id):
         if id:
             try:
-                return models.Trial.objects.get(questionnaire__study=self.study, id=id)
+                return models.Trial.objects.get(questionnaire__study=self.study, subject_id=id)
             except models.Trial.DoesNotExist:
                 pass
         return None
 
     def form_valid(self, form):
-        active_trial = self._trial_by_id(form.instance.id)
+        active_trial = self._trial_by_id(form.instance.subject_id)
         if active_trial:
             active_trial_url = reverse('rating-create', args=[active_trial.slug, 0])
             return redirect(active_trial_url)
