@@ -64,13 +64,13 @@ question_formset_helper.add_layout(
     ),
 )
 question_formset_helper.add_input(
+    Submit("submit", "Submit"),
+)
+question_formset_helper.add_input(
     Submit("add", "Add"),
 )
 question_formset_helper.add_input(
     Submit("delete", "Delete last"),
-)
-question_formset_helper.add_input(
-    Submit("submit", "Submit"),
 )
 
 

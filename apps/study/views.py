@@ -201,36 +201,37 @@ class QuestionUpdateView(StudyMixin, CheckStudyCreatorMixin, ProceedWarningMixin
 
     def post(self, request, *args, **kwargs):
         self.formset = forms.question_formset_factory(self.n_questions)(request.POST, request.FILES)
-        extra = len(self.formset.forms) - self.n_questions
-        if 'submit' in request.POST:
-            if self.formset.is_valid():
-                instances = self.formset.save(commit=False)
-                for instance, form in zip(instances, self.formset):
-                    instance.study = self.study
-                    instance.scalevalue_set.all().delete()
-                    instance.save()
-                    for scale_label in form.cleaned_data['scale_labels'].split(','):
-                        if scale_label:
-                            models.ScaleValue.objects.create(
-                                question=instance,
-                                label=scale_label,
-                            )
-            self.study.set_progress(self.study.PROGRESS_STD_QUESTION_CREATED)
-            messages.success(request, progress_success_message(self.study.PROGRESS_STD_QUESTION_CREATED))
-        elif 'add' in request.POST:
-            self.formset = forms.question_formset_factory(self.n_questions, extra + 1)(
-                queryset=models.Question.objects.filter(study=self.study)
-            )
-        else: # delete last
-            if extra > 0:
-                extra -= 1
-            elif self.n_questions > 0:
-                self.study.question_set.last().delete()
-                self.n_questions -= 1
-            self.formset = forms.question_formset_factory(self.n_questions, extra)(
-                queryset=models.Question.objects.filter(study=self.study)
-            )
-        forms.initialize_with_questions(self.formset, self.study.question_set.all())
+        if self.formset.is_valid():
+            instances = self.formset.save(commit=False)
+            for instance, form in zip(instances, self.formset):
+                instance.study = self.study
+                instance.save()
+                instance.scalevalue_set.all().delete()
+                for scale_label in form.cleaned_data['scale_labels'].split(','):
+                    if scale_label:
+                        models.ScaleValue.objects.create(
+                            question=instance,
+                            label=scale_label,
+                        )
+            extra = len(self.formset.forms) - self.n_questions
+            if 'submit' in request.POST:
+                self.study.set_progress(self.study.PROGRESS_STD_QUESTION_CREATED)
+                messages.success(request, progress_success_message(self.study.PROGRESS_STD_QUESTION_CREATED))
+                return redirect('study', study_slug=self.study.slug)
+            elif 'add' in request.POST:
+                self.formset = forms.question_formset_factory(self.n_questions, extra + 1)(
+                    queryset=models.Question.objects.filter(study=self.study)
+                )
+            else: # delete last
+                if extra > 0:
+                    extra -= 1
+                elif self.n_questions > 0:
+                    self.study.question_set.last().delete()
+                    self.n_questions -= 1
+                self.formset = forms.question_formset_factory(self.n_questions, extra)(
+                    queryset=models.Question.objects.filter(study=self.study)
+                )
+            forms.initialize_with_questions(self.formset, self.study.question_set.all())
         return super().get(request, *args, **kwargs)
 
     @property
