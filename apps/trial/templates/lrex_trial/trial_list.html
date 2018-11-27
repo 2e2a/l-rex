@@ -20,10 +20,11 @@
                 {% if study.require_participant_id %}
                 {{ trial.subject_id }} -
                 {% endif %}
+                {{ trial.creation_date|date:"SHORT_DATETIME_FORMAT" }}
                 <span class="badge badge-primary">{{ trial.status.name }}</span>
                 <span class="badge badge-secondary">Questionnaire {{ trial.questionnaire.number }}</span>
                 {% if trial.rating_proof %}
-                <span class="badge badge-secondary">Proof {{ trial.rating_proof }}</span>
+                <span class="badge badge-light">Proof {{ trial.rating_proof }}</span>
                 {% endif %}
             </div>
             <div class="col-2">
