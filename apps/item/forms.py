@@ -188,3 +188,70 @@ itemquestion_formset_helper.add_input(
 itemquestion_formset_helper.add_input(
     Submit("reset", "Reset"),
 )
+
+
+class UploadItemListForm(crispy_forms.CrispyForm):
+    file = forms.FileField(
+        help_text='The CSV file must contain a column for the item list number, item number and condition.'
+                  'Valid column delimiters: colon, semicolon, comma, space, or tab.',
+    )
+    list_column = forms.IntegerField(
+        initial=1,
+        help_text='Specify which column contains the item list number.',
+    )
+    item_number_column = forms.IntegerField(
+        initial=2,
+        help_text='Specify which column contains the item number.',
+    )
+    item_condition_column = forms.IntegerField(
+        initial=3,
+        help_text='Specify which column contains the condition.',
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.experiment = kwargs.pop('experiment')
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        file = cleaned_data['file']
+        try:
+            try:
+                data = file.read().decode('utf-8')
+            except UnicodeDecodeError:
+                file.seek(0)
+                data = file.read().decode('latin-1')
+            data_len = len(data)
+            sniff_data = data[:500 if data_len > 500 else data_len]
+            dialect = csv.Sniffer().sniff(sniff_data)
+            has_header = csv.Sniffer().has_header(sniff_data)
+            reader = csv.reader(StringIO(data), dialect)
+            if has_header:
+                next(reader)
+            try:
+                item_count = 0
+                for row in reader:
+                    assert len(row) >= cleaned_data['list_column']
+                    assert len(row) >= cleaned_data['item_number_column']
+                    assert len(row) >= cleaned_data['item_condition_column']
+                    assert  int(row[cleaned_data['list_column'] - 1])
+                    assert int(row[cleaned_data['item_number_column'] - 1])
+                    item_number = row[cleaned_data['item_number_column'] - 1]
+                    item_condition = row[cleaned_data['item_condition_column'] -1]
+                    if not self.experiment.item_set.filter(number=item_number, condition=item_condition).exists():
+                        error = 'Item {}{} is not defined.'.format(item_number, item_condition)
+                        raise forms.ValidationError(error)
+                    item_count += 1
+                if not item_count == self.experiment.item_set.count():
+                    raise forms.ValidationError('Not all items used in lists.')
+            except (ValueError, AssertionError):
+                raise forms.ValidationError(
+                    'File: Unexpected format in line %(n_line)s.',
+                    code='invalid',
+                    params={'n_line': reader.line_num})
+        except (UnicodeDecodeError, TypeError):
+            raise forms.ValidationError('Unsupported file encoding. Use UTF-8 or Latin-1.')
+        except csv.Error:
+            raise forms.ValidationError('Unsupported CSV format.')
+        file.seek(0)
+        return cleaned_data

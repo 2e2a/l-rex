@@ -7,6 +7,7 @@ urlpatterns_experiment = [
     path('upload/', views.ItemUploadView.as_view(), name='items-upload'),
     path('delete-all/', views.ItemDeleteAllView.as_view(), name='items-delete'),
     path('lists/', views.ItemListListView.as_view(), name='itemlists'),
+    path('lists/upload/', views.ItemListUploadView.as_view(), name='itemlist-upload'),
     path('create/text/', views.TextItemCreateView.as_view(), name='text-item-create'),
     path('create/audio-link/', views.AudioLinkItemCreateView.as_view(), name='audio-link-item-create'),
     path('', views.ItemListView.as_view(), name='items'),

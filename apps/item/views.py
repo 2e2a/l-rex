@@ -467,3 +467,67 @@ class ItemListListView(experiment_views.ExperimentMixin, study_views.CheckStudyC
             (self.experiment.title, reverse('experiment', args=[self.experiment.slug])),
             ('itemlists', ''),
         ]
+
+
+class ItemListUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin,
+                     study_views.ProceedWarningMixin, generic.FormView):
+    title = 'Upload custom item lists'
+    form_class = forms.UploadItemListForm
+    template_name = 'lrex_contrib/crispy_form.html'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['experiment'] = self.experiment
+        return kwargs
+
+    def form_valid(self, form):
+        result =  super().form_valid(form)
+        self.experiment.itemlist_set.all().delete()
+        file = form.cleaned_data['file']
+        list_col = form.cleaned_data['list_column'] - 1
+        num_col = form.cleaned_data['item_number_column'] - 1
+        cond_col = form.cleaned_data['item_condition_column'] - 1
+        try:
+            data = file.read().decode('utf-8')
+        except UnicodeDecodeError:
+            file.seek(0)
+            data = file.read().decode('latin-1')
+        data_len = len(data)
+        sniff_data = data[:16 if data_len > 16 else data_len]
+        has_header = csv.Sniffer().has_header(sniff_data)
+        dialect = csv.Sniffer().sniff(sniff_data)
+        reader = csv.reader(StringIO(data), dialect)
+        if has_header:
+            next(reader)
+        items = []
+        list_num_last = None
+        for row in reader:
+            list_num = row[list_col]
+            if list_num_last and list_num_last != list_num:
+                itemlist = models.ItemList.objects.create(experiment=self.experiment)
+                itemlist.items.set(items)
+                items = []
+            item = self.experiment.item_set.get(number=row[num_col], condition=row[cond_col])
+            items.append(item)
+            list_num_last = list_num
+        itemlist = models.ItemList.objects.create(experiment=self.experiment)
+        itemlist.items.set(items)
+        self.experiment.set_progress(self.experiment.PROGRESS_EXP_LISTS_CREATED)
+        messages.success(self.request, study_views.progress_success_message(self.experiment.PROGRESS_EXP_LISTS_CREATED))
+        return result
+
+    def get_success_url(self):
+        return reverse('itemlists', args=[self.experiment.slug])
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('experiments',reverse('experiments', args=[self.study.slug])),
+            (self.experiment.title, reverse('experiment', args=[self.experiment.slug])),
+            ('itemlists', reverse('itemlists', args=[self.experiment.slug])),
+            ('upload', ''),
+        ]
+
+
