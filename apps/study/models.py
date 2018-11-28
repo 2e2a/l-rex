@@ -38,13 +38,14 @@ class Study(models.Model):
         default=ITEM_TYPE_TXT,
         help_text='The items can be plain text or links to audio files (self-hosted).',
     )
-    instructions = models.TextField(
-        max_length=5000,
-        help_text='These instructions will be presented to the participant before the experiment begins.',
-    )
     password = models.CharField(
         max_length=200,
         help_text='This password will be required to participate in the study.',
+    )
+    instructions = models.TextField(
+        max_length=5000,
+        help_text='These instructions will be presented to the participant before the experiment begins.',
+        default='Please rate the following sentences on the scale.',
     )
     require_participant_id = models.BooleanField(
         default=False,
@@ -55,10 +56,9 @@ class Study(models.Model):
         help_text='Generate a proof code for the subject participation.',
     )
     outro = models.TextField(
-        blank=True,
-        null=True,
         max_length=5000,
         help_text='This text will be presented to the participant after the experiment is finished.',
+        default='Thank you for participating!',
     )
     end_date = models.DateField(
         blank=True,
