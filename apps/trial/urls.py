@@ -6,6 +6,7 @@ urlpatterns_questionnaires_study = [
     path('', views.QuestionnaireListView.as_view(), name='questionnaires'),
     path('generate/', views.QuestionnaireGenerateView.as_view(), name='questionnaire-generate'),
     path('blocks/', views.QuestionnaireBlockInstructionsUpdateView.as_view(), name='questionnaire-blocks'),
+    path('upload/', views.QuestionnaireUploadView.as_view(), name='questionnaire-upload'),
 ]
 
 urlpatterns_questionnaires = [

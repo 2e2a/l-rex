@@ -30,6 +30,10 @@
             </div>
         </div>
     </form>
+    <a href="{% url 'questionnaire-upload' study.slug %}"
+       class="btn btn-secondary btn-sm mx-1" role="button">
+        Upload custom CSV
+    </a>
     {% endif %}
 </div>
 <ul class="list-group">

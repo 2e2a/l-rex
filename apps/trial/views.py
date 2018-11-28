@@ -1,3 +1,5 @@
+import csv
+from io import StringIO
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.http import HttpResponse
@@ -7,6 +9,7 @@ from django.views import generic
 
 from apps.contrib import views as contrib_views
 from apps.experiment import views as experiment_views
+from apps.item import models as item_models
 from apps.study import models as study_models
 from apps.study import views as study_views
 
@@ -251,6 +254,72 @@ class QuestionnaireBlockInstructionsUpdateView(study_views.StudyMixin, study_vie
             (self.study.title, reverse('study', args=[self.study.slug])),
             ('questionnaires', reverse('questionnaires', args=[self.study.slug])),
             ('block-instructions', '')
+        ]
+
+
+class QuestionnaireUploadView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin,
+                              study_views.ProceedWarningMixin, generic.FormView):
+    title = 'Upload custom questionnaires'
+    form_class = forms.UploadQuestionnareForm
+    template_name = 'lrex_contrib/crispy_form.html'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['study'] = self.study
+        return kwargs
+
+    def form_valid(self, form):
+        result =  super().form_valid(form)
+        self.study.questionnaire_set.all().delete()
+        file = form.cleaned_data['file']
+        questionnaire_col = form.cleaned_data['questionnaire_column'] - 1
+        experiment_col = form.cleaned_data['experiment_column'] - 1
+        num_col = form.cleaned_data['item_number_column'] - 1
+        cond_col = form.cleaned_data['item_condition_column'] - 1
+        try:
+            data = file.read().decode('utf-8')
+        except UnicodeDecodeError:
+            file.seek(0)
+            data = file.read().decode('latin-1')
+        data_len = len(data)
+        sniff_data = data[:500 if data_len > 500 else data_len]
+        has_header = csv.Sniffer().has_header(sniff_data)
+        dialect = csv.Sniffer().sniff(sniff_data)
+        reader = csv.reader(StringIO(data), dialect)
+        if has_header:
+            next(reader)
+        items = []
+        questionnaire_num_last = None
+        for row in reader:
+            questionnaire_num = row[questionnaire_col]
+            experiment_title = row[experiment_col]
+            if questionnaire_num_last and questionnaire_num_last != questionnaire_num:
+                questionnaire = models.Questionnaire.objects.create(study=self.study, number=questionnaire_num_last)
+                for i, item in enumerate(items):
+                    models.QuestionnaireItem.objects.create(number=i, questionnaire=questionnaire, item=item)
+                items = []
+            item = item_models.Item.objects.get(
+                experiment__title=experiment_title, number=row[num_col], condition=row[cond_col]
+            )
+            items.append(item)
+            questionnaire_num_last = questionnaire_num
+        questionnaire = models.Questionnaire.objects.create(study=self.study, number=questionnaire_num_last)
+        for i, item in enumerate(items):
+            models.QuestionnaireItem.objects.create(number=i, questionnaire=questionnaire, item=item)
+        self.study.set_progress(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED)
+        messages.success(self.request, study_views.progress_success_message(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED))
+        return result
+
+    def get_success_url(self):
+        return reverse('questionnaires', args=[self.study.slug])
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('questionnaires', reverse('questionnaires', args=[self.study.slug])),
+            ('upload', '')
         ]
 
 

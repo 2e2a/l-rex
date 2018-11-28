@@ -222,7 +222,7 @@ class UploadItemListForm(crispy_forms.CrispyForm):
                 file.seek(0)
                 data = file.read().decode('latin-1')
             data_len = len(data)
-            sniff_data = data[:500 if data_len > 500 else data_len]
+            sniff_data = data[:16 if data_len > 16 else data_len]
             dialect = csv.Sniffer().sniff(sniff_data)
             has_header = csv.Sniffer().has_header(sniff_data)
             reader = csv.reader(StringIO(data), dialect)
@@ -234,7 +234,7 @@ class UploadItemListForm(crispy_forms.CrispyForm):
                     assert len(row) >= cleaned_data['list_column']
                     assert len(row) >= cleaned_data['item_number_column']
                     assert len(row) >= cleaned_data['item_condition_column']
-                    assert  int(row[cleaned_data['list_column'] - 1])
+                    assert int(row[cleaned_data['list_column'] - 1])
                     assert int(row[cleaned_data['item_number_column'] - 1])
                     item_number = row[cleaned_data['item_number_column'] - 1]
                     item_condition = row[cleaned_data['item_condition_column'] -1]
