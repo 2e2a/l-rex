@@ -2,7 +2,7 @@
 
 VIRTUAL_ENV=".venv"
 
-echo -n "Reset local database? (y/N)"
+echo -n "Reset local database? (y/N) "
 read ANSWER
 if [ "$ANSWER" != "y" ]; then
     exit

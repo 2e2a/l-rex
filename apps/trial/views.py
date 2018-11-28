@@ -517,7 +517,8 @@ class RatingOutroView(TrialMixin, generic.TemplateView):
     template_name = 'lrex_trial/rating_outro.html'
 
     def dispatch(self, *args, **kwargs):
-        self.generated_rating_proof = self.trial.generate_rating_proof()
+        if self.study.generate_participation_code:
+            self.generated_rating_proof = self.trial.generate_rating_proof()
         return super().dispatch(*args, **kwargs)
 
 

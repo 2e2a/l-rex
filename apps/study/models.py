@@ -50,6 +50,10 @@ class Study(models.Model):
         default=False,
         help_text='Enable if you want participants to enter some ID before participation.',
     )
+    generate_participation_code = models.BooleanField(
+        default=False,
+        help_text='Generate a proof code for the subject participation.',
+    )
     outro = models.TextField(
         blank=True,
         null=True,

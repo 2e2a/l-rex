@@ -16,9 +16,10 @@ class StudyForm(crispy_forms.CrispyModelForm):
             'title',
             'item_type',
             'instructions',
-            'require_participant_id',
-            'password',
             'outro',
+            'password',
+            'require_participant_id',
+            'generate_participation_code',
             'end_date',
             'trial_limit'
         ]

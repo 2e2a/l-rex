@@ -2,6 +2,7 @@
 
 {% block content %}
 <div class="row justify-content-center mb-2">
+    {%if study.generate_participation_code %}
     <form method="post">
         {% csrf_token %}
         <button type="submit" name="action" value="download_proofs"
@@ -9,6 +10,7 @@
             Download proof codes
         </button>
     </form>
+    {% endif %}
 </div>
 
 <ul class="list-group">

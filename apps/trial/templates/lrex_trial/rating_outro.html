@@ -7,15 +7,18 @@
     <p>
         {{ study.outro|linebreaks }}
     </p>
+    {% else %}
+    <p>
+        Thank you for participating! Have a nice day.
+    </p>
     {% endif %}
+    {% if study.generate_participation_code %}
     <p>
         If needed, save the following code as proof of your participation:
         <code>
             {{ view.generated_rating_proof }}
         </code>
     </p>
-    <p>
-        Thank you for participating! Have a nice day.
-    </p>
+    {% endif %}
 </div>
 {% endblock %}
