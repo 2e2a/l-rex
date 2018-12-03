@@ -140,6 +140,10 @@ class StudyDetailView(StudyObjectMixin, CheckStudyCreatorMixin, NextStepsMixin, 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         data['trial_count'] = trial_models.Trial.objects.filter(questionnaire__study=self.study).count()
+        data['experiments_ready'] = [experiment for experiment in self.study.experiments
+                                     if experiment.progress == experiment.PROGRESS_EXP_LISTS_CREATED]
+        data['exoperiments_draft'] = [experiment for experiment in self.study.experiments
+                                     if experiment.progress != experiment.PROGRESS_EXP_LISTS_CREATED]
         return data
 
     @property
@@ -179,6 +183,22 @@ class StudyDeleteView(StudyObjectMixin, CheckStudyCreatorMixin, contib_views.Def
 
     def get_success_url(self):
         return reverse('studies')
+
+
+class StudyInstructionsUpdateView(StudyObjectMixin, CheckStudyCreatorMixin, SuccessMessageMixin, generic.UpdateView):
+    model = models.Study
+    title ='Edit study instructions'
+    template_name = 'lrex_contrib/crispy_form.html'
+    form_class = forms.StudyInstructionsForm
+    success_message = 'Study instructions successfully updated.'
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('instructions', ''),
+        ]
 
 
 class QuestionUpdateView(StudyMixin, CheckStudyCreatorMixin, ProceedWarningMixin, NextStepsMixin, generic.DetailView):

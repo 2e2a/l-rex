@@ -12,6 +12,7 @@ urlpatterns = [
     path('<slug:study_slug>/', views.StudyDetailView.as_view(), name='study'),
     path('<slug:study_slug>/settings/', views.StudyUpdateView.as_view(), name='study-update'),
     path('<slug:study_slug>/delete/', views.StudyDeleteView.as_view(), name='study-delete'),
+    path('<slug:study_slug>/instructions/', views.StudyInstructionsUpdateView.as_view(), name='study-instructions'),
     path('<slug:study_slug>/questions/', views.QuestionUpdateView.as_view(), name='study-questions'),
     path('<slug:study_slug>/share/', views.SharedWithView.as_view(), name='study-share'),
     path('<slug:study_slug>/experiments/', include(experiment_urls.urlpatterns_study)),

@@ -46,6 +46,10 @@ class Experiment(models.Model):
         return super().save(*args, **kwargs)
 
     @cached_property
+    def items(self):
+        return self.item_set.all()
+
+    @cached_property
     def conditions(self):
         items = self.item_set.filter(number=1)
         conditions = [item.condition for item in items]
@@ -108,7 +112,6 @@ class Experiment(models.Model):
             item_list = item_models.ItemList.objects.create(experiment=self)
             items = list(self.item_set.all())
             item_list.items.add(*items)
-
 
     def results(self):
         results = []

@@ -3,13 +3,22 @@
 
 {% block content %}
 <div class="card my-2">
-  <div class="card-body">
-    <h2 class="card-title">Settings</h2>
-    <p class="card-text">
-        Change the settings of the experiment (like the title).
-    </p>
-    <a href="{% url 'experiment-update' experiment.slug %}" class="card-link">Edit settings</a>
-  </div>
+    <div class="card-body">
+        <h2 class="card-title">Settings</h2>
+        <p class="card-text">
+            Change the settings of the experiment.
+        </p>
+        <div class="row small text-secondary">
+            <div class="col-md-3">
+                Filler:
+            </div>
+            <div class="col-md-3">
+                {{ experiment.is_filler|yesno }}
+            </div>
+        </div>
+        <hr>
+        <a href="{% url 'experiment-update' experiment.slug %}" class="card-link">Edit settings</a>
+    </div>
 </div>
 
 <div class="card my-2 {% if not experiment|is_progress_exp_items_validated_reached %} border-primary {% endif %}">
@@ -18,7 +27,30 @@
         <p class="card-text">
             An experiment contains a set of items. Each item needs to be provided in the same number of conditions.
         </p>
-        <a  class="card-link" href="{% url 'items' experiment.slug %}">
+        <div class="row small text-secondary">
+            <div class="col-md-3">
+                Items created:
+            </div>
+            <div class="col-md-3">
+                {{ experiment.items|length }}
+            </div>
+            <div class="col-md-3">
+                Item conditions:
+            </div>
+            <div class="col-md-3">
+                {{ experiment.conditions|length }}
+            </div>
+        </div>
+        <div class="row small text-secondary">
+            <div class="col-md-3">
+                Items validated:
+            </div>
+            <div class="col-md-3">
+                {% if experiment|is_progress_exp_items_validated_reached %} yes {% else %} no {% endif %}
+            </div>
+        </div>
+        <hr>
+        <a class="card-link" href="{% url 'items' experiment.slug %}">
             Add/edit items
         </a>
     </div>
@@ -30,8 +62,17 @@
         <p class="card-text">
             The items of the experiment will be automatically distributed across participants using lists.
         </p>
+        <div class="row small text-secondary">
+            <div class="col-md-3">
+                Lists generated:
+            </div>
+            <div class="col-md-3">
+                {{ experiment.itemlist_set.count }}
+            </div>
+        </div>
+        <hr>
         {% if experiment|is_progress_exp_items_validated_reached %}
-        <a  class="card-link" href="{% url 'itemlists' experiment.slug %}">
+        <a class="card-link" href="{% url 'itemlists' experiment.slug %}">
             Item lists
         </a>
         {% else %}

@@ -87,7 +87,10 @@ class ExperimentCreateView(study_views.StudyMixin, study_views.CheckStudyCreator
 class ExperimentDetailView(ExperimentObjectMixin, study_views.CheckStudyCreatorMixin, study_views.NextStepsMixin,
                            generic.DetailView):
     model = models.Experiment
-    title = 'Edit experiment'
+
+    @property
+    def title(self):
+        return self.experiment.title
 
     @property
     def breadcrumbs(self):

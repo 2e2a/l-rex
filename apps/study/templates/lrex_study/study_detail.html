@@ -1,8 +1,9 @@
 {% extends "lrex_home/base.html" %}
 {% load progress_tags %}
+{% load contrib_tags %}
 
 {% block content %}
-<div class="row justify-content-center mb-2">
+<div class="row small text-secondary justify-content-center mb-2">
     <form class="form-inline" method="post">
         {% csrf_token %}
         {% if study.is_published %}
@@ -22,69 +23,139 @@
 <div class="card my-2">
     <div class="card-body">
         <h2 class="card-title">Status</h2>
-        <p class="card-text">
-        <div class="row">
-            <div class="col-md-2">
-                <small>Current status:</small>
+        <div class="row small text-secondary">
+            <div class="col-md-3">
+                Current status:
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <span class="badge badge-primary">{{ study.status.name }}</span>
             </div>
-            {% if study.creator == view.request.user %}
-            <div class="col-md-2">
-                <small>Shared with:</small>
+            <div class="col-md-3">
+                Participate:
             </div>
-            <div class="col-md-4">
-                <small>{{ study.shared_with|default:"--" }}</small>
-            </div>
-            {% else %}
-            <div class="col-md-2">
-                <small>Shared by:</small>
-            </div>
-            <div class="col-md-4">
-                <small>{{ study.creator.username }}</small>
-            </div>
-            {% endif %}
-        </div>
-        <div class="row">
-            <div class="col-md-2">
-                <small>Participate:</small>
-            </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 {% if study.is_published %}
-                <small><a href="{% url 'trial-create' study.slug %}">Participant link</a></small>
+                <a href="{% url 'trial-create' study.slug %}">Participant link</a> ({{ study.password }})
                 {% else %}
-                <small><a class="card-link text-muted">Participant link</a></small>
+                <a class="card-link text-muted">Participant link</a>
                 {% endif %}
             </div>
-            <div class="col-md-2">
-                <small>Password:</small>
-            </div>
-            <div class="col-md-4">
-                <small>{{ study.password }}</small>
-            </div>
         </div>
-        <div class="row">
-            <div class="col-md-2">
-                <small>Trials taken:</small>
-            </div>
-            <div class="col-md-4">
-                <small>{{ trial_count }}</small>
-            </div>
-        </div>
-        </p>
     </div>
 </div>
 
-<div class="card  my-2 {% if study|is_progress_std_created %} border-primary {% endif %}">
+<div class="card  my-2">
     <div class="card-body">
         <h2 class="card-title">Settings</h2>
         <p class="card-text">
-            Change the general settings (title, instructions, end date, trial limit, password) of your study or add/edit questions.
+            Change the settings of your study.
         </p>
+        <div class="row small text-secondary">
+            <div class="col-md-3">
+                Item Type:
+            </div>
+            <div class="col-md-3">
+                {{ study.get_item_type_display }}
+            </div>
+            <div class="col-md-3">
+                Participant password:
+            </div>
+            <div class="col-md-3">
+                {{ study.password }}
+            </div>
+        </div>
+        <div class="row small text-secondary">
+            <div class="col-md-3">
+                Require participant id:
+            </div>
+            <div class="col-md-3">
+                {{ study.require_participant_id|yesno }}
+            </div>
+            <div class="col-md-3">
+                Participation code:
+            </div>
+            <div class="col-md-3">
+                {{ study.generate_participation_code|yesno }}
+            </div>
+        </div>
+        <div class="row small text-secondary">
+            <div class="col-md-3">
+                End date:
+            </div>
+            <div class="col-md-3">
+                {% if study.end_date %}
+                    {{ study.end_date|date:"SHORT_DATETIME_FORMAT" }}
+                {% else %}
+                    --
+                {% endif %}
+            </div>
+            <div class="col-md-3">
+                Trial limit:
+            </div>
+            <div class="col-md-3">
+                {{ study.trial_limit|default:"--" }}
+            </div>
+        </div>
+        <div class="row small text-secondary">
+            {% if study.creator == view.request.user %}
+            <div class="col-md-3">
+                Shared with:
+            </div>
+            <div class="col-md-3">
+                {{ study.shared_with|default:"--" }}
+            </div>
+            {% else %}
+            <div class="col-md-3">
+                Shared by:
+            </div>
+            <div class="col-md-3">
+                {{ study.creator.username }}
+            </div>
+            {% endif %}
+        </div>
+        <hr>
         <a  class="card-link" href="{% url 'study-update' study.slug %}">Edit settings</a>
-        <a  class="card-link" href="{% url 'study-questions' study.slug %}">Questions</a>
         <a  class="card-link" href="{% url 'study-share' study.slug %}">Share</a>
+    </div>
+</div>
+
+<div class="card my-2 {% if study|is_progress_std_created %} border-primary {% endif %}">
+    <div class="card-body">
+        <h2 class="card-title">Tasks</h2>
+        <p class="card-text">
+            TODO
+        </p>
+        <div class="row small text-secondary">
+            <div class="col-md-3">
+                Questions:
+            </div>
+            <div class="col-md-9">
+
+                    {% for question in study.questions %}
+                    {{ question }}{% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                    --
+                    {% endfor %}
+
+            </div>
+        </div>
+        <div class="row small text-secondary">
+            <div class="col-md-3">
+                Instructions:
+            </div>
+            <div class="col-md-3">
+                {{ study.instructions|preview:"20" }}
+            </div>
+            <div class="col-md-3">
+                Outro:
+            </div>
+            <div class="col-md-3">
+                {{ study.outro|preview:"20" }}
+            </div>
+        </div>
+        <hr>
+        <a  class="card-link" href="{% url 'study-questions' study.slug %}">Questions</a>
+        <a  class="card-link" href="{% url 'study-instructions' study.slug %}">Instructions</a>
     </div>
 </div>
 
@@ -95,6 +166,33 @@
             A study can contain one or more experiments. Fillers count as a separate experiment. Items of all experiments that are part of the same study will be intermixed with each other within
             the same questionnaire.
         </p>
+        <div class="row small text-secondary">
+            <div class="col-md-3">
+                Experiments ready:
+            </div>
+            <div class="col-md-3">
+
+                    {% for experiment in experiments_ready %}
+                    {{ experiment }}{% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                    --
+                    {% endfor %}
+
+            </div>
+            <div class="col-md-3">
+                Experiments in draft:
+            </div>
+            <div class="col-md-3">
+
+                    {% for experiment in experiments_draft %}
+                    {{ experiment }}{% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                    --
+                    {% endfor %}
+
+            </div>
+        </div>
+        <hr>
         {% if study|is_progress_std_question_created_reached %}
         <a  class="card-link" href="{% url 'experiments' study.slug %}">Create/edit experiments</a>
         {% else %}
@@ -109,6 +207,15 @@
         <p class="card-text">
             A questionnaire is the ordered list of stimuli that an individual participant will see.
         </p>
+        <div class="row small text-secondary">
+            <div class="col-md-3">
+                Questionnaires created:
+            </div>
+            <div class="col-md-3">
+                {{ study.questionnaire_set.count }}
+            </div>
+        </div>
+        <hr>
         {% if study|is_progress_std_exp_completed_reached  %}
         <a  class="card-link" href="{% url 'questionnaires' study.slug %}">Generate questionnaires</a></p>
         {% else %}
@@ -119,28 +226,25 @@
 
 <div class="card my-2">
     <div class="card-body">
-        <h2 class="card-title">User trials</h2>
-        <p class="card-text">
-            View the completed individual questionnaires.
-        </p>
-        {% if study|is_progress_std_questionnares_generated_reached %}
-        <a  class="card-link" href="{% url 'trials' study.slug %}">User trials</a>
-        {% else %}
-        <a class="card-link text-muted">User trials</a>
-        {% endif %}
-    </div>
-</div>
-
-<div class="card my-2">
-    <div class="card-body">
         <h2 class="card-title">Results</h2>
         <p class="card-text">
-            View a summary of the current results.
+            View a summary of the current results or the completed individual questionnaires.
         </p>
+        <div class="row small text-secondary small text-secondary">
+            <div class="col-md-3">
+                Trials taken:
+            </div>
+            <div class="col-md-3">
+                {{ trial_count }}
+            </div>
+        </div>
+        <hr>
         {% if study|is_progress_std_questionnares_generated_reached %}
         <a  class="card-link" href="{{ study.results_url }}">Results</a>
+        <a  class="card-link" href="{% url 'trials' study.slug %}">User trials</a>
         {% else %}
         <a class="card-link text-muted">Results</a>
+        <a class="card-link text-muted">User trials</a>
         {% endif %}
     </div>
 </div>

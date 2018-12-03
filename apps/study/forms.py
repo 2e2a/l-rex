@@ -15,13 +15,21 @@ class StudyForm(crispy_forms.CrispyModelForm):
         fields = [
             'title',
             'item_type',
-            'instructions',
-            'outro',
             'password',
             'require_participant_id',
             'generate_participation_code',
             'end_date',
             'trial_limit'
+        ]
+
+
+class StudyInstructionsForm(crispy_forms.CrispyModelForm):
+
+    class Meta:
+        model = models.Study
+        fields = [
+            'instructions',
+            'outro',
         ]
 
 
