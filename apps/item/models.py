@@ -17,7 +17,7 @@ class Item(models.Model):
         on_delete=models.CASCADE
     )
     block = models.IntegerField(
-        help_text='TODO',
+        help_text='Number of the questionnaire block in which the item will appear',
         default=1
     )
 
@@ -36,7 +36,7 @@ class Item(models.Model):
 class TextItem(Item):
     text = models.TextField(
         max_length=1024,
-        help_text='Content of the item (character limit: 1024).',
+        help_text='Content of the item (character limit: 1024)',
     )
 
     def get_absolute_url(self):

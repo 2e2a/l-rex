@@ -6,7 +6,7 @@
     <div class="card-body">
         <h2 class="card-title">Settings</h2>
         <p class="card-text">
-            Change the settings of the experiment.
+            Set the general properties of the experiment.
         </p>
         <div class="row small text-secondary">
             <div class="col-md-3">
@@ -17,7 +17,7 @@
             </div>
         </div>
         <hr>
-        <a href="{% url 'experiment-update' experiment.slug %}" class="card-link">Edit settings</a>
+        <a href="{% url 'experiment-update' experiment.slug %}" class="card-link">Settings</a>
     </div>
 </div>
 
@@ -25,7 +25,7 @@
     <div class="card-body">
         <h2 class="card-title">Items</h2>
         <p class="card-text">
-            An experiment contains a set of items. Each item needs to be provided in the same number of conditions.
+            Add items. Each item needs to be provided in the same number of conditions.
         </p>
         <div class="row small text-secondary">
             <div class="col-md-3">
@@ -51,7 +51,7 @@
         </div>
         <hr>
         <a class="card-link" href="{% url 'items' experiment.slug %}">
-            Add/edit items
+            Items
         </a>
     </div>
 </div>
@@ -60,7 +60,7 @@
     <div class="card-body">
         <h2 class="card-title">Lists</h2>
         <p class="card-text">
-            The items of the experiment will be automatically distributed across participants using lists.
+            Generate lists. The items of the experiment will be automatically distributed across participants.
         </p>
         <div class="row small text-secondary">
             <div class="col-md-3">
@@ -73,7 +73,7 @@
         <hr>
         {% if experiment|is_progress_exp_items_validated_reached %}
         <a class="card-link" href="{% url 'itemlists' experiment.slug %}">
-            Item lists
+            Lists
         </a>
         {% else %}
         <a class="card-link text-muted">Generate lists</a>

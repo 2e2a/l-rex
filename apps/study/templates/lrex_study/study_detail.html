@@ -48,7 +48,7 @@
     <div class="card-body">
         <h2 class="card-title">Settings</h2>
         <p class="card-text">
-            Change the settings of your study.
+            Set the general properties of the study.
         </p>
         <div class="row small text-secondary">
             <div class="col-md-3">
@@ -114,7 +114,7 @@
             {% endif %}
         </div>
         <hr>
-        <a  class="card-link" href="{% url 'study-update' study.slug %}">Edit settings</a>
+        <a  class="card-link" href="{% url 'study-update' study.slug %}">Settings</a>
         <a  class="card-link" href="{% url 'study-share' study.slug %}">Share</a>
     </div>
 </div>
@@ -123,7 +123,7 @@
     <div class="card-body">
         <h2 class="card-title">Tasks</h2>
         <p class="card-text">
-            TODO
+            Specify the task and task instructions.
         </p>
         <div class="row small text-secondary">
             <div class="col-md-3">
@@ -163,8 +163,7 @@
     <div class="card-body">
         <h2 class="card-title">Experiments</h2>
         <p class="card-text">
-            A study can contain one or more experiments. Fillers count as a separate experiment. Items of all experiments that are part of the same study will be intermixed with each other within
-            the same questionnaire.
+            Add experiments (including fillers). Items of all experiments will be intermixed with each other within the same questionnaire.
         </p>
         <div class="row small text-secondary">
             <div class="col-md-3">
@@ -194,7 +193,7 @@
         </div>
         <hr>
         {% if study|is_progress_std_question_created_reached %}
-        <a  class="card-link" href="{% url 'experiments' study.slug %}">Create/edit experiments</a>
+        <a  class="card-link" href="{% url 'experiments' study.slug %}">Experiments</a>
         {% else %}
         <a  class="card-link disabled text-muted">Create/edit experiments</a>
         {% endif %}
@@ -205,7 +204,7 @@
     <div class="card-body">
         <h2 class="card-title">Questionnaires</h2>
         <p class="card-text">
-            A questionnaire is the ordered list of stimuli that an individual participant will see.
+            Generate questionnaires. A questionnaire is the ordered list of stimuli that an individual participant will see.
         </p>
         <div class="row small text-secondary">
             <div class="col-md-3">
@@ -219,7 +218,7 @@
         {% if study|is_progress_std_exp_completed_reached  %}
         <a  class="card-link" href="{% url 'questionnaires' study.slug %}">Generate questionnaires</a>
         {% else %}
-        <a  class="card-link text-muted">Generate questionnaires</a>
+        <a  class="card-link text-muted">Questionnaires</a>
         {% endif %}
     </div>
 </div>
@@ -240,8 +239,8 @@
         </div>
         <hr>
         {% if study|is_progress_std_questionnares_generated_reached %}
-        <a  class="card-link" href="{{ study.results_url }}">Results</a>
-        <a  class="card-link" href="{% url 'trials' study.slug %}">User trials</a>
+        <a  class="card-link" href="{{ study.results_url }}">Summery of the results</a>
+        <a  class="card-link" href="{% url 'trials' study.slug %}">Individual user trials</a>
         {% else %}
         <a class="card-link text-muted">Results</a>
         <a class="card-link text-muted">User trials</a>
