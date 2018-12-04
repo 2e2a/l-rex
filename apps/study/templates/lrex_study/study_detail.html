@@ -217,9 +217,9 @@
         </div>
         <hr>
         {% if study|is_progress_std_exp_completed_reached  %}
-        <a  class="card-link" href="{% url 'questionnaires' study.slug %}">Generate questionnaires</a></p>
+        <a  class="card-link" href="{% url 'questionnaires' study.slug %}">Generate questionnaires</a>
         {% else %}
-        <a  class="card-link text-muted">Generate questionnaires</a></p>
+        <a  class="card-link text-muted">Generate questionnaires</a>
         {% endif %}
     </div>
 </div>
