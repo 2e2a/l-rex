@@ -239,11 +239,11 @@
         </div>
         <hr>
         {% if study|is_progress_std_questionnares_generated_reached %}
-        <a  class="card-link" href="{{ study.results_url }}">Summery of the results</a>
+        <a  class="card-link" href="{{ study.results_url }}">Summary of the results</a>
         <a  class="card-link" href="{% url 'trials' study.slug %}">Individual user trials</a>
         {% else %}
-        <a class="card-link text-muted">Results</a>
-        <a class="card-link text-muted">User trials</a>
+        <a class="card-link text-muted">Summary of the results</a>
+        <a class="card-link text-muted">Individual user trials</a>
         {% endif %}
     </div>
 </div>
