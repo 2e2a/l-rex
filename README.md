@@ -2,6 +2,8 @@
 
 L-Rex is a platform for linguistic rating experiments. It is designed for experiments in which participants are asked to rate stimuli (e.g., sentences) on an n-point scale (e.g., a scale from 1-5).
 
+Read the [Wiki](https://github.com/2e2a/l-rex/wiki) for more information.
+
 ## Try it out
 
 We are currently running a free instance of L-Rex on our private server at [https://lrex.2e2a.de](https://lrex.2e2a.de). Feel free to use it for your studies.
