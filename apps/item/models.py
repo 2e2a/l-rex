@@ -99,4 +99,4 @@ class ItemQuestion(models.Model):
     )
 
     class Meta:
-        ordering = ['question']
+        ordering = ['question', 'pk']

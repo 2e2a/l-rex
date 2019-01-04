@@ -323,6 +323,7 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
                     create_item_questions = True
                     break
             if create_item_questions:
+                import pdb;pdb.set_trace()
                 for i, question in enumerate(self.study.questions):
                     question_col = form.cleaned_data['question_{}_question_column'.format(i+1)] - 1
                     if question_col > 0:
@@ -399,7 +400,7 @@ class ItemQuestionsUpdateView(ItemMixin, study_views.CheckStudyCreatorMixin, stu
     def get(self, request, *args, **kwargs):
         n_questions = len(self.study.questions)
         self.formset = forms.itemquestion_factory(n_questions)(
-            queryset=models.ItemQuestion.objects.filter(item=self.item)
+            queryset=models.ItemQuestion.objects.filter(item=self.item).order_by('pk')
         )
         forms.initialize_with_questions(self.formset, self.study.questions)
         return super().get(request, *args, **kwargs)
