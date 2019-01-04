@@ -323,7 +323,6 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
                     create_item_questions = True
                     break
             if create_item_questions:
-                import pdb;pdb.set_trace()
                 for i, question in enumerate(self.study.questions):
                     question_col = form.cleaned_data['question_{}_question_column'.format(i+1)] - 1
                     if question_col > 0:
