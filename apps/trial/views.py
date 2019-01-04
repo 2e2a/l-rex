@@ -523,10 +523,8 @@ class RatingsCreateView(RatingCreateMixin, TrialMixin, generic.TemplateView):
             questionnaire=self.trial.questionnaire,
             number=self.num
         )
-        self.questions = study_models.Question.objects.filter(
-            study=self.study
-        )
-        self.item_questions = self.questionnaire_item.item.itemquestion_set.all()
+        self.questions = self.study.questions
+        self.item_questions = self.questionnaire_item.item.itemquestion_set.order_by('pk')
         self.formset = forms.ratingformset_factory(len(self.questions))(
             queryset=models.Rating.objects.none()
         )
