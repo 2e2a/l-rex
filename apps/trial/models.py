@@ -346,3 +346,6 @@ class Rating(models.Model):
     trial = models.ForeignKey(Trial, on_delete=models.CASCADE)
     questionnaire_item = models.ForeignKey(QuestionnaireItem, on_delete=models.CASCADE)
     scale_value = models.ForeignKey(study_models.ScaleValue, on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ['pk']
