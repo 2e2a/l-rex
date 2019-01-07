@@ -62,7 +62,7 @@
         {% endfor %}
     </ol>
     {% for message in messages %}
-    <div class="alert {{ message.level_tag|bootstrap_alert_class }}" role="alert">
+    <div class="alert {{ message.level_tag|bootstrap_alert_class }} shadow" role="alert">
         {{ message }}
     </div>
     {% endfor %}
