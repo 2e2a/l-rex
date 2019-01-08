@@ -9,12 +9,26 @@ help:
 	@echo L-REX development
 	@echo TODO
 
-.PHONY: install
-install:
-	npm install
+.PHONY: python
+python:
 	if [ ! -f $(VIRTUAL_ENV)/bin/python3 ]; then python3 -m venv $(VIRTUAL_ENV); fi
 	$(VIRTUAL_ENV)/bin/python3 -m pip install -r requirements.txt
-	wget -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/advanced-options/svg-sprites/fa-solid.svg -P lrex/static/icons/
+
+.PHONY: node
+node:
+	npm install
+
+
+.PHONY: icons
+icons:
+	wget -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/info-circle.svg -P lrex/static/icons/
+	wget -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/graduation-cap.svg -P lrex/static/icons/
+	wget -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/book.svg -P lrex/static/icons/
+	wget -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/users.svg -P lrex/static/icons/
+
+
+.PHONY: install
+install: python node icons
 
 .PHONY: update
 update:
