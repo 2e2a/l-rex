@@ -179,7 +179,6 @@ class ExperimentResultsView(ExperimentObjectMixin, study_views.CheckStudyCreator
             '{}-results-subj-item'.format(experiment.slug),
         ])
 
-
     def _cache_key_results(self):
         if self.aggregate_by == ['subject']:
             return '{}-results-subj'.format(self.experiment.slug)

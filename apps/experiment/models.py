@@ -139,6 +139,7 @@ class Experiment(models.Model):
             row['condition'] = item.condition
             row['question'] = question.num
             row['rating'] = scale_value.num
+            row['label'] = scale_value.label
             if hasattr(item, 'textitem'):
                 row['text'] = item.textitem.text
 
@@ -146,25 +147,6 @@ class Experiment(models.Model):
 
         results_sorted = sorted(results, key=lambda r: (r['subject'], r['item'], r['condition']))
         return results_sorted
-
-    def _result_lists_for_questions(self, results):
-        aggregated_results = []
-
-        for row in results:
-            match = self._matching_row(row, aggregated_results, ['subject', 'item', 'condition'])
-            if match >= 0:
-                aggregated_results[match]['ratings'][row['question'] - 1] = row['rating']
-            else:
-                new_row = {}
-                n_questions = len(self.study.questions)
-                for col in ['subject', 'item', 'condition']:
-                    new_row[col] = row[col]
-                if 'text' in row:
-                    new_row['text'] =  row['text']
-                new_row['ratings'] = [-1] * n_questions
-                new_row['ratings'][row['question'] - 1] = row['rating']
-                aggregated_results.append(new_row)
-        return aggregated_results
 
     def _aggregation_columns(self):
         return ['subject', 'item', 'condition']
@@ -220,6 +202,26 @@ class Experiment(models.Model):
         aggregated_results_sorted = sorted(aggregated_results, key=lambda r: (r['subject'], r['item'], r['condition']))
 
         return aggregated_results_sorted
+
+    def _result_lists_for_questions(self, results):
+        aggregated_results = []
+
+        for row in results:
+            match = self._matching_row(row, aggregated_results, ['subject', 'item', 'condition'])
+            if match >= 0:
+                aggregated_results[match]['ratings'][row['question'] - 1] = row['label']
+            else:
+                new_row = {}
+                n_questions = len(self.study.questions)
+                for col in ['subject', 'item', 'condition']:
+                    new_row[col] = row[col]
+                if 'text' in row:
+                    new_row['text'] =  row['text']
+                new_row['ratings'] = [-1] * n_questions
+                new_row['ratings'][row['question'] - 1] = row['label']
+                aggregated_results.append(new_row)
+        return aggregated_results
+
 
     def results_csv(self, fileobj):
         writer = csv.writer(fileobj)
