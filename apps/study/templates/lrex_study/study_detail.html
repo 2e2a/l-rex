@@ -1,6 +1,7 @@
 {% extends "lrex_home/base.html" %}
-{% load progress_tags %}
 {% load contrib_tags %}
+{% load progress_tags %}
+{% load static %}
 
 {% block content %}
 <div class="row small text-secondary justify-content-center mb-2">
@@ -24,7 +25,10 @@
     <div class="col-md-8">
         <div class="card my-2 {% if study|is_progress_std_created %} border-primary shadow{% endif %}">
             <div class="card-body">
-                <h2 class="card-title">Tasks</h2>
+                <div class="d-flex justify-content-between">
+                    <h2 class="card-title">Tasks</h2>
+                    <span><img src="{% static 'icons/comment.svg' %} " width="20"></span>
+                </div>
                 <p class="card-text">
                     Specify the task and task instructions.
                 </p>
@@ -66,7 +70,10 @@
 
         <div class="card my-2 {% if study|is_progress_std_question_created_reached and not study|is_progress_std_exp_completed_reached %} border-primary shadow{% endif %}">
             <div class="card-body">
-                <h2 class="card-title">Experiments</h2>
+                <div class="d-flex justify-content-between">
+                    <h2 class="card-title">Experiments</h2>
+                    <span><img src="{% static 'icons/flask.svg' %} " width="20"></span>
+                </div>
                 <p class="card-text">
                     Add experiments (including fillers). Items of all experiments will be intermixed with each other within the same questionnaire.
                 </p>
@@ -109,7 +116,10 @@
 
         <div class="card my-2 {% if study|is_progress_std_exp_completed %} border-primary shadow{% endif %}">
             <div class="card-body">
-                <h2 class="card-title">Questionnaires</h2>
+                <div class="d-flex justify-content-between">
+                    <h2 class="card-title">Questionnaires</h2>
+                    <span><img src="{% static 'icons/clipboard-list.svg' %} " width="20"></span>
+                </div>
                 <p class="card-text">
                     Generate questionnaires. A questionnaire is the ordered list of stimuli that an individual participant will see.
                 </p>
@@ -132,7 +142,10 @@
 
         <div class="card my-2">
             <div class="card-body">
-                <h2 class="card-title">Results</h2>
+                <div class="d-flex justify-content-between">
+                    <h2 class="card-title">Results</h2>
+                    <span><img src="{% static 'icons/poll.svg' %} " width="20"></span>
+                </div>
                 <p class="card-text">
                     View a summary of the current results or the completed individual questionnaires.
                 </p>
@@ -158,7 +171,10 @@
     <div class="col-md-4">
         <div class="card my-2">
             <div class="card-body">
-                <h2 class="card-title">Status</h2>
+                <div class="d-flex justify-content-between">
+                    <h2 class="card-title">Status</h2>
+                    <span><img src="{% static 'icons/lightbulb.svg' %} " width="20"></span>
+                </div>
                 <div class="row small text-secondary">
                     <div class="col-sm-5">
                         Current status:
@@ -191,7 +207,10 @@
         </div>
         <div class="card  my-2">
             <div class="card-body">
-                <h2 class="card-title">Settings</h2>
+                <div class="d-flex justify-content-between">
+                    <h2 class="card-title">Settings</h2>
+                    <span><img src="{% static 'icons/sliders-h.svg' %} " width="20"></span>
+                </div>
                 <p class="card-text">
                     Set the general properties of the study.
                 </p>

@@ -1,5 +1,6 @@
 {% extends "lrex_home/base.html" %}
 {% load progress_tags %}
+{% load static %}
 
 {% block content %}
 
@@ -9,7 +10,10 @@
     <div class="col-md-8">
         <div class="card my-2 {% if not experiment|is_progress_exp_items_validated_reached %} border-primary shadow{% endif %}">
             <div class="card-body">
-                <h2 class="card-title">Items</h2>
+                <div class="d-flex justify-content-between">
+                    <h2 class="card-title">Items</h2>
+                    <span><img src="{% static 'icons/list-ul.svg' %} " width="20"></span>
+                </div>
                 <p class="card-text">
                     Add items.
                 </p>
@@ -46,7 +50,10 @@
 
         <div class="card my-2 {% if experiment|is_progress_exp_items_validated %} border-primary shadow{% endif %}">
             <div class="card-body">
-                <h2 class="card-title">Lists</h2>
+                <div class="d-flex justify-content-between">
+                    <h2 class="card-title">Lists</h2>
+                    <span><img src="{% static 'icons/list-ol.svg' %} " width="20"></span>
+                </div>
                 <p class="card-text">
                     Generate lists. The items of the experiment will be automatically distributed across participants.
                 </p>
@@ -72,7 +79,10 @@
      <div class="col-md-3">
          <div class="card my-2">
              <div class="card-body">
-                 <h2 class="card-title">Settings</h2>
+                 <div class="d-flex justify-content-between">
+                     <h2 class="card-title">Settings</h2>
+                     <span><img src="{% static 'icons/sliders-h.svg' %} " width="20"></span>
+                 </div>
                  <div class="row small text-secondary">
                      <div class="col-sm-5">
                          Filler:

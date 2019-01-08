@@ -18,14 +18,20 @@ python:
 node:
 	npm install
 
-
 .PHONY: icons
 icons:
-	wget -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/info-circle.svg -P lrex/static/icons/
-	wget -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/graduation-cap.svg -P lrex/static/icons/
-	wget -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/book.svg -P lrex/static/icons/
-	wget -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/users.svg -P lrex/static/icons/
-
+	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/clipboard-list.svg -P lrex/static/icons/
+	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/comment.svg -P lrex/static/icons/
+	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/book.svg -P lrex/static/icons/
+	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/flask.svg -P lrex/static/icons/
+	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/graduation-cap.svg -P lrex/static/icons/
+	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/info-circle.svg -P lrex/static/icons/
+	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/lightbulb.svg -P lrex/static/icons/
+	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/list-ul.svg -P lrex/static/icons/
+	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/list-ol.svg -P lrex/static/icons/
+	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/poll.svg -P lrex/static/icons/
+	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/sliders-h.svg -P lrex/static/icons/
+	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/users.svg -P lrex/static/icons/
 
 .PHONY: install
 install: python node icons
