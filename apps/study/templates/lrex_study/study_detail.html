@@ -244,7 +244,7 @@
                     </div>
                     <div class="col-sm-4">
                         {% if study.end_date %}
-                        {{ study.end_date|date }}
+                        {{ study.end_date|date:"SHORT_DATE_FORMAT" }}
                         {% else %}
                         --
                         {% endif %}
@@ -267,10 +267,10 @@
                         {{ study.shared_with|default:"--" }}
                     </div>
                     {% else %}
-                    <div class="col-sm-5">
+                    <div class="col-sm-6">
                         Shared by:
                     </div>
-                    <div class="col-sm-5">
+                    <div class="col-sm-4">
                         {{ study.creator.username }}
                     </div>
                     {% endif %}
