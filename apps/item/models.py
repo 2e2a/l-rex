@@ -29,7 +29,9 @@ class Item(models.Model):
 
     def save(self, *args, **kwargs):
         slug = '{}--{}{}'.format(self.experiment.slug, self.number, self.condition)
-        self.slug = slugify_unique(slug, Item, self.id)
+        new_slug = slugify_unique(slug, Item, self.id)
+        if new_slug != self.slug:
+            self.slug = slugify_unique(slug, Item, self.id)
         return super().save(*args, **kwargs)
 
 

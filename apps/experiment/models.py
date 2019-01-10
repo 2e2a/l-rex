@@ -42,7 +42,11 @@ class Experiment(models.Model):
 
     def save(self, *args, **kwargs):
         slug = '{}--{}'.format(self.study.slug, self.title)
-        self.slug = slugify_unique(slug, Experiment, self.id)
+        new_slug = slugify_unique(slug, Experiment, self.id)
+        if new_slug != self.slug:
+            self.slug = slugify_unique(slug, Experiment, self.id)
+            for item in self.items:
+                item.save()
         return super().save(*args, **kwargs)
 
     @cached_property

@@ -106,7 +106,11 @@ class Study(models.Model):
         ordering = ['-pk']
 
     def save(self, *args, **kwargs):
-        self.slug = slugify_unique(self.title, Study, self.id)
+        new_slug = slugify_unique(self.title, Study, self.id)
+        if self.slug != new_slug:
+            self.slug = slugify_unique(self.title, Study, self.id)
+            for experiment in self.experiments:
+                experiment.save()
         return super().save(*args, **kwargs)
 
     def __str__(self):
