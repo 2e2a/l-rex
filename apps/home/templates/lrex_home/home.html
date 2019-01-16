@@ -4,57 +4,82 @@
 {% block title %}L-Rex{% endblock %}
 
 {% block content %}
-<div class="card my-2 shadow">
-    <div class="card-body">
-        <div class="d-flex justify-content-between">
-            <h2 class="card-title">About</h2>
-            <span><img src="{% static 'icons/info-circle.svg' %} " width="24"></span>
-        </div>
-        <p class="card-text">
-            Welcome to L-Rex, a free and open-source platform for creating and running rating experiments.
-        </p>
-        <p class="card-text">
-            L-Rex is designed for linguistic experiments in which participants are asked to rate stimuli on a scale. You can quickly set up your experiment with L-Rex if...
-            <ul>
-                <li>...your stimuli are texts or audio files.</li>
-                <li>...the rating is binary or on an n-point scale (e.g., a scale from 1-5).</li>
-                <li>...you want to distribute the stimuli using a Latin Square Design.</li>
-                <li>...you want to present your stimuli in (pseudo-)randomized order.</li>
-            </ul>
-       </p>
-    </div>
+<div class="row">
+    <div class="col-md-8">
+        <div class="card my-2 shadow">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <h2 class="card-title">About</h2>
+                    <span><img src="{% static 'icons/info-circle.svg' %} " width="24"></span>
+                </div>
+                <p class="card-text">
+                    Welcome to L-Rex, a free and open-source platform for creating and running rating experiments.
+                </p>
+                <p class="card-text">
+                    L-Rex is designed for linguistic experiments in which participants are asked to rate stimuli on a scale. You can quickly set up your experiment with L-Rex if...
+                <ul>
+                    <li>...your stimuli are texts or audio files.</li>
+                    <li>...the rating is binary or on an n-point scale (e.g., a scale from 1-5).</li>
+                    <li>...you want to distribute the stimuli using a Latin Square Design.</li>
+                    <li>...you want to present your stimuli in (pseudo-)randomized order.</li>
+                </ul>
+                </p>
+            </div>
 
-    <div class="card-body">
-        <div class="d-flex justify-content-between">
-            <h2 class="card-title">Create and run experimental studies</h2>
-            <span><img src="{% static 'icons/graduation-cap.svg' %} " width="24"></span>
-        </div>
-        <p class="card-text">
-            Start creating experiments with L-Rex or edit your existing studies. A user account is required - you will be asked to log in or register.
-        </p>
-        <a  class="card-link" href="{% url 'studies' %}">My studies</a>
-    </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <h2 class="card-title">Create and run experimental studies</h2>
+                    <span><img src="{% static 'icons/graduation-cap.svg' %} " width="24"></span>
+                </div>
+                <p class="card-text">
+                    Start creating experiments with L-Rex or edit your existing studies. A user account is required - you will be asked to log in or register.
+                </p>
+                <a  class="card-link" href="{% url 'studies' %}">My studies</a>
+            </div>
 
-    <div class="card-body">
-        <div class="d-flex justify-content-between">
-            <h2 class="card-title">Documentation</h2>
-            <span><img src="{% static 'icons/book.svg' %} " width="24"></span>
-        </div>
-        <p class="card-text">
-            This wiki provides a step-by-step guide to setting up experimental studies with L-Rex.
-        </p>
-        <a  class="card-link" target="_blank" href="https://github.com/2e2a/l-rex/wiki">L-Rex Wiki</a>
-    </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <h2 class="card-title">Documentation</h2>
+                    <span><img src="{% static 'icons/book.svg' %} " width="24"></span>
+                </div>
+            <p class="card-text">
+                    This wiki provides a step-by-step guide to setting up experimental studies with L-Rex.
+                </p>
+                <a  class="card-link" target="_blank" href="https://github.com/2e2a/l-rex/wiki">L-Rex Wiki</a>
+            </div>
 
-    <div class="card-body">
-        <div class="d-flex justify-content-between">
-            <h2 class="card-title">Contribute</h2>
-            <span><img src="{% static 'icons/users.svg' %} " width="24"></span>
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <h2 class="card-title">Contribute</h2>
+                    <span><img src="{% static 'icons/users.svg' %} " width="24"></span>
+                </div>
+                <p class="card-text">
+                    L-Rex is free and open-source. Please feel free to submit your issues, feature requests, and pull requests.
+                </p>
+                <a  class="card-link" target="_blank" href="https://github.com/2e2a/l-rex/">L-Rex on GitHub</a>
+            </div>
         </div>
-        <p class="card-text">
-            L-Rex is free and open-source. Please feel free to submit your issues, feature requests, and pull requests.
-        </p>
-        <a  class="card-link" target="_blank" href="https://github.com/2e2a/l-rex/">L-Rex on GitHub</a>
+    </div>
+    <div class="col-md-4">
+        <div class="card my-2 shadow">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <h2 class="card-title">News</h2>
+                    <span><img src="{% static 'icons/bullhorn.svg' %} " width="24"></span>
+                </div>
+                <ul class="list-group mb-3">
+                    {% for news in news_list %}
+                    <li class="list-group-item border-0">
+                        <small>{{ news.date|date:"SHORT_DATE_FORMAT" }}</small><br>
+                        <a href="{% url 'news' news.slug %}">{{ news.title }}</a>
+                    </li>
+                    {% empty %}
+                      <li class="list-group-item">No news is good news.</li>
+                    {% endfor %}
+                  </ul>
+                <a  class="card-link" href="#">Older</a>
+            </div>
+        </div>
     </div>
 </div>
 

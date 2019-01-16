@@ -1,0 +1,12 @@
+{% extends "lrex_home/base.html" %}
+
+{% block content %}
+
+<div class="p-4 border bg-white">
+    <h2>
+        {{ object.date|date:"SHORT_DATE_FORMAT" }} - {{ object.title }}
+    </h2>
+    {{ object.text|linebreaks }}
+</div>
+
+{% endblock %}

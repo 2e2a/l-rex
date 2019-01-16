@@ -23,6 +23,7 @@ icons:
 	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/clipboard-list.svg -P lrex/static/icons/
 	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/comment.svg -P lrex/static/icons/
 	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/book.svg -P lrex/static/icons/
+	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/bullhorn.svg -P lrex/static/icons/
 	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/flask.svg -P lrex/static/icons/
 	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/graduation-cap.svg -P lrex/static/icons/
 	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/info-circle.svg -P lrex/static/icons/
