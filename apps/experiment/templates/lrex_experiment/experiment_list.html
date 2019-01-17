@@ -9,12 +9,11 @@
 </div>
 <ul class="list-group">
     {% for experiment in experiment_list %}
-    <li class="list-group-item my-1">
-        <div class="row">
-            <div class="col-10">
-                <strong>{{ experiment.title }}</strong>
-            </div>
-            <div class="col-2">
+    <li class="list-group-item d-flex my-1">
+        <div class="flex-grow-1">
+            <strong>{{ experiment.title }}</strong>
+        </div>
+        <div>
             <a href="{% url 'experiment' experiment.slug %}"
                class="btn btn-outline-primary btn-sm mx-1">
                 Edit
@@ -23,7 +22,6 @@
                class="btn btn-outline-danger btn-sm mx-1">
                 Delete
             </a>
-            </div>
         </div>
     </li>
     {% empty %}

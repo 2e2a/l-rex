@@ -15,28 +15,26 @@
 
 <ul class="list-group">
     {% for trial in trial_list %}
-    <li class="list-group-item my-1">
-        <div class="row">
-            <div class="col-10">
-                <strong>#{{ page_obj.start_index|add:forloop.counter0 }}</strong>
-                {% if trial.subject_id %}
-                {{ trial.subject_id }} -
-                {% endif %}
-                {{ trial.creation_date|date:"SHORT_DATETIME_FORMAT" }}
-                <span class="badge badge-primary">{{ trial.status.name }}</span>
-                <span class="badge badge-secondary">Questionnaire {{ trial.questionnaire.number }}</span>
-                {% if trial.rating_proof %}
-                <span class="badge badge-light">Proof {{ trial.rating_proof }}</span>
-                {% endif %}
-            </div>
-            <div class="col-2">
-                <a href="{% url 'trial' trial.slug %}" class="btn btn-outline-primary btn-sm mx-1">
-                    View
-                </a>
-                <a href="{% url 'trial-delete' trial.slug %}" class="btn btn-outline-danger btn-sm mx-1">
-                    Delete
-                </a>
-            </div>
+    <li class="list-group-item d-flex my-1">
+        <div class="flex-grow-1">
+            <strong>#{{ page_obj.start_index|add:forloop.counter0 }}</strong>
+            {% if trial.subject_id %}
+            {{ trial.subject_id }} -
+            {% endif %}
+            {{ trial.creation_date|date:"SHORT_DATETIME_FORMAT" }}
+            <span class="badge badge-primary">{{ trial.status.name }}</span>
+            <span class="badge badge-secondary">Questionnaire {{ trial.questionnaire.number }}</span>
+            {% if trial.rating_proof %}
+            <span class="badge badge-light">Proof {{ trial.rating_proof }}</span>
+            {% endif %}
+        </div>
+        <div>
+            <a href="{% url 'trial' trial.slug %}" class="btn btn-outline-primary btn-sm mx-1">
+                View
+            </a>
+            <a href="{% url 'trial-delete' trial.slug %}" class="btn btn-outline-danger btn-sm mx-1">
+                Delete
+            </a>
         </div>
     </li>
     {% empty %}

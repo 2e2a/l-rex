@@ -33,41 +33,39 @@
 <ul class="list-group">
     {% with consider_blocks=view.consider_blocks %}
     {% for item in item_list %}
-    <li class="list-group-item">
-        <div class="row">
-            <div class="col-1">
-                <strong>{{ item }}</strong>
-                {% if consider_blocks %}<span class="badge badge-secondary">block {{ item.block }}</span>{% endif %}
-            </div>
-            <div class="col-6">
-                {% if item.textitem %}
-                {{ item.textitem.text|linebreaks }}
-                {% else %}
-                <audio controls="controls">
-                    <source src="{{ item.audiolinkitem.url }}">
-                    Your browser does not support the <code>audio</code> element.
-                </audio>
-                {% endif %}
-            </div>
-            <div class="col-4">
-                <a
-                   {% if study.has_text_items %}
-                   href="{% url 'text-item-update' item_slug=item.slug %}"
-                   {% else %}
-                   href="{% url 'audio-link-item-update' item_slug=item.slug %}"
-                   {% endif %}
-                   class="btn btn-outline-primary btn-sm mx-1">
-                    Edit
-                </a>
-                <a href="{% url 'item-questions' item_slug=item.slug %}"
-                   class="btn btn-outline-secondary btn-sm mx-1">
-                    Customize questions
-                </a>
-                <a href="{% url 'item-delete' item_slug=item.slug %}"
-                   class="btn btn-outline-danger btn-sm mx-1">
-                    Delete
-                </a>
-            </div>
+    <li class="list-group-item d-flex flex-column flex-md-row">
+        <div class="mr-4">
+            <strong>{{ item }}</strong>
+            {% if consider_blocks %}<span class="badge badge-secondary">block {{ item.block }}</span>{% endif %}
+        </div>
+        <div class="flex-grow-1">
+            {% if item.textitem %}
+            {{ item.textitem.text|linebreaks }}
+            {% else %}
+            <audio controls="controls">
+                <source src="{{ item.audiolinkitem.url }}">
+                Your browser does not support the <code>audio</code> element.
+            </audio>
+            {% endif %}
+        </div>
+        <div>
+            <a
+               {% if study.has_text_items %}
+               href="{% url 'text-item-update' item_slug=item.slug %}"
+               {% else %}
+               href="{% url 'audio-link-item-update' item_slug=item.slug %}"
+               {% endif %}
+               class="btn btn-outline-primary btn-sm mx-1">
+                Edit
+            </a>
+            <a href="{% url 'item-questions' item_slug=item.slug %}"
+               class="btn btn-outline-secondary btn-sm mx-1">
+                Customize questions
+            </a>
+            <a href="{% url 'item-delete' item_slug=item.slug %}"
+               class="btn btn-outline-danger btn-sm mx-1">
+                Delete
+            </a>
         </div>
     </li>
     {% empty %}
