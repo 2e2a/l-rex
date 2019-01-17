@@ -52,15 +52,17 @@
 
 
 <div class="container">
-    <ol class="breadcrumb bg-light px-0">
-        {% for name, link in view.breadcrumbs %}
-        {% if not forloop.last %}
-        <li class="breadcrumb-item"><a href="{{ link }}">{{ name }}</a></li>
-        {% else %}
-        <li class="breadcrumb-item active">{{ name }}</li>
-        {% endif %}
-        {% endfor %}
-    </ol>
+    <nav aria-label="Breadcrumbs">
+        <ol class="breadcrumb bg-light px-0">
+            {% for name, link in view.breadcrumbs %}
+            {% if not forloop.last %}
+            <li class="breadcrumb-item"><a href="{{ link }}">{{ name }}</a></li>
+            {% else %}
+            <li class="breadcrumb-item active">{{ name }}</li>
+            {% endif %}
+            {% endfor %}
+        </ol>
+    </nav>
     {% for message in messages %}
     <div class="alert {{ message.level_tag|bootstrap_alert_class }} shadow" role="alert">
         {{ message }}
