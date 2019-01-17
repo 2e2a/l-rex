@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterField(
-            model_name='questionnaireblock',
+            model_name='QuestionnaireBlock',
             name='randomization',
             field=models.CharField(choices=[('none', 'Keep item order'), ('true', 'Randomize'), ('pseudo', 'Pseudo-randomize')], default='true', help_text='Randomize items in each questionnaire block', max_length=8),
         ),
