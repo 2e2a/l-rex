@@ -4,11 +4,11 @@
 <div class="row justify-content-center mb-2">
     {% if view.consider_blocks %}
     <a href="{% url 'questionnaire-generate' study.slug %}"
-       class="btn btn-primary btn-sm mx-1" role="button">
+       class="btn btn-primary btn-sm mx-1">
         Generate questionnaires
     </a>
     <a href="{% url 'questionnaire-blocks' study.slug %}"
-       class="btn btn-primary btn-sm mx-1" role="button">
+       class="btn btn-primary btn-sm mx-1">
         Add/edit block instructions
     </a>
     {% else %}
@@ -31,7 +31,7 @@
         </div>
     </form>
     <a href="{% url 'questionnaire-upload' study.slug %}"
-       class="btn btn-secondary btn-sm mx-1" role="button">
+       class="btn btn-secondary btn-sm mx-1">
         Upload custom CSV
     </a>
     {% endif %}
@@ -45,7 +45,7 @@
                 {% for item in questionnaire.items_preview %}{{ item.experiment }}-{{ item }}{% if not forloop.last %}, {% else %}...{% endif %}{% endfor %}
             </div>
             <div class="col-2">
-                <a href="{% url 'questionnaire' questionnaire.slug %}" class="btn btn-outline-primary btn-sm mx-1" role="button">
+                <a href="{% url 'questionnaire' questionnaire.slug %}" class="btn btn-outline-primary btn-sm mx-1">
                     Details
                 </a>
             </div>

@@ -3,8 +3,7 @@
 {% block content %}
 <div class="row justify-content-center mb-2">
     <a href="{% url 'experiment-create' study.slug %}"
-       class="btn btn-primary btn-sm mx-1"
-       role="button">
+       class="btn btn-primary btn-sm mx-1">
         New Experiment
     </a>
 </div>
@@ -17,11 +16,11 @@
             </div>
             <div class="col-2">
             <a href="{% url 'experiment' experiment.slug %}"
-               class="btn btn-outline-primary btn-sm mx-1" role="button">
+               class="btn btn-outline-primary btn-sm mx-1">
                 Edit
             </a>
             <a href="{% url 'experiment-delete' experiment.slug %}"
-               class="btn btn-outline-danger btn-sm mx-1" role="button">
+               class="btn btn-outline-danger btn-sm mx-1">
                 Delete
             </a>
             </div>
