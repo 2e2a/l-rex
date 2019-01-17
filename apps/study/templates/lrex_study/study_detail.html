@@ -22,6 +22,119 @@
 </div>
 
 <div class="row">
+    <div class="col-md-4 order-md-2">
+        <div class="card my-2">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <h2 class="card-title">Status</h2>
+                    <span><img src="{% static 'icons/lightbulb.svg' %} " width="20"></span>
+                </div>
+                <div class="row small text-secondary">
+                    <div class="col-sm-5">
+                        Current status:
+                    </div>
+                    <div class="col-sm-5">
+                        <span class="badge badge-primary">{{ study.status.name }}</span>
+                    </div>
+                </div>
+                <div class="row small text-secondary">
+                    <div class="col-sm-5">
+                        Participate:
+                    </div>
+                    <div class="col-sm-5">
+                        {% if study.is_published %}
+                        <a href="{% url 'trial-create' study.slug %}">Participant link</a>
+                        {% else %}
+                        <a class="card-link text-muted">Participant link</a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row small text-secondary">
+                    <div class="col-sm-5">
+                        Password:
+                    </div>
+                    <div class="col-sm-5">
+                        {{ study.password }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card  my-2">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <h2 class="card-title">Settings</h2>
+                    <span><img src="{% static 'icons/sliders-h.svg' %} " width="20"></span>
+                </div>
+                <p class="card-text">
+                    Set the general properties of the study.
+                </p>
+                <div class="row small text-secondary">
+                    <div class="col-sm-6">
+                        Item Type:
+                    </div>
+                    <div class="col-sm-4">
+                        {{ study.get_item_type_display }}
+                    </div>
+                </div>
+                <div class="row small text-secondary">
+                    <div class="col-sm-6">
+                        Participant id:
+                    </div>
+                    <div class="col-sm-4">
+                        {{ study.require_participant_id|yesno }}
+                    </div>
+                </div>
+                <div class="row small text-secondary">
+                    <div class="col-sm-6">
+                        Participation code:
+                    </div>
+                    <div class="col-sm-4">
+                        {{ study.generate_participation_code|yesno }}
+                    </div>
+                </div>
+                <div class="row small text-secondary">
+                    <div class="col-sm-6">
+                        End date:
+                    </div>
+                    <div class="col-sm-4">
+                        {% if study.end_date %}
+                        {{ study.end_date|date:"SHORT_DATE_FORMAT" }}
+                        {% else %}
+                        --
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row small text-secondary">
+                    <div class="col-sm-6">
+                        Trial limit:
+                    </div>
+                    <div class="col-sm-4">
+                        {{ study.trial_limit|default:"--" }}
+                    </div>
+                </div>
+                <div class="row small text-secondary">
+                    {% if study.creator == view.request.user %}
+                    <div class="col-sm-6">
+                        Shared with:
+                    </div>
+                    <div class="col-sm-4">
+                        {{ study.shared_with|default:"--" }}
+                    </div>
+                    {% else %}
+                    <div class="col-sm-6">
+                        Shared by:
+                    </div>
+                    <div class="col-sm-4">
+                        {{ study.creator.username }}
+                    </div>
+                    {% endif %}
+                </div>
+                <hr>
+                <a  class="card-link" href="{% url 'study-update' study.slug %}">Settings</a>
+                <a  class="card-link" href="{% url 'study-share' study.slug %}">Share</a>
+            </div>
+        </div>
+    </div>
     <div class="col-md-8">
         <div class="card my-2 {% if study|is_progress_std_created %} border-primary shadow{% endif %}">
             <div class="card-body">
@@ -165,119 +278,6 @@
                 <a class="card-link text-muted">Summary of the results</a>
                 <a class="card-link text-muted">Individual user trials</a>
                 {% endif %}
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card my-2">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <h2 class="card-title">Status</h2>
-                    <span><img src="{% static 'icons/lightbulb.svg' %} " width="20"></span>
-                </div>
-                <div class="row small text-secondary">
-                    <div class="col-sm-5">
-                        Current status:
-                    </div>
-                    <div class="col-sm-5">
-                        <span class="badge badge-primary">{{ study.status.name }}</span>
-                    </div>
-                </div>
-                <div class="row small text-secondary">
-                    <div class="col-sm-5">
-                        Participate:
-                    </div>
-                    <div class="col-sm-5">
-                        {% if study.is_published %}
-                        <a href="{% url 'trial-create' study.slug %}">Participant link</a>
-                        {% else %}
-                        <a class="card-link text-muted">Participant link</a>
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="row small text-secondary">
-                    <div class="col-sm-5">
-                        Password:
-                    </div>
-                    <div class="col-sm-5">
-                        {{ study.password }}
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="card  my-2">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <h2 class="card-title">Settings</h2>
-                    <span><img src="{% static 'icons/sliders-h.svg' %} " width="20"></span>
-                </div>
-                <p class="card-text">
-                    Set the general properties of the study.
-                </p>
-                <div class="row small text-secondary">
-                    <div class="col-sm-6">
-                        Item Type:
-                    </div>
-                    <div class="col-sm-4">
-                        {{ study.get_item_type_display }}
-                    </div>
-                </div>
-                <div class="row small text-secondary">
-                    <div class="col-sm-6">
-                        Participant id:
-                    </div>
-                    <div class="col-sm-4">
-                        {{ study.require_participant_id|yesno }}
-                    </div>
-                </div>
-                <div class="row small text-secondary">
-                    <div class="col-sm-6">
-                        Participation code:
-                    </div>
-                    <div class="col-sm-4">
-                        {{ study.generate_participation_code|yesno }}
-                    </div>
-                </div>
-                <div class="row small text-secondary">
-                    <div class="col-sm-6">
-                        End date:
-                    </div>
-                    <div class="col-sm-4">
-                        {% if study.end_date %}
-                        {{ study.end_date|date:"SHORT_DATE_FORMAT" }}
-                        {% else %}
-                        --
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="row small text-secondary">
-                    <div class="col-sm-6">
-                        Trial limit:
-                    </div>
-                    <div class="col-sm-4">
-                        {{ study.trial_limit|default:"--" }}
-                    </div>
-                </div>
-                <div class="row small text-secondary">
-                    {% if study.creator == view.request.user %}
-                    <div class="col-sm-6">
-                        Shared with:
-                    </div>
-                    <div class="col-sm-4">
-                        {{ study.shared_with|default:"--" }}
-                    </div>
-                    {% else %}
-                    <div class="col-sm-6">
-                        Shared by:
-                    </div>
-                    <div class="col-sm-4">
-                        {{ study.creator.username }}
-                    </div>
-                    {% endif %}
-                </div>
-                <hr>
-                <a  class="card-link" href="{% url 'study-update' study.slug %}">Settings</a>
-                <a  class="card-link" href="{% url 'study-share' study.slug %}">Share</a>
             </div>
         </div>
     </div>
