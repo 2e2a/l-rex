@@ -68,11 +68,21 @@ migrate:
 run:
 	$(VIRTUAL_ENV)/bin/python3 manage.py runserver 8000
 
+.PHONY: demo-save
+demo-save:
+	$(VIRTUAL_ENV)/bin/python3 manage.py dumpdata --natural-foreign --exclude auth.permission --exclude contenttypes --indent 4 > fixtures/demo.json
+
+.PHONY: demo-load
+demo-load:
+	$(VIRTUAL_ENV)/bin/python3 manage.py migrate
+	$(VIRTUAL_ENV)/bin/python3 manage.py loaddata fixtures/demo.json
+
 .PHONY: reset-db
 reset-db:
 	./scripts/reset_db.sh
-	$(VIRTUAL_ENV)/bin/python3 manage.py migrate
-	$(VIRTUAL_ENV)/bin/python3 manage.py loaddata fixtures/demo.json
+
+.PHONY: reset-dev
+reset-dev: reset-db demo-load
 
 .PHONY: pull
 pull:
