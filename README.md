@@ -33,7 +33,7 @@ make deploy
 
 ### Configuration
 
-Configuration parameters (e.g. `DATABASES`) can be overwritten in `lrex/local.conf`.
+Configuration parameters (e.g. `DATABASES`) can be overwritten in `lrex/local.py`.
 Add a `Site` for your domain (used by allauth).
 
 ### Usage
