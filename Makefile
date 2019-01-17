@@ -21,6 +21,7 @@ node:
 .PHONY: icons
 icons:
 	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/clipboard-list.svg -P lrex/static/icons/
+	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/clock.svg -P lrex/static/icons/
 	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/comment.svg -P lrex/static/icons/
 	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/book.svg -P lrex/static/icons/
 	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/bullhorn.svg -P lrex/static/icons/

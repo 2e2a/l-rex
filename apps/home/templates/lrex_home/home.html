@@ -74,10 +74,32 @@
                         <a href="{% url 'news' news.slug %}">{{ news.title }}</a>
                     </li>
                     {% empty %}
-                      <li class="list-group-item">No news is good news.</li>
+                      <li class="list-group-item border-0">No news is good news.</li>
                     {% endfor %}
                   </ul>
                 <a  class="card-link" href="#">Older</a>
+            </div>
+        </div>
+
+        <div class="card my-2 shadow">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <h2 class="card-title">Latest Studies</h2>
+                    <span><img src="{% static 'icons/clock.svg' %} " width="24"></span>
+                </div>
+                <ul class="list-group mb-2">
+                    {% if user.is_authenticated %}
+                    {% for study in latest_studies %}
+                    <li class="list-group-item border-0">
+                        <a href="{% url 'study' study.slug %}">{{ study.title }}</a>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item border-0">No studies.</li>
+                    {% endfor %}
+                    {% else%}
+                    <li class="list-group-item border-0">Login required.</li>
+                    {% endif %}
+                </ul>
             </div>
         </div>
     </div>

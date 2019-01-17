@@ -16,6 +16,8 @@ class HomeView(generic.TemplateView):
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         data['news_list'] = models.News.objects.all()[:3]
+        if self.request.user.is_authenticated:
+            data['latest_studies'] = self.request.user.study_set.all()[:2]
         return data
 
 
