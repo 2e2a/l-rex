@@ -1,7 +1,7 @@
 {% extends "lrex_home/base.html" %}
 
 {% block content %}
-<h1 class="row justify-content-center mt-2">Participate in the experiment</h1>
+<h1 class="text-center mt-2">Participate in the experiment</h1>
 <div class="my-2 p-4 border bg-white">
     <hr>
     {% if view.questionnaire_item.item.textitem %}
@@ -23,9 +23,9 @@
     </p>
     <form action="" method="post">
         {% csrf_token %}
-        <div class="btn-group d-flex" role="group">
+        <div class="d-flex flex-column flex-sm-row m-n1" role="group">
             {% for choice in form.scale_value.field.choices %}
-            <button class="btn btn-outline-primary mx-1 w-100" type="submit" name="scale_value" value="{{ choice.0 }}">
+            <button class="btn btn-outline-primary m-1 w-100" type="submit" name="scale_value" value="{{ choice.0 }}">
                 {{ choice.1 }}
             </button>
             {% endfor %}

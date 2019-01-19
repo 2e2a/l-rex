@@ -79,7 +79,7 @@ question_formset_helper.add_input(
     Submit("add", "Add"),
 )
 question_formset_helper.add_input(
-    Submit("delete", "Delete last"),
+    Submit("delete", "Delete last", css_class="btn-danger"),
 )
 
 

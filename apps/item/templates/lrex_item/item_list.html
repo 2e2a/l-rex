@@ -8,15 +8,15 @@
         {% else %}
         href="{% url 'audio-link-item-create' experiment.slug %}"
         {% endif %}
-       class="btn btn-primary btn-sm mx-1" role="button">
+       class="btn btn-primary btn-sm mx-1">
         Add item
     </a>
     <a href="{% url 'items-pregenerate' experiment.slug %}"
-       class="btn btn-primary btn-sm mx-1" role="button">
+       class="btn btn-primary btn-sm mx-1">
         Pregenerate items
     </a>
     <a href="{% url 'items-upload' experiment.slug %}"
-       class="btn btn-primary btn-sm mx-1" role="button">
+       class="btn btn-primary btn-sm mx-1">
         Upload CSV
     </a>
     <form method="post">
@@ -26,7 +26,7 @@
         </button>
     </form>
     <a href="{% url 'items-delete' experiment.slug %}"
-       class="btn btn-danger btn-sm mx-1" role="button">
+       class="btn btn-danger btn-sm mx-1">
         Delete all
     </a>
 </div>
@@ -56,15 +56,15 @@
                    {% else %}
                    href="{% url 'audio-link-item-update' item_slug=item.slug %}"
                    {% endif %}
-                   class="btn btn-outline-primary btn-sm mx-1" role="button">
+                   class="btn btn-outline-primary btn-sm mx-1">
                     Edit
                 </a>
                 <a href="{% url 'item-questions' item_slug=item.slug %}"
-                   class="btn btn-outline-secondary btn-sm mx-1" role="button">
+                   class="btn btn-outline-secondary btn-sm mx-1">
                     Customize questions
                 </a>
                 <a href="{% url 'item-delete' item_slug=item.slug %}"
-                   class="btn btn-outline-danger btn-sm mx-1" role="button">
+                   class="btn btn-outline-danger btn-sm mx-1">
                     Delete
                 </a>
             </div>
