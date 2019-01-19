@@ -1,7 +1,7 @@
 {% extends "lrex_home/base.html" %}
 
 {% block content %}
-<div class="row justify-content-center mb-2">
+<div class="text-center mb-2">
     {% if view.consider_blocks %}
     <a href="{% url 'questionnaire-generate' study.slug %}"
        class="btn btn-primary btn-sm mx-1">
@@ -12,7 +12,7 @@
         Add/edit block instructions
     </a>
     {% else %}
-    <form name="actionForm" id="actionForm" method="POST"/>
+    <form name="actionForm" id="actionForm" method="POST" class="d-inline">
         {% csrf_token %}
         <input class="span2" id="action" name="action" type="text" hidden="hidden">
         <div class="btn-group">

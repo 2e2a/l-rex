@@ -1,9 +1,9 @@
 {% extends "lrex_home/base.html" %}
 
 {% block content %}
-<div class="row justify-content-center mb-2">
+<div class="text-center mb-2">
     {%if study.generate_participation_code %}
-    <form method="post">
+    <form method="post" class="d-inline">
         {% csrf_token %}
         <button type="submit" name="action" value="download_proofs"
                 class="btn btn-primary btn-sm mx-1">

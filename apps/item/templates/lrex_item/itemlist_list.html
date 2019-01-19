@@ -1,8 +1,8 @@
 {% extends "lrex_home/base.html" %}
 
 {% block content %}
-<div class="row justify-content-center mb-2">
-    <form name="actionForm" id="actionForm" method="POST"/>
+<div class="text-center mb-2">
+    <form name="actionForm" id="actionForm" method="POST" class="d-inline">
     {% csrf_token %}
     <input class="span2" id="action" name="action" type="text" hidden="hidden">
     <div class="btn-group">
