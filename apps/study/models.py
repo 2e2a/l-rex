@@ -10,6 +10,7 @@ from django.utils.functional import cached_property
 
 from apps.contrib import math
 from apps.contrib.utils import slugify_unique
+from apps.contrib.datefield import DateField
 
 
 class StudyStatus(Enum):
@@ -60,10 +61,9 @@ class Study(models.Model):
         help_text='This text will be presented to the participant after the experiment is finished.',
         default='Thank you for participating!',
     )
-    end_date = models.DateField(
+    end_date = DateField(
         blank=True,
         null=True,
-        help_text='If you want to set a participation deadline, enter a date in the format YYYY-MM-DD.',
     )
     trial_limit = models.IntegerField(
         null=True,
