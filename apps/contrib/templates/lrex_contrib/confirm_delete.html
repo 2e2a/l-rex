@@ -2,15 +2,11 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-<div class="p-4 border bg-white">
-<form action="" method="post">{% csrf_token %}
-    <p class="row justify-content-center">{{ view.message }}</p>
-    <div class="row justify-content-center">
-    <span>
+<form action="" method="post" class="p-4 border bg-white">{% csrf_token %}
+    <p class="text-center">{{ view.message }}</p>
+    <div class="text-center">
         <input type="submit" value="Delete" class="btn btn-outline-danger btn-sm"/>
         <a href="{{ view.get_success_url }}" class="btn btn-outline-secondary btn-sm">Cancel</a>
-    </span>
     </div>
 </form>
-</div>
 {% endblock %}

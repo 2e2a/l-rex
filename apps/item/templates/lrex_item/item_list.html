@@ -1,7 +1,7 @@
 {% extends "lrex_home/base.html" %}
 
 {% block content %}
-<div class="row justify-content-center mb-2">
+<div class="text-center mb-2">
     <a
         {% if study.has_text_items %}
         href="{% url 'text-item-create' experiment.slug %}"
@@ -19,7 +19,7 @@
        class="btn btn-primary btn-sm mx-1">
         Upload CSV
     </a>
-    <form method="post">
+    <form method="post" class="d-inline">
         {% csrf_token %}
         <button type="submit" name="action" value="validate" class="btn btn-primary btn-sm mx-1">
             Validate
