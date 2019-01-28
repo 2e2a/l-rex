@@ -64,6 +64,7 @@ class Study(models.Model):
     end_date = DateField(
         blank=True,
         null=True,
+        help_text='Set a participation deadline.'
     )
     trial_limit = models.IntegerField(
         null=True,
