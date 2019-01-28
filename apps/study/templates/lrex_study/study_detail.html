@@ -136,7 +136,7 @@
         </div>
     </div>
     <div class="col-md-8">
-        <div class="card my-2 {% if study|is_progress_std_created %} border-primary shadow{% endif %}">
+        <div class="card my-2 {% if study|is_progress_std_created %} border-primary custom-shadow{% endif %}">
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <h2 class="card-title">Tasks</h2>
@@ -181,7 +181,7 @@
             </div>
         </div>
 
-        <div class="card my-2 {% if study|is_progress_std_question_created_reached and not study|is_progress_std_exp_completed_reached %} border-primary shadow{% endif %}">
+        <div class="card my-2 {% if study|is_progress_std_question_created_reached and not study|is_progress_std_exp_completed_reached %} border-primary custom-shadow{% endif %}">
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <h2 class="card-title">Experiments</h2>
@@ -227,7 +227,7 @@
             </div>
         </div>
 
-        <div class="card my-2 {% if study|is_progress_std_exp_completed %} border-primary shadow{% endif %}">
+        <div class="card my-2 {% if study|is_progress_std_exp_completed %} border-primary custom-shadow{% endif %}">
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <h2 class="card-title">Questionnaires</h2>

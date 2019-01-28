@@ -28,7 +28,7 @@
          </div>
      </div>
     <div class="col-md-8">
-        <div class="card my-2 {% if not experiment|is_progress_exp_items_validated_reached %} border-primary shadow{% endif %}">
+        <div class="card my-2 {% if not experiment|is_progress_exp_items_validated_reached %} border-primary custom-shadow{% endif %}">
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <h2 class="card-title">Items</h2>
@@ -68,7 +68,7 @@
             </div>
         </div>
 
-        <div class="card my-2 {% if experiment|is_progress_exp_items_validated %} border-primary shadow{% endif %}">
+        <div class="card my-2 {% if experiment|is_progress_exp_items_validated %} border-primary custom-shadow{% endif %}">
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <h2 class="card-title">Lists</h2>

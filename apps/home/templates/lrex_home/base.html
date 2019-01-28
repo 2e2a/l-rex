@@ -12,7 +12,7 @@
 </head>
 <body class="bg-light">
 
-<nav class="navbar navbar-expand-md navbar-light bg-white fixed-top shadow">
+<nav class="navbar navbar-expand-md navbar-light bg-white fixed-top custom-shadow">
     <div class="container">
         <a class="navbar-brand" href="/">L-Rex</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
@@ -64,7 +64,7 @@
         </ol>
     </nav>
     {% for message in messages %}
-    <div class="alert {{ message.level_tag|bootstrap_alert_class }} shadow" role="alert">
+    <div class="alert {{ message.level_tag|bootstrap_alert_class }} custom-shadow" role="alert">
         {{ message }}
     </div>
     {% endfor %}
