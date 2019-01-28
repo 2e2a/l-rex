@@ -426,7 +426,19 @@ class TrialDeleteView(TrialObjectMixin, study_views.CheckStudyCreatorMixin, cont
         return reverse('trials', args=[self.study.slug])
 
 
-class RatingCreateMixin():
+class ProgressMixin:
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        i = self.num + 1
+        count = len(self.trial.items)
+        data['progress_i'] =  i
+        data['progress_count'] = count
+        data['progress'] = i * 100 / (count + 1)
+        return data
+
+
+class RatingCreateMixin(ProgressMixin):
 
     def get_next_url(self):
         trial_items = self.trial.items
@@ -473,10 +485,6 @@ class RatingCreateView(RatingCreateMixin, TrialMixin, generic.CreateView):
         self.question = self.study.questions.first()
         self.item_questions = self.questionnaire_item.item.itemquestion_set.all()
         return super().dispatch(*args, **kwargs)
-
-    @property
-    def progress(self):
-        return self.num * 100 / len(self.trial.items)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -551,12 +559,8 @@ class RatingsCreateView(RatingCreateMixin, TrialMixin, generic.TemplateView):
                 return redirect(self.get_next_url())
         return super().get(request, *args, **kwargs)
 
-    @property
-    def progress(self):
-        return self.num * 100 / len(self.trial.items)
 
-
-class RatingBlockInstructionsView(TrialMixin, generic.TemplateView):
+class RatingBlockInstructionsView(ProgressMixin, TrialMixin, generic.TemplateView):
     template_name = 'lrex_trial/rating_block_instructions.html'
 
     def dispatch(self, *args, **kwargs):
@@ -574,10 +578,6 @@ class RatingBlockInstructionsView(TrialMixin, generic.TemplateView):
             block=self.questionnaire_item.item.block
         )
         return questionnaire_block.instructions
-
-    @property
-    def progress(self):
-        return self.num * 100 / len(self.trial.items)
 
 
 class RatingOutroView(TrialMixin, generic.TemplateView):
