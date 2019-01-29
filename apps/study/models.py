@@ -51,6 +51,7 @@ class Study(models.Model):
     require_participant_id = models.BooleanField(
         default=False,
         help_text='Enable if you want participants to enter some ID before participation.',
+        verbose_name='Participant ID required',
     )
     generate_participation_code = models.BooleanField(
         default=False,
