@@ -151,7 +151,11 @@ class UploadItemsForm(crispy_forms.CrispyForm):
         return cleaned_data
 
 
-class ItemQuestionForm(forms.ModelForm):
+class ItemQuestionForm(crispy_forms.OptionalLabelMixin, forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.append_optional_to_labels()
 
     class Meta:
         model = models.ItemQuestion
