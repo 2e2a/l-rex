@@ -38,7 +38,7 @@
 </div>
 <ul class="list-group">
     {% for questionnaire in questionnaire_list %}
-    <li class="list-group-item d-flex my-1">
+    <li class="list-group-item d-flex">
         <div class="flex-grow-1">
             <strong>#{{ questionnaire.number }}</strong>
             {% for item in questionnaire.items_preview %}{{ item.experiment }}-{{ item }}{% if not forloop.last %}, {% else %}...{% endif %}{% endfor %}
@@ -50,7 +50,7 @@
         </div>
     </li>
     {% empty %}
-    <li class="list-group-item my-1">No questionnaires generated yet.</li>
+    <li class="list-group-item">No questionnaires generated yet.</li>
     {% endfor %}
 </ul>
 <nav aria-label="Pagination">

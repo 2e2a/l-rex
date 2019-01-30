@@ -9,7 +9,7 @@
 </div>
 <ul class="list-group">
     {% for experiment in experiment_list %}
-    <li class="list-group-item d-flex my-1">
+    <li class="list-group-item d-flex">
         <div class="flex-grow-1">
             <strong>{{ experiment.title }}</strong>
             {% if experiment.is_filler %}<span class="badge badge-primary">filler</span>{% endif %}
@@ -26,7 +26,7 @@
         </div>
     </li>
     {% empty %}
-    <li class="list-group-item my-1">There are currently no experiments.</li>
+    <li class="list-group-item">There are currently no experiments.</li>
     {% endfor %}
 </ul>
 {% endblock %}

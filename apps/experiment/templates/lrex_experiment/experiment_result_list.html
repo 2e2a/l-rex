@@ -3,7 +3,7 @@
 {% block content %}
 <ul class="list-group">
     {% for experiment in experiment_list %}
-    <li class="list-group-item d-flex my-1">
+    <li class="list-group-item d-flex">
         <div class="flex-grow-1">
             {{ experiment.title }}
         </div>
@@ -15,7 +15,7 @@
         </div>
     </li>
     {% empty %}
-    <li class="list-group-item my-1">No experiments yet.</li>
+    <li class="list-group-item">No experiments yet.</li>
     {% endfor %}
 </ul>
 {% endblock %}

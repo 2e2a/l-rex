@@ -9,7 +9,7 @@
 </div>
 <ul class="list-group">
     {% for study in study_list %}
-    <li class="list-group-item d-flex my-1">
+    <li class="list-group-item d-flex">
         <div class="flex-grow-1">
             <strong>{{ study.title }}</strong>
             <span class="badge badge-primary">{{ study.status.name }}</span>
@@ -27,7 +27,7 @@
         </div>
     </li>
     {% empty %}
-    <li class="list-group-item my-1">There are currently no studies.</li>
+    <li class="list-group-item">There are currently no studies.</li>
     {% endfor %}
 </ul>
 
