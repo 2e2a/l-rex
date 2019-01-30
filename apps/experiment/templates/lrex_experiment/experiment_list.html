@@ -12,6 +12,7 @@
     <li class="list-group-item d-flex my-1">
         <div class="flex-grow-1">
             <strong>{{ experiment.title }}</strong>
+            {% if experiment.is_filler %}<span class="badge badge-primary">filler</span>{% endif %}
         </div>
         <div>
             <a href="{% url 'experiment' experiment.slug %}"
