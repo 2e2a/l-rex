@@ -76,7 +76,7 @@ question_formset_helper.add_input(
     Submit("submit", "Submit"),
 )
 question_formset_helper.add_input(
-    Submit("add", "Add"),
+    Submit("add", "Add", css_class="btn-secondary"),
 )
 question_formset_helper.add_input(
     Submit("delete", "Delete last", css_class="btn-danger"),
