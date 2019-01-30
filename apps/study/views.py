@@ -194,7 +194,7 @@ class StudyInstructionsUpdateView(StudyObjectMixin, CheckStudyCreatorMixin, Succ
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        self.study.set_progress(self.study.PROGRESS_STD_INSTRUCTIONS_EDITED)
+        form.instance.set_progress(self.study.PROGRESS_STD_INSTRUCTIONS_EDITED)
         messages.success(self.request, progress_success_message(self.study.PROGRESS_STD_INSTRUCTIONS_EDITED))
         return response
 
