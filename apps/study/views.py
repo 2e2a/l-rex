@@ -192,6 +192,12 @@ class StudyInstructionsUpdateView(StudyObjectMixin, CheckStudyCreatorMixin, Succ
     form_class = forms.StudyInstructionsForm
     success_message = 'Study instructions successfully updated.'
 
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        self.study.set_progress(self.study.PROGRESS_STD_INSTRUCTIONS_EDITED)
+        messages.success(self.request, progress_success_message(self.study.PROGRESS_STD_INSTRUCTIONS_EDITED))
+        return response
+
     @property
     def breadcrumbs(self):
         return [

@@ -86,6 +86,7 @@ class Study(models.Model):
 
     PROGRESS_STD_CREATED = '00-std-crt'
     PROGRESS_STD_QUESTION_CREATED = '10-qst-crt'
+    PROGRESS_STD_INSTRUCTIONS_EDITED = '11-ins-edt'
     PROGRESS_STD_EXP_CREATED = '20-exp-crt'
     PROGRESS_STD_EXP_COMPLETED = '29-exp-cmp'
     PROGRESS_STD_QUESTIONNARES_GENERATED = '30-std-qnr-gen'
@@ -93,6 +94,7 @@ class Study(models.Model):
     PROGRESS = (
         (PROGRESS_STD_CREATED, 'Create a study'),
         (PROGRESS_STD_QUESTION_CREATED, 'Create a question'),
+        (PROGRESS_STD_INSTRUCTIONS_EDITED, 'Edit the instuctions'),
         (PROGRESS_STD_EXP_CREATED, 'Create an experiment'),
         (PROGRESS_STD_EXP_COMPLETED, 'Complete the experiment creation'),
         (PROGRESS_STD_QUESTIONNARES_GENERATED, 'Generate questionnaires'),
@@ -293,6 +295,8 @@ class Study(models.Model):
             return reverse('study-create', args=[])
         elif progress == self.PROGRESS_STD_QUESTION_CREATED:
             return reverse('study-questions', args=[self])
+        elif progress == self.PROGRESS_STD_INSTRUCTIONS_EDITED:
+            return reverse('study-instructions', args=[self])
         elif progress == self.PROGRESS_STD_EXP_CREATED:
             return reverse('experiments', args=[self])
         elif progress == self.PROGRESS_STD_EXP_COMPLETED:
@@ -322,7 +326,9 @@ class Study(models.Model):
         if progress == self.PROGRESS_STD_CREATED:
             return [ self.PROGRESS_STD_QUESTION_CREATED]
         elif progress == self.PROGRESS_STD_QUESTION_CREATED:
-            return [ self.PROGRESS_STD_QUESTION_CREATED, self.PROGRESS_STD_EXP_CREATED ]
+            return [ self.PROGRESS_STD_INSTRUCTIONS_EDITED, self.PROGRESS_STD_EXP_CREATED ]
+        elif progress == self.PROGRESS_STD_INSTRUCTIONS_EDITED:
+            return [ self.PROGRESS_STD_EXP_CREATED ]
         elif progress == self.PROGRESS_STD_EXP_CREATED:
             return [ self.PROGRESS_STD_EXP_COMPLETED ]
         elif progress == self.PROGRESS_STD_EXP_COMPLETED:
