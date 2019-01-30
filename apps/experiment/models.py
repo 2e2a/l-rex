@@ -277,7 +277,7 @@ class Experiment(models.Model):
         if progress == self.PROGRESS_EXP_CREATED:
             return [ self.PROGRESS_EXP_ITEMS_CREATED ]
         elif progress == self.PROGRESS_EXP_ITEMS_CREATED:
-            return [ self.PROGRESS_EXP_ITEMS_CREATED, self.PROGRESS_EXP_ITEMS_VALIDATED ]
+            return [ self.PROGRESS_EXP_ITEMS_VALIDATED ]
         elif progress == self.PROGRESS_EXP_ITEMS_VALIDATED:
             return [ self.PROGRESS_EXP_LISTS_CREATED ]
         elif progress == self.PROGRESS_EXP_LISTS_CREATED:

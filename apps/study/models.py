@@ -332,7 +332,7 @@ class Study(models.Model):
         elif progress == self.PROGRESS_STD_EXP_CREATED:
             return [ self.PROGRESS_STD_EXP_COMPLETED ]
         elif progress == self.PROGRESS_STD_EXP_COMPLETED:
-            return [ self.PROGRESS_STD_EXP_CREATED, self.PROGRESS_STD_QUESTIONNARES_GENERATED ]
+            return [ self.PROGRESS_STD_QUESTIONNARES_GENERATED ]
         elif progress == self.PROGRESS_STD_QUESTIONNARES_GENERATED:
             return [ self.PROGRESS_STD_PUBLISHED ]
         elif progress == self.PROGRESS_STD_PUBLISHED:
