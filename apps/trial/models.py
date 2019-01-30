@@ -44,7 +44,7 @@ class Questionnaire(models.Model):
     @cached_property
     def items_preview(self):
         questionnaire_items = [questionnaire_item.item_id for questionnaire_item
-                               in self.questionnaireitem_set.all()[:4]]
+                               in self.questionnaireitem_set.all()[:10]]
         return item_models.Item.objects.filter(id__in=questionnaire_items)
 
     @cached_property

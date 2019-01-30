@@ -60,7 +60,7 @@ class Experiment(models.Model):
         return conditions
 
     def __str__(self):
-        return self.slug
+        return self.title
 
     def get_absolute_url(self):
         return reverse('experiment', args=[self.slug])

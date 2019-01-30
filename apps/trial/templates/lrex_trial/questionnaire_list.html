@@ -39,7 +39,7 @@
 <ul class="list-group">
     {% for questionnaire in questionnaire_list %}
     <li class="list-group-item d-flex">
-        <div class="flex-grow-1">
+        <div class="flex-grow-1 text-truncate">
             <strong>#{{ questionnaire.number }}</strong>
             {% for item in questionnaire.items_preview %}{{ item.experiment }}-{{ item }}{% if not forloop.last %}, {% else %}...{% endif %}{% endfor %}
         </div>
