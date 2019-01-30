@@ -2,19 +2,6 @@
 
 {% block content %}
 <div class="text-center mb-2">
-    <a
-        {% if study.has_text_items %}
-        href="{% url 'text-item-create' experiment.slug %}"
-        {% else %}
-        href="{% url 'audio-link-item-create' experiment.slug %}"
-        {% endif %}
-       class="btn btn-primary btn-sm mx-1">
-        Add item
-    </a>
-    <a href="{% url 'items-pregenerate' experiment.slug %}"
-       class="btn btn-primary btn-sm mx-1">
-        Pregenerate items
-    </a>
     <a href="{% url 'items-upload' experiment.slug %}"
        class="btn btn-primary btn-sm mx-1">
         Upload CSV
@@ -25,6 +12,19 @@
             Validate
         </button>
     </form>
+    <a
+        {% if study.has_text_items %}
+        href="{% url 'text-item-create' experiment.slug %}"
+        {% else %}
+        href="{% url 'audio-link-item-create' experiment.slug %}"
+        {% endif %}
+       class="btn btn-secondary btn-sm mx-1">
+        Add item
+    </a>
+    <a href="{% url 'items-pregenerate' experiment.slug %}"
+       class="btn btn-secondary btn-sm mx-1">
+        Pregenerate items
+    </a>
     <a href="{% url 'items-delete' experiment.slug %}"
        class="btn btn-danger btn-sm mx-1">
         Delete all
