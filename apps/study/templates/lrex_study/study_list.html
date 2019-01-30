@@ -9,23 +9,21 @@
 </div>
 <ul class="list-group">
     {% for study in study_list %}
-    <li class="list-group-item my-1">
-        <div class="row">
-            <div class="col-9">
-                <strong>{{ study.title }}</strong>
-                <span class="badge badge-primary">{{ study.status.name }}</span>
-                {% if study.creator != view.request.user %}
-                    <span class="badge badge-secondary">Shared</span>
-                {% endif %}
-            </div>
-            <div class="col-3">
-                <a href="{% url 'study' study.slug %}" class="btn btn-outline-primary btn-sm mx-1">
-                    Details
-                </a>
-                <a href="{% url 'study-delete' study.slug %}" class="btn btn-outline-danger btn-sm mx-1">
-                    Delete
-                </a>
-            </div>
+    <li class="list-group-item d-flex my-1">
+        <div class="flex-grow-1">
+            <strong>{{ study.title }}</strong>
+            <span class="badge badge-primary">{{ study.status.name }}</span>
+            {% if study.creator != view.request.user %}
+                <span class="badge badge-secondary">Shared</span>
+            {% endif %}
+        </div>
+        <div>
+            <a href="{% url 'study' study.slug %}" class="btn btn-outline-primary btn-sm mx-1">
+                Details
+            </a>
+            <a href="{% url 'study-delete' study.slug %}" class="btn btn-outline-danger btn-sm mx-1">
+                Delete
+            </a>
         </div>
     </li>
     {% empty %}

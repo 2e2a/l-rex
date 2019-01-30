@@ -3,14 +3,16 @@
 {% block content %}
 <ul class="list-group">
     {% for experiment in experiment_list %}
-    <li class="list-group-item d-flex justify-content-between align-items-center my-1">
-        {{ experiment.title }}
-        <span>
+    <li class="list-group-item d-flex my-1">
+        <div class="flex-grow-1">
+            {{ experiment.title }}
+        </div>
+        <div>
             <a href="{% url 'experiment-results' experiment.slug %}"
                class="btn btn-outline-primary btn-sm mx-1">
                 Results
             </a>
-        </span>
+        </div>
     </li>
     {% empty %}
     <li class="list-group-item my-1">No experiments yet.</li>
