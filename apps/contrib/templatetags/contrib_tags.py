@@ -15,7 +15,3 @@ def bootstrap_alert_class(message_level):
         return 'alert-warning'
     if message_level == 'error':
         return 'alert-danger'
-
-@register.filter
-def preview(text, chars):
-    return '{}...'.format(text[:int(chars)])

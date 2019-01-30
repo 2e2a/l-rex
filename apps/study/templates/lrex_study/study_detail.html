@@ -149,7 +149,7 @@
                     <div class="col-sm-3">
                         Questions:
                     </div>
-                    <div class="col-sm-7">
+                    <div class="col-sm-7 text-truncate">
 
                         {% for question in study.questions %}
                         {{ question }}{% if not forloop.last %}, {% endif %}
@@ -163,16 +163,16 @@
                     <div class="col-sm-3">
                         Instructions:
                     </div>
-                    <div class="col-sm-7">
-                        {{ study.instructions|preview:"40" }}
+                    <div class="col-sm-7 text-truncate">
+                        {{ study.instructions }}
                     </div>
                 </div>
                 <div class="row small text-secondary">
                     <div class="col-sm-3">
                         Outro:
                     </div>
-                    <div class="col-sm-7">
-                        {{ study.outro|preview:"40" }}
+                    <div class="col-sm-7 text-truncate">
+                        {{ study.outro }}
                     </div>
                 </div>
                 <hr>
