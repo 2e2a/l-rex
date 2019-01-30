@@ -147,6 +147,14 @@ class Study(models.Model):
     def questions(self):
         return self.question_set.all()
 
+    @cached_property
+    def question(self):
+        return self.questions[0] if self.questions else None
+
+    @cached_property
+    def is_multi_question(self):
+        return len(self.questions) > 1
+
     @property
     def status(self):
         from apps.trial.models import Trial

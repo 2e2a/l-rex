@@ -19,14 +19,24 @@
 </div>
 <table class="table bg-white">
 <thead>
+{% if study.is_multi_question %}
+<tr>
+    <th scope="col"></th>
+    <th scope="col"></th>
+    <th scope="col"></th>
+    {% for question in study.questions %}
+    <th scope="col" colspan="{{ question.scalevalue_set.all|length }}">Question {{ forloop.counter }}</th>
+    {% endfor %}
+</tr>
+{% endif %}
 <tr>
     {% if 'subject' not in view.aggregate_by %}<th scope="col">Subject</th>{% endif %}
     {% if 'item' not in view.aggregate_by %}<th scope="col">Item</th>{% endif %}
     {% if 'condition' not in view.aggregate_by %}<th scope="col">Condition</th>{% endif %}
     <th scope="col">N</th>
-    {% for question in study.question_set.all %}
+    {% for question in study.questions %}
         {% for scale_value in question.scalevalue_set.all %}
-    <th scope="col" class="table-primary">{{ scale_value.label }}</th>
+        <th scope="col" class="table-primary">{{ scale_value.label }}</th>
         {% endfor %}
     {% endfor %}
 </tr>
