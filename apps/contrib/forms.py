@@ -7,7 +7,7 @@ class OptionalLabelMixin:
 
     def append_optional_to_labels(self):
         for field in self.fields.values():
-            if not field.required:
+            if not field.required and not isinstance(field.widget, forms.widgets.CheckboxInput):
                 field.label = '{} (optional)'.format(field.label)
 
 
