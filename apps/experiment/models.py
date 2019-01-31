@@ -254,13 +254,13 @@ class Experiment(models.Model):
 
     def progress_url(self, progress):
         if progress == self.PROGRESS_EXP_ITEMS_CREATED:
-            return reverse('items', args=[self])
+            return reverse('items', args=[self.slug])
         elif progress == self.PROGRESS_EXP_ITEMS_CREATED:
-            return reverse('items', args=[self])
+            return reverse('items', args=[self.slug])
         elif progress == self.PROGRESS_EXP_ITEMS_VALIDATED:
-            return reverse('items', args=[self])
+            return reverse('items', args=[self.slug])
         elif progress == self.PROGRESS_EXP_LISTS_CREATED:
-            return reverse('itemlists', args=[self])
+            return reverse('itemlists', args=[self.slug])
         return None
 
     def set_progress(self, progress):

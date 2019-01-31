@@ -302,17 +302,17 @@ class Study(models.Model):
         if progress == self.PROGRESS_STD_CREATED:
             return reverse('study-create', args=[])
         elif progress == self.PROGRESS_STD_QUESTION_CREATED:
-            return reverse('study-questions', args=[self])
+            return reverse('study-questions', args=[self.slug])
         elif progress == self.PROGRESS_STD_INSTRUCTIONS_EDITED:
-            return reverse('study-instructions', args=[self])
+            return reverse('study-instructions', args=[self.slug])
         elif progress == self.PROGRESS_STD_EXP_CREATED:
-            return reverse('experiments', args=[self])
+            return reverse('experiments', args=[self.slug])
         elif progress == self.PROGRESS_STD_EXP_COMPLETED:
-            return reverse('study', args=[self])
+            return reverse('study', args=[self.slug])
         elif progress == self.PROGRESS_STD_QUESTIONNARES_GENERATED:
-            return reverse('questionnaires', args=[self])
+            return reverse('questionnaires', args=[self.slug])
         elif progress == self.PROGRESS_STD_PUBLISHED:
-            return reverse('study', args=[self])
+            return reverse('study', args=[self.slug])
         return None
 
     def set_progress(self, progress):
