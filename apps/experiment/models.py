@@ -264,14 +264,11 @@ class Experiment(models.Model):
         return None
 
     def set_progress(self, progress):
-        self.progress = progress
-        self.save()
-        if progress == self.PROGRESS_EXP_LISTS_CREATED:
-            self.study.set_progress(self.study.PROGRESS_STD_EXP_COMPLETED)
-        elif self.study.progress != self.study.PROGRESS_STD_EXP_CREATED \
-                and progress != self.PROGRESS_EXP_ITEMS_VALIDATED:
-            self.study.set_progress(self.study.PROGRESS_STD_EXP_CREATED)
-
+        if progress > self.progress:
+            self.progress = progress
+            self.save()
+            if progress == self.PROGRESS_EXP_LISTS_CREATED:
+                self.study.set_progress(self.study.PROGRESS_STD_EXP_COMPLETED)
 
     def next_progress_steps(self, progress):
         if progress == self.PROGRESS_EXP_CREATED:
