@@ -1,0 +1,25 @@
+{% load crispy_forms_field %}
+
+{% comment %}
+<!--TODO: Keep in sync with bootstrap4/field.html -->
+{% endcomment %}
+
+<label for="{{ field.id_for_label }}" class="col-form-label {{ label_class }}{% if field.field.required %} requiredField{% endif %}">
+    <em>{{ field.label|safe }}</em>{% if field.field.required %}<span class="asteriskField">*</span>{% endif %}
+</label>
+
+<div class="controls mb-2">
+    {% include 'bootstrap/layout/field_errors_block.html' %}
+    <div class="btn-group btn-group-toggle d-flex justify-content-between" data-toggle="buttons">
+    {% for choice in field.field.choices %}
+            <label  for="id_{{ field.id_for_label }}_{{ forloop.counter }}" class="btn btn-outline-secondary btn-sm">
+                <input type="radio" name="{{ field.html_name }}" id="id_{{ field.id_for_label }}_{{ forloop.counter }}" value="{{ choice.0 }}" autocomplete="off">
+                {{ choice.1 }}
+            </label>
+    {% endfor %}
+    </div>
+
+    {% if field.help_text %}
+        <small id="hint_{{ field.auto_id }}" class="form-text text-muted">{{ field.help_text|safe }}</small>
+    {% endif %}
+</div>

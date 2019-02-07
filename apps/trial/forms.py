@@ -1,7 +1,7 @@
 import csv
 from io import StringIO
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Fieldset, Layout, Submit
+from crispy_forms.layout import HTML, Field, Fieldset, Layout, Submit
 from django import forms
 
 from apps.contrib import forms as crispy_forms
@@ -187,18 +187,33 @@ class RatingForm(crispy_forms.CrispyModelForm):
         model = models.Rating
         fields = ['scale_value']
 
+    @property
+    def custom_helper(self):
+        helper = FormHelper()
+        helper.add_layout(
+            Layout(
+                Field('scale_value', template='lrex_trial/ratings_scale_value_field.html'),
+            ),
+        )
+        return helper
+
     def __init__(self, *args, **kwargs):
         question = kwargs.pop('question')
         item_question = kwargs.pop('item_question', None)
         super().__init__(*args, **kwargs)
         self.fields['scale_value'].empty_label = None
+        self.fields['scale_value'].label = question.question
+        self.fields['scale_value'].help_text = question.legend
         self.fields['scale_value'].queryset = study_models.ScaleValue.objects.filter(question=question)
-        if item_question and item_question.scale_labels:
-            custom_choices = []
-            for (pk, _ ), custom_label \
-                    in zip(self.fields['scale_value'].choices, item_question.scale_labels.split(',')):
-                custom_choices.append((pk, custom_label))
-            self.fields['scale_value'].choices = custom_choices
+        if item_question:
+            if item_question.question: self.fields['scale_value'].label = item_question.question
+            if item_question.legend: self.fields['scale_value'].help_text = item_question.legend
+            if item_question.scale_labels:
+                custom_choices = []
+                item_labels = item_question.scale_labels.split(',')
+                for (pk, _ ), custom_label in zip(self.fields['scale_value'].choices, item_labels):
+                    custom_choices.append((pk, custom_label))
+                self.fields['scale_value'].choices = custom_choices
 
 
 class RatingFormsetForm(forms.ModelForm):
@@ -243,11 +258,12 @@ def customize_to_questions(ratingformset, questions, item_questions):
             scale_value.choices = custom_choices
 
 
-class RatingFormSetHelper(FormHelper):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-rating_formset_helper = RatingFormSetHelper()
+rating_formset_helper = FormHelper()
+rating_formset_helper.add_layout(
+    Layout(
+        Field('scale_value', template='lrex_trial/ratings_scale_value_field.html'),
+    ),
+)
 rating_formset_helper.add_input(
     Submit("submit", "Submit"),
 )

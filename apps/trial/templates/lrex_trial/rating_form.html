@@ -1,4 +1,5 @@
 {% extends "lrex_home/base.html" %}
+{% load crispy_forms_tags %}
 
 {% block content %}
 <h1 class="text-center mt-2">Participate in the experiment</h1>
@@ -16,26 +17,9 @@
         </audio>
     </div>
     {% endif %}
-    <p>
-        <em>
-            {{ view.item_question }}
-        </em>
-    </p>
-    <form action="" method="post">
-        {% csrf_token %}
-        <div class="d-flex flex-column flex-sm-row m-n1" role="group">
-            {% for choice in form.scale_value.field.choices %}
-            <button class="btn btn-outline-primary m-1 w-100" type="submit" name="scale_value" value="{{ choice.0 }}">
-                {{ choice.1 }}
-            </button>
-            {% endfor %}
-        </div>
-    </form>
-    <p>
-        <small>
-            {{ view.item_legend }}
-        </small>
-    </p>
+    <div class="my-2">
+        {% crispy form form.helper %}
+    </div>
     <div class="text-center my-2">
         <div class="progress" style="height: 2px;">
             <div class="progress-bar" role="progressbar" style="width: {{ progress }}%" aria-valuenow="{{ view.progress }}" aria-valuemin="0" aria-valuemax="100"></div>
