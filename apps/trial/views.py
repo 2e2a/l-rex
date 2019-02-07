@@ -525,7 +525,7 @@ class RatingsCreateView(RatingCreateMixin, TrialMixin, generic.TemplateView):
     formset = None
     helper = forms.rating_formset_helper
 
-    def dispatch(self, *args, **kwargs):
+    def dispatch(self, request, *args, **kwargs):
         self.num = int(self.kwargs['num'])
         self.questionnaire_item = models.QuestionnaireItem.objects.get(
             questionnaire=self.trial.questionnaire,
@@ -533,11 +533,14 @@ class RatingsCreateView(RatingCreateMixin, TrialMixin, generic.TemplateView):
         )
         self.questions = self.study.questions
         self.item_questions = self.questionnaire_item.item.itemquestion_set.order_by('pk')
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
         self.formset = forms.ratingformset_factory(len(self.questions))(
             queryset=models.Rating.objects.none()
         )
         forms.customize_to_questions(self.formset, self.questions, self.item_questions)
-        return super().dispatch(*args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         if self.questionnaire_item.rating_set.filter(trial=self.trial).exists():

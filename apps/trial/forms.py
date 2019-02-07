@@ -187,6 +187,11 @@ class RatingForm(crispy_forms.CrispyModelForm):
     class Meta:
         model = models.Rating
         fields = ['scale_value']
+        error_messages = {
+            'scale_value': {
+                'required': 'Please answer this question.',
+            },
+    }
 
     @property
     def custom_helper(self):
