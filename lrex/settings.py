@@ -114,10 +114,12 @@ SITE_ID = 1
 
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
-ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
 ACCOUNT_FORMS = {'signup': 'apps.home.forms.FixedAutofocusSignupForm'}
 
 DEFAULT_FROM_EMAIL = 'lrex@localhost'
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 
 # Password validation
