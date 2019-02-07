@@ -88,9 +88,14 @@ reset-dev: reset-db demo-load
 pull:
 	git pull
 
-.PHONY: deploy
-deploy: pull install build migrate
+.PHONY:  static
+static:
+	$(VIRTUAL_ENV)/bin/python3 manage.py collectstatic --noinput
 
+.PHONY: deploy
+deploy: pull install build migrate static
+
+.PHONY: fixenv
 fixvenv:
 	rm -r $(VIRTUAL_ENV)
 	python3 -m venv $(VIRTUAL_ENV)
