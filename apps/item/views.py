@@ -423,6 +423,7 @@ class ItemQuestionsUpdateView(ItemMixin, study_views.CheckStudyCreatorMixin, stu
                 if scale_labels_valid:
                     for instance in instances:
                         instance.save()
+                    return redirect('items', experiment_slug=self.experiment.slug)
         else: # reset
             self.item.itemquestion_set.all().delete()
         forms.initialize_with_questions(self.formset, self.study.questions)
