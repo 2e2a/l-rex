@@ -4,10 +4,13 @@ from django import forms
 
 
 class OptionalLabelMixin:
+    optional_label_ignore_fields = None
 
     def append_optional_to_labels(self):
-        for field in self.fields.values():
-            if not field.required and not isinstance(field.widget, forms.widgets.CheckboxInput):
+        for name, field in self.fields.items():
+            if not field.required \
+                    and (not self.optional_label_ignore_fields or not name in self.optional_label_ignore_fields) \
+                    and not isinstance(field.widget, forms.widgets.CheckboxInput):
                 field.label = '{} (optional)'.format(field.label)
 
 
