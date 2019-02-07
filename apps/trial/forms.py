@@ -161,6 +161,7 @@ class TrialForm(crispy_forms.CrispyModelForm):
         widget=forms.PasswordInput,
         help_text='Provide a password (as instructed by the experimenter).',
     )
+    optional_label_ignore_fields = ['subject_id']
 
     class Meta:
         model = models.Trial
@@ -171,7 +172,7 @@ class TrialForm(crispy_forms.CrispyModelForm):
         super().__init__(*args, **kwargs)
         if self.study.require_participant_id:
             self.fields['subject_id'].required = True
-        else :
+        else:
             self.fields['subject_id'].widget = forms.HiddenInput()
 
     def clean_password(self):
