@@ -1,4 +1,5 @@
 import csv
+from itertools import groupby
 from django.db import models
 from django.urls import reverse
 from django.utils.functional import cached_property
@@ -66,6 +67,8 @@ class Experiment(models.Model):
         return reverse('experiment', args=[self.slug])
 
     def validate_items(self):
+        warnings = []
+
         conditions = []
         items = self.item_set.all().order_by('number', 'condition')
         if len(items) == 0:
@@ -83,10 +86,10 @@ class Experiment(models.Model):
 
         item_number = 0
         for i, item in enumerate(items):
-            if hasattr(item, 'textitem'):
+            if self.study.item_type == study_models.Study.ITEM_TYPE_TXT:
                 if not item.textitem.text:
                     raise AssertionError('Item {} has no text.'.format(item))
-            elif hasattr(item, 'audiolinkitem'):
+            elif self.study.item_type == study_models.Study.ITEM_TYPE_AUDIO_LINK:
                 if not item.audiolinkitem.url:
                     raise AssertionError('Item {} has no URL.'.format(item))
 
@@ -95,7 +98,20 @@ class Experiment(models.Model):
             if item.number != item_number or item.condition != conditions[i % condition_count]:
                 raise AssertionError('Items invalid. Item {} was not expected.'.format(item))
 
-        return None
+        if self.study.item_type == study_models.Study.ITEM_TYPE_TXT:
+            items_by_text = groupby(items, lambda x: x.textitem.text)
+            for _, items_with_same_text in items_by_text:
+                items = list(items_with_same_text)
+                if len(items) > 1:
+                    warnings.append('Items {} have the same text.'.format(','.join([str(item) for item in items])))
+        elif self.study.item_type == study_models.Study.ITEM_TYPE_AUDIO_LINK:
+            items_by_link = groupby(items, lambda x: x.audiolinkitem.url)
+            for _, items_with_same_link in items_by_link:
+                items = list(items_with_same_link)
+                if len(items) > 1:
+                    warnings.append('Items {} have the same URL.'.format(','.join([str(item) for item in items])))
+
+        return warnings
 
     def compute_item_lists(self, distribute=True):
         self.itemlist_set.all().delete()

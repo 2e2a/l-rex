@@ -63,9 +63,11 @@ class ItemListView(experiment_views.ExperimentMixin, study_views.CheckStudyCreat
         action = request.POST.get('action', None)
         if action and action == 'validate':
             try:
-                self.experiment.validate_items()
+                warnings = self.experiment.validate_items()
                 self.experiment.set_progress(self.experiment.PROGRESS_EXP_ITEMS_VALIDATED)
-                messages.success(self.request, study_views.progress_success_message(self.experiment.PROGRESS_EXP_ITEMS_VALIDATED))
+                messages.success(request, study_views.progress_success_message(self.experiment.PROGRESS_EXP_ITEMS_VALIDATED))
+                for warning in warnings:
+                    messages.warning(request, 'Warning: {}'.format(warning))
             except AssertionError as e:
                 messages.error(request, str(e))
         return redirect('items', experiment_slug=self.experiment.slug)
