@@ -13,7 +13,7 @@
   },
   "homepage": "https://github.com/2e2a/l-rex#readme",
   "dependencies": {
-    "bootstrap": "^4.2.1",
+    "bootstrap": "^4.3.1",
     "jquery": "^3.3.1",
     "node-sass": "^4.11.0",
     "popper.js": "^1.14.7"
