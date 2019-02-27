@@ -22,7 +22,7 @@ class Command(BaseCommand):
         if not study.is_rating_possible:
             raise CommandError('Study does not allow rating.')
         question_scale_values = []
-        for question in study.question_set.all():
+        for question in study.questions:
             question_scale_values.append(question.scalevalue_set.all())
         count = 0
         while count < n_ratings:

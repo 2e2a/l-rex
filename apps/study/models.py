@@ -139,8 +139,7 @@ class Study(models.Model):
     def item_blocks(self):
         item_bocks = set()
         for experiment in self.experiments:
-            for item in experiment.item_set.all():
-                item_bocks.add(item.block)
+            item_bocks.update(experiment.item_blocks)
         return sorted(item_bocks)
 
     @cached_property
@@ -214,14 +213,14 @@ class Study(models.Model):
 
     def _questionnaire_count(self):
         questionnaire_lcm = 1
-        for experiment in self.experiment_set.all():
+        for experiment in self.experiments:
             condition_count = len(experiment.conditions)
             questionnaire_lcm = math.lcm(questionnaire_lcm,  condition_count)
         return questionnaire_lcm
 
     def _init_questionnaire_lists(self):
         questionnaire_item_list = []
-        for experiment in self.experiment_set.all():
+        for experiment in self.experiments:
             item_list = experiment.itemlist_set.first()
             questionnaire_item_list.append(item_list)
         return questionnaire_item_list

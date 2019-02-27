@@ -222,7 +222,7 @@ class QuestionUpdateView(StudyMixin, CheckStudyCreatorMixin, ProceedWarningMixin
         self.formset = forms.question_formset_factory(self.n_questions, 0 if self.n_questions > 0 else 1)(
             queryset=models.Question.objects.filter(study=self.study)
         )
-        forms.initialize_with_questions(self.formset, self.study.question_set.all())
+        forms.initialize_with_questions(self.formset, self.study.questions)
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -257,7 +257,7 @@ class QuestionUpdateView(StudyMixin, CheckStudyCreatorMixin, ProceedWarningMixin
                 self.formset = forms.question_formset_factory(self.n_questions, extra)(
                     queryset=models.Question.objects.filter(study=self.study)
                 )
-            forms.initialize_with_questions(self.formset, self.study.question_set.all())
+            forms.initialize_with_questions(self.formset, self.study.questions)
         return super().get(request, *args, **kwargs)
 
     @property

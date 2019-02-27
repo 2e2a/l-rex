@@ -60,6 +60,11 @@ class Experiment(models.Model):
         conditions = [item.condition for item in items]
         return conditions
 
+    @cached_property
+    def item_blocks(self):
+        item_bocks = set([item.block for item in self.items])
+        return sorted(item_bocks)
+
     def __str__(self):
         return self.title
 
@@ -86,10 +91,10 @@ class Experiment(models.Model):
 
         item_number = 0
         for i, item in enumerate(items):
-            if self.study.item_type == study_models.Study.ITEM_TYPE_TXT:
+            if self.study.has_text_items:
                 if not item.textitem.text:
                     raise AssertionError('Item {} has no text.'.format(item))
-            elif self.study.item_type == study_models.Study.ITEM_TYPE_AUDIO_LINK:
+            else:
                 if not item.audiolinkitem.url:
                     raise AssertionError('Item {} has no URL.'.format(item))
 
@@ -98,13 +103,13 @@ class Experiment(models.Model):
             if item.number != item_number or item.condition != conditions[i % condition_count]:
                 raise AssertionError('Items invalid. Item {} was not expected.'.format(item))
 
-        if self.study.item_type == study_models.Study.ITEM_TYPE_TXT:
+        if self.study.has_text_items:
             items_by_text = groupby(items, lambda x: x.textitem.text)
             for _, items_with_same_text in items_by_text:
                 items = list(items_with_same_text)
                 if len(items) > 1:
                     warnings.append('Items {} have the same text.'.format(','.join([str(item) for item in items])))
-        elif self.study.item_type == study_models.Study.ITEM_TYPE_AUDIO_LINK:
+        else:
             items_by_link = groupby(items, lambda x: x.audiolinkitem.url)
             for _, items_with_same_link in items_by_link:
                 items = list(items_with_same_link)
@@ -130,8 +135,7 @@ class Experiment(models.Model):
                 item_list.items.add(item)
         else:
             item_list = item_models.ItemList.objects.create(experiment=self)
-            items = list(self.item_set.all())
-            item_list.items.add(*items)
+            item_list.items.add(*list(self.items))
 
     def results(self):
         results = []
@@ -241,7 +245,6 @@ class Experiment(models.Model):
                 new_row['ratings'][row['question'] - 1] = row['label']
                 aggregated_results.append(new_row)
         return aggregated_results
-
 
     def results_csv(self, fileobj):
         writer = csv.writer(fileobj)

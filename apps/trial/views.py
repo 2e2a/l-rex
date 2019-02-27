@@ -474,7 +474,7 @@ class RatingCreateView(RatingCreateMixin, TrialMixin, generic.CreateView):
     def dispatch(self, *args, **kwargs):
         self.num = int(self.kwargs['num'])
         redirect_link = self._redirect_active_link(self.num)
-        if not redirect_link and len(self.study.questions) > 1:
+        if not redirect_link and self.study.is_multi_question:
             redirect_link = reverse('ratings-create', args=[self.trial.slug, self.num])
         if redirect_link:
             return redirect(redirect_link)
@@ -482,13 +482,12 @@ class RatingCreateView(RatingCreateMixin, TrialMixin, generic.CreateView):
             questionnaire=self.trial.questionnaire,
             number=self.num
         )
-        self.question = self.study.questions.first()
         self.item_questions = self.questionnaire_item.item.itemquestion_set.all()
         return super().dispatch(*args, **kwargs)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['question'] = self.question
+        kwargs['question'] = self.study.question
         if self.item_questions:
             kwargs['item_question'] = self.item_questions[0]
         return kwargs
@@ -502,20 +501,6 @@ class RatingCreateView(RatingCreateMixin, TrialMixin, generic.CreateView):
 
     def get_success_url(self):
         return self.get_next_url()
-
-    @property
-    def item_question(self):
-        if self.item_questions:
-            return self.item_questions[0].question
-        return self.question.question
-
-    @property
-    def item_legend(self):
-        if self.item_questions and self.item_questions[0].legend:
-            return self.item_questions[0].legend
-        if self.question.legend:
-            return self.question.legend
-        return ''
 
 
 class RatingsCreateView(RatingCreateMixin, TrialMixin, generic.TemplateView):

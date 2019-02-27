@@ -54,6 +54,7 @@ class QuestionForm(crispy_forms.CrispyModelForm):
             raise forms.ValidationError('At least two scale values need to be defined')
         return scale_labels
 
+
 def question_formset_factory(n_questions, extra=0):
     return forms.modelformset_factory(
         models.Question,
@@ -62,9 +63,11 @@ def question_formset_factory(n_questions, extra=0):
         extra=extra,
     )
 
+
 def initialize_with_questions(question_formset, questions):
     for question, form in zip(questions, question_formset):
         form['scale_labels'].initial = ','.join([scale_value.label for scale_value in question.scalevalue_set.all()])
+
 
 question_formset_helper = FormHelper()
 question_formset_helper.add_layout(
