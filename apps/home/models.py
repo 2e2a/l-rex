@@ -6,7 +6,7 @@ from apps.contrib.utils import slugify_unique
 
 
 class News(models.Model):
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(unique=True, max_length=210)
     title = models.CharField(
         max_length=200,
     )

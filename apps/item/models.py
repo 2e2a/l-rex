@@ -3,8 +3,12 @@ from django.urls import reverse
 
 from apps.contrib.utils import slugify_unique
 
+
 class Item(models.Model):
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(
+        unique=True,
+        max_length=230,
+    )
     number = models.IntegerField(
         help_text='Number of the item',
     )

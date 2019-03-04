@@ -22,10 +22,13 @@ class StudyStatus(Enum):
 
 class Study(models.Model):
     title = models.CharField(
-        max_length=200,
+        max_length=100,
         help_text='Give your study a name.',
         )
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(
+        unique=True,
+        max_length=110,
+    )
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     ITEM_TYPE_TXT = 'txt'
     ITEM_TYPE_AUDIO_LINK = 'aul'

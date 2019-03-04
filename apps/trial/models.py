@@ -18,7 +18,10 @@ from apps.study import models as study_models
 
 
 class Questionnaire(models.Model):
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(
+        unique=True,
+        max_length=110,
+    )
     study = models.ForeignKey(
         'lrex_study.Study',
         on_delete=models.CASCADE

@@ -12,10 +12,13 @@ from apps.trial import models as trial_models
 
 class Experiment(models.Model):
     title = models.CharField(
-        max_length=200,
+        max_length=100,
         help_text='Give your experiment a name.',
     )
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(
+        unique=True,
+        max_length=220,
+    )
     study = models.ForeignKey(
         'lrex_study.Study',
         on_delete=models.CASCADE
