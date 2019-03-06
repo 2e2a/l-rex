@@ -260,7 +260,7 @@ class QuestionnaireBlockInstructionsUpdateView(study_views.StudyMixin, study_vie
 class QuestionnaireUploadView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin,
                               study_views.ProceedWarningMixin, generic.FormView):
     title = 'Upload custom questionnaires'
-    form_class = forms.UploadQuestionnareForm
+    form_class = forms.UploadQuestionnaireForm
     template_name = 'lrex_contrib/crispy_form.html'
 
     def get_form_kwargs(self):
@@ -372,7 +372,6 @@ class TrialCreateView(study_views.StudyMixin, generic.CreateView):
         if active_trial:
             active_trial_url = reverse('rating-create', args=[active_trial.slug, 0])
             return redirect(active_trial_url)
-        form.instance.study = self.study
         form.instance.init(self.study)
         return super().form_valid(form)
 
@@ -413,7 +412,6 @@ class TrialDeleteView(TrialObjectMixin, study_views.CheckStudyCreatorMixin, cont
             experiment_views.ExperimentResultsView.clear_cache(experiment)
         return results
 
-
     @property
     def breadcrumbs(self):
         return [
@@ -440,6 +438,17 @@ class ProgressMixin:
 
 class RatingCreateMixin(ProgressMixin):
 
+    def _redirect_to_correct_num(self, num):
+        try:
+            if self.trial.status == models.TrialStatus.FINISHED:
+                return reverse('rating-taken', args=[self.trial.slug])
+            rating = models.Rating.objects.filter(trial=self.trial, question=1).count()
+            if rating != num:
+                return reverse('rating-create', args=[self.trial.slug, rating])
+        except models.Rating.DoesNotExist:
+            pass
+        return None
+
     def get_next_url(self):
         trial_items = self.trial.items
         if self.num < len(trial_items) - 1:
@@ -458,22 +467,9 @@ class RatingCreateView(RatingCreateMixin, TrialMixin, generic.CreateView):
     model = models.Rating
     form_class = forms.RatingForm
 
-    def _redirect_active_link(self, num):
-        try:
-            if self.trial.status == models.TrialStatus.FINISHED:
-                return reverse('rating-taken', args=[self.trial.slug])
-            n_ratings = models.Rating.objects.filter(trial=self.trial).count()
-            n_questions = len(self.study.questions)
-            rating = int(n_ratings/n_questions)
-            if rating != num:
-                return reverse('rating-create', args=[self.trial.slug, rating])
-        except models.Rating.DoesNotExist:
-            pass
-        return None
-
     def dispatch(self, *args, **kwargs):
         self.num = int(self.kwargs['num'])
-        redirect_link = self._redirect_active_link(self.num)
+        redirect_link = self._redirect_to_correct_num(self.num)
         if not redirect_link and self.study.is_multi_question:
             redirect_link = reverse('ratings-create', args=[self.trial.slug, self.num])
         if redirect_link:
@@ -512,29 +508,32 @@ class RatingsCreateView(RatingCreateMixin, TrialMixin, generic.TemplateView):
 
     def dispatch(self, request, *args, **kwargs):
         self.num = int(self.kwargs['num'])
+        redirect_link = self._redirect_to_correct_num(self.num)
+        if redirect_link:
+            return redirect(redirect_link)
         self.questionnaire_item = models.QuestionnaireItem.objects.get(
             questionnaire=self.trial.questionnaire,
             number=self.num
         )
-        self.questions = self.study.questions
-        self.item_questions = self.questionnaire_item.item.itemquestion_set.order_by('pk')
+        self.n_questions = len(self.study.questions)
+        self.item_questions = self.questionnaire_item.item.itemquestion_set.all()
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
-        self.formset = forms.ratingformset_factory(len(self.questions))(
+        self.formset = forms.ratingformset_factory(self.n_questions)(
             queryset=models.Rating.objects.none()
         )
-        forms.customize_to_questions(self.formset, self.questions, self.item_questions)
+        forms.customize_to_questions(self.formset, self.study.questions, self.item_questions)
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         if self.questionnaire_item.rating_set.filter(trial=self.trial).exists():
             return redirect(self.get_next_url())
-        self.formset = forms.ratingformset_factory(len(self.questions))(request.POST, request.FILES)
-        forms.customize_to_questions(self.formset, self.questions, self.item_questions)
+        self.formset = forms.ratingformset_factory(self.n_questions)(request.POST, request.FILES)
+        forms.customize_to_questions(self.formset, self.study.questions, self.item_questions)
         if self.formset.is_valid():
             instances = self.formset.save(commit=False)
-            if len(instances) < len(self.questions):
+            if len(instances) < self.n_questions:
                 self.formset._non_form_errors = \
                     self.formset.error_class(ValidationError('Please answer all questions').error_list)
             else:

@@ -7,6 +7,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
+from django.utils.timezone import now
 
 from apps.contrib import math
 from apps.contrib.utils import slugify_unique
@@ -86,6 +87,10 @@ class Study(models.Model):
         max_length=200,
         help_text='Give other users access to the study, enter comma separated user names.',
     )
+    created_date = DateField(
+        default=now,
+        editable=False,
+    )
 
     PROGRESS_STD_CREATED = '00-std-crt'
     PROGRESS_STD_QUESTION_CREATED = '10-qst-crt'
@@ -110,7 +115,7 @@ class Study(models.Model):
     )
 
     class Meta:
-        ordering = ['-pk']
+        ordering = ['-created_date']
 
     def save(self, *args, **kwargs):
         new_slug = slugify_unique(self.title, Study, self.id)
@@ -365,6 +370,9 @@ class Question(models.Model):
         Study,
         on_delete=models.CASCADE
     )
+    number = models.IntegerField(
+        default=0,
+    )
     question = models.CharField(
         max_length=1000,
         help_text='Question text for this item (e.g. "How acceptable is this sentence?")',
@@ -377,20 +385,19 @@ class Question(models.Model):
     )
 
     class Meta:
-        ordering = ['pk']
-
-    @cached_property
-    def num(self):
-        return list(Question.objects.filter(study=self.study)).index(self) + 1
+        ordering = ['study', 'number']
 
     def get_absolute_url(self):
         return reverse('study-question', args=[self.study.slug, self.pk])
 
     def __str__(self):
-        return self.question
+        return '({}) {}'.format(self.number, self.question)
 
 
 class ScaleValue(models.Model):
+    number = models.IntegerField(
+        default=0,
+    )
     question = models.ForeignKey(
         Question,
         on_delete=models.CASCADE
@@ -401,11 +408,7 @@ class ScaleValue(models.Model):
     )
 
     class Meta:
-        ordering = ['pk']
-
-    @cached_property
-    def num(self):
-        return list(ScaleValue.objects.filter(question=self.question)).index(self) + 1
+        ordering = ['question', 'number']
 
     def __str__(self):
-        return self.label
+        return '{} ({})'.format(self.label, self.number)

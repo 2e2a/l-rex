@@ -27,15 +27,13 @@ def questionnaire_block_factory(n_blocks):
         max_num=n_blocks,
     )
 
+
 def customize_randomization(questionnaireblock_formset, study):
     if not study.allow_pseudo_randomization:
         for form in questionnaireblock_formset:
             randomization = form.fields.get('randomization')
-            print(randomization.choices)
             randomization.choices = [(k, v) for k,v in randomization.choices
                                      if k != models.QuestionnaireBlock.RANDOMIZATION_PSEUDO]
-            print(randomization.choices)
-
 
 
 questionnaire_block_formset_helper = FormHelper()
@@ -76,7 +74,7 @@ questionnaire_block_update_formset_helper.add_input(
 )
 
 
-class UploadQuestionnareForm(crispy_forms.CrispyForm):
+class UploadQuestionnaireForm(crispy_forms.CrispyForm):
     file = forms.FileField(
         help_text='The CSV file must contain a column for the questionnaire number, experiment title, item number and '
                   'condition. Valid column delimiters: colon, semicolon, comma, space, or tab.',
@@ -226,10 +224,10 @@ class RatingFormsetForm(forms.ModelForm):
 
     class Meta:
         model = models.Rating
-        fields = ['scale_value']
+        fields = ['scale_value', 'question']
         widgets = {
-            'scale_value': forms.RadioSelect(
-            ),
+            'question': forms.HiddenInput(),
+            'scale_value': forms.RadioSelect(),
         }
 
     def __init__(self, *args, **kwargs):
@@ -250,16 +248,17 @@ def ratingformset_factory(n_questions=1):
 
 
 def customize_to_questions(ratingformset, questions, item_questions):
-    for i, (question, form) in enumerate(zip(questions, ratingformset)):
+    for question, form in zip(questions, ratingformset):
+        form.fields['question'].initial = question.number
         scale_value = form.fields.get('scale_value')
         scale_value.queryset = scale_value.queryset.filter(question=question)
         scale_value.label = \
-            item_questions[i].question if item_questions else question.question
+            item_questions[question.number].question if item_questions else question.question
         scale_value.help_text = \
-            item_questions[i].legend if item_questions and item_questions[i].legend else question.legend
-        if item_questions and item_questions[i].scale_labels:
+            item_questions[question.number].legend if item_questions and item_questions[question.number].legend else question.legend
+        if item_questions and item_questions[question.number].scale_labels:
             custom_choices = []
-            for (pk, _ ), custom_label in zip(scale_value.choices, item_questions[i].scale_labels.split(',')):
+            for (pk, _ ), custom_label in zip(scale_value.choices, item_questions[question.number].scale_labels.split(',')):
                 custom_choices.append((pk, custom_label))
             scale_value.choices = custom_choices
 

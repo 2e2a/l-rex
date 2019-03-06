@@ -26,7 +26,7 @@ class Item(models.Model):
     )
 
     class Meta:
-        ordering = ['block', 'number', 'condition']
+        ordering = ['experiment', 'block', 'number', 'condition']
 
     def __str__(self):
         return '{}{}'.format(self.number, self.condition)
@@ -64,10 +64,16 @@ class ItemList(models.Model):
         'lrex_experiment.Experiment',
         on_delete=models.CASCADE
     )
+    number = models.IntegerField(
+        default=0,
+    )
     items = models.ManyToManyField(Item)
 
     class Meta:
-        ordering = ['pk']
+        ordering = ['experiment', 'number']
+
+    def __str__(self):
+        return '{} {}'.format(self.experiment, self.number)
 
     @property
     def num(self):
@@ -84,6 +90,9 @@ class ItemQuestion(models.Model):
     item = models.ForeignKey(
         Item,
         on_delete=models.CASCADE
+    )
+    number = models.IntegerField(
+        default=0,
     )
     question = models.CharField(
         max_length=1000,
@@ -105,4 +114,8 @@ class ItemQuestion(models.Model):
     )
 
     class Meta:
-        ordering = ['question', 'pk']
+        ordering = ['item', 'number']
+
+
+    def __str__(self):
+        return '{}{}'.format(self.item, self.number)

@@ -21,7 +21,7 @@
             {% if trial.subject_id %}
             {{ trial.subject_id }} -
             {% endif %}
-            {{ trial.creation_date|date:"SHORT_DATETIME_FORMAT" }}
+            {{ trial.created|date:"SHORT_DATETIME_FORMAT" }}
             <span class="badge badge-primary">{{ trial.status.name }}</span>
             <span class="badge badge-secondary">Questionnaire {{ trial.questionnaire.number }}</span>
             {% if trial.rating_proof %}

@@ -41,8 +41,11 @@ class Questionnaire(models.Model):
 
     @cached_property
     def items(self):
-        questionnaire_items = [questionnaire_item.item_id for questionnaire_item in self.questionnaireitem_set.all()]
-        return item_models.Item.objects.filter(id__in=questionnaire_items)
+        return [
+            questionnaire_item.item
+            for questionnaire_item
+            in self.questionnaireitem_set.all().prefetch_related('item')
+        ]
 
     @cached_property
     def items_preview(self):
@@ -209,7 +212,7 @@ class Questionnaire(models.Model):
             block_offset += len(block_items)
 
     def __str__(self):
-        return 'Questionnaire-{}'.format(self.slug)
+        return str(self.number)
 
 
 class QuestionnaireBlock(models.Model):
@@ -243,7 +246,7 @@ class QuestionnaireBlock(models.Model):
         ordering = ['block']
 
     def __str__(self):
-        return 'Questionnaire block {}-{}'.format(self.study, self.block)
+        return str(self.block)
 
 
 class QuestionnaireItem(models.Model):
@@ -254,9 +257,8 @@ class QuestionnaireItem(models.Model):
     class Meta:
         ordering = ['number']
 
-
     def __str__(self):
-        return '{} questionnaire {} item {}'.format(self.pk, self.questionnaire.number, self.item)
+        return '{} - {}'.format(self.questionnaire.number, self.item)
 
 
 class TrialStatus(Enum):
@@ -274,7 +276,7 @@ class Trial(models.Model):
         unique=True,
     )
     questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE)
-    creation_date = models.DateTimeField(
+    created = models.DateTimeField(
         default=timezone.now
     )
     subject_id = models.CharField(
@@ -291,7 +293,7 @@ class Trial(models.Model):
     )
 
     class Meta:
-        ordering = ['creation_date']
+        ordering = ['created']
 
     @cached_property
     def items(self):
@@ -307,24 +309,21 @@ class Trial(models.Model):
 
     @property
     def ratings_completed(self):
-        n_questions = len(self.questionnaire.study.questions)
-        n_ratings = Rating.objects.filter(trial=self).count()
-        return int(n_ratings / n_questions)
+        return Rating.objects.filter(trial=self, question=1).count()
 
     @property
     def status(self):
-        n_ratings = self.ratings_completed
-        if n_ratings > 0:
+        if self.ratings_completed > 0:
             n_items = len(self.items)
-            if n_ratings == n_items:
+            if self.ratings_completed == n_items:
                 return TrialStatus.FINISHED
-            if self.creation_date + timedelta(1) < timezone.now():
+            if self.created + timedelta(1) < timezone.now():
                 return TrialStatus.ABANDONED
             return TrialStatus.STARTED
         return TrialStatus.CREATED
 
     def init(self, study):
-        self.questionnaire = self.study.next_questionnaire
+        self.questionnaire = study.next_questionnaire
         self.save()
 
     def generate_rating_proof(self):
@@ -339,16 +338,17 @@ class Trial(models.Model):
         return None
 
     def get_absolute_url(self):
-        return reverse('trial', args=[self.study.slug, self.slug])
+        return reverse('trial', args=[self.slug])
 
     def __str__(self):
-        return 'Trial {}'.format(self.subject_id if self.subject_id else self.slug)
+        return str(self.slug)
 
 
 class Rating(models.Model):
     trial = models.ForeignKey(Trial, on_delete=models.CASCADE)
     questionnaire_item = models.ForeignKey(QuestionnaireItem, on_delete=models.CASCADE)
+    question = models.IntegerField(default=0)
     scale_value = models.ForeignKey(study_models.ScaleValue, on_delete=models.CASCADE)
 
     class Meta:
-        ordering = ['pk']
+        ordering = ['trial', 'questionnaire_item', 'question']

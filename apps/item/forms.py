@@ -61,10 +61,10 @@ class UploadItemsForm(crispy_forms.CrispyForm):
     def __init__(self, *args, **kwargs):
         self.questions = kwargs.pop('questions')
         super().__init__(*args, **kwargs)
-        for i, _ in enumerate(self.questions):
+        for question in self.questions:
             self.fields.update(
                 {
-                    'question_{}_question_column'.format(i+1):
+                    'question_{}_question_column'.format(question.number+1):
                     forms.IntegerField(
                         initial=0,
                         help_text='Optional: specify which column contains the item-specific question. '
@@ -74,7 +74,7 @@ class UploadItemsForm(crispy_forms.CrispyForm):
             )
             self.fields.update(
                 {
-                    'question_{}_scale_column'.format(i+1):
+                    'question_{}_scale_column'.format(question.number+1):
                         forms.IntegerField(
                             initial=0,
                             help_text='Optional: specify which column contains the item-specific '
@@ -85,7 +85,7 @@ class UploadItemsForm(crispy_forms.CrispyForm):
             )
             self.fields.update(
                 {
-                    'question_{}_legend_column'.format(i+1):
+                    'question_{}_legend_column'.format(question.number+1):
                         forms.IntegerField(
                             initial=0,
                             help_text='Optional: specify which column contains the items-specific scale legend. '
@@ -116,28 +116,28 @@ class UploadItemsForm(crispy_forms.CrispyForm):
                     assert len(row) >= cleaned_data['condition_column']
                     assert len(row) >= cleaned_data['text_column']
                     assert len(row) >= cleaned_data['block_column']
-                    for i, _ in enumerate(self.questions):
-                        if cleaned_data['question_{}_question_column'.format(i+1)] > 0:
-                            assert len(row) >= cleaned_data['question_{}_question_column'.format(i+1)]
-                        if cleaned_data['question_{}_scale_column'.format(i+1)] > 0:
-                            assert len(row) >= cleaned_data['question_{}_scale_column'.format(i+1)]
-                        if cleaned_data['question_{}_legend_column'.format(i+1)] > 0:
-                            assert len(row) >= cleaned_data['question_{}_legend_column'.format(i+1)]
+                    for question in self.questions:
+                        if cleaned_data['question_{}_question_column'.format(question.number)] > 0:
+                            assert len(row) >= cleaned_data['question_{}_question_column'.format(question.number)]
+                        if cleaned_data['question_{}_scale_column'.format(question.number)] > 0:
+                            assert len(row) >= cleaned_data['question_{}_scale_column'.format(question.number)]
+                        if cleaned_data['question_{}_legend_column'.format(question.number)] > 0:
+                            assert len(row) >= cleaned_data['question_{}_legend_column'.format(question.number)]
 
                     assert int(row[cleaned_data['number_column'] - 1])
                     assert row[cleaned_data['condition_column'] - 1]
                     assert row[cleaned_data['text_column'] - 1]
                     if cleaned_data['block_column'] > 0:
                         assert int(row[cleaned_data['block_column'] - 1])
-                    for i, question in enumerate(self.questions):
-                        if cleaned_data['question_{}_question_column'.format(i+1)] > 0:
-                            assert row[cleaned_data['question_{}_question_column'.format(i+1)] - 1 ]
-                        if cleaned_data['question_{}_scale_column'.format(i+1)] > 0:
-                            assert row[cleaned_data['question_{}_scale_column'.format(i+1)] - 1]
-                            assert len(row[cleaned_data['question_{}_scale_column'.format(i+1)] - 1].split(',')) == \
+                    for question in self.questions:
+                        if cleaned_data['question_{}_question_column'.format(question.number)] > 0:
+                            assert row[cleaned_data['question_{}_question_column'.format(question.number)] - 1 ]
+                        if cleaned_data['question_{}_scale_column'.format(question.number)] > 0:
+                            assert row[cleaned_data['question_{}_scale_column'.format(question.number)] - 1]
+                            assert len(row[cleaned_data['question_{}_scale_column'.format(question.number)] - 1].split(',')) == \
                                    question.scalevalue_set.count()
-                        if cleaned_data['question_{}_legend_column'.format(i+1)] > 0:
-                            assert row[cleaned_data['question_{}_legend_column'.format(i+1)] - 1]
+                        if cleaned_data['question_{}_legend_column'.format(question.number)] > 0:
+                            assert row[cleaned_data['question_{}_legend_column'.format(question.number)] - 1]
             except (ValueError, AssertionError):
                 raise forms.ValidationError(
                     'File: Unexpected format in line %(n_line)s.',

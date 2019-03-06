@@ -44,6 +44,9 @@ class Experiment(models.Model):
         default=PROGRESS_EXP_CREATED,
     )
 
+    class Meta:
+        ordering = ['slug']
+
     def save(self, *args, **kwargs):
         slug = '{}--{}'.format(self.study.slug, self.title)
         new_slug = slugify_unique(slug, Experiment, self.id)
@@ -144,29 +147,23 @@ class Experiment(models.Model):
         results = []
         ratings = trial_models.Rating.objects.filter(
             questionnaire_item__item__experiment=self
+        ).prefetch_related(
+            'trial', 'questionnaire_item',
         )
         if not self.study.require_participant_id:
             trials =  list(trial_models.Trial.objects.filter(
                 questionnaire__study=self.study
             ))
-        scale_values = {}
-        questions = {}
-        for question in self.study.questions:
-            for scale_value in question.scalevalue_set.all():
-                scale_values.update({scale_value.id: scale_value})
-            questions.update({question.id: question})
         for rating in ratings:
             row = {}
             item = rating.questionnaire_item.item
-            scale_value = scale_values[rating.scale_value_id]
-            question = questions[scale_value.question_id]
-            trial = rating.trial
-            row['subject'] = trial.subject_id if self.study.require_participant_id else trials.index(trial)
+            row['subject'] = \
+                rating.trial.subject_id if self.study.require_participant_id else trials.index(rating.trial)
             row['item'] = item.number
             row['condition'] = item.condition
-            row['question'] = question.num
-            row['rating'] = scale_value.num
-            row['label'] = scale_value.label
+            row['question'] = rating.question + 1
+            row['rating'] = rating.scale_value.number
+            row['label'] = rating.scale_value.label
             if hasattr(item, 'textitem'):
                 row['text'] = item.textitem.text
 
@@ -252,8 +249,8 @@ class Experiment(models.Model):
     def results_csv(self, fileobj):
         writer = csv.writer(fileobj)
         csv_row = ['subject', 'item', 'condition']
-        for i, _ in enumerate(self.study.questions):
-            csv_row.append('rating{}'.format(i))
+        for question in self.study.questions:
+            csv_row.append('rating{}'.format(question.number))
         if self.study.has_text_items:
             csv_row.append('text')
         writer.writerow(csv_row)

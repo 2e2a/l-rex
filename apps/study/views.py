@@ -229,13 +229,15 @@ class QuestionUpdateView(StudyMixin, CheckStudyCreatorMixin, ProceedWarningMixin
         self.formset = forms.question_formset_factory(self.n_questions)(request.POST, request.FILES)
         if self.formset.is_valid():
             instances = self.formset.save(commit=False)
-            for instance, form in zip(instances, self.formset):
+            for i, (instance, form) in enumerate(zip(instances, self.formset)):
                 instance.study = self.study
+                instance.number = i
                 instance.save()
                 instance.scalevalue_set.all().delete()
-                for scale_label in form.cleaned_data['scale_labels'].split(','):
+                for j, scale_label in enumerate(form.cleaned_data['scale_labels'].split(',')):
                     if scale_label:
                         models.ScaleValue.objects.create(
+                            number=j,
                             question=instance,
                             label=scale_label,
                         )
