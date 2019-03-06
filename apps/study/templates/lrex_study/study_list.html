@@ -13,6 +13,7 @@
         <div class="flex-grow-1">
             <strong>{{ study.title }}</strong>
             <span class="badge badge-primary">{{ study.status.name }}</span>
+            <span class="badge badge-secondary">{{ study.created_date|date:"SHORT_DATE_FORMAT" }}</span>
             {% if study.creator != view.request.user %}
                 <span class="badge badge-secondary">Shared</span>
             {% endif %}
