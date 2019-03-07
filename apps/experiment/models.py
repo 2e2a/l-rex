@@ -45,7 +45,7 @@ class Experiment(models.Model):
     )
 
     class Meta:
-        ordering = ['slug']
+        ordering = ['study', 'title']
 
     def save(self, *args, **kwargs):
         slug = '{}--{}'.format(self.study.slug, self.title)
