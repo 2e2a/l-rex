@@ -157,11 +157,10 @@ class Experiment(models.Model):
         for rating in ratings:
             row = {}
             item = rating.questionnaire_item.item
-            row['subject'] = \
-                rating.trial.subject_id if self.study.require_participant_id else trials.index(rating.trial)
+            row['subject'] = rating.trial.subject_id if self.study.require_participant_id else rating.slug
             row['item'] = item.number
             row['condition'] = item.condition
-            row['question'] = rating.question + 1
+            row['question'] = rating.question
             row['rating'] = rating.scale_value.number
             row['label'] = rating.scale_value.label
             if hasattr(item, 'textitem'):
@@ -206,14 +205,14 @@ class Experiment(models.Model):
             if matching_row >= 0:
                 aggregated_row = aggregated_results[matching_row]
                 aggregated_row['rating_count'] += 1
-                aggregated_row['ratings'][question_scale_offset[row['question'] - 1] + row['rating'] - 1] += 1
+                aggregated_row['ratings'][question_scale_offset[row['question']] + row['rating']] += 1
             else:
                 for aggregated_column in columns:
                     row[aggregated_column] = ''
                 row['rating_count'] = 1
                 row['ratings'] = [0.0] * scale_value_count
 
-                row['ratings'][question_scale_offset[row['question'] - 1] + row['rating'] - 1] = 1.0
+                row['ratings'][question_scale_offset[row['question']] + row['rating']] = 1.0
                 aggregated_results.append(row)
 
         num_questions = len(self.study.questions)
@@ -233,7 +232,7 @@ class Experiment(models.Model):
         for row in results:
             match = self._matching_row(row, aggregated_results, ['subject', 'item', 'condition'])
             if match >= 0:
-                aggregated_results[match]['ratings'][row['question'] - 1] = row['label']
+                aggregated_results[match]['ratings'][row['question']] = row['label']
             else:
                 new_row = {}
                 n_questions = len(self.study.questions)
@@ -242,7 +241,7 @@ class Experiment(models.Model):
                 if 'text' in row:
                     new_row['text'] =  row['text']
                 new_row['ratings'] = [-1] * n_questions
-                new_row['ratings'][row['question'] - 1] = row['label']
+                new_row['ratings'][row['question']] = row['label']
                 aggregated_results.append(new_row)
         return aggregated_results
 
@@ -250,7 +249,7 @@ class Experiment(models.Model):
         writer = csv.writer(fileobj)
         csv_row = ['subject', 'item', 'condition']
         for question in self.study.questions:
-            csv_row.append('rating{}'.format(question.number))
+            csv_row.append('rating{}'.format(question.number + 1))
         if self.study.has_text_items:
             csv_row.append('text')
         writer.writerow(csv_row)

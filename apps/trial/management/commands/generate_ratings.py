@@ -21,21 +21,23 @@ class Command(BaseCommand):
             raise CommandError('Study does not exist.')
         if not study.is_rating_possible:
             raise CommandError('Study does not allow rating.')
-        question_scale_values = []
+        questions_scale_values = []
         for question in study.questions:
-            question_scale_values.append(question.scalevalue_set.all())
-        count = 0
-        while count < n_ratings:
+            questions_scale_values.append((question.number, question.scalevalue_set.all()))
+        for i in range(n_ratings):
             questionnaire = study.next_questionnaire
-            trial = trial_models.Trial.objects.create(
+            trial = trial_models.Trial(
                 questionnaire=questionnaire
             )
+            if study.require_participant_id:
+                trial.subject_id = i
+            trial.save()
             for questionnaire_item in questionnaire.questionnaireitem_set.all():
-                for scale_values in question_scale_values:
-                    scale_value = random.choice(scale_values)
+                for question, question_scale_values in questions_scale_values:
+                    scale_value = random.choice(question_scale_values)
                     trial_models.Rating.objects.create(
                         trial=trial,
                         questionnaire_item=questionnaire_item,
                         scale_value=scale_value,
+                        question=question
                     )
-            count += 1

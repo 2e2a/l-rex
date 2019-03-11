@@ -411,4 +411,4 @@ class ScaleValue(models.Model):
         ordering = ['question', 'number']
 
     def __str__(self):
-        return '{} ({})'.format(self.label, self.number)
+        return self.label
