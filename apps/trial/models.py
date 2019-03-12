@@ -258,7 +258,7 @@ class QuestionnaireItem(models.Model):
         ordering = ['number']
 
     def __str__(self):
-        return '{} - {}'.format(self.questionnaire.number, self.item)
+        return '{} - {}'.format(self.number, self.item)
 
 
 class TrialStatus(Enum):
