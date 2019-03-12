@@ -41,7 +41,7 @@
     <li class="list-group-item d-flex">
         <div class="flex-grow-1 text-truncate">
             <strong>#{{ questionnaire.number }}</strong>
-            {% for item in questionnaire.items_preview %}{{ item.experiment }}-{{ item }}{% if not forloop.last %}, {% else %}...{% endif %}{% endfor %}
+            {% for q_item in questionnaire.questionnaire_items_preview %}{{ q_item.item.experiment }}-{{ q_item.item }}{% if not forloop.last %}, {% else %}...{% endif %}{% endfor %}
         </div>
         <div>
             <a href="{% url 'questionnaire' questionnaire.slug %}" class="btn btn-outline-primary btn-sm mx-1">
