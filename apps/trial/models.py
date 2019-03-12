@@ -309,7 +309,7 @@ class Trial(models.Model):
 
     @property
     def ratings_completed(self):
-        return Rating.objects.filter(trial=self, question=1).count()
+        return Rating.objects.filter(trial=self, question=0).count()
 
     @property
     def status(self):

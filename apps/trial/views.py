@@ -442,7 +442,7 @@ class RatingCreateMixin(ProgressMixin):
         try:
             if self.trial.status == models.TrialStatus.FINISHED:
                 return reverse('rating-taken', args=[self.trial.slug])
-            rating = models.Rating.objects.filter(trial=self.trial, question=1).count()
+            rating = models.Rating.objects.filter(trial=self.trial, question=0).count()
             if rating != num:
                 return reverse('rating-create', args=[self.trial.slug, rating])
         except models.Rating.DoesNotExist:
