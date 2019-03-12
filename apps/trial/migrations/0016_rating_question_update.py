@@ -6,12 +6,15 @@ from django.utils.timezone import now
 
 
 def update(apps, schema_editor):
+    Trial = apps.get_model('lrex_trial', 'Trial')
     QuestionnaireItem = apps.get_model('lrex_trial', 'QuestionnaireItem')
-    for questionnare_item  in QuestionnaireItem.objects.all():
-        ratings = questionnare_item.rating_set.all().order_by('pk')
-        for i, rating in enumerate(ratings):
-            rating.question = i
-            rating.save(update_fields=['question'])
+    for trial  in Trial.objects.all():
+        questionnaire_items = QuestionnaireItem.objects.all().filter(questionnaire__trial=trial)
+        for questionnare_item in questionnaire_items:
+            ratings = questionnare_item.rating_set.all().order_by('pk')
+            for i, rating in enumerate(ratings):
+                rating.question = i
+                rating.save(update_fields=['question'])
 
 
 class Migration(migrations.Migration):

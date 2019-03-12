@@ -150,14 +150,10 @@ class Experiment(models.Model):
         ).prefetch_related(
             'trial', 'questionnaire_item',
         )
-        if not self.study.require_participant_id:
-            trials =  list(trial_models.Trial.objects.filter(
-                questionnaire__study=self.study
-            ))
         for rating in ratings:
             row = {}
             item = rating.questionnaire_item.item
-            row['subject'] = rating.trial.subject_id if self.study.require_participant_id else rating.slug
+            row['subject'] = rating.trial.subject_id if self.study.require_participant_id else rating.trial.slug
             row['item'] = item.number
             row['condition'] = item.condition
             row['question'] = rating.question
