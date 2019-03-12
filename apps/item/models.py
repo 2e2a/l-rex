@@ -26,7 +26,7 @@ class Item(models.Model):
     )
 
     class Meta:
-        ordering = ['experiment', 'block', 'number', 'condition']
+        ordering = ['block', 'number', 'condition']
 
     def __str__(self):
         return '{}{}'.format(self.number, self.condition)
