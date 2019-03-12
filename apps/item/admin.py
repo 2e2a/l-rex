@@ -72,7 +72,7 @@ class ItemQuestionAdmin(admin.ModelAdmin):
     )
     list_per_page = 32
     search_fields = (
-        'item_experiment__study__title',
+        'item__experiment__study__title',
     )
 
     def item_question(self, obj):
