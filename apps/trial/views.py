@@ -481,6 +481,11 @@ class RatingCreateView(RatingCreateMixin, TrialMixin, generic.CreateView):
         self.item_questions = self.questionnaire_item.item.itemquestion_set.all()
         return super().dispatch(*args, **kwargs)
 
+    def post(self, request, *args, **kwargs):
+        if self.questionnaire_item.rating_set.filter(trial=self.trial).exists():
+            return redirect(self.get_next_url())
+        return super().post(request, *args, **kwargs)
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['question'] = self.study.question
