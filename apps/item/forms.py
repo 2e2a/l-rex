@@ -64,7 +64,7 @@ class UploadItemsForm(crispy_forms.CrispyForm):
         for question in self.questions:
             self.fields.update(
                 {
-                    'question_{}_question_column'.format(question.number+1):
+                    'question_{}_question_column'.format(question.number):
                     forms.IntegerField(
                         initial=0,
                         help_text='Optional: specify which column contains the item-specific question. '
@@ -74,7 +74,7 @@ class UploadItemsForm(crispy_forms.CrispyForm):
             )
             self.fields.update(
                 {
-                    'question_{}_scale_column'.format(question.number+1):
+                    'question_{}_scale_column'.format(question.number):
                         forms.IntegerField(
                             initial=0,
                             help_text='Optional: specify which column contains the item-specific '
@@ -85,7 +85,7 @@ class UploadItemsForm(crispy_forms.CrispyForm):
             )
             self.fields.update(
                 {
-                    'question_{}_legend_column'.format(question.number+1):
+                    'question_{}_legend_column'.format(question.number):
                         forms.IntegerField(
                             initial=0,
                             help_text='Optional: specify which column contains the items-specific scale legend. '
