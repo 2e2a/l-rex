@@ -156,6 +156,7 @@ class Experiment(models.Model):
             row['subject'] = rating.trial.subject_id if self.study.require_participant_id else rating.trial.slug
             row['item'] = item.number
             row['condition'] = item.condition
+            row['position'] = rating.questionnaire_item.number + 1
             row['question'] = rating.question
             row['rating'] = rating.scale_value.number
             row['label'] = rating.scale_value.label
@@ -232,7 +233,7 @@ class Experiment(models.Model):
             else:
                 new_row = {}
                 n_questions = len(self.study.questions)
-                for col in ['subject', 'item', 'condition']:
+                for col in ['subject', 'item', 'condition', 'position']:
                     new_row[col] = row[col]
                 if 'text' in row:
                     new_row['text'] =  row['text']
@@ -243,7 +244,7 @@ class Experiment(models.Model):
 
     def results_csv(self, fileobj):
         writer = csv.writer(fileobj)
-        csv_row = ['subject', 'item', 'condition']
+        csv_row = ['subject', 'item', 'condition', 'position']
         for question in self.study.questions:
             csv_row.append('rating{}'.format(question.number + 1))
         if self.study.has_text_items:
@@ -252,7 +253,7 @@ class Experiment(models.Model):
         results = self.results()
         results = self._result_lists_for_questions(results)
         for row in results:
-            csv_row = [row['subject'], row['item'], row['condition']]
+            csv_row = [row['subject'], row['item'], row['condition'], row['position']]
             for rating in row['ratings']:
                 csv_row.append(rating)
             if self.study.has_text_items:
