@@ -1,8 +1,7 @@
-{% extends "lrex_home/base.html" %}
+{% extends "lrex_home/participant_base.html" %}
 {% load crispy_forms_tags %}
 
 {% block content %}
-<h1 class="text-center mt-2">Participate in the experiment</h1>
 <div class="my-2 p-4 border bg-white">
     <hr>
     {% if view.questionnaire_item.item.textitem %}

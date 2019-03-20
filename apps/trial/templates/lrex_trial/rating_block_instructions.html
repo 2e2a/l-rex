@@ -1,9 +1,7 @@
-{% extends "lrex_home/base.html" %}
+{% extends "lrex_home/participant_base.html" %}
 
 {% block content %}
-<h1 class="text-center mt-2">Participate in the experiment</h1>
 <div class="my-2 p-4 border bg-white">
-    <hr>
     <p>
         {{ view.block_instructions|linebreaks }}
         <a href="{% url 'rating-create' view.trial.slug view.num %}"

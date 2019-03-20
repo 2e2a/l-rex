@@ -1,0 +1,24 @@
+{% load static contrib_tags %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>L-Rex</title>
+    <script src="{% static 'js/jquery.slim.min.js' %}"></script>
+    <script src="{% static 'js/popper.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/lrex.css' %}">
+</head>
+<body class="bg-light">
+
+<div class="container">
+    {% for message in messages %}
+    <div class="alert {{ message.level_tag|bootstrap_alert_class }} custom-shadow" role="alert">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% block content %}{% endblock %}
+</div>
+</body>
+</html>
