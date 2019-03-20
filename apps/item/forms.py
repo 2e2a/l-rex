@@ -126,6 +126,7 @@ class UploadItemsForm(crispy_forms.CrispyForm):
 
                     assert int(row[cleaned_data['number_column'] - 1])
                     assert row[cleaned_data['condition_column'] - 1]
+                    assert len(row[cleaned_data['condition_column'] - 1]) < 8
                     assert row[cleaned_data['text_column'] - 1]
                     if cleaned_data['block_column'] > 0:
                         assert int(row[cleaned_data['block_column'] - 1])
