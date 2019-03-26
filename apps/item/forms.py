@@ -5,6 +5,7 @@ from django import forms
 from django.forms import modelformset_factory
 from io import StringIO
 
+from apps.contrib import csv as contrib_csv
 from apps.contrib import forms as crispy_forms
 
 from . import models
@@ -96,59 +97,42 @@ class UploadItemsForm(crispy_forms.CrispyForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        file = cleaned_data['file']
+        data = contrib_csv.read_file(cleaned_data)
+        sniff_data = contrib_csv.sniff(data)
+        validator_int_columns = ['number_column',]
+        delimiter, quoting, has_header = contrib_csv.detect_dialect(sniff_data, cleaned_data, validator_int_columns)
+        reader = csv.reader(StringIO(data), delimiter=delimiter, quoting=quoting)
+        if has_header:
+            next(reader)
         try:
-            try:
-                data = file.read().decode('utf-8')
-            except UnicodeDecodeError:
-                file.seek(0)
-                data = file.read().decode('latin-1')
-            data_len = len(data)
-            sniff_data = data[:500 if data_len > 500 else data_len]
-            dialect = csv.Sniffer().sniff(sniff_data)
-            has_header = csv.Sniffer().has_header(sniff_data)
-            reader = csv.reader(StringIO(data), dialect)
-            if has_header:
-                next(reader)
-            try:
-                for row in reader:
-                    assert len(row) >= cleaned_data['number_column']
-                    assert len(row) >= cleaned_data['condition_column']
-                    assert len(row) >= cleaned_data['text_column']
-                    assert len(row) >= cleaned_data['block_column']
-                    for question in self.questions:
-                        if cleaned_data['question_{}_question_column'.format(question.number)] > 0:
-                            assert len(row) >= cleaned_data['question_{}_question_column'.format(question.number)]
-                        if cleaned_data['question_{}_scale_column'.format(question.number)] > 0:
-                            assert len(row) >= cleaned_data['question_{}_scale_column'.format(question.number)]
-                        if cleaned_data['question_{}_legend_column'.format(question.number)] > 0:
-                            assert len(row) >= cleaned_data['question_{}_legend_column'.format(question.number)]
+            for row in reader:
 
-                    assert int(row[cleaned_data['number_column'] - 1])
-                    assert row[cleaned_data['condition_column'] - 1]
-                    assert len(row[cleaned_data['condition_column'] - 1]) < 8
-                    assert row[cleaned_data['text_column'] - 1]
-                    if cleaned_data['block_column'] > 0:
-                        assert int(row[cleaned_data['block_column'] - 1])
-                    for question in self.questions:
-                        if cleaned_data['question_{}_question_column'.format(question.number)] > 0:
-                            assert row[cleaned_data['question_{}_question_column'.format(question.number)] - 1 ]
-                        if cleaned_data['question_{}_scale_column'.format(question.number)] > 0:
-                            assert row[cleaned_data['question_{}_scale_column'.format(question.number)] - 1]
-                            assert len(row[cleaned_data['question_{}_scale_column'.format(question.number)] - 1].split(',')) == \
-                                   question.scalevalue_set.count()
-                        if cleaned_data['question_{}_legend_column'.format(question.number)] > 0:
-                            assert row[cleaned_data['question_{}_legend_column'.format(question.number)] - 1]
-            except (ValueError, AssertionError):
-                raise forms.ValidationError(
-                    'File: Unexpected format in line %(n_line)s.',
-                    code='invalid',
-                    params={'n_line': reader.line_num})
-        except (UnicodeDecodeError, TypeError):
-            raise forms.ValidationError('Unsupported file encoding. Use UTF-8 or Latin-1.')
-        except csv.Error:
-            raise forms.ValidationError('Unsupported CSV format.')
-        file.seek(0)
+                assert int(row[cleaned_data['number_column'] - 1])
+                assert row[cleaned_data['condition_column'] - 1]
+                assert len(row[cleaned_data['condition_column'] - 1]) < 8
+                assert row[cleaned_data['text_column'] - 1]
+                if cleaned_data['block_column'] > 0:
+                    assert int(row[cleaned_data['block_column'] - 1])
+                for question in self.questions:
+                    if cleaned_data['question_{}_question_column'.format(question.number)] > 0:
+                        assert row[cleaned_data['question_{}_question_column'.format(question.number)] - 1 ]
+                    if cleaned_data['question_{}_scale_column'.format(question.number)] > 0:
+                        assert row[cleaned_data['question_{}_scale_column'.format(question.number)] - 1]
+                        assert len(row[cleaned_data['question_{}_scale_column'.format(question.number)] - 1].split(',')) == \
+                               question.scalevalue_set.count()
+                    if cleaned_data['question_{}_legend_column'.format(question.number)] > 0:
+                        assert row[cleaned_data['question_{}_legend_column'.format(question.number)] - 1]
+            contrib_csv.seek_file(cleaned_data)
+            self.detected_csv = {
+                'delimiter': delimiter,
+                'quoting': quoting,
+                'has_header': has_header,
+            }
+        except (ValueError, AssertionError):
+            raise forms.ValidationError(
+                'File: Unexpected format in line %(n_line)s.',
+                code='invalid',
+                params={'n_line': reader.line_num})
         return cleaned_data
 
 
@@ -219,44 +203,30 @@ class UploadItemListForm(crispy_forms.CrispyForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        file = cleaned_data['file']
+        data = contrib_csv.read_file(cleaned_data)
+        sniff_data = contrib_csv.sniff(data)
+        validator_int_columns = ['list_column', 'item_number_column']
+        delimiter, quoting, has_header = contrib_csv.detect_dialect(sniff_data, cleaned_data, validator_int_columns)
+        reader = csv.reader(StringIO(data), delimiter=delimiter, quoting=quoting)
+        if has_header:
+            next(reader)
         try:
-            try:
-                data = file.read().decode('utf-8')
-            except UnicodeDecodeError:
-                file.seek(0)
-                data = file.read().decode('latin-1')
-            data_len = len(data)
-            sniff_data = data[:16 if data_len > 16 else data_len]
-            dialect = csv.Sniffer().sniff(sniff_data)
-            has_header = csv.Sniffer().has_header(sniff_data)
-            reader = csv.reader(StringIO(data), dialect)
-            if has_header:
-                next(reader)
-            try:
-                item_count = 0
-                for row in reader:
-                    assert len(row) >= cleaned_data['list_column']
-                    assert len(row) >= cleaned_data['item_number_column']
-                    assert len(row) >= cleaned_data['item_condition_column']
-                    assert int(row[cleaned_data['list_column'] - 1])
-                    assert int(row[cleaned_data['item_number_column'] - 1])
-                    item_number = row[cleaned_data['item_number_column'] - 1]
-                    item_condition = row[cleaned_data['item_condition_column'] -1]
-                    if not self.experiment.item_set.filter(number=item_number, condition=item_condition).exists():
-                        error = 'Item {}{} is not defined.'.format(item_number, item_condition)
-                        raise forms.ValidationError(error)
-                    item_count += 1
-                if not item_count == self.experiment.item_set.count():
-                    raise forms.ValidationError('Not all items used in lists.')
-            except (ValueError, AssertionError):
-                raise forms.ValidationError(
-                    'File: Unexpected format in line %(n_line)s.',
-                    code='invalid',
-                    params={'n_line': reader.line_num})
-        except (UnicodeDecodeError, TypeError):
-            raise forms.ValidationError('Unsupported file encoding. Use UTF-8 or Latin-1.')
-        except csv.Error:
-            raise forms.ValidationError('Unsupported CSV format.')
-        file.seek(0)
+            item_count = 0
+            for row in reader:
+                assert int(row[cleaned_data['list_column'] - 1])
+                assert int(row[cleaned_data['item_number_column'] - 1])
+                item_number = row[cleaned_data['item_number_column'] - 1]
+                item_condition = row[cleaned_data['item_condition_column'] -1]
+                if not self.experiment.item_set.filter(number=item_number, condition=item_condition).exists():
+                    error = 'Item {}{} is not defined.'.format(item_number, item_condition)
+                    raise forms.ValidationError(error)
+                item_count += 1
+            if not item_count == self.experiment.item_set.count():
+                raise forms.ValidationError('Not all items used in lists.')
+            contrib_csv.seek_file(cleaned_data)
+        except (ValueError, AssertionError):
+            raise forms.ValidationError(
+                'File: Unexpected format in line %(n_line)s.',
+                code='invalid',
+                params={'n_line': reader.line_num})
         return cleaned_data

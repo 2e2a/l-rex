@@ -5,6 +5,7 @@ from crispy_forms.layout import HTML, Field, Fieldset, Layout, Submit
 from django import forms
 
 from apps.contrib import forms as crispy_forms
+from apps.contrib import csv as contrib_csv
 from apps.experiment import models as experiment_models
 from apps.item import models as item_models
 from apps.study import models as study_models
@@ -103,53 +104,40 @@ class UploadQuestionnaireForm(crispy_forms.CrispyForm):
     def clean(self):
         cleaned_data = super().clean()
         file = cleaned_data['file']
+        cleaned_data = super().clean()
+        data = contrib_csv.read_file(cleaned_data)
+        sniff_data = contrib_csv.sniff(data)
+        validator_int_columns = ['questionnaire_column', 'item_number_column']
+        delimiter, quoting, has_header = contrib_csv.detect_dialect(sniff_data, cleaned_data, validator_int_columns)
+        reader = csv.reader(StringIO(data), delimiter=delimiter, quoting=quoting)
+        if has_header:
+            next(reader)
         try:
-            try:
-                data = file.read().decode('utf-8')
-            except UnicodeDecodeError:
-                file.seek(0)
-                data = file.read().decode('latin-1')
-            data_len = len(data)
-            sniff_data = data[:500 if data_len > 500 else data_len]
-            dialect = csv.Sniffer().sniff(sniff_data)
-            has_header = csv.Sniffer().has_header(sniff_data)
-            reader = csv.reader(StringIO(data), dialect)
-            if has_header:
-                next(reader)
-            try:
-                item_count = 0
-                experiments = set()
-                for row in reader:
-                    assert len(row) >= cleaned_data['questionnaire_column']
-                    assert len(row) >= cleaned_data['experiment_column']
-                    assert len(row) >= cleaned_data['item_number_column']
-                    assert len(row) >= cleaned_data['item_condition_column']
-                    assert int(row[cleaned_data['questionnaire_column'] - 1])
-                    assert int(row[cleaned_data['item_number_column'] - 1])
-                    experiment_title = row[cleaned_data['experiment_column'] - 1]
-                    try:
-                        experiment = self.study.experiment_set.get(title=experiment_title)
-                    except experiment_models.Experiment.DoesNotExist:
-                        raise forms.ValidationError('Experiment with title "{}" does not exists.'.format(experiment_title))
-                    item_number = row[cleaned_data['item_number_column'] - 1]
-                    item_condition = row[cleaned_data['item_condition_column'] -1]
-                    if not experiment.item_set.filter(number=item_number, condition=item_condition).exists():
-                        error = 'Item {}{} of "{}" is not defined.'.format(item_number, item_condition, experiment_title)
-                        raise forms.ValidationError(error)
-                    item_count += 1
-                    experiments.add(experiment)
-                if not item_count == item_models.Item.objects.filter(experiment__in=experiments).count():
-                    raise forms.ValidationError('Not all items used in questionnaires.')
-            except (ValueError, AssertionError):
-                raise forms.ValidationError(
-                    'File: Unexpected format in line %(n_line)s.',
-                    code='invalid',
-                    params={'n_line': reader.line_num})
-        except (UnicodeDecodeError, TypeError):
-            raise forms.ValidationError('Unsupported file encoding. Use UTF-8 or Latin-1.')
-        except csv.Error:
-            raise forms.ValidationError('Unsupported CSV format.')
-        file.seek(0)
+            item_count = 0
+            experiments = set()
+            for row in reader:
+                assert int(row[cleaned_data['questionnaire_column'] - 1])
+                assert int(row[cleaned_data['item_number_column'] - 1])
+                experiment_title = row[cleaned_data['experiment_column'] - 1]
+                try:
+                    experiment = self.study.experiment_set.get(title=experiment_title)
+                except experiment_models.Experiment.DoesNotExist:
+                    raise forms.ValidationError('Experiment with title "{}" does not exists.'.format(experiment_title))
+                item_number = row[cleaned_data['item_number_column'] - 1]
+                item_condition = row[cleaned_data['item_condition_column'] -1]
+                if not experiment.item_set.filter(number=item_number, condition=item_condition).exists():
+                    error = 'Item {}{} of "{}" is not defined.'.format(item_number, item_condition, experiment_title)
+                    raise forms.ValidationError(error)
+                item_count += 1
+                experiments.add(experiment)
+            contrib_csv.seek_file(cleaned_data)
+            if not item_count == item_models.Item.objects.filter(experiment__in=experiments).count():
+                raise forms.ValidationError('Not all items used in questionnaires.')
+        except (ValueError, AssertionError):
+            raise forms.ValidationError(
+                'File: Unexpected format in line %(n_line)s.',
+                code='invalid',
+                params={'n_line': reader.line_num})
         return cleaned_data
 
 

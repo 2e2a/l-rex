@@ -7,10 +7,10 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.views import generic
 
+from apps.contrib import csv as contrib_csv
 from apps.contrib import views as contrib_views
 from apps.experiment import views as experiment_views
 from apps.item import models as item_models
-from apps.study import models as study_models
 from apps.study import views as study_views
 
 from . import forms
@@ -276,17 +276,12 @@ class QuestionnaireUploadView(study_views.StudyMixin, study_views.CheckStudyCrea
         experiment_col = form.cleaned_data['experiment_column'] - 1
         num_col = form.cleaned_data['item_number_column'] - 1
         cond_col = form.cleaned_data['item_condition_column'] - 1
-        try:
-            data = file.read().decode('utf-8')
-        except UnicodeDecodeError:
-            file.seek(0)
-            data = file.read().decode('latin-1')
-        data_len = len(data)
-        sniff_data = data[:500 if data_len > 500 else data_len]
-        has_header = csv.Sniffer().has_header(sniff_data)
-        dialect = csv.Sniffer().sniff(sniff_data)
-        reader = csv.reader(StringIO(data), dialect)
-        if has_header:
+
+        data = contrib_csv.read_file(form.cleaned_data)
+        reader = csv.reader(
+            StringIO(data), delimiter=form.detected_csv['delimiter'], quoting=form.detected_csv['quoting']
+        )
+        if form.detected_csv['has_header']:
             next(reader)
         items = []
         questionnaire_num_last = None

@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.views import generic
 
 from apps.contrib import views as contrib_views
+from apps.contrib import csv as contrib_csv
 from apps.experiment import models as experiment_models
 from apps.experiment import views as experiment_views
 from apps.study import views as study_views
@@ -287,20 +288,12 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
         text_col = form.cleaned_data['text_column'] - 1
         block_col = form.cleaned_data['block_column'] - 1 if form.cleaned_data['block_column'] > 0 else None
 
-        try:
-            data = file.read().decode('utf-8')
-        except UnicodeDecodeError:
-            file.seek(0)
-            data = file.read().decode('latin-1')
-        data_len = len(data)
-        sniff_data = data[:500 if data_len > 500 else data_len]
-        has_header = csv.Sniffer().has_header(sniff_data)
-        dialect = csv.Sniffer().sniff(sniff_data)
-        reader = csv.reader(StringIO(data), dialect)
-
-        if has_header:
+        data = contrib_csv.read_file(form.cleaned_data)
+        reader = csv.reader(
+            StringIO(data), delimiter=form.detected_csv['delimiter'], quoting=form.detected_csv['quoting']
+        )
+        if form.detected_csv['has_header']:
             next(reader)
-
         for row in reader:
             item = None
             if self.study.has_text_items:
@@ -343,7 +336,6 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
                             scale_labels=None,
                             legend=None,
                         )
-
 
         self.experiment.set_progress(self.experiment.PROGRESS_EXP_ITEMS_CREATED)
         messages.success(self.request, study_views.progress_success_message(self.experiment.PROGRESS_EXP_ITEMS_CREATED))
@@ -485,6 +477,7 @@ class ItemListUploadView(experiment_views.ExperimentMixin, study_views.CheckStud
         return kwargs
 
     def form_valid(self, form):
+        # TODO: Fix all uploads
         result =  super().form_valid(form)
         self.experiment.itemlist_set.all().delete()
         file = form.cleaned_data['file']
