@@ -4,6 +4,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils.functional import cached_property
 
+from apps.contrib import csv as contrib_csv
 from apps.contrib.utils import slugify_unique
 from apps.item import models as item_models
 from apps.study import models as study_models
@@ -243,7 +244,7 @@ class Experiment(models.Model):
         return aggregated_results
 
     def results_csv(self, fileobj):
-        writer = csv.writer(fileobj)
+        writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
         csv_row = ['subject', 'item', 'condition', 'position']
         for question in self.study.questions:
             csv_row.append('rating{}'.format(question.number + 1))

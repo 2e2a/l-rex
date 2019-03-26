@@ -9,6 +9,7 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.timezone import now
 
+from apps.contrib import csv as contrib_csv
 from apps.contrib import math
 from apps.contrib.utils import slugify_unique
 from apps.contrib.datefield import DateField
@@ -277,7 +278,7 @@ class Study(models.Model):
 
     def rating_proofs_csv(self, fileobj):
         from apps.trial.models import Trial
-        writer = csv.writer(fileobj)
+        writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
         csv_row = [
             'Subject',
             'Proof code'
