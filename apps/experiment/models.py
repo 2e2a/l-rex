@@ -243,18 +243,25 @@ class Experiment(models.Model):
                 aggregated_results.append(new_row)
         return aggregated_results
 
-    def results_csv(self, fileobj):
-        writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
-        csv_row = ['subject', 'item', 'condition', 'position']
+    def results_csv_header(self, add_experiment_column=False):
+        csv_row = ['experiment'] if add_experiment_column else []
+        csv_row.extend(['subject', 'item', 'condition', 'position'])
         for question in self.study.questions:
             csv_row.append('rating{}'.format(question.number + 1))
         if self.study.has_text_items:
             csv_row.append('text')
-        writer.writerow(csv_row)
+        return csv_row
+
+    def results_csv(self, fileobj, add_header=True, add_experiment_column=False):
+        writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
+        if add_header:
+            header = self.results_csv_header()
+            writer.writerow(header)
         results = self.results()
         results = self._result_lists_for_questions(results)
         for row in results:
-            csv_row = [row['subject'], row['item'], row['condition'], row['position']]
+            csv_row = [self.title] if add_experiment_column else []
+            csv_row.extend([row['subject'], row['item'], row['condition'], row['position']])
             for rating in row['ratings']:
                 csv_row.append(rating)
             if self.study.has_text_items:

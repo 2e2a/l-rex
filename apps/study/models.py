@@ -294,6 +294,14 @@ class Study(models.Model):
             ]
             writer.writerow(csv_row)
 
+    def results_csv(self, fileobj):
+        for i, experiment in enumerate(self.experiments):
+            if i == 0:
+                writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
+                header = experiment.results_csv_header(add_experiment_column=True)
+                writer.writerow(header)
+            experiment.results_csv(fileobj, add_header=False, add_experiment_column=True)
+
     def progress_reached(self, progress):
         return self.progress >= progress
 

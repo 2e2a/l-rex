@@ -3,6 +3,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
 from django.db.models import Q
+from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.safestring import mark_safe
@@ -287,3 +288,14 @@ class SharedWithView(StudyObjectMixin, CheckStudyCreatorMixin, NextStepsMixin, g
 
     def get_success_url(self):
         return reverse('study', args=[self.study.slug])
+
+
+class StudyResultsCSVDownloadView(StudyObjectMixin, CheckStudyCreatorMixin, generic.DetailView):
+    model = models.Study
+
+    def get(self, request, *args, **kwargs):
+        filename = self.study.slug + '.csv'
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
+        self.study.results_csv(response,  )
+        return response
