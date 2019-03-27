@@ -394,7 +394,7 @@ class TrialDetailView(TrialObjectMixin, study_views.CheckStudyCreatorMixin, gene
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
             ('trials', reverse('trials', args=[self.study.slug])),
-            (self.trial.subject_id if self.trial.subject_id else self.trial.slug, ''),
+            (self.trial.subject_id, ''),
         ]
 
 

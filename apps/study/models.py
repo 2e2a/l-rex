@@ -287,9 +287,9 @@ class Study(models.Model):
         trials = Trial.objects.filter(
             questionnaire__study=self
         )
-        for i, trial in enumerate(trials):
+        for trial in trials:
             csv_row = [
-                trial.subject_id if trial.subject_id else i,
+                trial.subject_id,
                 trial.rating_proof
             ]
             writer.writerow(csv_row)

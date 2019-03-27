@@ -18,12 +18,10 @@
     <li class="list-group-item d-flex">
         <div class="flex-grow-1">
             <strong>#{{ page_obj.start_index|add:forloop.counter0 }}</strong>
-            {% if trial.subject_id %}
-            {{ trial.subject_id }} -
-            {% endif %}
-            {{ trial.created|date:"SHORT_DATETIME_FORMAT" }}
-            <span class="badge badge-primary">{{ trial.status.name }}</span>
+            Subject {{ trial.subject_id }}
+            <span class="badge badge-secondary">{{ trial.created|date:"SHORT_DATETIME_FORMAT" }}</span>
             <span class="badge badge-secondary">Questionnaire {{ trial.questionnaire.number }}</span>
+            <span class="badge badge-primary">{{ trial.status.name }}</span>
             {% if trial.rating_proof %}
             <span class="badge badge-light">Proof {{ trial.rating_proof }}</span>
             {% endif %}

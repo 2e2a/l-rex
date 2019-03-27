@@ -279,8 +279,6 @@ class Trial(models.Model):
     )
     subject_id = models.CharField(
         max_length=200,
-        blank=True,
-        null=True,
         help_text='Provide an identification number/name (as instructed by the experimenter).',
         verbose_name='ID',
     )
@@ -292,6 +290,15 @@ class Trial(models.Model):
 
     class Meta:
         ordering = ['created']
+
+    def save(self, *args, **kwargs):
+        if not self.subject_id:
+            if Trial.objects.filter(questionnaire__study=self.questionnaire.study).exists():
+                last_trial = Trial.objects.filter(questionnaire__study=self.questionnaire.study).last()
+                self.subject_id = int(last_trial.subject_id) + 1
+            else:
+                self.subject_id = 1
+        return super().save(*args, **kwargs)
 
     @cached_property
     def items(self):

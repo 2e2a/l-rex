@@ -154,7 +154,7 @@ class Experiment(models.Model):
         for rating in ratings:
             row = {}
             item = rating.questionnaire_item.item
-            row['subject'] = rating.trial.subject_id if self.study.require_participant_id else rating.trial.slug
+            row['subject'] = rating.trial.subject_id
             row['item'] = item.number
             row['condition'] = item.condition
             row['position'] = rating.questionnaire_item.number + 1

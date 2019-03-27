@@ -159,6 +159,7 @@ class TrialForm(crispy_forms.CrispyModelForm):
         if self.study.require_participant_id:
             self.fields['subject_id'].required = True
         else:
+            self.fields['subject_id'].required = False
             self.fields['subject_id'].widget = forms.HiddenInput()
 
     def clean_password(self):
