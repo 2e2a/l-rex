@@ -4,7 +4,7 @@ from io import StringIO
 from django import forms
 
 
-DEFAULT_DELIMITER = ','
+DEFAULT_DELIMITER = ';'
 DEFAULT_QUOTING = csv.QUOTE_MINIMAL
 
 
