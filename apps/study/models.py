@@ -103,7 +103,7 @@ class Study(models.Model):
     PROGRESS = (
         (PROGRESS_STD_CREATED, 'Create a study'),
         (PROGRESS_STD_QUESTION_CREATED, 'Create a question'),
-        (PROGRESS_STD_INSTRUCTIONS_EDITED, 'Edit the instuctions'),
+        (PROGRESS_STD_INSTRUCTIONS_EDITED, 'Edit the instructions'),
         (PROGRESS_STD_EXP_CREATED, 'Create an experiment'),
         (PROGRESS_STD_EXP_COMPLETED, 'Complete the experiment creation'),
         (PROGRESS_STD_QUESTIONNARES_GENERATED, 'Generate questionnaires'),
