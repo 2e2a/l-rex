@@ -161,10 +161,13 @@ class TrialForm(crispy_forms.CrispyModelForm):
         else:
             self.fields['subject_id'].required = False
             self.fields['subject_id'].widget = forms.HiddenInput()
+        if not self.study.password:
+            self.fields['password'].required = False
+            self.fields['password'].widget = forms.HiddenInput()
 
     def clean_password(self):
         password = self.cleaned_data['password']
-        if password != self.study.password:
+        if password and password != self.study.password:
             raise forms.ValidationError('Invalid password.')
         return password
 

@@ -45,6 +45,8 @@ class Study(models.Model):
         help_text='The items can be plain text or links to audio files (self-hosted).',
     )
     password = models.CharField(
+        blank=True,
+        null=True,
         max_length=200,
         help_text='This password will be required to participate in the study.',
     )

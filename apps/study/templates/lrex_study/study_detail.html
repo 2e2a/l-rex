@@ -62,7 +62,11 @@
                         Password:
                     </div>
                     <div class="col-sm-5">
+                        {% if study.password %}
                         {{ study.password }}
+                        {% else %}
+                        --
+                        {% endif %}
                     </div>
                 </div>
                 <div class="row small text-secondary">
