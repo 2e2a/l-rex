@@ -295,7 +295,10 @@ class Trial(models.Model):
         if not self.subject_id:
             if Trial.objects.filter(questionnaire__study=self.questionnaire.study).exists():
                 last_trial = Trial.objects.filter(questionnaire__study=self.questionnaire.study).last()
-                self.subject_id = int(last_trial.subject_id) + 1
+                try:
+                    self.subject_id = int(last_trial.subject_id) + 1
+                except ValueError:
+                    self.subject_id = 1
             else:
                 self.subject_id = 1
         return super().save(*args, **kwargs)
