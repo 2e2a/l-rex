@@ -108,7 +108,7 @@ class Experiment(models.Model):
             if i % condition_count == 0:
                 item_number += 1
             if item.number != item_number or item.condition != conditions[i % condition_count]:
-                raise AssertionError('Items invalid. Item {} was not expected.'.format(item))
+                raise AssertionError('Items invalid. Item "{}" was not expected.'.format(item))
 
         if self.study.has_text_items:
             items_by_text = groupby(items, lambda x: x.textitem.text)
