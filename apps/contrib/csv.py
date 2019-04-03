@@ -26,15 +26,15 @@ def sniff(data):
     data_len = len(data)
     return data[:500 if data_len > 500 else data_len]
 
+def get_min_columns(form_cleaned_data):
+    min_columns = 1
+    for field, data in form_cleaned_data.items():
+        if '_column' in field:
+            min_columns = max(min_columns, data)
+    return min_columns
+
 
 def detect_dialect(data, form_cleaned_data, int_column_names=None):
-
-    def _min_columns(form_cleaned_data):
-        min_columns = 1
-        for field, data in form_cleaned_data.items():
-            if '_column' in field:
-                min_columns = max(min_columns, data)
-        return min_columns
 
     def _row_column_types_match(row, int_columns):
         for col in int_columns:
@@ -52,7 +52,7 @@ def detect_dialect(data, form_cleaned_data, int_column_names=None):
 
     try:
         int_columns = [form_cleaned_data[column_name] for column_name in int_column_names]
-        min_columns = _min_columns(form_cleaned_data)
+        min_columns = get_min_columns(form_cleaned_data)
         delimiters = [';', '\t', ',']
         for delimiter in delimiters:
             reader = csv.reader(StringIO(data), delimiter=delimiter, quoting=csv.QUOTE_MINIMAL)

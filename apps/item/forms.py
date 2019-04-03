@@ -105,9 +105,11 @@ class UploadItemsForm(crispy_forms.CrispyForm):
         if has_header:
             next(reader)
         try:
+            min_columns = contrib_csv.get_min_columns(cleaned_data)
             for row in reader:
                 if not row:
                     continue
+                assert len(row) >= min_columns
                 assert int(row[cleaned_data['number_column'] - 1])
                 assert row[cleaned_data['condition_column'] - 1]
                 assert len(row[cleaned_data['condition_column'] - 1]) < 8
