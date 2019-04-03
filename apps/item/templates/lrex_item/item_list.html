@@ -38,7 +38,7 @@
             <strong>{{ item }}</strong>
             {% if consider_blocks %}<span class="badge badge-secondary">block {{ item.block }}</span>{% endif %}
         </div>
-        <div class="flex-grow-1">
+        <div class="flex-grow-1 mr-4">
             {% if item.textitem %}
             {{ item.textitem.text|linebreaks }}
             {% else %}
@@ -48,7 +48,7 @@
             </audio>
             {% endif %}
         </div>
-        <div>
+        <div class="flex-shrink-0">
             <a
                {% if study.has_text_items %}
                href="{% url 'text-item-update' item_slug=item.slug %}"
