@@ -106,7 +106,8 @@ class UploadItemsForm(crispy_forms.CrispyForm):
             next(reader)
         try:
             for row in reader:
-
+                if not row:
+                    continue
                 assert int(row[cleaned_data['number_column'] - 1])
                 assert row[cleaned_data['condition_column'] - 1]
                 assert len(row[cleaned_data['condition_column'] - 1]) < 8

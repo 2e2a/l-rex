@@ -295,6 +295,8 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
         if form.detected_csv['has_header']:
             next(reader)
         for row in reader:
+            if not row:
+                continue
             item = None
             if self.study.has_text_items:
                 item = models.TextItem.objects.create(
