@@ -17,6 +17,12 @@ class TextItemForm(crispy_forms.CrispyModelForm):
         model = models.TextItem
         fields = ['number', 'condition', 'text', 'block']
 
+    def clean_condition(self):
+        return self.cleaned_data['condition'].strip()
+
+    def clean_text(self):
+        return self.cleaned_data['text'].strip()
+
 
 class AudioLinkItemForm(crispy_forms.CrispyModelForm):
 

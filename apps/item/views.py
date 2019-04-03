@@ -282,7 +282,6 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
         result =  super().form_valid(form)
         models.Item.objects.filter(experiment=self.experiment).delete()
 
-        file = form.cleaned_data['file']
         num_col = form.cleaned_data['number_column'] - 1
         cond_col = form.cleaned_data['condition_column'] - 1
         text_col = form.cleaned_data['text_column'] - 1
@@ -300,9 +299,9 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
             item = None
             if self.study.has_text_items:
                 item = models.TextItem.objects.create(
-                    number=row[num_col],
-                    condition=row[cond_col],
-                    text=row[text_col],
+                    number=int(row[num_col]),
+                    condition=row[cond_col].strip(),
+                    text=row[text_col].strip(),
                     experiment=self.experiment,
                     block=row[block_col] if block_col else 1,
                 )
