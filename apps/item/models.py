@@ -87,7 +87,6 @@ class ItemList(models.Model):
 
 
 class ItemQuestion(models.Model):
-    # TODO: decouple
     item = models.ForeignKey(
         Item,
         on_delete=models.CASCADE

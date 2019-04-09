@@ -374,7 +374,7 @@ class Question(models.Model):
         return reverse('study-question', args=[self.study.slug, self.pk])
 
     def __str__(self):
-        return '({}) {}'.format(self.number, self.question)
+        return self.question
 
 
 class ScaleValue(models.Model):
