@@ -75,7 +75,7 @@ class Experiment(models.Model):
 
     @cached_property
     def is_complete(self):
-        return self.itemlist_set.all().exists()
+        return self.itemlist_set.exists()
 
     def __str__(self):
         return self.title
@@ -299,6 +299,6 @@ class Experiment(models.Model):
             self._append_step_info(next_steps, ExperimentSteps.STEP_EXP_ITEMS_CREATE)
         if False:  # TODO: Save if validated
             self._append_step_info(next_steps, ExperimentSteps.STEP_EXP_ITEMS_VALIDATE)
-        if self.items and not self.itemlist_set.all().exists():
+        if self.items and not self.itemlist_set.exists():
             self._append_step_info(next_steps, ExperimentSteps.STEP_EXP_LISTS_GENERATE)
         return next_steps
