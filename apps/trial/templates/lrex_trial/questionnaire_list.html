@@ -3,6 +3,7 @@
 {% block content %}
 <div class="text-center mb-2">
     {% if view.consider_blocks %}
+    {% if allow_actions %}
     <a href="{% url 'questionnaire-generate' study.slug %}"
        class="btn btn-primary btn-sm mx-1">
         Generate questionnaires
@@ -12,6 +13,11 @@
         Add/edit block instructions
     </a>
     {% else %}
+    <a href="" class="btn btn-primary btn-sm mx-1 disabled">Generate questionnaires</a>
+    <a class="btn btn-primary btn-sm mx-1 disabled">Add/edit block instructions</a>
+    {% endif %}
+    {% else %}
+    {% if allow_actions %}
     <form name="actionForm" id="actionForm" method="POST" class="d-inline">
         {% csrf_token %}
         <input class="span2" id="action" name="action" type="text" hidden="hidden">
@@ -22,7 +28,7 @@
                 Generate questionnaires
             </button>
             <div class="dropdown-menu" aria-labelledby="dropdownAction">
-                {% if study.allow_pseudo_randomization %}
+                {% if study.is_allowed_pseudo_randomization %}
                 <a href="#" class="dropdown-item" onclick="$('#action').val('generate_pseudo'); $('#actionForm').submit()">Pseudo-randomize</a>
                 {% endif %}
                 <a href="#" class="dropdown-item" onclick="$('#action').val('generate_random'); $('#actionForm').submit()">Randomize</a>
@@ -34,6 +40,9 @@
        class="btn btn-secondary btn-sm mx-1">
         Upload custom CSV
     </a>-->
+    {% else %}
+    <a href="" class="btn btn-primary btn-sm mx-1 disabled">Generate questionnaires</a>
+    {% endif %}
     {% endif %}
 </div>
 <ul class="list-group">

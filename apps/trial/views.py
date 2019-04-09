@@ -90,9 +90,14 @@ class QuestionnaireListView(study_views.StudyMixin, study_views.CheckStudyCreato
     def dispatch(self, request, *args, **kwargs):
         self.page = request.GET.get('page', 1)
         self.blocks = self.study.item_blocks
-        if not self.study.allow_pseudo_randomization:
+        if not self.study.is_allowed_pseudo_randomization:
             messages.info(request, 'Note: Define filler experiments to use pseudo randomization.')
         return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['allow_actions'] = self.study.is_allowed_create_questionnaires
+        return data
 
     @property
     def consider_blocks(self):
@@ -122,8 +127,7 @@ class QuestionnaireListView(study_views.StudyMixin, study_views.CheckStudyCreato
         self._create_default_questionnaire_block(randomization)
         try:
             self.study.generate_questionnaires()
-            self.study.set_progress(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED)
-            messages.success(request, study_views.progress_success_message(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED))
+            messages.success(request, 'Questionnaires generated')
         except RuntimeError:
             messages.error(request, 'Pseudo-randomization timed out. Retry or add more filler items.')
         return redirect('questionnaires',study_slug=self.study.slug)
@@ -176,7 +180,7 @@ class QuestionnaireGenerateView(study_views.StudyMixin, study_views.CheckStudyCr
 
     def dispatch(self, request, *args, **kwargs):
         self.blocks = self.study.item_blocks
-        if not self.study.allow_pseudo_randomization:
+        if not self.study.is_allowed_pseudo_randomization:
             messages.info(request, 'Note: Define filler experiments to use pseudo randomization.')
         return super().dispatch(request, *args, **kwargs)
 
@@ -206,8 +210,7 @@ class QuestionnaireGenerateView(study_views.StudyMixin, study_views.CheckStudyCr
                 self.formset.save(commit=True)
                 try:
                     self.study.generate_questionnaires()
-                    self.study.set_progress(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED)
-                    messages.success(request, study_views.progress_success_message(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED))
+                    messages.success(request, 'Questionnaires generated')
                 except RuntimeError:
                     messages.error(request, 'Pseudo-randomization timed out. Retry or add more filler items and retry.')
                 return redirect('questionnaires', study_slug=self.study.slug)
@@ -301,8 +304,7 @@ class QuestionnaireUploadView(study_views.StudyMixin, study_views.CheckStudyCrea
         questionnaire = models.Questionnaire.objects.create(study=self.study, number=questionnaire_num_last)
         for i, item in enumerate(items):
             models.QuestionnaireItem.objects.create(number=i, questionnaire=questionnaire, item=item)
-        self.study.set_progress(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED)
-        messages.success(self.request, study_views.progress_success_message(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED))
+        messages.success(self.request, 'Questionnaires uploaded')
         return result
 
     def get_success_url(self):

@@ -30,7 +30,7 @@ def questionnaire_block_factory(n_blocks):
 
 
 def customize_randomization(questionnaireblock_formset, study):
-    if not study.allow_pseudo_randomization:
+    if not study.is_allowed_pseudo_randomization:
         for form in questionnaireblock_formset:
             randomization = form.fields.get('randomization')
             randomization.choices = [(k, v) for k,v in randomization.choices

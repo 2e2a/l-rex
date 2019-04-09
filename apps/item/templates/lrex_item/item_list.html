@@ -31,7 +31,6 @@
     </a>
 </div>
 <ul class="list-group">
-    {% with consider_blocks=view.consider_blocks %}
     {% for item in item_list %}
     <li class="list-group-item d-flex flex-column flex-md-row">
         <div class="mr-4">
@@ -71,7 +70,6 @@
     {% empty %}
     <li class="list-group-item">There are currently no items.</li>
     {% endfor %}
-    {% endwith %}
 </ul>
 <nav aria-label="Pagination">
     <ul class="pagination justify-content-center mt-2">

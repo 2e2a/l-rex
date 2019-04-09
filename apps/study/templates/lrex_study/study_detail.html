@@ -1,6 +1,5 @@
 {% extends "lrex_home/base.html" %}
 {% load contrib_tags %}
-{% load progress_tags %}
 {% load static %}
 
 {% block content %}
@@ -14,7 +13,7 @@
         </button>
         {% else %}
         <button type="submit" name="action" value="publish"
-                class="btn btn-success btn-sm mx-1 {% if not study|is_progress_std_questionnares_generated_reached %} disabled {% endif %}">
+                class="btn btn-success btn-sm mx-1 {% if study.is_ready_for_publish %} disabled {% endif %}">
             Publish
         </button>
         {% endif %}
@@ -156,7 +155,7 @@
         </div>
     </div>
     <div class="col-md-8">
-        <div class="card my-2 {% if study|is_progress_std_created %} border-primary custom-shadow{% endif %}">
+        <div class="card my-2">
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <h2 class="card-title">Tasks</h2>
@@ -184,7 +183,7 @@
                         Instructions:
                     </div>
                     <div class="col-sm-7 text-truncate">
-                        {{ study.instructions }}
+                        {{ study.instructions|default:"--" }}
                     </div>
                 </div>
                 <div class="row small text-secondary">
@@ -192,7 +191,7 @@
                         Outro:
                     </div>
                     <div class="col-sm-7 text-truncate">
-                        {{ study.outro }}
+                        {{ study.outro|default:"--" }}
                     </div>
                 </div>
                 <hr>
@@ -201,7 +200,7 @@
             </div>
         </div>
 
-        <div class="card my-2 {% if study|is_progress_std_question_created_reached and not study|is_progress_std_exp_completed_reached %} border-primary custom-shadow{% endif %}">
+        <div class="card my-2">
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <h2 class="card-title">Experiments</h2>
@@ -239,15 +238,11 @@
                     </div>
                 </div>
                 <hr>
-                {% if study|is_progress_std_question_created_reached %}
                 <a  class="card-link" href="{% url 'experiments' study.slug %}">Experiments</a>
-                {% else %}
-                <a  class="card-link disabled text-muted">Create/edit experiments</a>
-                {% endif %}
             </div>
         </div>
 
-        <div class="card my-2 {% if study|is_progress_std_exp_completed %} border-primary custom-shadow{% endif %}">
+        <div class="card my-2">
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <h2 class="card-title">Questionnaires</h2>
@@ -265,11 +260,7 @@
                     </div>
                 </div>
                 <hr>
-                {% if study|is_progress_std_exp_completed_reached  %}
                 <a  class="card-link" href="{% url 'questionnaires' study.slug %}">Generate questionnaires</a>
-                {% else %}
-                <a  class="card-link text-muted">Questionnaires</a>
-                {% endif %}
             </div>
         </div>
 
@@ -291,15 +282,9 @@
                     </div>
                 </div>
                 <hr>
-                {% if study|is_progress_std_questionnares_generated_reached %}
                 <a  class="card-link" href="{{ study.results_url }}">Summary of the results</a>
                 <a  class="card-link" href="{% url 'trials' study.slug %}">Individual user trials</a>
                 <a  class="card-link" href="{% url 'study-results-csv' study.slug %}">Download results</a>
-                {% else %}
-                <a class="card-link text-muted">Summary of the results</a>
-                <a class="card-link text-muted">Individual user trials</a>
-                <a class="card-link text-muted">Download results</a>
-                {% endif %}
             </div>
         </div>
     </div>

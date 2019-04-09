@@ -54,8 +54,20 @@ class ItemObjectMixin(ItemMixin):
         return self.item_object
 
 
+class ItemsValidateMixin:
+
+    def validate_items(self):
+        try:
+            warnings = self.experiment.validate_items()
+            messages.success(self.request, 'Items seem valid')
+            for warning in warnings:
+                messages.warning(self.request, 'Warning: {}'.format(warning))
+        except AssertionError as e:
+            messages.error(self.request, str(e))
+
+
 class ItemListView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin, study_views.NextStepsMixin,
-                   generic.ListView):
+                   ItemsValidateMixin, generic.ListView):
     model = models.Item
     title = 'Items'
     paginate_by = 16
@@ -63,25 +75,16 @@ class ItemListView(experiment_views.ExperimentMixin, study_views.CheckStudyCreat
     def post(self, request, *args, **kwargs):
         action = request.POST.get('action', None)
         if action and action == 'validate':
-            try:
-                warnings = self.experiment.validate_items()
-                self.experiment.set_progress(self.experiment.PROGRESS_EXP_ITEMS_VALIDATED)
-                messages.success(request, study_views.progress_success_message(self.experiment.PROGRESS_EXP_ITEMS_VALIDATED))
-                for warning in warnings:
-                    messages.warning(request, 'Warning: {}'.format(warning))
-            except AssertionError as e:
-                messages.error(request, str(e))
+            self.validate_items()
         return redirect('items', experiment_slug=self.experiment.slug)
 
     def get_queryset(self):
         return super().get_queryset().filter(experiment=self.experiment).order_by('number','condition')
 
-    @property
-    def consider_blocks(self):
-        blocks = set()
-        for item in self.object_list:
-            blocks.add(item.block)
-        return len(blocks) > 1
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['consider_blocks'] = len(self.study.item_blocks) > 1
+        return data
 
     @property
     def breadcrumbs(self):
@@ -103,8 +106,7 @@ class TextItemCreateView(experiment_views.ExperimentMixin, study_views.CheckStud
     def form_valid(self, form):
         form.instance.experiment = self.experiment
         result = super().form_valid(form)
-        self.experiment.set_progress(experiment_models.Experiment.PROGRESS_EXP_ITEMS_CREATED)
-        messages.success(self.request, study_views.progress_success_message(self.experiment.PROGRESS_EXP_ITEMS_CREATED))
+        messages.success(self.request, 'Item created')
         return result
 
     def get_success_url(self):
@@ -153,8 +155,7 @@ class AudioLinkItemCreateView(experiment_views.ExperimentMixin, study_views.Chec
     def form_valid(self, form):
         form.instance.experiment = self.experiment
         result = super().form_valid(form)
-        self.experiment.set_progress(experiment_models.Experiment.PROGRESS_EXP_ITEMS_CREATED)
-        messages.success(self.request, study_views.progress_success_message(self.experiment.PROGRESS_EXP_ITEMS_CREATED))
+        messages.success(self.request, 'Item created')
         return result
 
     def get_success_url(self):
@@ -199,10 +200,7 @@ class ItemDeleteView(ItemObjectMixin, study_views.CheckStudyCreatorMixin, study_
 
     def delete(self, *args, **kwargs):
         response = super().delete(*args, **kwargs)
-        if not models.Item.objects.filter(experiment=self.experiment).exists():
-            self.experiment.set_progress(self.experiment.PROGRESS_EXP_CREATED)
-        else:
-            self.experiment.set_progress(self.experiment.PROGRESS_EXP_ITEMS_CREATED)
+        # TODO: Confirm with result download
         return response
 
     def get_success_url(self):
@@ -268,7 +266,12 @@ class ItemPregenerateView(experiment_views.ExperimentMixin, study_views.CheckStu
 
 
 class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin,
-                     study_views.ProceedWarningMixin, generic.FormView):
+                     study_views.ProceedWarningMixin, ItemsValidateMixin, generic.FormView):
+    # TODO: show hint if no questions defined for item questions
+    # TODO: Show wargning to download results
+    # TODO: Update Items, if changes delete lists + questionnaires + show info
+    # TODO: Consider implementing ModelForm Confirm view rendering form.data
+    # TODO: !!! User must delete results before
     title = 'Items'
     form_class = forms.UploadItemsForm
     template_name = 'lrex_contrib/crispy_form.html'
@@ -337,8 +340,8 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
                             legend=None,
                         )
 
-        self.experiment.set_progress(self.experiment.PROGRESS_EXP_ITEMS_CREATED)
-        messages.success(self.request, study_views.progress_success_message(self.experiment.PROGRESS_EXP_ITEMS_CREATED))
+        messages.success(self.request, 'Items uploaded')
+        self.validate_items()
         return result
 
     def get_success_url(self):
@@ -364,8 +367,8 @@ class ItemDeleteAllView(experiment_views.ExperimentMixin, study_views.CheckStudy
 
     def post(self, request, *args, **kwargs):
         models.Item.objects.filter(experiment=self.experiment).delete()
-        self.experiment.set_progress(self.experiment.PROGRESS_EXP_CREATED)
-        messages.success(self.request, 'Deletion successfull.')
+        # TODO: confirm result reletion
+        messages.success(self.request, 'All items deleted')
         return redirect(self.get_success_url())
 
     @property
@@ -447,12 +450,16 @@ class ItemListListView(experiment_views.ExperimentMixin, study_views.CheckStudyC
             self.experiment.compute_item_lists(distribute=True)
         elif action and action == 'generate_single':
             self.experiment.compute_item_lists(distribute=False)
-        self.experiment.set_progress(self.experiment.PROGRESS_EXP_LISTS_CREATED)
-        messages.success(self.request, study_views.progress_success_message(self.experiment.PROGRESS_EXP_LISTS_CREATED))
+        messages.success(self.request, 'Item lists generated.')
         return redirect('itemlists', experiment_slug=self.experiment.slug)
 
     def get_queryset(self):
         return models.ItemList.objects.filter(experiment=self.experiment)
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['allow_actions'] = True  # TODO: check items valid
+        return data
 
     @property
     def breadcrumbs(self):
@@ -509,8 +516,7 @@ class ItemListUploadView(experiment_views.ExperimentMixin, study_views.CheckStud
             list_num_last = list_num
         itemlist = models.ItemList.objects.create(experiment=self.experiment)
         itemlist.items.set(items)
-        self.experiment.set_progress(self.experiment.PROGRESS_EXP_LISTS_CREATED)
-        messages.success(self.request, study_views.progress_success_message(self.experiment.PROGRESS_EXP_LISTS_CREATED))
+        messages.success(self.request, 'Lists uploaded.')
         return result
 
     def get_success_url(self):

@@ -32,8 +32,16 @@ class StudyInstructionsForm(crispy_forms.CrispyModelForm):
             'outro',
         ]
 
+    def __init__(self, *args, **kwargs):
+        kwargs['initial'].update({
+            'instructions': 'Please rate the following sentences on the scale.',
+            'outro': 'Thank you for participating!',
+        })
+        super().__init__(*args, **kwargs)
+
 
 class QuestionForm(crispy_forms.CrispyModelForm):
+    # TODO: Show hint if item questions defined
     scale_labels = forms.CharField(
         max_length=200,
         required=True,

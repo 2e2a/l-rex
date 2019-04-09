@@ -16,17 +16,12 @@ from . import models
 from . import forms
 
 
-def progress_success_message(progress):
-    return 'Success: {}'.format(models.Study.progress_description(progress))
-
-
 class NextStepsMixin:
 
     def get(self, request, *args, **kwargs):
         response = super().get(request, *args, **kwargs)
         next_steps = self.study.next_steps()
-        for next_step in next_steps:
-            description, url = next_step
+        for description, url in next_steps:
             message = 'Next: {}'.format(description)
             if url and self.request.path != url:
                 message = message + ' (<a href="{}">here</a>)'.format(url)
@@ -113,7 +108,7 @@ class StudyCreateView(LoginRequiredMixin, generic.CreateView):
     def form_valid(self, form):
         form.instance.creator = self.request.user
         response = super().form_valid(form)
-        messages.success(self.request, progress_success_message(form.instance.progress))
+        messages.success(self.request, 'Study successfully created.')
         return response
 
 
@@ -128,23 +123,21 @@ class StudyDetailView(StudyObjectMixin, CheckStudyCreatorMixin, NextStepsMixin, 
         action = request.POST.get('action', None)
         if action == 'publish':
             self.study.is_published = True
-            self.study.set_progress(self.study.PROGRESS_STD_PUBLISHED)
-            messages.success(request, progress_success_message(self.study.PROGRESS_STD_PUBLISHED))
+            messages.success(request, 'Study published.')
             self.study.save()
         elif action == 'unpublish':
             self.study.is_published = False
-            self.study.set_progress(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED)
             messages.success(request, 'Study unpublished.')
             self.study.save()
         return redirect('study', study_slug=self.study.slug)
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
+        data['allow_publish'] = self.study.is_allowed_publish
         data['trial_count'] = trial_models.Trial.objects.filter(questionnaire__study=self.study).count()
-        data['experiments_ready'] = [experiment for experiment in self.study.experiments
-                                     if experiment.progress == experiment.PROGRESS_EXP_LISTS_CREATED]
-        data['exoperiments_draft'] = [experiment for experiment in self.study.experiments
-                                     if experiment.progress != experiment.PROGRESS_EXP_LISTS_CREATED]
+        data['experiments_ready'] = data['experiments_draft'] = []
+        for experiment in self.study.experiments:
+            data['experiments_ready' if experiment.is_complete else 'experiments_draft'].append(experiment)
         return data
 
     @property
@@ -191,13 +184,7 @@ class StudyInstructionsUpdateView(StudyObjectMixin, CheckStudyCreatorMixin, Succ
     title ='Edit study instructions'
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.StudyInstructionsForm
-    success_message = 'Study instructions successfully updated.'
-
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        form.instance.set_progress(self.study.PROGRESS_STD_INSTRUCTIONS_EDITED)
-        messages.success(self.request, progress_success_message(self.study.PROGRESS_STD_INSTRUCTIONS_EDITED))
-        return response
+    success_message = 'Instructions saved.'
 
     @property
     def breadcrumbs(self):
@@ -244,8 +231,7 @@ class QuestionUpdateView(StudyMixin, CheckStudyCreatorMixin, ProceedWarningMixin
                         )
             extra = len(self.formset.forms) - self.n_questions
             if 'submit' in request.POST:
-                self.study.set_progress(self.study.PROGRESS_STD_QUESTION_CREATED)
-                messages.success(request, progress_success_message(self.study.PROGRESS_STD_QUESTION_CREATED))
+                messages.success(request, 'Questions saved.')
                 return redirect('study', study_slug=self.study.slug)
             elif 'add' in request.POST:
                 self.formset = forms.question_formset_factory(self.n_questions, extra + 1)(

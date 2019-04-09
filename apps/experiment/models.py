@@ -1,4 +1,5 @@
 import csv
+from enum import Enum
 from itertools import groupby
 from django.db import models
 from django.urls import reverse
@@ -9,6 +10,12 @@ from apps.contrib.utils import slugify_unique
 from apps.item import models as item_models
 from apps.study import models as study_models
 from apps.trial import models as trial_models
+
+
+class ExperimentSteps(Enum):
+    STEP_EXP_ITEMS_CREATE = 1
+    STEP_EXP_ITEMS_VALIDATE = 2
+    STEP_EXP_LISTS_GENERATE = 3
 
 
 class Experiment(models.Model):
@@ -28,21 +35,6 @@ class Experiment(models.Model):
         default=False,
         help_text='Mark the items of this experiment as fillers. '
                   'This setting will be relevant if you choose to pseudo-randomize the questionnaire.',
-    )
-    PROGRESS_EXP_CREATED = '21-exp-crt'
-    PROGRESS_EXP_ITEMS_CREATED = '22-exp-itm-crt'
-    PROGRESS_EXP_ITEMS_VALIDATED = '23-exp-itm-vld'
-    PROGRESS_EXP_LISTS_CREATED = '24-exp-lst-gen'
-    PROGRESS = (
-        (PROGRESS_EXP_CREATED, 'Create an experiment'),
-        (PROGRESS_EXP_ITEMS_CREATED, 'Create or upload experiment items'),
-        (PROGRESS_EXP_ITEMS_VALIDATED, 'Validate consistency of the items'),
-        (PROGRESS_EXP_LISTS_CREATED, 'Generate item lists'),
-    )
-    progress = models.CharField(
-        max_length=16,
-        choices=PROGRESS,
-        default=PROGRESS_EXP_CREATED,
     )
 
     class Meta:
@@ -72,6 +64,19 @@ class Experiment(models.Model):
         item_bocks = set([item.block for item in self.items])
         return sorted(item_bocks)
 
+    @cached_property
+    def is_allowed_create_items(self):
+        if not self.experiments:
+            return False
+        for experiment in self.experiments:
+            if not experiment.is_complete:
+                return False
+        return True
+
+    @cached_property
+    def is_complete(self):
+        return self.itemlist_set.all().exists()
+
     def __str__(self):
         return self.title
 
@@ -79,6 +84,7 @@ class Experiment(models.Model):
         return reverse('experiment', args=[self.slug])
 
     def validate_items(self):
+        # TODO: If item questions defined ask to define question first, then validate scales
         warnings = []
 
         conditions = []
@@ -268,45 +274,31 @@ class Experiment(models.Model):
                 csv_row.append(row['text'])
             writer.writerow(csv_row)
 
-    @staticmethod
-    def progress_description(progress):
-        return dict(Experiment.PROGRESS)[progress]
+    STEP_DESCRIPTION = {
+        ExperimentSteps.STEP_EXP_ITEMS_CREATE: 'Create or upload experiment items',
+        ExperimentSteps.STEP_EXP_ITEMS_VALIDATE: 'Validate consistency of the items',
+        ExperimentSteps.STEP_EXP_LISTS_GENERATE: 'Generate item lists',
+    }
 
-    def progress_reached(self, progress):
-        return self.progress >= progress
-
-    def progress_url(self, progress):
-        if progress == self.PROGRESS_EXP_ITEMS_CREATED:
+    def step_url(self, step):
+        if step == ExperimentSteps.STEP_EXP_ITEMS_CREATE:
             return reverse('items', args=[self.slug])
-        elif progress == self.PROGRESS_EXP_ITEMS_CREATED:
+        if step == ExperimentSteps.STEP_EXP_ITEMS_VALIDATE:
             return reverse('items', args=[self.slug])
-        elif progress == self.PROGRESS_EXP_ITEMS_VALIDATED:
-            return reverse('items', args=[self.slug])
-        elif progress == self.PROGRESS_EXP_LISTS_CREATED:
+        if step == ExperimentSteps.STEP_EXP_LISTS_GENERATE:
             return reverse('itemlists', args=[self.slug])
-        return None
 
-    def set_progress(self, progress):
-        if progress > self.progress:
-            self.progress = progress
-            self.save()
-            if progress == self.PROGRESS_EXP_LISTS_CREATED:
-                self.study.set_progress(self.study.PROGRESS_STD_EXP_COMPLETED)
-
-    def next_progress_steps(self, progress):
-        if progress == self.PROGRESS_EXP_CREATED:
-            return [ self.PROGRESS_EXP_ITEMS_CREATED ]
-        elif progress == self.PROGRESS_EXP_ITEMS_CREATED:
-            return [ self.PROGRESS_EXP_ITEMS_VALIDATED ]
-        elif progress == self.PROGRESS_EXP_ITEMS_VALIDATED:
-            return [ self.PROGRESS_EXP_LISTS_CREATED ]
-        elif progress == self.PROGRESS_EXP_LISTS_CREATED:
-            return []
+    def _append_step_info(self, steps, step):
+        steps.append((self.STEP_DESCRIPTION[step], self.step_url(step)))
 
     def next_steps(self):
         next_steps = []
-        for next_step in self.next_progress_steps(self.progress):
-            description = '{} [ {} ]'.format(self.progress_description(next_step), self)
-            url = self.progress_url(next_step)
-            next_steps.append(( description, url, ))
+        if self.is_complete:
+            return next_steps
+        if not self.items:
+            self._append_step_info(next_steps, ExperimentSteps.STEP_EXP_ITEMS_CREATE)
+        if False:  # TODO: Save if validated
+            self._append_step_info(next_steps, ExperimentSteps.STEP_EXP_ITEMS_VALIDATE)
+        if self.items and not self.itemlist_set.all().exists():
+            self._append_step_info(next_steps, ExperimentSteps.STEP_EXP_LISTS_GENERATE)
         return next_steps
