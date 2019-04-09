@@ -6,11 +6,11 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import ValidationError
 from django.shortcuts import redirect
 from django.urls import reverse
+from django.utils.safestring import mark_safe
 from django.views import generic
 
 from apps.contrib import views as contrib_views
 from apps.contrib import csv as contrib_csv
-from apps.experiment import models as experiment_models
 from apps.experiment import views as experiment_views
 from apps.study import views as study_views
 
@@ -267,14 +267,20 @@ class ItemPregenerateView(experiment_views.ExperimentMixin, study_views.CheckStu
 
 class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin,
                      study_views.ProceedWarningMixin, ItemsValidateMixin, generic.FormView):
-    # TODO: show hint if no questions defined for item questions
-    # TODO: Show wargning to download results
     # TODO: Update Items, if changes delete lists + questionnaires + show info
     # TODO: Consider implementing ModelForm Confirm view rendering form.data
-    # TODO: !!! User must delete results before
+    # TODO: Show wargning to download results
+    # TODO: User could delete results before, or try confim view first
     title = 'Items'
     form_class = forms.UploadItemsForm
     template_name = 'lrex_contrib/crispy_form.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        if not self.study.questions:
+            msg = 'Note: If you want to use per item question customization, please define the study question first ' \
+                  '(<a href="{}">here</a>)'.format(reverse('study-questions', args=[self.study.slug]))
+            messages.info(self.request, mark_safe(msg))
+        return super().dispatch(request, *args, **kwargs)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
