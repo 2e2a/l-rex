@@ -347,6 +347,29 @@ class TrialListView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, 
         ]
 
 
+class TrialDeleteAllView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, generic.TemplateView):
+    title = 'Confirm Delete'
+    template_name = 'lrex_contrib/confirm_delete.html'
+    message = 'Delete all trials?'
+
+    def post(self, request, *args, **kwargs):
+        models.Trial.objects.filter(questionnaire__study=self.study).delete()
+        messages.success(self.request, 'All trials deleted')
+        return redirect(self.get_success_url())
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('trials', reverse('trials', args=[self.study.slug])),
+            ('delete-all', ''),
+        ]
+
+    def get_success_url(self):
+        return reverse('study', args=[self.study.slug])
+
+
 class TrialCreateView(study_views.StudyMixin, generic.CreateView):
     model = models.Trial
     form_class = forms.TrialForm

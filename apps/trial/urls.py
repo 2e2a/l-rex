@@ -15,6 +15,7 @@ urlpatterns_questionnaires = [
 
 urlpatterns_study = [
     path('', views.TrialListView.as_view(), name='trials'),
+    path('delete-all', views.TrialDeleteAllView.as_view(), name='trials-delete'),
     path('participate/', views.TrialCreateView.as_view(), name='trial-create'),
 ]
 
