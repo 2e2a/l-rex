@@ -81,18 +81,26 @@ class TrialObjectMixin(TrialMixin):
 
 
 class QuestionnaireListView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, study_views.NextStepsMixin,
-                            study_views.ProceedWarningMixin, generic.ListView):
+                            study_views.DisableFormIfStudyActiveMixin, generic.ListView):
     model = models.Questionnaire
     title = 'Questionnaires'
     page = 1
     paginate_by = 16
 
+    def get(self, request, *args, **kwargs):
+        if not self.study.is_allowed_pseudo_randomization:
+            messages.info(request, 'Note: Define filler experiments to use pseudo randomization.')
+        return super().get(request, *args, **kwargs)
+
     def dispatch(self, request, *args, **kwargs):
         self.page = request.GET.get('page', 1)
         self.blocks = self.study.item_blocks
-        if not self.study.allow_pseudo_randomization:
-            messages.info(request, 'Note: Define filler experiments to use pseudo randomization.')
         return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['allow_actions'] = self.study.is_allowed_create_questionnaires
+        return data
 
     @property
     def consider_blocks(self):
@@ -122,8 +130,7 @@ class QuestionnaireListView(study_views.StudyMixin, study_views.CheckStudyCreato
         self._create_default_questionnaire_block(randomization)
         try:
             self.study.generate_questionnaires()
-            self.study.set_progress(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED)
-            messages.success(request, study_views.progress_success_message(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED))
+            messages.success(request, 'Questionnaires generated')
         except RuntimeError:
             messages.error(request, 'Pseudo-randomization timed out. Retry or add more filler items.')
         return redirect('questionnaires',study_slug=self.study.slug)
@@ -168,7 +175,7 @@ class QuestionnaireDetailView(QuestionnaireObjectMixin, study_views.CheckStudyCr
 
 
 class QuestionnaireGenerateView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin,
-                                study_views.ProceedWarningMixin, generic.TemplateView):
+                                study_views.DisableFormIfStudyActiveMixin, generic.TemplateView):
     title = 'Generate questionnaires'
     template_name = 'lrex_contrib/crispy_formset_form.html'
     formset = None
@@ -176,7 +183,7 @@ class QuestionnaireGenerateView(study_views.StudyMixin, study_views.CheckStudyCr
 
     def dispatch(self, request, *args, **kwargs):
         self.blocks = self.study.item_blocks
-        if not self.study.allow_pseudo_randomization:
+        if not self.study.is_allowed_pseudo_randomization:
             messages.info(request, 'Note: Define filler experiments to use pseudo randomization.')
         return super().dispatch(request, *args, **kwargs)
 
@@ -206,8 +213,7 @@ class QuestionnaireGenerateView(study_views.StudyMixin, study_views.CheckStudyCr
                 self.formset.save(commit=True)
                 try:
                     self.study.generate_questionnaires()
-                    self.study.set_progress(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED)
-                    messages.success(request, study_views.progress_success_message(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED))
+                    messages.success(request, 'Questionnaires generated')
                 except RuntimeError:
                     messages.error(request, 'Pseudo-randomization timed out. Retry or add more filler items and retry.')
                 return redirect('questionnaires', study_slug=self.study.slug)
@@ -258,7 +264,7 @@ class QuestionnaireBlockInstructionsUpdateView(study_views.StudyMixin, study_vie
 
 
 class QuestionnaireUploadView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin,
-                              study_views.ProceedWarningMixin, generic.FormView):
+                              study_views.DisableFormIfStudyActiveMixin, generic.FormView,):
     title = 'Upload custom questionnaires'
     form_class = forms.UploadQuestionnaireForm
     template_name = 'lrex_contrib/crispy_form.html'
@@ -301,8 +307,7 @@ class QuestionnaireUploadView(study_views.StudyMixin, study_views.CheckStudyCrea
         questionnaire = models.Questionnaire.objects.create(study=self.study, number=questionnaire_num_last)
         for i, item in enumerate(items):
             models.QuestionnaireItem.objects.create(number=i, questionnaire=questionnaire, item=item)
-        self.study.set_progress(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED)
-        messages.success(self.request, study_views.progress_success_message(self.study.PROGRESS_STD_QUESTIONNARES_GENERATED))
+        messages.success(self.request, 'Questionnaires uploaded')
         return result
 
     def get_success_url(self):
@@ -343,6 +348,29 @@ class TrialListView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, 
             (self.study.title, reverse('study', args=[self.study.slug])),
             ('trials', ''),
         ]
+
+
+class TrialDeleteAllView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, generic.TemplateView):
+    title = 'Confirm Delete'
+    template_name = 'lrex_contrib/confirm_delete.html'
+    message = 'Delete all trials?'
+
+    def post(self, request, *args, **kwargs):
+        models.Trial.objects.filter(questionnaire__study=self.study).delete()
+        messages.success(self.request, 'All trials deleted')
+        return redirect(self.get_success_url())
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('trials', reverse('trials', args=[self.study.slug])),
+            ('delete-all', ''),
+        ]
+
+    def get_success_url(self):
+        return reverse('study', args=[self.study.slug])
 
 
 class TrialCreateView(study_views.StudyMixin, generic.CreateView):

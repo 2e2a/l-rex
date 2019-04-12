@@ -22,6 +22,14 @@ class StudyStatus(Enum):
     FINISHED = 4
 
 
+class StudySteps(Enum):
+    STEP_STD_QUESTION_CREATE = 1
+    STEP_STD_INSTRUCTIONS_EDIT = 2
+    STEP_STD_EXP_CREATE = 3
+    STEP_STD_QUESTIONNAIRES_GENERATE = 4
+    STEP_STD_PUBLISH = 5
+
+
 class Study(models.Model):
     title = models.CharField(
         max_length=100,
@@ -51,9 +59,10 @@ class Study(models.Model):
         help_text='This password will be required to participate in the study.',
     )
     instructions = models.TextField(
+        blank=True,
+        null=True,
         max_length=5000,
         help_text='These instructions will be presented to the participant before the experiment begins.',
-        default='Please rate the following sentences on the scale.',
     )
     require_participant_id = models.BooleanField(
         default=False,
@@ -65,9 +74,10 @@ class Study(models.Model):
         help_text='Generate a proof code for the subject participation.',
     )
     outro = models.TextField(
+        blank=True,
+        null=True,
         max_length=5000,
         help_text='This text will be presented to the participant after the experiment is finished.',
-        default='Thank you for participating!',
     )
     end_date = DateField(
         blank=True,
@@ -93,28 +103,6 @@ class Study(models.Model):
     created_date = DateField(
         default=now,
         editable=False,
-    )
-
-    PROGRESS_STD_CREATED = '00-std-crt'
-    PROGRESS_STD_QUESTION_CREATED = '10-qst-crt'
-    PROGRESS_STD_INSTRUCTIONS_EDITED = '11-ins-edt'
-    PROGRESS_STD_EXP_CREATED = '20-exp-crt'
-    PROGRESS_STD_EXP_COMPLETED = '29-exp-cmp'
-    PROGRESS_STD_QUESTIONNARES_GENERATED = '30-std-qnr-gen'
-    PROGRESS_STD_PUBLISHED = '40-std-pub'
-    PROGRESS = (
-        (PROGRESS_STD_CREATED, 'Create a study'),
-        (PROGRESS_STD_QUESTION_CREATED, 'Create a question'),
-        (PROGRESS_STD_INSTRUCTIONS_EDITED, 'Edit the instructions'),
-        (PROGRESS_STD_EXP_CREATED, 'Create an experiment'),
-        (PROGRESS_STD_EXP_COMPLETED, 'Complete the experiment creation'),
-        (PROGRESS_STD_QUESTIONNARES_GENERATED, 'Generate questionnaires'),
-        (PROGRESS_STD_PUBLISHED, 'Publish the study'),
-    )
-    progress = models.CharField(
-        max_length=16,
-        choices=PROGRESS,
-        default=PROGRESS_STD_CREATED,
     )
 
     class Meta:
@@ -191,7 +179,20 @@ class Study(models.Model):
         return reverse('experiment-result-list', args=[self.slug])
 
     @cached_property
-    def allow_pseudo_randomization(self):
+    def is_allowed_create_questionnaires(self):
+        if not self.experiments:
+            return False
+        for experiment in self.experiments:
+            if not experiment.is_complete:
+                return False
+        return True
+
+    @cached_property
+    def is_allowed_publish(self):
+        return self.questions and self.instructions and self.questionnaire_set.exists()
+
+    @cached_property
+    def is_allowed_pseudo_randomization(self):
         return self.experiment_set.filter(is_filler=True).count() > 0
 
     @cached_property
@@ -304,75 +305,44 @@ class Study(models.Model):
                 writer.writerow(header)
             experiment.results_csv(fileobj, add_header=False, add_experiment_column=True)
 
-    def progress_reached(self, progress):
-        return self.progress >= progress
+    STEP_DESCRIPTION = {
+        StudySteps.STEP_STD_QUESTION_CREATE: 'Create a question',
+        StudySteps.STEP_STD_INSTRUCTIONS_EDIT: 'Create the instructions',
+        StudySteps.STEP_STD_EXP_CREATE: 'Create an experiment',
+        StudySteps.STEP_STD_QUESTIONNAIRES_GENERATE: 'Generate questionnaires',
+        StudySteps.STEP_STD_PUBLISH: 'Publish the study',
+    }
 
-    @staticmethod
-    def progress_description(progress):
-        progress_dict = dict(Study.PROGRESS)
-        if progress in progress_dict:
-            return progress_dict[progress]
-        else:
-            from apps.experiment.models import Experiment
-            return Experiment.progress_description(progress)
-
-    def progress_url(self, progress):
-        if progress == self.PROGRESS_STD_CREATED:
-            return reverse('study-create', args=[])
-        elif progress == self.PROGRESS_STD_QUESTION_CREATED:
+    def step_url(self, step):
+        if step == StudySteps.STEP_STD_QUESTION_CREATE:
             return reverse('study-questions', args=[self.slug])
-        elif progress == self.PROGRESS_STD_INSTRUCTIONS_EDITED:
+        elif step == StudySteps.STEP_STD_INSTRUCTIONS_EDIT:
             return reverse('study-instructions', args=[self.slug])
-        elif progress == self.PROGRESS_STD_EXP_CREATED:
-            return reverse('experiments', args=[self.slug])
-        elif progress == self.PROGRESS_STD_EXP_COMPLETED:
-            return reverse('study', args=[self.slug])
-        elif progress == self.PROGRESS_STD_QUESTIONNARES_GENERATED:
+        elif step == StudySteps.STEP_STD_EXP_CREATE:
+            return reverse('experiment-create', args=[self.slug])
+        elif step == StudySteps.STEP_STD_QUESTIONNAIRES_GENERATE:
             return reverse('questionnaires', args=[self.slug])
-        elif progress == self.PROGRESS_STD_PUBLISHED:
+        elif step == StudySteps.STEP_STD_PUBLISH:
             return reverse('study', args=[self.slug])
-        return None
 
-    def set_progress(self, progress):
-        if progress > self.progress:
-            change_progress = True
-            if progress == self.PROGRESS_STD_EXP_COMPLETED:
-                for experiment in self.experiments:
-                    if experiment.progress != experiment.PROGRESS_EXP_LISTS_CREATED:
-                        change_progress = False
-            if change_progress:
-                self.progress = progress
-                self.save()
-
-    def next_progress_steps(self, progress):
-        if progress == self.PROGRESS_STD_CREATED:
-            return [ self.PROGRESS_STD_QUESTION_CREATED]
-        elif progress == self.PROGRESS_STD_QUESTION_CREATED:
-            return [ self.PROGRESS_STD_INSTRUCTIONS_EDITED, self.PROGRESS_STD_EXP_CREATED ]
-        elif progress == self.PROGRESS_STD_INSTRUCTIONS_EDITED:
-            return [ self.PROGRESS_STD_EXP_CREATED ]
-        elif progress == self.PROGRESS_STD_EXP_CREATED:
-            return [ self.PROGRESS_STD_EXP_COMPLETED ]
-        elif progress == self.PROGRESS_STD_EXP_COMPLETED:
-            return [ self.PROGRESS_STD_QUESTIONNARES_GENERATED ]
-        elif progress == self.PROGRESS_STD_QUESTIONNARES_GENERATED:
-            return [ self.PROGRESS_STD_PUBLISHED ]
-        elif progress == self.PROGRESS_STD_PUBLISHED:
-            return []
+    def _append_step_info(self, steps, step):
+        steps.append((self.STEP_DESCRIPTION[step], self.step_url(step)))
 
     def next_steps(self):
         next_steps = []
-        if not next_steps:
-            if self.progress == self.PROGRESS_STD_EXP_CREATED:
-                for experiment in self.experiments:
-                    next_exp_steps = experiment.next_steps()
-                    next_steps.extend(next_exp_steps)
-
-        if not next_steps:
-            for next_step in self.next_progress_steps(self.progress):
-                description = self.progress_description(next_step)
-                url = self.progress_url(next_step)
-                next_steps.append(( description, url, ))
+        if not self.questions:
+            self._append_step_info(next_steps, StudySteps.STEP_STD_QUESTION_CREATE)
+        if not self.instructions:
+            self._append_step_info(next_steps, StudySteps.STEP_STD_INSTRUCTIONS_EDIT)
+        if not self.experiments:
+            self._append_step_info(next_steps, StudySteps.STEP_STD_EXP_CREATE)
+        if self.is_allowed_create_questionnaires and not self.questionnaire_set.exists():
+            self._append_step_info(next_steps, StudySteps.STEP_STD_QUESTIONNAIRES_GENERATE)
+        if self.is_allowed_publish and not self.is_published:
+            self._append_step_info(next_steps, StudySteps.STEP_STD_PUBLISH)
+        for experiment in self.experiments:
+            next_exp_steps = experiment.next_steps()
+            next_steps.extend(next_exp_steps)
         return next_steps
 
 
@@ -402,7 +372,7 @@ class Question(models.Model):
         return reverse('study-question', args=[self.study.slug, self.pk])
 
     def __str__(self):
-        return '({}) {}'.format(self.number, self.question)
+        return self.question
 
 
 class ScaleValue(models.Model):

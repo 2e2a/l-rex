@@ -5,7 +5,7 @@
 <form action="" method="post" class="p-4 border bg-white">{% csrf_token %}
     <p class="text-center">{{ view.message }}</p>
     <div class="text-center">
-        <input type="submit" value="Delete" class="btn btn-outline-danger btn-sm"/>
+        <input type="submit" value="Delete" class="btn btn-outline-danger btn-sm" {% if study_active %}disabled=True{% endif %}/>
         <a href="{{ view.get_success_url }}" class="btn btn-outline-secondary btn-sm">Cancel</a>
     </div>
 </form>

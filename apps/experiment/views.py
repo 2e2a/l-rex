@@ -61,17 +61,17 @@ class ExperimentListView(study_views.StudyMixin, study_views.CheckStudyCreatorMi
         ]
 
 
-class ExperimentCreateView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, generic.CreateView):
+class ExperimentCreateView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin,
+                           study_views.DisableFormIfStudyActiveMixin, generic.CreateView):
     model = models.Experiment
     title = 'Create experiment'
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.ExperimentForm
+    success_message = 'Experiment created.'
 
     def form_valid(self, form):
         form.instance.study = self.study
         response = super().form_valid(form)
-        self.study.set_progress(self.study.PROGRESS_STD_EXP_CREATED)
-        messages.success(self.request, study_views.progress_success_message(self.study.PROGRESS_STD_EXP_CREATED))
         return response
 
     @property
@@ -91,6 +91,11 @@ class ExperimentDetailView(ExperimentObjectMixin, study_views.CheckStudyCreatorM
     @property
     def title(self):
         return self.experiment.title
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['items_validated'] = True  # TODO
+        return data
 
     @property
     def breadcrumbs(self):
@@ -121,17 +126,9 @@ class ExperimentUpdateView(ExperimentObjectMixin, study_views.CheckStudyCreatorM
         ]
 
 
-class ExperimentDeleteView(ExperimentObjectMixin, study_views.CheckStudyCreatorMixin, study_views.ProceedWarningMixin,
+class ExperimentDeleteView(ExperimentObjectMixin, study_views.CheckStudyCreatorMixin, study_views.DisableFormIfStudyActiveMixin,
                            contrib_views.DefaultDeleteView):
     model = models.Experiment
-
-    def delete(self, *args, **kwargs):
-        response = super().delete(*args, **kwargs)
-        if not models.Experiment.objects.filter(study=self.study).exists():
-            self.study.set_progress(self.study.PROGRESS_STD_QUESTION_CREATED)
-        else:
-            self.study.set_progress(self.study.PROGRESS_STD_EXP_CREATED)
-        return response
 
     @property
     def breadcrumbs(self):

@@ -14,22 +14,26 @@ class OptionalLabelMixin:
                 field.label = '{} (optional)'.format(field.label)
 
 
-class CrispyForm(OptionalLabelMixin, forms.Form):
+class HelperMixin:
+
+    def init_helper(self):
+        self.helper = self.custom_helper if hasattr(self, 'custom_helper') else FormHelper()
+        self.helper.add_input(Submit('submit', self.submit_label))
+
+
+class CrispyForm(OptionalLabelMixin, HelperMixin, forms.Form):
     submit_label = 'Submit'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.helper = self.custom_helper if hasattr(self, 'custom_helper') else FormHelper()
-        self.helper.add_input(Submit('submit', self.submit_label))
+        self.init_helper()
         self.append_optional_to_labels()
 
 
-
-class CrispyModelForm(OptionalLabelMixin, forms.ModelForm):
+class CrispyModelForm(OptionalLabelMixin, HelperMixin, forms.ModelForm):
     submit_label = 'Submit'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.helper = self.custom_helper if hasattr(self, 'custom_helper') else FormHelper()
-        self.helper.add_input(Submit('submit', self.submit_label))
+        self.init_helper()
         self.append_optional_to_labels()

@@ -2,10 +2,8 @@
 
 {% block content %}
 <div class="text-center mb-2">
-    <a href="{% url 'items-upload' experiment.slug %}"
-       class="btn btn-primary btn-sm mx-1">
-        Upload CSV
-    </a>
+    {% if not disable_actions %}
+    <a href="{% url 'items-upload' experiment.slug %}" class="btn btn-primary btn-sm mx-1">Upload CSV</a>
     <form method="post" class="d-inline">
         {% csrf_token %}
         <button type="submit" name="action" value="validate" class="btn btn-primary btn-sm mx-1">
@@ -13,25 +11,21 @@
         </button>
     </form>
     <a
-        {% if study.has_text_items %}
-        href="{% url 'text-item-create' experiment.slug %}"
-        {% else %}
-        href="{% url 'audio-link-item-create' experiment.slug %}"
-        {% endif %}
-       class="btn btn-secondary btn-sm mx-1">
+        href="{% if study.has_text_items %}{% url 'text-item-create' experiment.slug %}{% else %}{% url 'audio-link-item-create' experiment.slug %}{% endif %}"
+        class="btn btn-secondary btn-sm mx-1">
         Add item
     </a>
-    <a href="{% url 'items-pregenerate' experiment.slug %}"
-       class="btn btn-secondary btn-sm mx-1">
-        Pregenerate items
-    </a>
-    <a href="{% url 'items-delete' experiment.slug %}"
-       class="btn btn-danger btn-sm mx-1">
-        Delete all
-    </a>
+    <a href="{% url 'items-pregenerate' experiment.slug %}" class="btn btn-secondary btn-sm mx-1">Pregenerate items</a>
+    <a href="{% url 'items-delete' experiment.slug %}" class="btn btn-danger btn-sm mx-1">Delete all</a>
+    {% else %}
+    <a href="" class="btn btn-primary btn-sm mx-1 disabled">Upload CSV</a>
+    <a href="" class="btn btn-primary btn-sm mx-1 disabled">Validate</a>
+    <a href="" class="btn btn-secondary btn-sm mx-1 disabled">Add item</a>
+    <a href="" class="btn btn-secondary btn-sm mx-1 disabled">Pregenerate items</a>
+    <a href="" class="btn btn-danger btn-sm mx-1 disabled">Delete all</a>
+    {% endif %}
 </div>
 <ul class="list-group">
-    {% with consider_blocks=view.consider_blocks %}
     {% for item in item_list %}
     <li class="list-group-item d-flex flex-column flex-md-row">
         <div class="mr-4">
@@ -49,29 +43,28 @@
             {% endif %}
         </div>
         <div class="flex-shrink-0">
+            {% if not disable_actions %}
             <a
-               {% if study.has_text_items %}
-               href="{% url 'text-item-update' item_slug=item.slug %}"
-               {% else %}
-               href="{% url 'audio-link-item-update' item_slug=item.slug %}"
-               {% endif %}
+               href="{% if study.has_text_items %}{% url 'text-item-update' item_slug=item.slug %}{% else %}{% url 'audio-link-item-update' item_slug=item.slug %}{% endif %}
                class="btn btn-outline-primary btn-sm mx-1">
                 Edit
             </a>
-            <a href="{% url 'item-questions' item_slug=item.slug %}"
-               class="btn btn-outline-secondary btn-sm mx-1">
+            <a href="{% url 'item-questions' item_slug=item.slug %}" class="btn btn-outline-secondary btn-sm mx-1">
                 Customize questions
             </a>
-            <a href="{% url 'item-delete' item_slug=item.slug %}"
-               class="btn btn-outline-danger btn-sm mx-1">
+            <a href="{% url 'item-delete' item_slug=item.slug %}" class="btn btn-outline-danger btn-sm mx-1">
                 Delete
             </a>
+            {% else %}
+            <a href="" class="btn btn-outline-primary btn-sm mx-1 disabled">Edit</a>
+            <a href="" class="btn btn-outline-secondary btn-sm mx-1 disabled">Customize questions</a>
+            <a href="" class="btn btn-outline-danger btn-sm mx-1 disabled">Delete</a>
+            {% endif %}
         </div>
     </li>
     {% empty %}
     <li class="list-group-item">There are currently no items.</li>
     {% endfor %}
-    {% endwith %}
 </ul>
 <nav aria-label="Pagination">
     <ul class="pagination justify-content-center mt-2">
