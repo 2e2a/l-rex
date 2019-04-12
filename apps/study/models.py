@@ -314,14 +314,12 @@ class Study(models.Model):
     }
 
     def step_url(self, step):
-        if step == StudySteps.STEP_STD_EXP_CREATE:
-            return reverse('study-create', args=[])
-        elif step == StudySteps.STEP_STD_QUESTION_CREATE:
+        if step == StudySteps.STEP_STD_QUESTION_CREATE:
             return reverse('study-questions', args=[self.slug])
         elif step == StudySteps.STEP_STD_INSTRUCTIONS_EDIT:
             return reverse('study-instructions', args=[self.slug])
         elif step == StudySteps.STEP_STD_EXP_CREATE:
-            return reverse('experiments', args=[self.slug])
+            return reverse('experiment-create', args=[self.slug])
         elif step == StudySteps.STEP_STD_QUESTIONNAIRES_GENERATE:
             return reverse('questionnaires', args=[self.slug])
         elif step == StudySteps.STEP_STD_PUBLISH:
@@ -340,7 +338,7 @@ class Study(models.Model):
             self._append_step_info(next_steps, StudySteps.STEP_STD_EXP_CREATE)
         if self.is_allowed_create_questionnaires and not self.questionnaire_set.exists():
             self._append_step_info(next_steps, StudySteps.STEP_STD_QUESTIONNAIRES_GENERATE)
-        if self.is_allowed_publish:
+        if self.is_allowed_publish and not self.is_published:
             self._append_step_info(next_steps, StudySteps.STEP_STD_PUBLISH)
         for experiment in self.experiments:
             next_exp_steps = experiment.next_steps()
