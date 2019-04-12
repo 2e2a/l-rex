@@ -21,10 +21,10 @@ class WarnUserIfStudyActiveMixin:
     def get(self, request, *args, **kwargs):
         if self.study.status == models.StudyStatus.ACTIVE:
             if hasattr(self, 'get_form') or hasattr(self, 'helper'):
-                msg = 'Note: Actions are disabled. You cannot change a study with existing results. Please remove the results fist' \
+                msg = 'Note: Actions are disabled. You cannot change a study with existing results. Please save and remove the results first' \
                       ' (<a href="{}">here</a>).'.format(reverse('trials', args=[self.study.slug]))
             else:
-                msg = 'Note: Form is disabled. You cannot change a study with existing results. Please remove the results fist' \
+                msg = 'Note: Form is disabled. You cannot change a study with existing results. Please save and remove the results first' \
                       ' (<a href="{}">here</a>).'.format(reverse('trials', args=[self.study.slug]))
             messages.info(request, mark_safe(msg))
         return  super().get(request, *args, **kwargs)
