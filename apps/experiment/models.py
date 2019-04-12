@@ -36,6 +36,9 @@ class Experiment(models.Model):
         help_text='Mark the items of this experiment as fillers. '
                   'This setting will be relevant if you choose to pseudo-randomize the questionnaire.',
     )
+    items_validated = models.BooleanField(
+        default=False,
+    )
 
     class Meta:
         ordering = ['study', 'title']
@@ -84,7 +87,6 @@ class Experiment(models.Model):
         return reverse('experiment', args=[self.slug])
 
     def validate_items(self):
-        # TODO: If item questions defined ask to define question first, then validate scales
         warnings = []
 
         conditions = []
@@ -129,6 +131,8 @@ class Experiment(models.Model):
                 if len(items) > 1:
                     warnings.append('Items {} have the same URL.'.format(','.join([str(item) for item in items])))
 
+        self.items_validated = True
+        self.save()
         return warnings
 
     def compute_item_lists(self, distribute=True):
@@ -297,8 +301,8 @@ class Experiment(models.Model):
             return next_steps
         if not self.items:
             self._append_step_info(next_steps, ExperimentSteps.STEP_EXP_ITEMS_CREATE)
-        if False:  # TODO: Save if validated
+        if self.items and not self.items_validated:
             self._append_step_info(next_steps, ExperimentSteps.STEP_EXP_ITEMS_VALIDATE)
-        if self.items and not self.itemlist_set.exists():
+        if self.items_validated and not self.itemlist_set.exists():
             self._append_step_info(next_steps, ExperimentSteps.STEP_EXP_LISTS_GENERATE)
         return next_steps

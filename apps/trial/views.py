@@ -87,11 +87,14 @@ class QuestionnaireListView(study_views.StudyMixin, study_views.CheckStudyCreato
     page = 1
     paginate_by = 16
 
+    def get(self, request, *args, **kwargs):
+        if not self.study.is_allowed_pseudo_randomization:
+            messages.info(request, 'Note: Define filler experiments to use pseudo randomization.')
+        return super().get(request, *args, **kwargs)
+
     def dispatch(self, request, *args, **kwargs):
         self.page = request.GET.get('page', 1)
         self.blocks = self.study.item_blocks
-        if not self.study.is_allowed_pseudo_randomization:
-            messages.info(request, 'Note: Define filler experiments to use pseudo randomization.')
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
