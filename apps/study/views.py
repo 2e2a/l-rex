@@ -16,6 +16,44 @@ from . import models
 from . import forms
 
 
+class WarnUserIfStudyActiveMixin:
+
+    def get(self, request, *args, **kwargs):
+        if self.study.status == models.StudyStatus.ACTIVE:
+            if hasattr(self, 'get_form') or hasattr(self, 'helper'):
+                msg = 'Note: Actions are disabled. You cannot change a study with existing results. Please remove the results fist' \
+                      ' (<a href="{}">here</a>).'.format(reverse('trials', args=[self.study.slug]))
+            else:
+                msg = 'Note: Form is disabled. You cannot change a study with existing results. Please remove the results fist' \
+                      ' (<a href="{}">here</a>).'.format(reverse('trials', args=[self.study.slug]))
+            messages.info(request, mark_safe(msg))
+        return  super().get(request, *args, **kwargs)
+
+
+class DisableFormIfStudyActiveMixin(WarnUserIfStudyActiveMixin):
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['disable_actions'] = (self.study.status == models.StudyStatus.ACTIVE)
+        return data
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class=form_class)
+        if self.study.status == models.StudyStatus.ACTIVE:
+            for helper_input in form.helper.inputs:
+                helper_input.field_classes += '  disabled'
+                helper_input.flat_attrs += '  disabled=True'
+        return form
+
+    def get(self, request, *args, **kwargs):
+        if self.study.status == models.StudyStatus.ACTIVE:
+            if hasattr(self, 'helper'):
+                for helper_input in self.helper.inputs:
+                    helper_input.field_classes += '  disabled'
+                    helper_input.flat_attrs += '  disabled=True'
+        return  super().get(request, *args, **kwargs)
+
+
 class NextStepsMixin:
 
     def get(self, request, *args, **kwargs):
@@ -26,17 +64,6 @@ class NextStepsMixin:
             if url and self.request.path != url:
                 message = message + ' (<a href="{}">here</a>)'.format(url)
             messages.info(request, mark_safe(message))
-        return response
-
-
-class ProceedWarningMixin:
-
-    def get(self, request, *args, **kwargs):
-        response = super().get(request, *args, **kwargs)
-        if self.study.status == models.StudyStatus.ACTIVE:
-            message = 'Important: Making changes would delete already submitted trials. ' \
-                      'Save your results first if needed (<a href="{}">here</a>).'.format(self.study.results_url)
-            messages.warning(request, mark_safe(message))
         return response
 
 
@@ -195,7 +222,7 @@ class StudyInstructionsUpdateView(StudyObjectMixin, CheckStudyCreatorMixin, Succ
         ]
 
 
-class QuestionUpdateView(StudyMixin, CheckStudyCreatorMixin, ProceedWarningMixin, NextStepsMixin, generic.DetailView):
+class QuestionUpdateView(StudyMixin, CheckStudyCreatorMixin, DisableFormIfStudyActiveMixin, generic.DetailView):
     model = models.Study
     title = 'Questions'
     template_name = 'lrex_contrib/crispy_formset_form.html'

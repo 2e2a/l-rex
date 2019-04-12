@@ -81,7 +81,7 @@ class TrialObjectMixin(TrialMixin):
 
 
 class QuestionnaireListView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, study_views.NextStepsMixin,
-                            study_views.ProceedWarningMixin, generic.ListView):
+                            study_views.DisableFormIfStudyActiveMixin, generic.ListView):
     model = models.Questionnaire
     title = 'Questionnaires'
     page = 1
@@ -172,7 +172,7 @@ class QuestionnaireDetailView(QuestionnaireObjectMixin, study_views.CheckStudyCr
 
 
 class QuestionnaireGenerateView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin,
-                                study_views.ProceedWarningMixin, generic.TemplateView):
+                                study_views.DisableFormIfStudyActiveMixin, generic.TemplateView):
     title = 'Generate questionnaires'
     template_name = 'lrex_contrib/crispy_formset_form.html'
     formset = None
@@ -261,7 +261,7 @@ class QuestionnaireBlockInstructionsUpdateView(study_views.StudyMixin, study_vie
 
 
 class QuestionnaireUploadView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin,
-                              study_views.ProceedWarningMixin, generic.FormView):
+                              study_views.DisableFormIfStudyActiveMixin, generic.FormView,):
     title = 'Upload custom questionnaires'
     form_class = forms.UploadQuestionnaireForm
     template_name = 'lrex_contrib/crispy_form.html'

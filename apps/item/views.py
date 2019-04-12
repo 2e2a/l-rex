@@ -12,6 +12,7 @@ from django.views import generic
 from apps.contrib import views as contrib_views
 from apps.contrib import csv as contrib_csv
 from apps.experiment import views as experiment_views
+from apps.study import models as study_models
 from apps.study import views as study_views
 
 from . import forms
@@ -67,7 +68,7 @@ class ItemsValidateMixin:
 
 
 class ItemListView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin, study_views.NextStepsMixin,
-                   ItemsValidateMixin, generic.ListView):
+                   study_views.DisableFormIfStudyActiveMixin, ItemsValidateMixin, generic.ListView):
     model = models.Item
     title = 'Items'
     paginate_by = 16
@@ -97,7 +98,8 @@ class ItemListView(experiment_views.ExperimentMixin, study_views.CheckStudyCreat
         ]
 
 
-class TextItemCreateView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin, generic.CreateView):
+class TextItemCreateView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin,
+                         study_views.DisableFormIfStudyActiveMixin, generic.CreateView):
     model = models.TextItem
     title = 'Add item'
     template_name = 'lrex_contrib/crispy_form.html'
@@ -124,7 +126,8 @@ class TextItemCreateView(experiment_views.ExperimentMixin, study_views.CheckStud
         ]
 
 
-class TextItemUpdateView(SuccessMessageMixin, ItemObjectMixin, study_views.CheckStudyCreatorMixin, generic.UpdateView):
+class TextItemUpdateView(SuccessMessageMixin, ItemObjectMixin, study_views.CheckStudyCreatorMixin,
+                         study_views.DisableFormIfStudyActiveMixin, generic.UpdateView):
     model = models.TextItem
     title = 'Edit item'
     template_name = 'lrex_contrib/crispy_form.html'
@@ -146,7 +149,8 @@ class TextItemUpdateView(SuccessMessageMixin, ItemObjectMixin, study_views.Check
         ]
 
 
-class AudioLinkItemCreateView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin, generic.CreateView):
+class AudioLinkItemCreateView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin,
+                              study_views.DisableFormIfStudyActiveMixin, generic.CreateView):
     model = models.AudioLinkItem
     title = 'Add Item'
     template_name = 'lrex_contrib/crispy_form.html'
@@ -173,7 +177,8 @@ class AudioLinkItemCreateView(experiment_views.ExperimentMixin, study_views.Chec
         ]
 
 
-class AudioLinkItemUpdateView(ItemObjectMixin, study_views.CheckStudyCreatorMixin, SuccessMessageMixin, generic.UpdateView):
+class AudioLinkItemUpdateView(ItemObjectMixin, study_views.CheckStudyCreatorMixin, SuccessMessageMixin,
+                              study_views.DisableFormIfStudyActiveMixin, generic.UpdateView):
     model = models.AudioLinkItem
     title = 'Edit Item'
     template_name = 'lrex_contrib/crispy_form.html'
@@ -195,13 +200,9 @@ class AudioLinkItemUpdateView(ItemObjectMixin, study_views.CheckStudyCreatorMixi
         ]
 
 
-class ItemDeleteView(ItemObjectMixin, study_views.CheckStudyCreatorMixin, study_views.ProceedWarningMixin, contrib_views.DefaultDeleteView):
+class ItemDeleteView(ItemObjectMixin, study_views.CheckStudyCreatorMixin, study_views.DisableFormIfStudyActiveMixin,
+                     contrib_views.DefaultDeleteView):
     model = models.Item
-
-    def delete(self, *args, **kwargs):
-        response = super().delete(*args, **kwargs)
-        # TODO: Confirm with result download
-        return response
 
     def get_success_url(self):
         return reverse('items', args=[self.experiment.slug])
@@ -219,8 +220,8 @@ class ItemDeleteView(ItemObjectMixin, study_views.CheckStudyCreatorMixin, study_
         ]
 
 
-class ItemPregenerateView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin,
-                          study_views.ProceedWarningMixin, SuccessMessageMixin, generic.FormView):
+class ItemPregenerateView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin, SuccessMessageMixin,
+                          study_views.DisableFormIfStudyActiveMixin, generic.FormView):
     title = 'Pregenerate items'
     form_class = forms.PregenerateItemsForm
     template_name = 'lrex_contrib/crispy_form.html'
@@ -265,12 +266,8 @@ class ItemPregenerateView(experiment_views.ExperimentMixin, study_views.CheckStu
         ]
 
 
-class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin,
-                     study_views.ProceedWarningMixin, ItemsValidateMixin, generic.FormView):
-    # TODO: Update Items, if changes delete lists + questionnaires + show info
-    # TODO: Consider implementing ModelForm Confirm view rendering form.data
-    # TODO: Show wargning to download results
-    # TODO: User could delete results before, or try confim view first
+class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin, ItemsValidateMixin,
+                     study_views.DisableFormIfStudyActiveMixin, generic.FormView):
     title = 'Items'
     form_class = forms.UploadItemsForm
     template_name = 'lrex_contrib/crispy_form.html'
@@ -288,10 +285,11 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
         return kwargs
 
     def form_valid(self, form):
-        result =  super().form_valid(form)
-        models.Item.objects.filter(experiment=self.experiment).delete()
+        result = super().form_valid(form)
 
-        file = form.cleaned_data['file']
+        new_items = []
+        items_to_delete = list(models.Item.objects.filter(experiment=self.experiment).all())
+
         num_col = form.cleaned_data['number_column'] - 1
         cond_col = form.cleaned_data['condition_column'] - 1
         text_col = form.cleaned_data['text_column'] - 1
@@ -306,7 +304,7 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
         for row in reader:
             item = None
             if self.study.has_text_items:
-                item = models.TextItem.objects.create(
+                item, created = models.TextItem.objects.get_or_create(
                     number=row[num_col],
                     condition=row[cond_col],
                     text=row[text_col],
@@ -314,13 +312,19 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
                     block=row[block_col] if block_col else 1,
                 )
             elif self.study.has_audiolink_items:
-                item = models.AudioLinkItem.objects.create(
+                item, created = models.AudioLinkItem.objects.get_or_create(
                     number=row[num_col],
                     condition=row[cond_col],
                     url=row[text_col],
                     experiment=self.experiment,
                     block=row[block_col] if block_col else 1,
                 )
+
+            if created:
+                new_items.append(item)
+            else:
+                items_to_delete.remove(item)
+
             create_item_questions = False
             for question in self.study.questions:
                 if form.cleaned_data['question_{}_question_column'.format(question.number)] > 0:
@@ -332,19 +336,27 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
                     if question_col > 0:
                         scale_col = form.cleaned_data['question_{}_scale_column'.format(question.number)] - 1
                         legend_col = form.cleaned_data['question_{}_legend_column'.format(question.number)] - 1
-                        models.ItemQuestion.objects.create(
+                        models.ItemQuestion.objects.get_or_create(
                             item=item,
                             question=row[question_col],
                             scale_labels=row[scale_col] if scale_col>0 else None,
                             legend=row[legend_col] if legend_col>0 else None,
                         )
                     else:
-                        models.ItemQuestion.objects.create(
+                        models.ItemQuestion.objects.get_or_create(
                             item=item,
                             question=question,
                             scale_labels=None,
                             legend=None,
                         )
+
+        if new_items or items_to_delete:
+            # TODO: remove questionnairs and list of this exp
+            msg = 'Note: Items have changed. Please generate new lists and questionnaires.'
+            messages.info(self.request, msg)
+
+        for item in items_to_delete:
+            item.delete()
 
         messages.success(self.request, 'Items uploaded')
         self.validate_items()
@@ -366,14 +378,13 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
 
 
 class ItemDeleteAllView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin,
-                        study_views.ProceedWarningMixin, generic.TemplateView):
+                        study_views.DisableFormIfStudyActiveMixin, generic.TemplateView):
     title = 'Confirm Delete'
     template_name = 'lrex_contrib/confirm_delete.html'
     message =  'Delete all items?'
 
     def post(self, request, *args, **kwargs):
         models.Item.objects.filter(experiment=self.experiment).delete()
-        # TODO: confirm result reletion
         messages.success(self.request, 'All items deleted')
         return redirect(self.get_success_url())
 
@@ -393,7 +404,8 @@ class ItemDeleteAllView(experiment_views.ExperimentMixin, study_views.CheckStudy
 
 
 class ItemQuestionsUpdateView(ItemMixin, study_views.CheckStudyCreatorMixin, study_views.NextStepsMixin,
-                              generic.TemplateView):
+                              study_views.DisableFormIfStudyActiveMixin, generic.TemplateView):
+    # TODO: show hint if no questions defined
     title = 'Customize item questions'
     template_name = 'lrex_contrib/crispy_formset_form.html'
     formset = None
@@ -446,7 +458,7 @@ class ItemQuestionsUpdateView(ItemMixin, study_views.CheckStudyCreatorMixin, stu
 
 
 class ItemListListView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin, study_views.NextStepsMixin,
-                       study_views.ProceedWarningMixin, generic.ListView):
+                       study_views.DisableFormIfStudyActiveMixin, generic.ListView):
     model = models.ItemList
     title = 'Item lists'
 
@@ -479,7 +491,7 @@ class ItemListListView(experiment_views.ExperimentMixin, study_views.CheckStudyC
 
 
 class ItemListUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin,
-                     study_views.ProceedWarningMixin, generic.FormView):
+                         study_views.DisableFormIfStudyActiveMixin, generic.FormView):
     title = 'Upload custom item lists'
     form_class = forms.UploadItemListForm
     template_name = 'lrex_contrib/crispy_form.html'
