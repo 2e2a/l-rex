@@ -162,7 +162,8 @@ class StudyDetailView(StudyObjectMixin, CheckStudyCreatorMixin, NextStepsMixin, 
         data = super().get_context_data(**kwargs)
         data['allow_publish'] = self.study.is_allowed_publish
         data['trial_count'] = trial_models.Trial.objects.filter(questionnaire__study=self.study).count()
-        data['experiments_ready'] = data['experiments_draft'] = []
+        data['experiments_ready'] = []
+        data['experiments_draft'] = []
         for experiment in self.study.experiments:
             data['experiments_ready' if experiment.is_complete else 'experiments_draft'].append(experiment)
         return data
