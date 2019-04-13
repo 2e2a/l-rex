@@ -206,7 +206,8 @@ class StudyDeleteView(StudyObjectMixin, CheckStudyCreatorMixin, contib_views.Def
         return reverse('studies')
 
 
-class StudyInstructionsUpdateView(StudyObjectMixin, CheckStudyCreatorMixin, SuccessMessageMixin, generic.UpdateView):
+class StudyInstructionsUpdateView(StudyObjectMixin, CheckStudyCreatorMixin, SuccessMessageMixin,
+                                  DisableFormIfStudyActiveMixin, generic.UpdateView):
     model = models.Study
     title ='Edit study instructions'
     template_name = 'lrex_contrib/crispy_form.html'
