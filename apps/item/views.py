@@ -478,7 +478,7 @@ class ItemListListView(experiment_views.ExperimentMixin, study_views.CheckStudyC
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        data['allow_actions'] = True  # TODO: check items valid
+        data['allow_actions'] = self.experiment.items_validated
         return data
 
     @property

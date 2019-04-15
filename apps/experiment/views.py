@@ -94,7 +94,7 @@ class ExperimentDetailView(ExperimentObjectMixin, study_views.CheckStudyCreatorM
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        data['items_validated'] = True  # TODO
+        data['items_validated'] = self.experiment.items_validated
         return data
 
     @property

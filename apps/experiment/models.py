@@ -298,8 +298,6 @@ class Experiment(models.Model):
 
     def next_steps(self):
         next_steps = []
-        if self.is_complete:
-            return next_steps
         if not self.items:
             self._append_step_info(next_steps, ExperimentSteps.STEP_EXP_ITEMS_CREATE)
         if self.items and not self.items_validated:
