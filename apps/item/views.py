@@ -400,7 +400,6 @@ class ItemDeleteAllView(experiment_views.ExperimentMixin, study_views.CheckStudy
 
 class ItemQuestionsUpdateView(ItemMixin, study_views.CheckStudyCreatorMixin, study_views.NextStepsMixin,
                               study_views.DisableFormIfStudyActiveMixin, generic.TemplateView):
-    # TODO: show hint if no questions defined
     title = 'Customize item questions'
     template_name = 'lrex_contrib/crispy_formset_form.html'
     formset = None
@@ -412,6 +411,10 @@ class ItemQuestionsUpdateView(ItemMixin, study_views.CheckStudyCreatorMixin, stu
             queryset=models.ItemQuestion.objects.filter(item=self.item)
         )
         forms.initialize_with_questions(self.formset, self.study.questions)
+        if n_questions == 0:
+            msg = 'Note: If you want to use per item question customization, please define the study question first ' \
+                  '(<a href="{}">here</a>)'.format(reverse('study-questions', args=[self.study.slug]))
+            messages.info(self.request, mark_safe(msg))
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
