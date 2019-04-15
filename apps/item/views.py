@@ -344,13 +344,6 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
                             scale_labels=row[scale_col] if scale_col>0 else None,
                             legend=row[legend_col] if legend_col>0 else None,
                         )
-                    else:
-                        models.ItemQuestion.objects.get_or_create(
-                            item=item,
-                            question=question,
-                            scale_labels=None,
-                            legend=None,
-                        )
 
         if new_items or items_to_delete:
             # TODO: remove questionnairs and list of this exp

@@ -240,17 +240,22 @@ def ratingformset_factory(n_questions=1):
 
 
 def customize_to_questions(ratingformset, questions, item_questions):
+
+    def _get_item_question(num, item_questions):
+        for item_question in item_questions:
+            if item_question.number == num:
+                return item_question
+
     for question, form in zip(questions, ratingformset):
+        item_question = _get_item_question(question.number, item_questions)
         form.fields['question'].initial = question.number
         scale_value = form.fields.get('scale_value')
         scale_value.queryset = scale_value.queryset.filter(question=question)
-        scale_value.label = \
-            item_questions[question.number].question if item_questions else question.question
-        scale_value.help_text = \
-            item_questions[question.number].legend if item_questions and item_questions[question.number].legend else question.legend
-        if item_questions and item_questions[question.number].scale_labels:
+        scale_value.label = item_question.question if item_question else question.question
+        scale_value.help_text = item_question.legend if item_question and item_question.legend else question.legend
+        if item_question and item_question.scale_labels:
             custom_choices = []
-            for (pk, _ ), custom_label in zip(scale_value.choices, item_questions[question.number].scale_labels.split(',')):
+            for (pk, _ ), custom_label in zip(scale_value.choices, item_question.scale_labels.split(',')):
                 custom_choices.append((pk, custom_label))
             scale_value.choices = custom_choices
 
