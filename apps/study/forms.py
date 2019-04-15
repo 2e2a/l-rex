@@ -41,7 +41,6 @@ class StudyInstructionsForm(crispy_forms.CrispyModelForm):
 
 
 class QuestionForm(crispy_forms.CrispyModelForm):
-    # TODO: Show hint if item questions defined
     scale_labels = forms.CharField(
         max_length=200,
         required=True,

@@ -177,6 +177,7 @@ class StudyDetailView(StudyObjectMixin, CheckStudyCreatorMixin, NextStepsMixin, 
 
 
 class StudyUpdateView(StudyObjectMixin, CheckStudyCreatorMixin, SuccessMessageMixin, generic.UpdateView):
+    # TODO: disallow changing of title and item-type
     model = models.Study
     title = 'Edit study'
     template_name = 'lrex_contrib/crispy_form.html'
@@ -242,6 +243,11 @@ class QuestionUpdateView(StudyMixin, CheckStudyCreatorMixin, DisableFormIfStudyA
         forms.initialize_with_questions(self.formset, self.study.questions)
         return super().get(request, *args, **kwargs)
 
+    def _invalidate_experiment_items(self):
+        for experiment in self.study.experiments:
+            experiment.items_validated = False
+            experiment.save()
+
     def post(self, request, *args, **kwargs):
         self.formset = forms.question_formset_factory(self.n_questions)(request.POST, request.FILES)
         if self.formset.is_valid():
@@ -250,14 +256,23 @@ class QuestionUpdateView(StudyMixin, CheckStudyCreatorMixin, DisableFormIfStudyA
                 instance.study = self.study
                 instance.number = i
                 instance.save()
-                instance.scalevalue_set.all().delete()
+                scale_values_new = []
+                scale_values_old = list(instance.scalevalue_set.all())
                 for j, scale_label in enumerate(form.cleaned_data['scale_labels'].split(',')):
                     if scale_label:
-                        models.ScaleValue.objects.create(
+                        scale_value, created = models.ScaleValue.objects.get_or_create(
                             number=j,
                             question=instance,
                             label=scale_label,
                         )
+                        if created:
+                            scale_values_new.append(scale_value)
+                        else:
+                            scale_values_old.remove(scale_value)
+                if scale_values_old or scale_values_new and self.study.has_item_questions:
+                    self._invalidate_experiment_items()
+                for scale_value in scale_values_old:
+                    scale_value.delete()
             extra = len(self.formset.forms) - self.n_questions
             if 'submit' in request.POST:
                 messages.success(request, 'Questions saved.')
@@ -271,6 +286,8 @@ class QuestionUpdateView(StudyMixin, CheckStudyCreatorMixin, DisableFormIfStudyA
                     extra -= 1
                 elif self.n_questions > 0:
                     self.study.question_set.last().delete()
+                    if self.study.has_item_questions:
+                        self._invalidate_experiment_items()
                     self.n_questions -= 1
                 self.formset = forms.question_formset_factory(self.n_questions, extra)(
                     queryset=models.Question.objects.filter(study=self.study)

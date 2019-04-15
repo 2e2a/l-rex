@@ -153,6 +153,15 @@ class Study(models.Model):
     def is_multi_question(self):
         return len(self.questions) > 1
 
+    @cached_property
+    def has_item_questions(self):
+        from apps.item.models import Item, ItemQuestion
+        try:
+            experiment_items = Item.objects.filter(experiment__in=self.experiments).all()
+            return ItemQuestion.objects.filter(item__in=experiment_items).exists()
+        except Item.DoesNotExist:
+            return False
+
     @property
     def status(self):
         from apps.trial.models import Trial
