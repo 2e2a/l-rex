@@ -500,7 +500,6 @@ class ItemListUploadView(experiment_views.ExperimentMixin, study_views.CheckStud
         return kwargs
 
     def form_valid(self, form):
-        # TODO: Fix all uploads
         result =  super().form_valid(form)
         self.experiment.itemlist_set.all().delete()
         file = form.cleaned_data['file']
@@ -522,6 +521,8 @@ class ItemListUploadView(experiment_views.ExperimentMixin, study_views.CheckStud
         items = []
         list_num_last = None
         for row in reader:
+            if not row:
+                continue
             list_num = row[list_col]
             if list_num_last and list_num_last != list_num:
                 itemlist = models.ItemList.objects.create(experiment=self.experiment)

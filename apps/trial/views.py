@@ -292,6 +292,8 @@ class QuestionnaireUploadView(study_views.StudyMixin, study_views.CheckStudyCrea
         items = []
         questionnaire_num_last = None
         for row in reader:
+            if not row:
+                continue
             questionnaire_num = row[questionnaire_col]
             experiment_title = row[experiment_col]
             if questionnaire_num_last and questionnaire_num_last != questionnaire_num:
