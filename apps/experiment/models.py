@@ -119,6 +119,17 @@ class Experiment(models.Model):
                 msg = 'Item "{}" was not expected. Check whether item number/condition is correct.'.format(item)
                 raise AssertionError(msg)
 
+            questions = self.study.questions
+            for item_question in item.itemquestion_set.all():
+                if item_question.number >= len(questions):
+                    raise AssertionError('For item question validation the study question(s) must be defined first.')
+                if item_question.scale_labels and \
+                        len(item_question.scale_labels.split(',')) !=  \
+                        questions[item_question.number].scalevalue_set.count():
+                    msg = 'Scale of the item question "{}" does not match the study question {} ' \
+                          'scale.'.format(item, item_question.number)
+                    raise AssertionError(msg)
+
         if self.study.has_text_items:
             items_by_text = groupby(items, lambda x: x.textitem.text)
             for _, items_with_same_text in items_by_text:
