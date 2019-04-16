@@ -267,8 +267,7 @@ class QuestionUpdateView(StudyMixin, CheckStudyCreatorMixin, DisableFormIfStudyA
 
     def _invalidate_experiment_items(self):
         for experiment in self.study.experiments:
-            experiment.items_validated = False
-            experiment.save()
+            experiment.set_items_validated(False)
 
     def post(self, request, *args, **kwargs):
         self.formset = forms.question_formset_factory(self.n_questions)(request.POST, request.FILES)

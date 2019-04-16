@@ -239,6 +239,10 @@ class Study(models.Model):
             trial_count.update({questionnaire: trial_count_by_id.get(questionnaire.id, 0)})
         return trial_count
 
+    @cached_property
+    def has_questionnaires(self):
+        return self.questionnaire_set.exists()
+
     @property
     def next_questionnaire(self):
         trial_count = self.questionnaire_trial_count
@@ -300,6 +304,9 @@ class Study(models.Model):
             last_questionnaire.generate_items(experiments)
         if self.randomization_reqiured:
             self._generate_questionnaire_permutations(experiments)
+
+    def delete_questionnaires(self):
+        self.questionnaire_set.all().delete()
 
     def rating_proofs_csv(self, fileobj):
         from apps.trial.models import Trial

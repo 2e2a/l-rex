@@ -109,6 +109,11 @@ class TextItemCreateView(experiment_views.ExperimentMixin, study_views.CheckStud
         form.instance.experiment = self.experiment
         result = super().form_valid(form)
         messages.success(self.request, 'Item created')
+        if self.experiment.is_complete:
+            self.experiment.set_items_validated(False)
+            self.experiment.delete_lists()
+            msg = 'Note: Items have changed. Deleting old lists and questionnaires.'
+            messages.info(self.request, msg)
         return result
 
     def get_success_url(self):
@@ -133,6 +138,11 @@ class TextItemUpdateView(SuccessMessageMixin, ItemObjectMixin, study_views.Check
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.TextItemForm
     success_message = 'Item successfully updated.'
+
+    def form_valid(self, form):
+        result =  super().form_valid(form)
+        self.experiment.set_items_validated(False)
+        return result
 
     def get_success_url(self):
         return reverse('items', args=[self.experiment.slug])
@@ -185,6 +195,11 @@ class AudioLinkItemUpdateView(ItemObjectMixin, study_views.CheckStudyCreatorMixi
     form_class = forms.AudioLinkItemForm
     success_message = 'Item successfully updated.'
 
+    def form_valid(self, form):
+        result =  super().form_valid(form)
+        self.experiment.set_items_validated(False)
+        return result
+
     def get_success_url(self):
         return reverse('items', args=[self.experiment.slug])
 
@@ -203,6 +218,12 @@ class AudioLinkItemUpdateView(ItemObjectMixin, study_views.CheckStudyCreatorMixi
 class ItemDeleteView(ItemObjectMixin, study_views.CheckStudyCreatorMixin, study_views.DisableFormIfStudyActiveMixin,
                      contrib_views.DefaultDeleteView):
     model = models.Item
+
+    def delete(self, *args, **kwargs):
+        result = super().delete(*args, **kwargs)
+        self.experiment.set_items_validated(False)
+        self.experiment.delete_lists()
+        return result
 
     def get_success_url(self):
         return reverse('items', args=[self.experiment.slug])
@@ -248,6 +269,8 @@ class ItemPregenerateView(experiment_views.ExperimentMixin, study_views.CheckStu
         n_items = form.cleaned_data['num_items']
         n_conditions = form.cleaned_data['num_conditions']
         models.Item.objects.filter(experiment=self.experiment).delete()
+        self.experiment.set_items_validated(False)
+        self.experiment.delete_lists()
         self._pregenerate_items(n_items, n_conditions)
         return result
 
@@ -344,16 +367,13 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
                             scale_labels=row[scale_col] if scale_col>0 else None,
                             legend=row[legend_col] if legend_col>0 else None,
                         )
-
-        if new_items or items_to_delete:
-            # TODO: remove questionnairs and list of this exp
-            msg = 'Note: Items have changed. Please generate new lists and questionnaires.'
+        messages.success(self.request, 'Items uploaded')
+        if new_items or items_to_delete and self.experiment.is_complete:
+            self.experiment.delete_lists()
+            msg = 'Note: Items have changed. Deleting old lists and questionnaires.'
             messages.info(self.request, msg)
-
         for item in items_to_delete:
             item.delete()
-
-        messages.success(self.request, 'Items uploaded')
         self.validate_items()
         return result
 
@@ -380,6 +400,8 @@ class ItemDeleteAllView(experiment_views.ExperimentMixin, study_views.CheckStudy
 
     def post(self, request, *args, **kwargs):
         models.Item.objects.filter(experiment=self.experiment).delete()
+        self.experiment.set_items_validated(False)
+        self.experiment.delete_lists()
         messages.success(self.request, 'All items deleted')
         return redirect(self.get_success_url())
 
@@ -468,6 +490,9 @@ class ItemListListView(experiment_views.ExperimentMixin, study_views.CheckStudyC
         elif action and action == 'generate_single':
             self.experiment.compute_item_lists(distribute=False)
         messages.success(self.request, 'Item lists generated.')
+        if self.study.has_questionnaires:
+            self.study.delete_questionnaires()
+            messages.info(self.request, 'Old questionnaires deleted.')
         return redirect('itemlists', experiment_slug=self.experiment.slug)
 
     def get_queryset(self):

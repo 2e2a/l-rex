@@ -80,6 +80,14 @@ class Experiment(models.Model):
     def is_complete(self):
         return self.itemlist_set.exists()
 
+    def set_items_validated(self, valid):
+        self.items_validated = valid
+        self.save()
+
+    def delete_lists(self):
+        self.study.delete_questionnaires()
+        self.itemlist_set.all().delete()
+
     def __str__(self):
         return self.title
 
@@ -88,8 +96,9 @@ class Experiment(models.Model):
 
     def validate_items(self):
         warnings = []
-
         conditions = []
+        self.set_items_validated(False)
+
         items = self.item_set.all().order_by('number', 'condition')
         if len(items) == 0:
             raise AssertionError('No items.')
