@@ -441,7 +441,8 @@ class ItemQuestionsUpdateView(ItemMixin, study_views.CheckStudyCreatorMixin, stu
                     return redirect('items', experiment_slug=self.experiment.slug)
         else: # reset
             self.item.itemquestion_set.all().delete()
-        return self.get(request, *args, **kwargs)
+            return self.get(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
     @property
     def breadcrumbs(self):
