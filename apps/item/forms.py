@@ -156,17 +156,24 @@ class ItemQuestionForm(crispy_forms.OptionalLabelMixin, forms.ModelForm):
         fields = ['question', 'scale_labels', 'legend']
 
 
-def itemquestion_factory(n_questions):
+def itemquestion_factory(n_questions, n_item_questions=0):
+    extra = (n_questions - n_item_questions) if n_questions > n_item_questions else 0
     return modelformset_factory(
         models.ItemQuestion,
         form=ItemQuestionForm,
-        min_num=n_questions,
         max_num=n_questions,
-        extra=0,
+        extra=extra,
     )
 
 def initialize_with_questions(itemquestion_formset, questions):
-    for question, form in zip(questions, itemquestion_formset):
+
+    def get_question(num, questions):
+        for question in questions:
+            if question.number == num:
+                return question
+
+    for i, form in enumerate(itemquestion_formset):
+        question = get_question(i, questions)
         if not form['question'].initial:
             form['question'].initial = question.question
             scale_labels = [scale_value.label for scale_value in question.scalevalue_set.all()]

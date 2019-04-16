@@ -407,8 +407,9 @@ class ItemQuestionsUpdateView(ItemMixin, study_views.CheckStudyCreatorMixin, stu
 
     def get(self, request, *args, **kwargs):
         n_questions = len(self.study.questions)
-        self.formset = forms.itemquestion_factory(n_questions)(
-            queryset=models.ItemQuestion.objects.filter(item=self.item)
+        item_questions_q =models.ItemQuestion.objects.filter(item=self.item)
+        self.formset = forms.itemquestion_factory(n_questions, n_item_questions=item_questions_q.count())(
+            queryset=item_questions_q
         )
         forms.initialize_with_questions(self.formset, self.study.questions)
         if n_questions == 0:
@@ -440,8 +441,7 @@ class ItemQuestionsUpdateView(ItemMixin, study_views.CheckStudyCreatorMixin, stu
                     return redirect('items', experiment_slug=self.experiment.slug)
         else: # reset
             self.item.itemquestion_set.all().delete()
-        forms.initialize_with_questions(self.formset, self.study.questions)
-        return super().get(request, *args, **kwargs)
+        return self.get(request, *args, **kwargs)
 
     @property
     def breadcrumbs(self):
