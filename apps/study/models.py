@@ -174,16 +174,20 @@ class Study(models.Model):
             return StudyStatus.DRAFT
         if self.end_date and self.end_date < timezone.now().date():
             return StudyStatus.FINISHED
-        trial_count = Trial.objects.filter(questionnaire__study=self).count()
-        if self.trial_limit  and self.trial_limit <= trial_count:
+        if self.trial_limit  and self.trial_limit <= self.trial_count:
             return StudyStatus.FINISHED
-        if trial_count > 0:
+        if self.trial_count > 0:
             return StudyStatus.ACTIVE
         return StudyStatus.STARTED
 
     @cached_property
     def is_active(self):
-        return self.status == StudyStatus.ACTIVE
+        return self.is_published or self.trial_count > 0
+
+    @cached_property
+    def trial_count(self):
+        from apps.trial.models import Trial
+        return Trial.objects.filter(questionnaire__study=self).count()
 
     @cached_property
     def is_rating_possible(self):

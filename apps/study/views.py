@@ -21,11 +21,15 @@ class WarnUserIfStudyActiveMixin:
     def get(self, request, *args, **kwargs):
         if self.study.is_active:
             if hasattr(self, 'form_valid') or hasattr(self, 'helper'):
-                msg = 'Note: Form is disabled. You cannot change a study with existing results. Please save and remove the results first' \
-                      ' (<a href="{}">here</a>).'.format(reverse('trials', args=[self.study.slug]))
+                msg = 'Note: Form is disabled.'
             else:
-                msg = 'Note: Actions are disabled. You cannot change a study with existing results. Please save and remove the results first' \
-                      ' (<a href="{}">here</a>).'.format(reverse('trials', args=[self.study.slug]))
+                msg = 'Note: Actions are disabled.'
+            msg = msg + 'You cannot change an active study. Please <a href="{}">unpublish</a> ' \
+                        'the study and save and <a href="{}">remove the results</a> first.'\
+                        .format(
+                            reverse('study', args=[self.study.slug]),
+                            reverse('trials', args=[self.study.slug])
+                        )
             messages.info(request, mark_safe(msg))
         return  super().get(request, *args, **kwargs)
 
@@ -161,7 +165,7 @@ class StudyDetailView(StudyObjectMixin, CheckStudyCreatorMixin, NextStepsMixin, 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         data['allow_publish'] = self.study.is_allowed_publish
-        data['trial_count'] = trial_models.Trial.objects.filter(questionnaire__study=self.study).count()
+        data['trial_count'] = self.study.trial_count
         data['experiments_ready'] = []
         data['experiments_draft'] = []
         for experiment in self.study.experiments:
@@ -185,8 +189,10 @@ class StudyUpdateView(StudyObjectMixin, CheckStudyCreatorMixin, SuccessMessageMi
 
     def get(self, request, *args, **kwargs):
         if self.study.is_active:
-            msg = 'Note: You cannot change the title of a study with existing results. Please save and remove the results first' \
-                  ' (<a href="{}">here</a>).'.format(reverse('trials', args=[self.study.slug]))
+            msg = 'Note: You cannot change the title of an active study. Please <a href="{}">unpublish</a> ' \
+                  'the study and save and <a href="{}">remove the results</a> first'.format(
+                    reverse('study', args=[self.study.slug]),
+                    reverse('trials', args=[self.study.slug]))
             messages.info(request, mark_safe(msg))
         if self.study.has_items:
             msg = 'Note: To change the "item type" setting you would need to remove old items first' \
