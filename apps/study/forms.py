@@ -22,6 +22,29 @@ class StudyForm(crispy_forms.CrispyModelForm):
             'trial_limit'
         ]
 
+    def __init__(self, *args, **kwargs):
+        self.disable_title = kwargs.pop('disable_title', False)
+        self.disable_itemtype = kwargs.pop('disable_itemtype', False)
+        super().__init__(*args, **kwargs)
+        if self.disable_title:
+            self.fields['title'].widget.attrs['readonly'] = True
+        if self.disable_itemtype:
+            self.fields['item_type'].widget.attrs['readonly'] = True
+
+    def clean_title(self):
+        if self.disable_title:
+            instance = getattr(self, 'instance', None)
+            return instance.title if instance and instance.pk else self.cleaned_data['title']
+        else:
+            return self.cleaned_data['title']
+
+    def clean_item_type(self):
+        if self.disable_itemtype:
+            instance = getattr(self, 'instance', None)
+            return instance.item_type if instance and instance.pk else self.cleaned_data['item_type']
+        else:
+            return self.cleaned_data['item_type']
+
 
 class StudyInstructionsForm(crispy_forms.CrispyModelForm):
 

@@ -154,6 +154,11 @@ class Study(models.Model):
         return len(self.questions) > 1
 
     @cached_property
+    def has_items(self):
+        from apps.item.models import Item
+        return Item.objects.filter(experiment__in=self.experiments).exists()
+
+    @cached_property
     def has_item_questions(self):
         from apps.item.models import Item, ItemQuestion
         try:

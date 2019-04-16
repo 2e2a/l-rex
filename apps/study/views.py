@@ -177,12 +177,28 @@ class StudyDetailView(StudyObjectMixin, CheckStudyCreatorMixin, NextStepsMixin, 
 
 
 class StudyUpdateView(StudyObjectMixin, CheckStudyCreatorMixin, SuccessMessageMixin, generic.UpdateView):
-    # TODO: disallow changing of title and item-type
     model = models.Study
     title = 'Edit study'
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.StudyForm
     success_message = 'Study successfully updated.'
+
+    def get(self, request, *args, **kwargs):
+        if self.study.is_active:
+            msg = 'Note: You cannot change the title of a study with existing results. Please save and remove the results first' \
+                  ' (<a href="{}">here</a>).'.format(reverse('trials', args=[self.study.slug]))
+            messages.info(request, mark_safe(msg))
+        if self.study.has_items:
+            msg = 'Note: To change the "item type" setting you would need to remove old items first' \
+                  ' (<a href="{}">here</a>).'.format(reverse('experiments', args=[self.study.slug]))
+            messages.info(request, mark_safe(msg))
+        return super().get(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['disable_title'] =  self.study.is_active
+        kwargs['disable_itemtype'] = self.study.has_items
+        return kwargs
 
     @property
     def breadcrumbs(self):
