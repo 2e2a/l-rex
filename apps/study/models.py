@@ -176,7 +176,11 @@ class Study(models.Model):
             return StudyStatus.ACTIVE
         return StudyStatus.STARTED
 
-    @property
+    @cached_property
+    def is_active(self):
+        return self.status == StudyStatus.ACTIVE
+
+    @cached_property
     def is_rating_possible(self):
         return self.status == StudyStatus.ACTIVE or self.status == StudyStatus.STARTED
 
