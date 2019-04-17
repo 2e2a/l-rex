@@ -12,10 +12,14 @@
             Unpublish
         </button>
         {% else %}
+        {% if allow_publish %}
         <button type="submit" name="action" value="publish"
                 class="btn btn-success btn-sm mx-1 {% if study.is_ready_for_publish %} disabled {% endif %}">
             Publish
         </button>
+        {% else %}
+        <a href="" class="btn btn-success btn-sm mx-1 disabled">Publish</a>
+        {% endif %}
         {% endif %}
     </form>
 </div>

@@ -211,11 +211,18 @@ class Study(models.Model):
 
     @cached_property
     def is_allowed_publish(self):
-        return self.questions and self.instructions and self.questionnaire_set.exists()
+        return self.questions and self.instructions and self.questionnaire_set.exists() and self.items_validated
 
     @cached_property
     def is_allowed_pseudo_randomization(self):
         return self.experiment_set.filter(is_filler=True).count() > 0
+
+    @cached_property
+    def items_validated(self):
+        for experiment in self.experiments:
+            if not experiment.items_validated:
+                return False
+        return True
 
     @cached_property
     def randomization_reqiured(self):
