@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'apps.item.apps.ItemConfig',
     'apps.trial.apps.TrialConfig',
 
+    'markdownx',
     'crispy_forms',
     'allauth',
     'allauth.account',

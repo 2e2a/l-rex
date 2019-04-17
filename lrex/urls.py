@@ -17,6 +17,7 @@ urlpatterns = [
     path('questionnaires/', include(trial_urls.urlpatterns_questionnaires)),
     path('accounts/', include(allauth_urls)),
     path('admin/', admin.site.urls),
+    path('markdownx/', include('markdownx.urls')),
     path('', include(home_urls))
 ]
 
