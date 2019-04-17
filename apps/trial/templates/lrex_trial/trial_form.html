@@ -5,7 +5,7 @@
 <div class="my-2 p-4 border bg-white">
     {% if study.is_rating_possible %}
     <p>
-        {{ study.instructions|linebreaks }}
+        {{ instructions_rich }}
     </p>
     {% crispy form form.helper %}
     {% elif study.status.name == 'DRAFT' %}

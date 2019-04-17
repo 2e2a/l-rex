@@ -1,9 +1,12 @@
 import csv
 from io import StringIO
+from markdownx.utils import markdownify
+
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.http import HttpResponse
 from django.shortcuts import redirect
+from django.utils.safestring import mark_safe
 from django.urls import reverse
 from django.views import generic
 
@@ -384,6 +387,11 @@ class TrialCreateView(study_views.StudyMixin, generic.CreateView):
         kwargs['study'] = self.study
         return kwargs
 
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['instructions_rich'] = mark_safe(markdownify(self.study.instructions))
+        return data
+
     def _trial_by_id(self, id):
         if id:
             try:
@@ -600,10 +608,12 @@ class RatingBlockInstructionsView(ProgressMixin, TrialMixin, generic.TemplateVie
 class RatingOutroView(TrialMixin, generic.TemplateView):
     template_name = 'lrex_trial/rating_outro.html'
 
-    def dispatch(self, *args, **kwargs):
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
         if self.study.generate_participation_code:
-            self.generated_rating_proof = self.trial.generate_rating_proof()
-        return super().dispatch(*args, **kwargs)
+            data['generated_rating_proof'] = self.trial.generate_rating_proof()
+        data['outro_rich'] = mark_safe(markdownify(self.study.outro))
+        return data
 
 
 class RatingTakenView(TrialMixin, generic.TemplateView):

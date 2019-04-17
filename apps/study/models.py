@@ -1,5 +1,6 @@
 import csv
 from itertools import groupby
+from markdownx.models import MarkdownxField
 
 from enum import Enum
 from django.conf import settings
@@ -58,7 +59,7 @@ class Study(models.Model):
         max_length=200,
         help_text='This password will be required to participate in the study.',
     )
-    instructions = models.TextField(
+    instructions = MarkdownxField(
         blank=True,
         null=True,
         max_length=5000,
@@ -73,7 +74,7 @@ class Study(models.Model):
         default=False,
         help_text='Generate a proof code for the subject participation.',
     )
-    outro = models.TextField(
+    outro = MarkdownxField(
         blank=True,
         null=True,
         max_length=5000,

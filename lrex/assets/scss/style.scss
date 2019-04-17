@@ -4,6 +4,15 @@ body {
     padding-top: 64px;
 }
 
+.nav>li>a {
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.nav-pills .nav-item .nav-link.active {
+    background-color: $secondary;
+}
+
 .icon {
     width: 24px;
     height: 24px;
@@ -20,3 +29,5 @@ body {
 .asteriskField {
     display: none;
 }
+
+
