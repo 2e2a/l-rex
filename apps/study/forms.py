@@ -47,6 +47,10 @@ class StudyForm(crispy_forms.CrispyModelForm):
 
 
 class StudyInstructionsForm(crispy_forms.CrispyModelForm):
+    optional_label_ignore_fields = [
+        'instructions',
+        'outro',
+    ]
 
     class Meta:
         model = models.Study
@@ -56,10 +60,12 @@ class StudyInstructionsForm(crispy_forms.CrispyModelForm):
         ]
 
     def __init__(self, *args, **kwargs):
-        kwargs['initial'].update({
-            'instructions': 'Please rate the following sentences on the scale.',
-            'outro': 'Thank you for participating!',
-        })
+        instance = kwargs.get('instance', None)
+        if instance and not instance.instructions:
+            kwargs['initial'].update({
+                'instructions': 'Please rate the following sentences on the scale.',
+                'outro': 'Thank you for participating!',
+            })
         super().__init__(*args, **kwargs)
 
 
