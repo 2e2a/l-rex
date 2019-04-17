@@ -200,7 +200,7 @@
     "pk": 3,
     "fields": {
         "study": 2,
-        "number": 0,
+        "number": 1,
         "question": "Does the sentence describe a plausible situation?",
         "legend": null
     }
