@@ -460,9 +460,10 @@ class TrialDeleteView(TrialObjectMixin, study_views.CheckStudyCreatorMixin, cont
 class ProgressMixin:
 
     def get_context_data(self, **kwargs):
+        num = kwargs['num']
+        count = kwargs['n_trial_items']
         data = super().get_context_data(**kwargs)
-        i = self.num + 1
-        count = len(self.trial.items)
+        i = num + 1
         data['progress_i'] =  i
         data['progress_count'] = count
         data['progress'] = i * 100 / (count + 1)
@@ -471,13 +472,20 @@ class ProgressMixin:
 
 class RatingCreateMixin(ProgressMixin):
 
+    def get_context_data(self, **kwargs):
+        kwargs.update(
+            {'n_trial_items': len(self.trial.items), 'num': self.num}
+        )
+        return super().get_context_data(**kwargs)
+        return super().get_context_data(**kwargs)
+
     def _redirect_to_correct_num(self, num):
         try:
             if self.trial.status == models.TrialStatus.FINISHED:
                 return reverse('rating-taken', args=[self.trial.slug])
-            rating = models.Rating.objects.filter(trial=self.trial, question=0).count()
-            if rating != num:
-                return reverse('rating-create', args=[self.trial.slug, rating])
+            n_ratings = models.Rating.objects.filter(trial=self.trial, question=0).count()
+            if n_ratings != num:
+                return reverse('rating-create', args=[self.trial.slug, n_ratings])
         except models.Rating.DoesNotExist:
             pass
         return None
@@ -588,21 +596,23 @@ class RatingsCreateView(RatingCreateMixin, TrialMixin, generic.TemplateView):
 class RatingBlockInstructionsView(ProgressMixin, TrialMixin, generic.TemplateView):
     template_name = 'lrex_trial/rating_block_instructions.html'
 
-    def dispatch(self, *args, **kwargs):
-        self.num = int(self.kwargs['num'])
-        self.questionnaire_item = models.QuestionnaireItem.objects.get(
-            questionnaire=self.trial.questionnaire,
-            number=self.num
+    def get_context_data(self, **kwargs):
+        kwargs.update(
+            {'n_trial_items': len(self.trial.items)}
         )
-        return super().dispatch(*args, **kwargs)
-
-    @property
-    def block_instructions(self):
+        num = self.kwargs['num']
+        data = super().get_context_data(**kwargs)
+        questionnaire_item = models.QuestionnaireItem.objects.get(
+            questionnaire=self.trial.questionnaire,
+            number=num
+        )
         questionnaire_block = models.QuestionnaireBlock.objects.get(
             study=self.study,
-            block=self.questionnaire_item.item.block
+            block=questionnaire_item.item.block
         )
-        return questionnaire_block.instructions
+        data['block_instructions_rich'] = mark_safe(markdownify(questionnaire_block.instructions))
+        data['trial'] = self.trial
+        return data
 
 
 class RatingOutroView(TrialMixin, generic.TemplateView):

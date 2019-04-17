@@ -1,5 +1,6 @@
 from collections import deque
 from itertools import groupby
+from markdownx.models import MarkdownxField
 import random
 import string
 import uuid
@@ -215,7 +216,7 @@ class Questionnaire(models.Model):
 
 class QuestionnaireBlock(models.Model):
     block = models.IntegerField()
-    instructions = models.TextField(
+    instructions = MarkdownxField(
         max_length=5000,
         help_text='These instructions will be presented to the participant before the experiment begins.',
         blank=True,

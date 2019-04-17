@@ -3,8 +3,9 @@
 {% block content %}
 <div class="my-2 p-4 border bg-white">
     <p>
-        {{ view.block_instructions|linebreaks }}
-        <a href="{% url 'rating-create' view.trial.slug view.num %}"
+        {{ block_instructions_rich }}
+
+        <a href="{% url 'rating-create' trial.slug num %}"
            class="btn btn-primary btn-sm mx-1">
             Continue
         </a>
