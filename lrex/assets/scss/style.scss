@@ -4,30 +4,31 @@ body {
     padding-top: 64px;
 }
 
-.nav-pills>li>a {
+.lrex .nav-pills>li>a {
     padding-top: 1px;
     padding-bottom: 1px;
 }
 
-.nav-pills .nav-item .nav-link.active {
+.lrex .nav-pills .nav-item .nav-link.active {
     background-color: $secondary;
 }
 
-.icon {
+.lrex .icon {
     width: 24px;
     height: 24px;
 }
 
-.form-inline {
+.lrex .asteriskField {
+    display: none;
+}
+
+
+.lrex .form-inline {
     display: inline;
 }
 
 .custom-shadow {
     box-shadow: 0 0.1rem 0.3rem rgba(0, 0, 0, 0.15) !important;
-}
-
-.asteriskField {
-    display: none;
 }
 
 
