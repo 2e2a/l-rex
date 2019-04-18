@@ -18,7 +18,7 @@ class News(models.Model):
     )
 
     class Meta:
-        ordering = ['date']
+        ordering = ['-date']
 
     def save(self, *args, **kwargs):
         new_slug = slugify_unique(self.title, News, self.id)
