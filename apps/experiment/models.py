@@ -119,7 +119,10 @@ class Experiment(models.Model):
             if self.study.has_text_items:
                 if not item.textitem.text:
                     raise AssertionError('Item {} has no text.'.format(item))
-            else:
+            elif self.study.has_markdown_items:
+                if not item.markdownitem.text:
+                    raise AssertionError('Item {} has no text.'.format(item))
+            elif self.study.has_audiolink_items:
                 if not item.audiolinkitem.url:
                     raise AssertionError('Item {} has no URL.'.format(item))
 
@@ -140,13 +143,16 @@ class Experiment(models.Model):
                           'scale.'.format(item, item_question.number)
                     raise AssertionError(msg)
 
-        if self.study.has_text_items:
-            items_by_text = groupby(items, lambda x: x.textitem.text)
+        if self.study.has_text_items or self.study.has_markdown_items:
+            if self.study.has_text_items:
+                items_by_text = groupby(items, lambda x: x.textitem.text)
+            else:
+                items_by_text = groupby(items, lambda x: x.markdownitem.text)
             for _, items_with_same_text in items_by_text:
                 items = list(items_with_same_text)
                 if len(items) > 1:
                     warnings.append('Items {} have the same text.'.format(','.join([str(item) for item in items])))
-        else:
+        elif self.study.has_audiolink_items:
             items_by_link = groupby(items, lambda x: x.audiolinkitem.url)
             for _, items_with_same_link in items_by_link:
                 items = list(items_with_same_link)

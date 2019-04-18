@@ -8,6 +8,8 @@
     <p>
         {{ view.questionnaire_item.item.textitem.text|linebreaks }}
     </p>
+    {% elif view.questionnaire_item.item.markdownitem %}
+    {{ view.questionnaire_item.item.markdownitem|markdownify_item }}
     {% else %}
     <div class="text-center my-2">
         <audio controls="controls" autoplay="autoplay">

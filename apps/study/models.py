@@ -42,16 +42,18 @@ class Study(models.Model):
     )
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     ITEM_TYPE_TXT = 'txt'
+    ITEM_TYPE_MARKDOWN = 'mkd'
     ITEM_TYPE_AUDIO_LINK = 'aul'
     ITEM_TYPE = (
-        (ITEM_TYPE_TXT, 'Text'),
-        (ITEM_TYPE_AUDIO_LINK, 'Audio Link'),
+        (ITEM_TYPE_TXT, 'Plain text'),
+        (ITEM_TYPE_MARKDOWN, 'Rich text with markdown'),
+        (ITEM_TYPE_AUDIO_LINK, 'Audio link'),
     )
     item_type = models.CharField(
         max_length=3,
         choices=ITEM_TYPE,
         default=ITEM_TYPE_TXT,
-        help_text='The items can be plain text or links to audio files (self-hosted).',
+        help_text='The items can be plain text or markdown rich text or links to audio files (self-hosted).',
     )
     password = models.CharField(
         blank=True,
@@ -130,6 +132,10 @@ class Study(models.Model):
     @cached_property
     def has_text_items(self):
         return self.item_type == self.ITEM_TYPE_TXT
+
+    @cached_property
+    def has_markdown_items(self):
+        return self.item_type == self.ITEM_TYPE_MARKDOWN
 
     @cached_property
     def has_audiolink_items(self):

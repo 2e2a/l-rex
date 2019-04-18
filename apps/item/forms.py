@@ -11,20 +11,27 @@ from apps.contrib import forms as crispy_forms
 from . import models
 
 
-class TextItemForm(crispy_forms.CrispyModelForm):
+class ItemFormMixin:
+
+    def clean_condition(self):
+        return self.cleaned_data['condition'].strip()
+
+
+class TextItemForm(ItemFormMixin, crispy_forms.CrispyModelForm):
 
     class Meta:
         model = models.TextItem
         fields = ['number', 'condition', 'text', 'block']
 
-    def clean_condition(self):
-        return self.cleaned_data['condition'].strip()
 
-    def clean_text(self):
-        return self.cleaned_data['text'].strip()
+class MarkdownItemForm(ItemFormMixin, crispy_forms.CrispyModelForm):
+
+    class Meta:
+        model = models.MarkdownItem
+        fields = ['number', 'condition', 'text', 'block']
 
 
-class AudioLinkItemForm(crispy_forms.CrispyModelForm):
+class AudioLinkItemForm(ItemFormMixin, crispy_forms.CrispyModelForm):
 
     class Meta:
         model = models.AudioLinkItem

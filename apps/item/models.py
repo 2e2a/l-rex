@@ -1,3 +1,4 @@
+from markdownx.models import MarkdownxField
 from django.db import models
 from django.urls import reverse
 
@@ -47,6 +48,16 @@ class TextItem(Item):
 
     def get_absolute_url(self):
         return reverse('text-item-update', args=[self.experiment.study.slug, self.experiment.slug, self.pk])
+
+
+class MarkdownItem(Item):
+    text = MarkdownxField(
+        max_length=1024,
+        help_text='Content of the item with markdown formatting (character limit: 1024)',
+    )
+
+    def get_absolute_url(self):
+        return reverse('markdown-item-update', args=[self.experiment.study.slug, self.experiment.slug, self.pk])
 
 
 class AudioLinkItem(Item):

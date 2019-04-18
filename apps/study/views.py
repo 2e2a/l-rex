@@ -9,7 +9,6 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.views import generic
 
-from apps.trial import models as trial_models
 from apps.contrib import views as contib_views
 
 from . import models

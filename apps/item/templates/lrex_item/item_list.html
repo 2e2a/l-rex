@@ -1,4 +1,5 @@
 {% extends "lrex_home/base.html" %}
+{% load item_tags %}
 
 {% block content %}
 <div class="text-center mb-2">
@@ -10,11 +11,7 @@
             Validate
         </button>
     </form>
-    <a
-        href="{% if study.has_text_items %}{% url 'text-item-create' experiment.slug %}{% else %}{% url 'audio-link-item-create' experiment.slug %}{% endif %}"
-        class="btn btn-secondary btn-sm mx-1">
-        Add item
-    </a>
+    <a href="{% url item_add_url_name experiment.slug %}" class="btn btn-secondary btn-sm mx-1">Add item </a>
     <a href="{% url 'items-pregenerate' experiment.slug %}" class="btn btn-secondary btn-sm mx-1">Pregenerate items</a>
     <a href="{% url 'items-delete' experiment.slug %}" class="btn btn-danger btn-sm mx-1">Delete all</a>
     {% else %}
@@ -35,6 +32,8 @@
         <div class="flex-grow-1 mr-4">
             {% if item.textitem %}
             {{ item.textitem.text|linebreaks }}
+            {% elif item.markdownitem %}
+            {{ item.markdownitem|markdownify_item }}
             {% else %}
             <audio controls="controls">
                 <source src="{{ item.audiolinkitem.url }}">
@@ -44,9 +43,7 @@
         </div>
         <div class="flex-shrink-0">
             {% if not disable_actions %}
-            <a
-               href="{% if study.has_text_items %}{% url 'text-item-update' item_slug=item.slug %}{% else %}{% url 'audio-link-item-update' item_slug=item.slug %}{% endif %}"
-               class="btn btn-outline-primary btn-sm mx-1">
+            <a href="{% url item_edit_url_name item_slug=item.slug %}" class="btn btn-outline-primary btn-sm mx-1">
                 Edit
             </a>
             <a href="{% url 'item-questions' item_slug=item.slug %}" class="btn btn-outline-secondary btn-sm mx-1">
