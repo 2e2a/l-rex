@@ -4,24 +4,22 @@
 
 {% block content %}
 <div class="text-center mb-2">
+    {% if allow_publish %}
     <form class="form-inline" method="post">
         {% csrf_token %}
         {% if study.is_published %}
-        <button type="submit" name="action" value="unpublish"
-                class="btn btn-warning btn-sm mx-1">
+        <button type="submit" name="action" value="unpublish" class="btn btn-warning btn-sm mx-1">
             Unpublish
         </button>
         {% else %}
-        {% if allow_publish %}
-        <button type="submit" name="action" value="publish"
-                class="btn btn-success btn-sm mx-1 {% if study.is_ready_for_publish %} disabled {% endif %}">
+        <button type="submit" name="action" value="publish" class="btn btn-success btn-sm mx-1">
             Publish
         </button>
-        {% else %}
-        <a href="" class="btn btn-success btn-sm mx-1 disabled">Publish</a>
-        {% endif %}
         {% endif %}
     </form>
+    {% else %}
+    <a href="" class="btn btn-success btn-sm mx-1 disabled">Publish</a>
+    {% endif %}
 </div>
 
 <div class="row">
