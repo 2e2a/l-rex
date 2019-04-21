@@ -12,7 +12,6 @@ from django.views import generic
 from apps.contrib import views as contrib_views
 from apps.contrib import csv as contrib_csv
 from apps.experiment import views as experiment_views
-from apps.study import models as study_models
 from apps.study import views as study_views
 
 from . import forms
@@ -308,7 +307,7 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['questions'] = self.study.questions
+        kwargs['study'] = self.study
         return kwargs
 
     def form_valid(self, form):
@@ -319,7 +318,7 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
 
         num_col = form.cleaned_data['number_column'] - 1
         cond_col = form.cleaned_data['condition_column'] - 1
-        text_col = form.cleaned_data['text_column'] - 1
+        content_col = form.cleaned_data['content_column'] - 1
         block_col = form.cleaned_data['block_column'] - 1 if form.cleaned_data['block_column'] > 0 else None
 
         data = contrib_csv.read_file(form.cleaned_data)
@@ -336,7 +335,7 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
                 item, created = models.TextItem.objects.get_or_create(
                     number=row[num_col],
                     condition=row[cond_col],
-                    text=row[text_col],
+                    text=row[content_col],
                     experiment=self.experiment,
                     block=row[block_col] if block_col else 1,
                 )
@@ -344,7 +343,7 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
                 item, created = models.MarkdownItem.objects.get_or_create(
                     number=row[num_col],
                     condition=row[cond_col],
-                    text=row[text_col],
+                    text=row[content_col],
                     experiment=self.experiment,
                     block=row[block_col] if block_col else 1,
                 )
@@ -352,7 +351,7 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
                 item, created = models.AudioLinkItem.objects.get_or_create(
                     number=row[num_col],
                     condition=row[cond_col],
-                    url=row[text_col],
+                    url=row[content_col],
                     experiment=self.experiment,
                     block=row[block_col] if block_col else 1,
                 )

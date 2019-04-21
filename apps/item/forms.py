@@ -62,9 +62,8 @@ class UploadItemsForm(crispy_forms.CrispyForm):
         initial=2,
         help_text='Specify which column contains the condition.',
     )
-    text_column = forms.IntegerField(
+    content_column = forms.IntegerField(
         initial=3,
-        help_text='Specify which column contains the text or the link to the audio file.',
     )
     block_column = forms.IntegerField(
         initial=0,
@@ -73,9 +72,16 @@ class UploadItemsForm(crispy_forms.CrispyForm):
     )
 
     def __init__(self, *args, **kwargs):
-        self.questions = kwargs.pop('questions')
+        self.study= kwargs.pop('study')
         super().__init__(*args, **kwargs)
-        for question in self.questions:
+        if self.study.has_text_items:
+            content_help_text = 'Specify which column contains the item text.',
+        elif self.study.has_markdown_items:
+            content_help_text = 'Specify which column contains the item text formatted with markdown.'
+        elif self.study.has_audiolink_items:
+            content_help_text = 'Specify which column contains the link to the audio file.',
+        self.fields['content_column'].help_text = content_help_text
+        for question in self.study.questions:
             self.fields.update(
                 {
                     'question_{}_question_column'.format(question.number):
@@ -126,10 +132,10 @@ class UploadItemsForm(crispy_forms.CrispyForm):
                 assert int(row[cleaned_data['number_column'] - 1])
                 assert row[cleaned_data['condition_column'] - 1]
                 assert len(row[cleaned_data['condition_column'] - 1]) < 8
-                assert row[cleaned_data['text_column'] - 1]
+                assert row[cleaned_data['content_column'] - 1]
                 if cleaned_data['block_column'] > 0:
                     assert int(row[cleaned_data['block_column'] - 1])
-                for question in self.questions:
+                for question in self.study.questions:
                     if cleaned_data['question_{}_question_column'.format(question.number)] > 0:
                         assert row[cleaned_data['question_{}_question_column'.format(question.number)] - 1 ]
                     if cleaned_data['question_{}_scale_column'.format(question.number)] > 0:
