@@ -1,22 +1,23 @@
 <ul class="nav nav-pills mb-2 justify-content-end" role="tablist">
+
     <span class="text-secondary mr-2"><small><em>
         You can use <a  target="_blank" href="https://en.wikipedia.org/wiki/Markdown#Example">Markdown</a>
         to create rich text
     </em></small></span>
     <li role="presentation" class="nav-item active">
-        <a href="#edit" class="nav-link active" aria-controls="edit" role="tab" data-toggle="tab">Edit</a>
+        <a href="#edit-{{ widget.name }}" class="nav-link active" aria-controls="edit" role="tab" data-toggle="tab">Edit</a>
     </li>
     <li role="presentation" class="nav-item">
-        <a href="#preview"  class="nav-link" aria-controls="preview" role="tab" data-toggle="tab">Preview</a>
+        <a href="#preview-{{ widget.name }}"  class="nav-link" aria-controls="preview" role="tab" data-toggle="tab">Preview</a>
     </li>
 </ul>
 
 <div class="markdownx">
     <div class="tab-content">
-        <div role="tabpanel" class="tab-pane active" id="edit">
+        <div role="tabpanel" class="tab-pane active" id="edit-{{ widget.name }}">
             {% include 'django/forms/widgets/textarea.html' %}
         </div>
-        <div role="tabpanel" class="tab-pane" id="preview">
+        <div role="tabpanel" class="tab-pane" id="preview-{{ widget.name }}">
             <div class="markdownx-preview border px-2 py-1"></div>
         </div>
     </div>
