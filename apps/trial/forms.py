@@ -142,6 +142,8 @@ class UploadQuestionnaireForm(crispy_forms.CrispyForm):
 
 
 class TrialForm(crispy_forms.CrispyModelForm):
+    submit_label = 'Continue'
+
     password = forms.CharField(
         max_length=200,
         widget=forms.PasswordInput,
@@ -173,6 +175,7 @@ class TrialForm(crispy_forms.CrispyModelForm):
 
 
 class RatingForm(crispy_forms.CrispyModelForm):
+    submit_label = 'Continue'
 
     class Meta:
         model = models.Rating
@@ -267,5 +270,5 @@ rating_formset_helper.add_layout(
     ),
 )
 rating_formset_helper.add_input(
-    Submit("submit", "Submit"),
+    Submit("submit", "Continue"),
 )
