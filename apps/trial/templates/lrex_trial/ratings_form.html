@@ -3,8 +3,7 @@
 {% load item_tags %}
 
 {% block content %}
-<div class="my-2 p-4 border bg-white">
-    <hr>
+<div class="my-2 p-4 border bg-white item-content">
     {% if view.questionnaire_item.item.textitem %}
     <p>
         {{ view.questionnaire_item.item.textitem.text|linebreaks }}
@@ -19,6 +18,8 @@
         </audio>
     </div>
     {% endif %}
+</div>
+<div class="my-2 p-4 border bg-white">
     <div class="my-2">
         {% crispy view.formset view.helper %}
     </div>
