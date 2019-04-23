@@ -82,6 +82,11 @@ class Study(models.Model):
         max_length=5000,
         help_text='This text will be presented to the participant after the experiment is finished.',
     )
+    continue_label = models.CharField(
+        max_length=40,
+        default='Continue',
+        help_text='Label of the "Continue" button used during participation.',
+    )
     end_date = DateField(
         blank=True,
         null=True,

@@ -142,14 +142,16 @@ class UploadQuestionnaireForm(crispy_forms.CrispyForm):
 
 
 class TrialForm(crispy_forms.CrispyModelForm):
-    submit_label = 'Continue'
-
     password = forms.CharField(
         max_length=200,
         widget=forms.PasswordInput,
         help_text='Provide a password (as instructed by the experimenter).',
     )
     optional_label_ignore_fields = ['subject_id']
+
+    @property
+    def submit_label(self):
+        return self.study.continue_label
 
     class Meta:
         model = models.Trial
@@ -175,7 +177,10 @@ class TrialForm(crispy_forms.CrispyModelForm):
 
 
 class RatingForm(crispy_forms.CrispyModelForm):
-    submit_label = 'Continue'
+
+    @property
+    def submit_label(self):
+        return self.study.continue_label
 
     class Meta:
         model = models.Rating
@@ -197,6 +202,7 @@ class RatingForm(crispy_forms.CrispyModelForm):
         return helper
 
     def __init__(self, *args, **kwargs):
+        self.study = kwargs.pop('study')
         question = kwargs.pop('question')
         item_question = kwargs.pop('item_question', None)
         super().__init__(*args, **kwargs)
@@ -263,12 +269,14 @@ def customize_to_questions(ratingformset, questions, item_questions):
             scale_value.choices = custom_choices
 
 
-rating_formset_helper = FormHelper()
-rating_formset_helper.add_layout(
-    Layout(
-        Field('scale_value', template='lrex_trial/ratings_scale_value_field.html'),
-    ),
-)
-rating_formset_helper.add_input(
-    Submit("submit", "Continue"),
-)
+def rating_formset_helper(submit_label='Continue'):
+    formset_helper = FormHelper()
+    formset_helper.add_layout(
+        Layout(
+            Field('scale_value', template='lrex_trial/ratings_scale_value_field.html'),
+        ),
+    )
+    formset_helper.add_input(
+        Submit('submit', submit_label),
+    )
+    return formset_helper

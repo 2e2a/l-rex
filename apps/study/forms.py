@@ -57,6 +57,7 @@ class StudyInstructionsForm(crispy_forms.CrispyModelForm):
         fields = [
             'instructions',
             'outro',
+            'continue_label',
         ]
 
     def __init__(self, *args, **kwargs):

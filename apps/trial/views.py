@@ -529,6 +529,7 @@ class RatingCreateView(RatingCreateMixin, TrialMixin, generic.CreateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
+        kwargs['study'] = self.study
         kwargs['question'] = self.study.question
         if self.item_questions:
             kwargs['item_question'] = self.item_questions[0]
@@ -550,7 +551,7 @@ class RatingsCreateView(RatingCreateMixin, TrialMixin, generic.TemplateView):
     template_name = 'lrex_trial/ratings_form.html'
 
     formset = None
-    helper = forms.rating_formset_helper
+    helper = None
 
     def dispatch(self, request, *args, **kwargs):
         self.num = int(self.kwargs['num'])
@@ -563,6 +564,7 @@ class RatingsCreateView(RatingCreateMixin, TrialMixin, generic.TemplateView):
         )
         self.n_questions = len(self.study.questions)
         self.item_questions = self.questionnaire_item.item.itemquestion_set.all()
+        self.helper = forms.rating_formset_helper(self.study.continue_label)
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
