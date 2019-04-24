@@ -4,11 +4,14 @@
 <table class="table bg-white">
     <thead>
     <tr>
+        {% if study.use_blocks %}
         <th>Block</th>
+        {% endif %}
         <th>Items</th>
     </tr>
     </thead>
     <tbody>
+    {% if study.use_blocks %}
     {% for block, items in questionnaire.questionnaire_items_by_block.items %}
     <tr>
         <td>{{ forloop.counter }}</td>
@@ -16,7 +19,14 @@
             {% for item in items %}{{ item.item.experiment }}-{{ item.item }}{% if not forloop.last %}, {% endif %}{% endfor %}
         </td>
     </tr>
-    </tbody>
     {% endfor %}
+    {% else %}
+    <tr>
+        <td>
+            {% for item in questionnaire.items %}{{ item.experiment }}-{{ item }}{% if not forloop.last %}, {% endif %}{% endfor %}
+        </td>
+    </tr>
+    {% endif %}
+    </tbody>
 </table>
 {% endblock %}

@@ -99,7 +99,6 @@ class ItemListView(experiment_views.ExperimentMixin, study_views.CheckStudyCreat
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        data['consider_blocks'] = len(self.study.item_blocks) > 1
         data['item_add_url_name'] = self._item_add_url_name()
         data['item_edit_url_name'] = self._item_edit_url_name()
         return data
@@ -118,6 +117,11 @@ class ItemListView(experiment_views.ExperimentMixin, study_views.CheckStudyCreat
 class ItemCreateMixin:
     title = 'Add item'
     template_name = 'lrex_contrib/crispy_form.html'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['study'] = self.study
+        return kwargs
 
     def form_valid(self, form):
         form.instance.experiment = self.experiment
@@ -149,6 +153,11 @@ class ItemUpdateMixin:
     title = 'Edit item'
     template_name = 'lrex_contrib/crispy_form.html'
     success_message = 'Item successfully updated.'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['study'] = self.study
+        return kwargs
 
     def form_valid(self, form):
         result =  super().form_valid(form)
@@ -440,7 +449,7 @@ class ItemQuestionsUpdateView(ItemMixin, study_views.CheckStudyCreatorMixin, stu
 
     def get(self, request, *args, **kwargs):
         n_questions = len(self.study.questions)
-        item_questions_q =models.ItemQuestion.objects.filter(item=self.item)
+        item_questions_q = models.ItemQuestion.objects.filter(item=self.item)
         self.formset = forms.itemquestion_factory(n_questions, n_item_questions=item_questions_q.count())(
             queryset=item_questions_q
         )

@@ -263,6 +263,11 @@
                 </div>
                 <hr>
                 <a  class="card-link" href="{% url 'questionnaires' study.slug %}">Questionnaires</a>
+                {% if study.use_blocks %}
+                <a  class="card-link" href="{% url 'questionnaire-blocks' study.slug %}">
+                    Block instructions
+                </a>
+                {% endif %}
             </div>
         </div>
 

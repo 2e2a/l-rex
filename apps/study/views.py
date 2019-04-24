@@ -201,7 +201,7 @@ class StudyUpdateView(StudyObjectMixin, CheckStudyCreatorMixin, SuccessMessageMi
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['disable_title'] =  self.study.is_active
+        kwargs['disable'] =  self.study.is_active
         kwargs['disable_itemtype'] = self.study.has_items
         return kwargs
 

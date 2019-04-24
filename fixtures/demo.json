@@ -4,7 +4,7 @@
     "pk": 1,
     "fields": {
         "password": "pbkdf2_sha256$150000$ORGeJCYUQJeQ$TmWe2OwMOsBKV74grTYaKDBTA4sj9xHxkARFuIMKtPM=",
-        "last_login": "2019-04-17T14:21:17.702Z",
+        "last_login": "2019-04-23T10:42:39.942Z",
         "is_superuser": false,
         "username": "user",
         "first_name": "",
@@ -124,6 +124,14 @@
     }
 },
 {
+    "model": "sessions.session",
+    "pk": "zqiaprofldkwnazc32gw0phdgvv474dz",
+    "fields": {
+        "session_data": "OTkzZTJiNjIxMjRlZjVhZmQzNTQ4Nzk3MjBkNjNlYWJiZmQyZTdmMTp7Il9hdXRoX3VzZXJfaWQiOiIxIiwiX2F1dGhfdXNlcl9iYWNrZW5kIjoiZGphbmdvLmNvbnRyaWIuYXV0aC5iYWNrZW5kcy5Nb2RlbEJhY2tlbmQiLCJfYXV0aF91c2VyX2hhc2giOiI4Mjk5ZWMwNzZiOTczODBiM2I3YzhkYzJiYzg1NjQ2ZjI3ZTY2ZTlkIiwiX3Nlc3Npb25fZXhwaXJ5IjowfQ==",
+        "expire_date": "2019-05-07T10:42:39.957Z"
+    }
+},
+{
     "model": "sites.site",
     "pk": 1,
     "fields": {
@@ -141,11 +149,13 @@
             "user"
         ],
         "item_type": "txt",
+        "use_blocks": false,
         "password": "test",
         "instructions": "Please rate the following sentences on a scale from 1 to 7. If a sentence sounds completely fine, e.g., \"The students met the teachers\", it should receive a high rating. If a sentence sounds bad, e.g., \"The students meets the teachers\", it should receive a low rating.",
         "require_participant_id": false,
         "generate_participation_code": false,
         "outro": "Thank you for participating!",
+        "continue_label": "Continue",
         "end_date": null,
         "trial_limit": null,
         "is_published": true,
@@ -163,11 +173,13 @@
             "user"
         ],
         "item_type": "txt",
+        "use_blocks": true,
         "password": "test",
         "instructions": "In this experiment, you will rate sentences on a scale from 1-7. Additionally, you will answer a yes/no question about each sentence. You will first see two examples.",
         "require_participant_id": true,
         "generate_participation_code": true,
         "outro": "",
+        "continue_label": "Continue",
         "end_date": null,
         "trial_limit": null,
         "is_published": true,

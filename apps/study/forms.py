@@ -15,6 +15,7 @@ class StudyForm(crispy_forms.CrispyModelForm):
         fields = [
             'title',
             'item_type',
+            'use_blocks',
             'password',
             'require_participant_id',
             'generate_participation_code',
@@ -23,16 +24,17 @@ class StudyForm(crispy_forms.CrispyModelForm):
         ]
 
     def __init__(self, *args, **kwargs):
-        self.disable_title = kwargs.pop('disable_title', False)
+        self.disable = kwargs.pop('disable', False)
         self.disable_itemtype = kwargs.pop('disable_itemtype', False)
         super().__init__(*args, **kwargs)
-        if self.disable_title:
+        if self.disable:
             self.fields['title'].widget.attrs['readonly'] = True
+            self.fields['use_blocks'].widget.attrs['readonly'] = True
         if self.disable_itemtype:
             self.fields['item_type'].widget.attrs['readonly'] = True
 
     def clean_title(self):
-        if self.disable_title:
+        if self.disable:
             instance = getattr(self, 'instance', None)
             return instance.title if instance and instance.pk else self.cleaned_data['title']
         else:
@@ -44,6 +46,13 @@ class StudyForm(crispy_forms.CrispyModelForm):
             return instance.item_type if instance and instance.pk else self.cleaned_data['item_type']
         else:
             return self.cleaned_data['item_type']
+
+    def clean_use_blocks(self):
+        if self.disable:
+            instance = getattr(self, 'use_blocks', None)
+            return instance.use_blocks if instance and instance.pk else self.cleaned_data['use_blocks']
+        else:
+            return self.cleaned_data['use_blocks']
 
 
 class StudyInstructionsForm(crispy_forms.CrispyModelForm):

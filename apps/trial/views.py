@@ -97,7 +97,6 @@ class QuestionnaireListView(study_views.StudyMixin, study_views.CheckStudyCreato
 
     def dispatch(self, request, *args, **kwargs):
         self.page = request.GET.get('page', 1)
-        self.blocks = self.study.item_blocks
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -105,15 +104,11 @@ class QuestionnaireListView(study_views.StudyMixin, study_views.CheckStudyCreato
         data['allow_actions'] = self.study.is_allowed_create_questionnaires
         return data
 
-    @property
-    def consider_blocks(self):
-        return len(self.blocks) > 1
-
     def _create_default_questionnaire_block(self, randomization):
         models.QuestionnaireBlock.objects.filter(study=self.study).delete()
         models.QuestionnaireBlock.objects.create(
             study=self.study,
-            block=self.blocks[0],
+            block=1,
             randomization=randomization,
         )
 
@@ -127,7 +122,7 @@ class QuestionnaireListView(study_views.StudyMixin, study_views.CheckStudyCreato
 
     def post(self, request, *args, **kwargs):
         action = request.POST.get('action', None)
-        if len(self.blocks)>1:
+        if self.study.use_blocks:
             return redirect('questionnaire-generate',study_slug=self.study.slug)
         randomization = self._get_randomization(action)
         self._create_default_questionnaire_block(randomization)
@@ -158,14 +153,6 @@ class QuestionnaireDetailView(QuestionnaireObjectMixin, study_views.CheckStudyCr
                               generic.DetailView):
     model = models.Questionnaire
     title = 'Questionnaire'
-
-    def dispatch(self, *args, **kwargs):
-        self.blocks = self.study.item_blocks
-        return super().dispatch(*args, **kwargs)
-
-    @property
-    def consider_blocks(self):
-        return len(self.blocks) > 1
 
     @property
     def breadcrumbs(self):
@@ -246,6 +233,16 @@ class QuestionnaireBlockInstructionsUpdateView(study_views.StudyMixin, study_vie
         self.formset = forms.questionnaire_block_update_factory(len(self.blocks))(
             queryset=models.QuestionnaireBlock.objects.filter(study=self.study)
         )
+        disable_form = False
+        if self.study.use_blocks and not self.study.has_questionnaires:
+            disable_form = True
+        if not self.study.use_blocks:
+            disable_form = True
+            messages.info(request, 'Blocks are disabled for this study.')
+        if disable_form:
+            for helper_input in self.helper.inputs:
+                helper_input.field_classes += '  disabled'
+                helper_input.flat_attrs += '  disabled=True'
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -253,7 +250,8 @@ class QuestionnaireBlockInstructionsUpdateView(study_views.StudyMixin, study_vie
             self.formset = forms.questionnaire_block_update_factory(len(self.blocks))(request.POST, request.FILES)
             if self.formset.is_valid():
                 self.formset.save(commit=True)
-                return redirect('questionnaires', study_slug=self.study.slug)
+                messages.success(request, 'Block instructions updated')
+                return redirect('study', study_slug=self.study.slug)
         return super().get(request, *args, **kwargs)
 
     @property
@@ -261,7 +259,6 @@ class QuestionnaireBlockInstructionsUpdateView(study_views.StudyMixin, study_vie
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
-            ('questionnaires', reverse('questionnaires', args=[self.study.slug])),
             ('block-instructions', '')
         ]
 
@@ -493,13 +490,8 @@ class RatingCreateMixin(ProgressMixin):
     def get_next_url(self):
         trial_items = self.trial.items
         if self.num < len(trial_items) - 1:
-            if trial_items[self.num].block != trial_items[self.num + 1].block:
-                questionnaire_block = models.QuestionnaireBlock.objects.get(
-                    study=self.study,
-                    block=trial_items[self.num + 1].block
-                )
-                if questionnaire_block.instructions:
-                    return reverse('rating-block-instructions', args=[self.trial.slug, self.num + 1])
+            if self.study.use_blocks and trial_items[self.num].block != trial_items[self.num + 1].block:
+                return reverse('rating-block-instructions', args=[self.trial.slug, self.num + 1])
             return reverse('rating-create', args=[self.trial.slug, self.num + 1])
         return reverse('rating-outro', args=[self.trial.slug])
 

@@ -28,7 +28,8 @@ class StudySteps(Enum):
     STEP_STD_INSTRUCTIONS_EDIT = 2
     STEP_STD_EXP_CREATE = 3
     STEP_STD_QUESTIONNAIRES_GENERATE = 4
-    STEP_STD_PUBLISH = 5
+    STEP_STD_BLOCK_INSTRUCTIONS_CREATE = 5
+    STEP_STD_PUBLISH = 6
 
 
 class Study(models.Model):
@@ -54,6 +55,11 @@ class Study(models.Model):
         choices=ITEM_TYPE,
         default=ITEM_TYPE_TXT,
         help_text='The items can be plain text or markdown rich text or links to audio files (self-hosted).',
+    )
+    use_blocks = models.BooleanField(
+        default=False,
+        help_text='Enable if you want to divide the questionnaire into separate parts (blocks) with individual '
+                  'instructions',
     )
     password = models.CharField(
         blank=True,
@@ -179,6 +185,15 @@ class Study(models.Model):
         except Item.DoesNotExist:
             return False
 
+    @cached_property
+    def has_block_instructions(self):
+        if not self.questionnaireblock_set.exists():
+            return False
+        for block in self.questionnaireblock_set.all():
+            if not block.instructions:
+                return False
+        return True
+
     @property
     def status(self):
         from apps.trial.models import Trial
@@ -223,7 +238,9 @@ class Study(models.Model):
 
     @cached_property
     def is_allowed_publish(self):
-        return self.questions and self.instructions and self.questionnaire_set.exists() and self.items_validated
+        return self.questions and self.instructions \
+               and self.items_validated and self.questionnaire_set.exists() \
+               and (not self.use_blocks or self.has_block_instructions)
 
     @cached_property
     def is_allowed_pseudo_randomization(self):
@@ -358,6 +375,7 @@ class Study(models.Model):
         StudySteps.STEP_STD_INSTRUCTIONS_EDIT: 'Create the instructions',
         StudySteps.STEP_STD_EXP_CREATE: 'Create an experiment',
         StudySteps.STEP_STD_QUESTIONNAIRES_GENERATE: 'Generate questionnaires',
+        StudySteps.STEP_STD_BLOCK_INSTRUCTIONS_CREATE: 'Define questionnaire block instructions',
         StudySteps.STEP_STD_PUBLISH: 'Publish the study',
     }
 
@@ -370,6 +388,8 @@ class Study(models.Model):
             return reverse('experiment-create', args=[self.slug])
         elif step == StudySteps.STEP_STD_QUESTIONNAIRES_GENERATE:
             return reverse('questionnaires', args=[self.slug])
+        elif step == StudySteps.STEP_STD_BLOCK_INSTRUCTIONS_CREATE:
+            return reverse('questionnaire-blocks', args=[self.slug])
         elif step == StudySteps.STEP_STD_PUBLISH:
             return reverse('study', args=[self.slug])
 
@@ -386,6 +406,8 @@ class Study(models.Model):
             self._append_step_info(next_steps, StudySteps.STEP_STD_EXP_CREATE)
         if self.is_allowed_create_questionnaires and not self.questionnaire_set.exists():
             self._append_step_info(next_steps, StudySteps.STEP_STD_QUESTIONNAIRES_GENERATE)
+        if self.use_blocks and self.has_questionnaires and not self.has_block_instructions:
+            self._append_step_info(next_steps, StudySteps.STEP_STD_BLOCK_INSTRUCTIONS_CREATE)
         if self.is_allowed_publish and not self.is_published:
             self._append_step_info(next_steps, StudySteps.STEP_STD_PUBLISH)
         for experiment in self.experiments:

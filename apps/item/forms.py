@@ -16,6 +16,12 @@ class ItemFormMixin:
     def clean_condition(self):
         return self.cleaned_data['condition'].strip()
 
+    def __init__(self, *args, **kwargs):
+        study = kwargs.pop('study')
+        super().__init__(*args, **kwargs)
+        if not study.use_blocks:
+            self.fields['block'].widget = forms.HiddenInput()
+
 
 class TextItemForm(ItemFormMixin, crispy_forms.CrispyModelForm):
 

@@ -5,10 +5,7 @@
     <p>
         {{ block_instructions_rich }}
 
-        <a href="{% url 'rating-create' trial.slug num %}"
-           class="btn btn-primary btn-sm mx-1">
-            {{ study.continue_label }}
-        </a>
+        <a href="{% url 'rating-create' trial.slug num %}" class="btn btn-primary">{{ study.continue_label }}</a>
     </p>
     <div class="text-center my-2">
         <div class="progress" style="height: 2px;">
