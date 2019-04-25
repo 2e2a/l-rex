@@ -288,14 +288,17 @@ class Trial(models.Model):
         blank=True,
         null=True,
     )
+    is_test = models.BooleanField(
+        default=False,
+    )
 
     class Meta:
         ordering = ['created']
 
     def save(self, *args, **kwargs):
         if not self.subject_id:
-            if Trial.objects.filter(questionnaire__study=self.questionnaire.study).exists():
-                last_trial = Trial.objects.filter(questionnaire__study=self.questionnaire.study).last()
+            if Trial.objects.filter(questionnaire__study=self.questionnaire.study, is_test=False).exists():
+                last_trial = Trial.objects.filter(questionnaire__study=self.questionnaire.study, is_test=False).last()
                 try:
                     self.subject_id = int(last_trial.subject_id) + 1
                 except ValueError:
@@ -332,7 +335,7 @@ class Trial(models.Model):
         return TrialStatus.CREATED
 
     def init(self, study):
-        self.questionnaire = study.next_questionnaire
+        self.questionnaire = study.next_questionnaire(is_test=self.is_test)
         self.save()
 
     def generate_rating_proof(self):
@@ -350,7 +353,7 @@ class Trial(models.Model):
         return reverse('trial', args=[self.slug])
 
     def __str__(self):
-        return str(self.slug)
+        return '{} trial'.format(self.subject_id)
 
 
 class Rating(models.Model):

@@ -214,7 +214,7 @@ class Study(models.Model):
     @cached_property
     def trial_count(self):
         from apps.trial.models import Trial
-        return Trial.objects.filter(questionnaire__study=self).count()
+        return Trial.objects.filter(questionnaire__study=self, is_test=False).count()
 
     @cached_property
     def is_rating_possible(self):
@@ -261,12 +261,16 @@ class Study(models.Model):
                 return True
         return False
 
-    @property
-    def questionnaire_trial_count(self):
+    @cached_property
+    def has_questionnaires(self):
+        return self.questionnaire_set.exists()
+
+    def _questionnaire_trial_count(self, is_test=False):
         from apps.trial.models import Trial
         questionnaires = self.questionnaire_set.all()
         trials = Trial.objects.filter(
-            questionnaire_id__in=[questionnaire.id for questionnaire in questionnaires]
+            questionnaire_id__in=[questionnaire.id for questionnaire in questionnaires],
+            is_test=is_test,
         ).order_by('questionnaire_id')
         trials_per_questionnaire = groupby(trials, lambda x: x.questionnaire_id)
         trial_count_by_id = {q_id: len(list(q_trials)) for q_id, q_trials in trials_per_questionnaire}
@@ -275,13 +279,8 @@ class Study(models.Model):
             trial_count.update({questionnaire: trial_count_by_id.get(questionnaire.id, 0)})
         return trial_count
 
-    @cached_property
-    def has_questionnaires(self):
-        return self.questionnaire_set.exists()
-
-    @property
-    def next_questionnaire(self):
-        trial_count = self.questionnaire_trial_count
+    def next_questionnaire(self, is_test=False):
+        trial_count = self._questionnaire_trial_count(is_test)
         next_questionnaire = min(trial_count, key=trial_count.get)
         return next_questionnaire
 
@@ -342,6 +341,8 @@ class Study(models.Model):
             self._generate_questionnaire_permutations(experiments)
 
     def delete_questionnaires(self):
+        from apps.trial.models import Trial
+        Trial.objects.filter(questionnaire__study=self).all().delete()
         self.questionnaire_set.all().delete()
 
     def rating_proofs_csv(self, fileobj):

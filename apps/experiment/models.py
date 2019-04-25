@@ -185,7 +185,8 @@ class Experiment(models.Model):
     def results(self):
         results = []
         ratings = trial_models.Rating.objects.filter(
-            questionnaire_item__item__experiment=self
+            questionnaire_item__item__experiment=self,
+            trial__is_test=False,
         ).prefetch_related(
             'trial', 'questionnaire_item',
         )

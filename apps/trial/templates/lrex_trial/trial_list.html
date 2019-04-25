@@ -19,7 +19,11 @@
     <li class="list-group-item d-flex">
         <div class="flex-grow-1">
             <strong>#{{ page_obj.start_index|add:forloop.counter0 }}</strong>
+            {% if trial.is_test %}
+            <span class="badge badge-warning">Test</span>
+            {% else %}
             Subject {{ trial.subject_id }}
+            {% endif %}
             <span class="badge badge-secondary">{{ trial.created|date:"SHORT_DATETIME_FORMAT" }}</span>
             <span class="badge badge-secondary">Questionnaire {{ trial.questionnaire.number }}</span>
             <span class="badge badge-primary">{{ trial.status.name }}</span>

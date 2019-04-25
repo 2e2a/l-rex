@@ -406,17 +406,25 @@ class TrialCreateView(study_views.StudyMixin, generic.CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        first_questionnaire_item = models.QuestionnaireItem.objects.get(
-            questionnaire=self.object.questionnaire,
-            number=0
-        )
-        questionnaire_block = models.QuestionnaireBlock.objects.get(
-            study=self.study,
-            block=first_questionnaire_item.item.block
-        )
-        if questionnaire_block.instructions:
+        if self.study.use_blocks:
             return reverse('rating-block-instructions', args=[self.object.slug, 0])
         return reverse('rating-create', args=[self.object.slug, 0])
+
+
+class TestTrialCreateView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, generic.RedirectView):
+
+    def dispatch(self, request, *args, **kwargs):
+        self.trial = models.Trial(
+            subject_id='test',
+            is_test=True,
+        )
+        self.trial.init(self.study)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_redirect_url(self, *args, **kwargs):
+        if self.study.use_blocks:
+            return reverse('rating-block-instructions', args=[self.trial.slug, 0])
+        return reverse('rating-create', args=[self.trial.slug, 0])
 
 
 class TrialDetailView(TrialObjectMixin, study_views.CheckStudyCreatorMixin, generic.DetailView):
@@ -468,6 +476,11 @@ class ProgressMixin:
 
 
 class RatingCreateMixin(ProgressMixin):
+
+    def get(self, request, *args, **kwargs):
+        if self.trial.is_test:
+            messages.warning(request, 'Warning: This is a test trial.')
+        return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         kwargs.update(

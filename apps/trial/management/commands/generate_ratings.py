@@ -25,7 +25,7 @@ class Command(BaseCommand):
         for question in study.questions:
             questions_scale_values.append((question.number, question.scalevalue_set.all()))
         for i in range(n_ratings):
-            questionnaire = study.next_questionnaire
+            questionnaire = study.next_questionnaire()
             trial = trial_models.Trial(
                 questionnaire=questionnaire
             )
