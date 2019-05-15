@@ -157,9 +157,23 @@ class TrialForm(crispy_forms.CrispyModelForm):
         model = models.Trial
         fields = ['subject_id']
 
+    @property
+    def _test_subject_id(self):
+        test_num = 1
+        while True:
+            test_subject_id = 'Test {}'.format(test_num)
+            if not models.Trial.objects.filter(questionnaire__study=self.study, is_test=True, subject_id=test_subject_id).exists():
+                break
+            test_num += 1
+        return test_subject_id
+
     def __init__(self, *args, **kwargs):
+        is_test = kwargs.pop('is_test')
         self.study = kwargs.pop('study')
         super().__init__(*args, **kwargs)
+        if is_test:
+            self.fields['subject_id'].initial = self._test_subject_id
+            self.fields['subject_id'].readonly = True
         if self.study.require_participant_id:
             self.fields['subject_id'].required = True
         else:

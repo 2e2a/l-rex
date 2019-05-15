@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.utils.safestring import mark_safe
 from django.urls import reverse
+from django.utils.functional import cached_property
 from django.views import generic
 
 from apps.contrib import csv as contrib_csv
@@ -379,9 +380,19 @@ class TrialCreateView(study_views.StudyMixin, generic.CreateView):
     model = models.Trial
     form_class = forms.TrialForm
 
+    @cached_property
+    def is_test_trial(self):
+        return bool(self.request.GET.get('test', False))
+
+    def get(self, request, *args, **kwargs):
+        if self.is_test_trial:
+            messages.warning(request, 'Warning: This is a test trial.')
+        return super().get(request, *args, **kwargs)
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['study'] = self.study
+        kwargs['is_test'] = self.is_test_trial
         return kwargs
 
     def get_context_data(self, **kwargs):
@@ -402,6 +413,10 @@ class TrialCreateView(study_views.StudyMixin, generic.CreateView):
         if active_trial:
             active_trial_url = reverse('rating-create', args=[active_trial.slug, 0])
             return redirect(active_trial_url)
+        if self.is_test_trial:
+            if not form.instance.subject_id:
+                form.instance.subject_id = 'Test'
+            form.instance.is_test = True
         form.instance.init(self.study)
         return super().form_valid(form)
 
@@ -409,22 +424,6 @@ class TrialCreateView(study_views.StudyMixin, generic.CreateView):
         if self.study.use_blocks:
             return reverse('rating-block-instructions', args=[self.object.slug, 0])
         return reverse('rating-create', args=[self.object.slug, 0])
-
-
-class TestTrialCreateView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, generic.RedirectView):
-
-    def dispatch(self, request, *args, **kwargs):
-        self.trial = models.Trial(
-            subject_id='test',
-            is_test=True,
-        )
-        self.trial.init(self.study)
-        return super().dispatch(request, *args, **kwargs)
-
-    def get_redirect_url(self, *args, **kwargs):
-        if self.study.use_blocks:
-            return reverse('rating-block-instructions', args=[self.trial.slug, 0])
-        return reverse('rating-create', args=[self.trial.slug, 0])
 
 
 class TrialDetailView(TrialObjectMixin, study_views.CheckStudyCreatorMixin, generic.DetailView):
@@ -475,12 +474,15 @@ class ProgressMixin:
         return data
 
 
-class RatingCreateMixin(ProgressMixin):
+class TestWarningMixin:
 
     def get(self, request, *args, **kwargs):
         if self.trial.is_test:
             messages.warning(request, 'Warning: This is a test trial.')
         return super().get(request, *args, **kwargs)
+
+
+class RatingCreateMixin(ProgressMixin, TestWarningMixin):
 
     def get_context_data(self, **kwargs):
         kwargs.update(
@@ -600,7 +602,7 @@ class RatingsCreateView(RatingCreateMixin, TrialMixin, generic.TemplateView):
         return super().get(request, *args, **kwargs)
 
 
-class RatingBlockInstructionsView(ProgressMixin, TrialMixin, generic.TemplateView):
+class RatingBlockInstructionsView(ProgressMixin, TestWarningMixin, TrialMixin, generic.TemplateView):
     template_name = 'lrex_trial/rating_block_instructions.html'
 
     def get_context_data(self, **kwargs):
@@ -622,7 +624,7 @@ class RatingBlockInstructionsView(ProgressMixin, TrialMixin, generic.TemplateVie
         return data
 
 
-class RatingOutroView(TrialMixin, generic.TemplateView):
+class RatingOutroView(TrialMixin, TestWarningMixin, generic.TemplateView):
     template_name = 'lrex_trial/rating_outro.html'
 
     def get_context_data(self, **kwargs):
@@ -633,7 +635,7 @@ class RatingOutroView(TrialMixin, generic.TemplateView):
         return data
 
 
-class RatingTakenView(TrialMixin, generic.TemplateView):
+class RatingTakenView(TrialMixin, TestWarningMixin, generic.TemplateView):
     template_name = 'lrex_trial/rating_taken.html'
 
 
