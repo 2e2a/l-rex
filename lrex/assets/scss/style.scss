@@ -1,3 +1,5 @@
+$primary: #00a333;
+
 @import './node_modules/bootstrap/scss/bootstrap';
 
 body {
@@ -27,8 +29,12 @@ body {
 }
 
 
-.custom-shadow {
+.grey-shadow {
     box-shadow: 0 0.1rem 0.3rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.primary-shadow {
+    box-shadow: 0 0.1rem 0.3rem $primary !important;
 }
 
 .item-content {

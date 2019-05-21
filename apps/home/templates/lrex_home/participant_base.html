@@ -9,12 +9,16 @@
     <script src="{% static 'js/popper.min.js' %}"></script>
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
     <link rel="stylesheet" href="{% static 'css/lrex.css' %}">
+    <link rel="shortcut icon" type="image/sgv" href="{% static 'img/favicon.svg' %}"/>
 </head>
 <body class="bg-light">
 
-<nav class="navbar navbar-expand-md navbar-light bg-white fixed-top custom-shadow">
+<nav class="navbar navbar-expand-md navbar-light bg-white fixed-top primary-shadow">
     <div class="container">
-        <a class="navbar-brand" href="/">L-Rex</a>
+        <a class="navbar-brand" href="/">
+            <img src="{% static 'img/logo.svg' %}" width="30" height="30" alt="Logo">
+            L-Rex
+        </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -31,7 +35,7 @@
 
 <div class="container">
     {% for message in messages %}
-    <div class="alert {{ message.level_tag|bootstrap_alert_class }} custom-shadow" role="alert">
+    <div class="alert {{ message.level_tag|bootstrap_alert_class }} grey-shadow" role="alert">
         {{ message }}
     </div>
     {% endfor %}
