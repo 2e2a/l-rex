@@ -251,9 +251,10 @@ class QuestionUpdateView(StudyMixin, CheckStudyCreatorMixin, DisableFormIfStudyA
     title = 'Questions'
     template_name = 'lrex_contrib/crispy_formset_form.html'
     formset = None
-    helper = forms.question_formset_helper
+    helper = None
 
     def dispatch(self, *args, **kwargs):
+        self.helper = forms.question_formset_helper()
         self.n_questions = self.study.question_set.count()
         return super().dispatch(*args, **kwargs)
 

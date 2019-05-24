@@ -170,9 +170,10 @@ class QuestionnaireGenerateView(study_views.StudyMixin, study_views.CheckStudyCr
     title = 'Generate questionnaires'
     template_name = 'lrex_contrib/crispy_formset_form.html'
     formset = None
-    helper = forms.questionnaire_block_formset_helper
+    helper = None
 
     def dispatch(self, request, *args, **kwargs):
+        self.helper = forms.questionnaire_block_formset_helper()
         self.blocks = self.study.item_blocks
         if not self.study.is_allowed_pseudo_randomization:
             messages.info(request, 'Note: Define filler experiments to use pseudo randomization.')
@@ -224,9 +225,10 @@ class QuestionnaireBlockInstructionsUpdateView(study_views.StudyMixin, study_vie
     title = 'Edit questionnaire block instructions'
     template_name = 'lrex_contrib/crispy_formset_form.html'
     formset = None
-    helper = forms.questionnaire_block_update_formset_helper
+    helper = None
 
     def dispatch(self, *args, **kwargs):
+        self.helper = forms.questionnaire_block_update_formset_helper()
         self.blocks = self.study.item_blocks
         return super().dispatch(*args, **kwargs)
 

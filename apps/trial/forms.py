@@ -37,15 +37,17 @@ def customize_randomization(questionnaireblock_formset, study):
                                      if k != models.QuestionnaireBlock.RANDOMIZATION_PSEUDO]
 
 
-questionnaire_block_formset_helper = FormHelper()
-questionnaire_block_formset_helper.add_layout(
-    Layout(
-        Fieldset('Item block {{ forloop.counter }}', None, 'instructions', 'randomization'),
-    ),
-)
-questionnaire_block_formset_helper.add_input(
-    Submit("submit", "Submit"),
-)
+def questionnaire_block_formset_helper():
+    formset_helper = FormHelper()
+    formset_helper.add_layout(
+        Layout(
+            Fieldset('Item block {{ forloop.counter }}', None, 'instructions', 'randomization'),
+        ),
+    )
+    formset_helper.add_input(
+        Submit("submit", "Submit"),
+    )
+    return formset_helper
 
 
 class QuestionnaireBlockUpdateForm(forms.ModelForm):
@@ -64,15 +66,17 @@ def questionnaire_block_update_factory(n_blocks):
     )
 
 
-questionnaire_block_update_formset_helper = FormHelper()
-questionnaire_block_update_formset_helper.add_layout(
-    Layout(
-        Fieldset('Item block {{ forloop.counter }}', None, 'instructions'),
-    ),
-)
-questionnaire_block_update_formset_helper.add_input(
-    Submit("submit", "Submit"),
-)
+def questionnaire_block_update_formset_helper():
+    formset_helper = FormHelper()
+    formset_helper.add_layout(
+        Layout(
+            Fieldset('Item block {{ forloop.counter }}', None, 'instructions'),
+        ),
+    )
+    formset_helper.add_input(
+        Submit("submit", "Submit"),
+    )
+    return formset_helper
 
 
 class UploadQuestionnaireForm(crispy_forms.CrispyForm):

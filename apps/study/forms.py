@@ -115,21 +115,23 @@ def initialize_with_questions(question_formset, questions):
         form['scale_labels'].initial = ','.join([scale_value.label for scale_value in question.scalevalue_set.all()])
 
 
-question_formset_helper = FormHelper()
-question_formset_helper.add_layout(
-    Layout(
-        Fieldset('Question {{ forloop.counter }}', None, 'question', 'scale_labels', 'legend'),
-    ),
-)
-question_formset_helper.add_input(
-    Submit("submit", "Submit"),
-)
-question_formset_helper.add_input(
-    Submit("add", "Add", css_class="btn-secondary"),
-)
-question_formset_helper.add_input(
-    Submit("delete", "Delete last", css_class="btn-danger"),
-)
+def question_formset_helper():
+    formset_helper = FormHelper()
+    formset_helper.add_layout(
+        Layout(
+            Fieldset('Question {{ forloop.counter }}', None, 'question', 'scale_labels', 'legend'),
+        ),
+    )
+    formset_helper.add_input(
+        Submit("submit", "Submit"),
+    )
+    formset_helper.add_input(
+        Submit("add", "Add", css_class="btn-secondary"),
+    )
+    formset_helper.add_input(
+        Submit("delete", "Delete last", css_class="btn-danger"),
+    )
+    return formset_helper
 
 
 class SharedWithForm(crispy_forms.CrispyModelForm):

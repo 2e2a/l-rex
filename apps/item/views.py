@@ -445,25 +445,28 @@ class ItemQuestionsUpdateView(ItemMixin, study_views.CheckStudyCreatorMixin, stu
     title = 'Customize item questions'
     template_name = 'lrex_contrib/crispy_formset_form.html'
     formset = None
-    helper = forms.itemquestion_formset_helper
+    helper = None
+
+    def dispatch(self, request, *args, **kwargs):
+        self.n_questions = len(self.study.questions)
+        self.helper = forms.itemquestion_formset_helper()
+        return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
-        n_questions = len(self.study.questions)
         item_questions_q = models.ItemQuestion.objects.filter(item=self.item)
-        self.formset = forms.itemquestion_factory(n_questions, n_item_questions=item_questions_q.count())(
+        self.formset = forms.itemquestion_factory(self.n_questions, n_item_questions=item_questions_q.count())(
             queryset=item_questions_q
         )
         forms.initialize_with_questions(self.formset, self.study.questions)
-        if n_questions == 0:
+        if self.n_questions == 0:
             msg = 'Note: If you want to use per item question customization, please define the study question first ' \
                   '(<a href="{}">here</a>)'.format(reverse('study-questions', args=[self.study.slug]))
             messages.info(self.request, mark_safe(msg))
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        n_questions = len(self.study.questions)
         if 'submit' in request.POST:
-            self.formset = forms.itemquestion_factory(n_questions)(request.POST, request.FILES)
+            self.formset = forms.itemquestion_factory(self.n_questions)(request.POST, request.FILES)
             if self.formset.is_valid():
                 instances = self.formset.save(commit=False)
                 scale_labels_valid = True

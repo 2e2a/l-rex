@@ -200,18 +200,20 @@ def initialize_with_questions(itemquestion_formset, questions):
             form['legend'].initial = question.legend
 
 
-itemquestion_formset_helper = FormHelper()
-itemquestion_formset_helper.add_layout(
-    Layout(
-        Fieldset('Question {{ forloop.counter }}', None, 'question', 'scale_labels', 'legend'),
-    ),
-)
-itemquestion_formset_helper.add_input(
-    Submit("submit", "Submit"),
-)
-itemquestion_formset_helper.add_input(
-    Submit("reset", "Reset"),
-)
+def itemquestion_formset_helper():
+    formset_helper = FormHelper()
+    formset_helper.add_layout(
+        Layout(
+            Fieldset('Question {{ forloop.counter }}', None, 'question', 'scale_labels', 'legend'),
+        ),
+    )
+    formset_helper.add_input(
+        Submit("submit", "Submit"),
+    )
+    formset_helper.add_input(
+        Submit("reset", "Reset"),
+    )
+    return formset_helper
 
 
 class UploadItemListForm(crispy_forms.CrispyForm):
