@@ -55,6 +55,7 @@ class PregenerateItemsForm(crispy_forms.CrispyForm):
 )
 
 
+# TODO: ItemUploadForm
 class UploadItemsForm(crispy_forms.CrispyForm):
     file = forms.FileField(
         help_text='The CSV file must contain columns for item number, condition, and text/link to the audio file. '
@@ -90,7 +91,7 @@ class UploadItemsForm(crispy_forms.CrispyForm):
         for question in self.study.questions:
             self.fields.update(
                 {
-                    'question_{}_question_column'.format(question.number):
+                    'question_{}_question_column'.format(question.number + 1):
                     forms.IntegerField(
                         initial=0,
                         help_text='Optional: specify which column contains the item-specific question. '
@@ -100,7 +101,7 @@ class UploadItemsForm(crispy_forms.CrispyForm):
             )
             self.fields.update(
                 {
-                    'question_{}_scale_column'.format(question.number):
+                    'question_{}_scale_column'.format(question.number + 1):
                         forms.IntegerField(
                             initial=0,
                             help_text='Optional: specify which column contains the item-specific '
@@ -111,7 +112,7 @@ class UploadItemsForm(crispy_forms.CrispyForm):
             )
             self.fields.update(
                 {
-                    'question_{}_legend_column'.format(question.number):
+                    'question_{}_legend_column'.format(question.number + 1):
                         forms.IntegerField(
                             initial=0,
                             help_text='Optional: specify which column contains the items-specific scale legend. '
