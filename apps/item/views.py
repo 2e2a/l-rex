@@ -384,6 +384,7 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
                         models.ItemQuestion.objects.get_or_create(
                             item=item,
                             question=row[question_col],
+                            number=question.number,
                             scale_labels=row[scale_col] if scale_col>0 else None,
                             legend=row[legend_col] if legend_col>0 else None,
                         )
