@@ -86,6 +86,14 @@
                         <a href="{% url 'trial-create' study.slug %}?test=True">Test link</a>
                     </div>
                 </div>
+                <div class="row small text-secondary">
+                    <div class="col-sm-5">
+                        Test trials:
+                    </div>
+                    <div class="col-sm-5">
+                        {{ test_trial_count }}
+                    </div>
+                </div>
             </div>
         </div>
         <div class="card  my-2">
@@ -291,6 +299,14 @@
                 <div class="row small text-secondary small text-secondary">
                     <div class="col-sm-3">
                         Trials taken:
+                    </div>
+                    <div class="col-sm-7">
+                        {{ trial_count }}
+                    </div>
+                </div>
+                <div class="row small text-secondary small text-secondary">
+                    <div class="col-sm-3">
+                        Test trials:
                     </div>
                     <div class="col-sm-7">
                         {{ trial_count }}

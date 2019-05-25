@@ -217,6 +217,11 @@ class Study(models.Model):
         return Trial.objects.filter(questionnaire__study=self, is_test=False).count()
 
     @cached_property
+    def test_trial_count(self):
+        from apps.trial.models import Trial
+        return Trial.objects.filter(questionnaire__study=self, is_test=True).count()
+
+    @cached_property
     def is_rating_possible(self):
         return self.status == StudyStatus.ACTIVE or self.status == StudyStatus.STARTED
 

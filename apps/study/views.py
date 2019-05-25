@@ -165,6 +165,7 @@ class StudyDetailView(StudyObjectMixin, CheckStudyCreatorMixin, NextStepsMixin, 
         data = super().get_context_data(**kwargs)
         data['allow_publish'] = self.study.is_allowed_publish
         data['trial_count'] = self.study.trial_count
+        data['test_trial_count'] = self.study.test_trial_count
         data['experiments_ready'] = []
         data['experiments_draft'] = []
         for experiment in self.study.experiments:
