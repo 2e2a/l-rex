@@ -400,6 +400,7 @@ class TrialCreateView(study_views.StudyMixin, generic.CreateView):
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         data['instructions_rich'] = mark_safe(markdownify(self.study.instructions))
+        data['is_test'] = self.is_test_trial
         return data
 
     def _trial_by_id(self, id):

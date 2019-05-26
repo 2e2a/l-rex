@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="my-2 p-4 border bg-white">
-    {% if study.is_rating_possible %}
+    {% if study.is_rating_possible or is_test %}
     <p>
         {{ instructions_rich }}
     </p>
