@@ -372,15 +372,15 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
 
             create_item_questions = False
             for question in self.study.questions:
-                if form.cleaned_data['question_{}_question_column'.format(question.number)] > 0:
+                if form.cleaned_data['question_{}_question_column'.format(question.number + 1)] > 0:
                     create_item_questions = True
                     break
             if create_item_questions:
                 for question in self.study.questions:
-                    question_col = form.cleaned_data['question_{}_question_column'.format(question.number)] - 1
+                    question_col = form.cleaned_data['question_{}_question_column'.format(question.number + 1)] - 1
                     if question_col > 0:
-                        scale_col = form.cleaned_data['question_{}_scale_column'.format(question.number)] - 1
-                        legend_col = form.cleaned_data['question_{}_legend_column'.format(question.number)] - 1
+                        scale_col = form.cleaned_data['question_{}_scale_column'.format(question.number + 1)] - 1
+                        legend_col = form.cleaned_data['question_{}_legend_column'.format(question.number + 1)] - 1
                         models.ItemQuestion.objects.get_or_create(
                             item=item,
                             question=row[question_col],

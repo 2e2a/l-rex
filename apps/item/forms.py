@@ -143,14 +143,14 @@ class UploadItemsForm(crispy_forms.CrispyForm):
                 if cleaned_data['block_column'] > 0:
                     assert int(row[cleaned_data['block_column'] - 1])
                 for question in self.study.questions:
-                    if cleaned_data['question_{}_question_column'.format(question.number)] > 0:
-                        assert row[cleaned_data['question_{}_question_column'.format(question.number)] - 1 ]
-                    if cleaned_data['question_{}_scale_column'.format(question.number)] > 0:
-                        assert row[cleaned_data['question_{}_scale_column'.format(question.number)] - 1]
-                        assert len(row[cleaned_data['question_{}_scale_column'.format(question.number)] - 1].split(',')) == \
+                    if cleaned_data['question_{}_question_column'.format(question.number + 1)] > 0:
+                        assert row[cleaned_data['question_{}_question_column'.format(question.number + 1)] - 1 ]
+                    if cleaned_data['question_{}_scale_column'.format(question.number + 1)] > 0:
+                        assert row[cleaned_data['question_{}_scale_column'.format(question.number + 1)] - 1]
+                        assert len(row[cleaned_data['question_{}_scale_column'.format(question.number + 1)] - 1].split(',')) == \
                                question.scalevalue_set.count()
-                    if cleaned_data['question_{}_legend_column'.format(question.number)] > 0:
-                        assert row[cleaned_data['question_{}_legend_column'.format(question.number)] - 1]
+                    if cleaned_data['question_{}_legend_column'.format(question.number + 1)] > 0:
+                        assert row[cleaned_data['question_{}_legend_column'.format(question.number + 1)] - 1]
             contrib_csv.seek_file(cleaned_data)
             self.detected_csv = {
                 'delimiter': delimiter,
