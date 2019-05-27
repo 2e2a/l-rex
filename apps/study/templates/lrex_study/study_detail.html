@@ -83,7 +83,11 @@
                         Test:
                     </div>
                     <div class="col-sm-5">
+                        {% if allow_publish %}
                         <a href="{% url 'trial-create' study.slug %}?test=True">Test link</a>
+                        {% else %}
+                        <a class="card-link text-muted">Test link</a>
+                        {% endif %}
                     </div>
                 </div>
                 <div class="row small text-secondary">
