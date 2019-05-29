@@ -6,6 +6,11 @@ from django import forms
 
 DEFAULT_DELIMITER = ';'
 DEFAULT_QUOTING = csv.QUOTE_MINIMAL
+DEFAULT_DIALECT = {
+    'delimiter': DEFAULT_DELIMITER,
+    'quoting': DEFAULT_QUOTING,
+    'has_header': True,
+}
 
 
 def read_file(form_cleaned_data):
@@ -36,6 +41,8 @@ def get_min_columns(form_cleaned_data):
 
 def detect_dialect(data, form_cleaned_data, int_column_names=None):
 
+    SNIFF_ROWS = 2
+
     def _row_column_types_match(row, int_columns):
         for col in int_columns:
             try:
@@ -57,15 +64,24 @@ def detect_dialect(data, form_cleaned_data, int_column_names=None):
         for delimiter in delimiters:
             reader = csv.reader(StringIO(data), delimiter=delimiter, quoting=csv.QUOTE_MINIMAL)
             first_row = next(reader)
-            rows = [next(reader), next(reader)]
+            rows = []
+            try:
+                for _ in range(SNIFF_ROWS):
+                    rows.append(next(reader))
+            except StopIteration:
+                pass
             rows_valid = True
-            for row in rows:
+            if len(rows) > 0:
+                for row in rows:
+                    if not _is_row_valid(row, int_columns, min_columns):
+                        rows_valid = False
+                        break
+                if rows_valid:
+                    has_header = _has_header(first_row, int_columns)
+                    return delimiter, csv.QUOTE_MINIMAL, has_header
+            else:
                 if not _is_row_valid(row, int_columns, min_columns):
-                    rows_valid = False
-                    break
-            if rows_valid:
-                has_header = _has_header(first_row, int_columns)
-                return delimiter, csv.QUOTE_MINIMAL, has_header
+                    return delimiter, csv.QUOTE_MINIMAL, False
         raise forms.ValidationError('Unsupported CSV format.')
     except (UnicodeDecodeError, TypeError):
         raise forms.ValidationError('Unsupported file encoding. Use UTF-8 or Latin-1.')

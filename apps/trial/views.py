@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.utils.safestring import mark_safe
+from django.utils.timezone import now
 from django.urls import reverse
 from django.utils.functional import cached_property
 from django.views import generic
@@ -280,38 +281,13 @@ class QuestionnaireUploadView(study_views.StudyMixin, study_views.CheckStudyCrea
     def form_valid(self, form):
         result =  super().form_valid(form)
         self.study.questionnaire_set.all().delete()
-        file = form.cleaned_data['file']
-        questionnaire_col = form.cleaned_data['questionnaire_column'] - 1
-        experiment_col = form.cleaned_data['experiment_column'] - 1
-        num_col = form.cleaned_data['item_number_column'] - 1
-        cond_col = form.cleaned_data['item_condition_column'] - 1
-
+        columns = {
+            'questionnaires': form.cleaned_data['questionnaires_column'] - 1,
+            'items': form.cleaned_data['items_column'] - 1,
+            'lists': form.cleaned_data['item_lists_column'] - 1,
+        }
         data = contrib_csv.read_file(form.cleaned_data)
-        reader = csv.reader(
-            StringIO(data), delimiter=form.detected_csv['delimiter'], quoting=form.detected_csv['quoting']
-        )
-        if form.detected_csv['has_header']:
-            next(reader)
-        items = []
-        questionnaire_num_last = None
-        for row in reader:
-            if not row:
-                continue
-            questionnaire_num = row[questionnaire_col]
-            experiment_title = row[experiment_col]
-            if questionnaire_num_last and questionnaire_num_last != questionnaire_num:
-                questionnaire = models.Questionnaire.objects.create(study=self.study, number=questionnaire_num_last)
-                for i, item in enumerate(items):
-                    models.QuestionnaireItem.objects.create(number=i, questionnaire=questionnaire, item=item)
-                items = []
-            item = item_models.Item.objects.get(
-                experiment__title=experiment_title, number=row[num_col], condition=row[cond_col]
-            )
-            items.append(item)
-            questionnaire_num_last = questionnaire_num
-        questionnaire = models.Questionnaire.objects.create(study=self.study, number=questionnaire_num_last)
-        for i, item in enumerate(items):
-            models.QuestionnaireItem.objects.create(number=i, questionnaire=questionnaire, item=item)
+        self.study.questionnaires_csv_restore(data, user_columns=columns, detected_csv=form.detected_csv)
         messages.success(self.request, 'Questionnaires uploaded')
         return result
 
@@ -328,6 +304,16 @@ class QuestionnaireUploadView(study_views.StudyMixin, study_views.CheckStudyCrea
         ]
 
 
+class QuestionnaireCSVDownloadView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, generic.View):
+
+    def get(self, request, *args, **kwargs):
+        filename = '{}_QUESTIONNAIRES_{}.csv'.format(self.study.title.replace(' ', '_'), str(now().date()))
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
+        self.study.questionnaires_csv(response)
+        return response
+
+
 class TrialListView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, generic.ListView):
     model = models.Trial
     title = 'Trials'
@@ -336,7 +322,7 @@ class TrialListView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, 
     def post(self, request, *args, **kwargs):
         action = request.POST.get('action', None)
         if action and action == 'download_proofs':
-            filename = self.study.slug + '-proofs.csv'
+            filename = '{}_PROOFS_{}.csv'.format(self.study.title.replace(' ', '_'), str(now().date()))
             response = HttpResponse(content_type='text/csv')
             response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
             self.study.rating_proofs_csv(response)

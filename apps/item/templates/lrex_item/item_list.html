@@ -21,6 +21,7 @@
     <a href="" class="btn btn-secondary btn-sm mx-1 disabled">Pregenerate items</a>
     <a href="" class="btn btn-danger btn-sm mx-1 disabled">Delete all</a>
     {% endif %}
+    <a href="{% url 'items-download' experiment.slug %}" class="btn btn-secondary btn-sm mx-1">Download CSV</a>
 </div>
 <ul class="list-group">
     {% for item in item_list %}

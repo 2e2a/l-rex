@@ -1,4 +1,5 @@
 import csv
+import re
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Fieldset, Layout, Submit
 from django import forms
@@ -136,12 +137,12 @@ class UploadItemsForm(crispy_forms.CrispyForm):
                 if not row:
                     continue
                 assert len(row) >= min_columns
-                assert int(row[cleaned_data['number_column'] - 1])
+                int(row[cleaned_data['number_column'] - 1])
                 assert row[cleaned_data['condition_column'] - 1]
                 assert len(row[cleaned_data['condition_column'] - 1]) < 8
                 assert row[cleaned_data['content_column'] - 1]
                 if cleaned_data['block_column'] > 0:
-                    assert int(row[cleaned_data['block_column'] - 1])
+                    int(row[cleaned_data['block_column'] - 1])
                 for question in self.study.questions:
                     if cleaned_data['question_{}_question_column'.format(question.number + 1)] > 0:
                         assert row[cleaned_data['question_{}_question_column'.format(question.number + 1)] - 1 ]
@@ -152,11 +153,7 @@ class UploadItemsForm(crispy_forms.CrispyForm):
                     if cleaned_data['question_{}_legend_column'.format(question.number + 1)] > 0:
                         assert row[cleaned_data['question_{}_legend_column'.format(question.number + 1)] - 1]
             contrib_csv.seek_file(cleaned_data)
-            self.detected_csv = {
-                'delimiter': delimiter,
-                'quoting': quoting,
-                'has_header': has_header,
-            }
+            self.detected_csv = { 'delimiter': delimiter, 'quoting': quoting, 'has_header': has_header }
         except (ValueError, AssertionError):
             raise forms.ValidationError(
                 'File: Unexpected format in line %(n_line)s.',
@@ -196,8 +193,7 @@ def initialize_with_questions(itemquestion_formset, questions):
         question = get_question(i, questions)
         if not form['question'].initial:
             form['question'].initial = question.question
-            scale_labels = [scale_value.label for scale_value in question.scalevalue_set.all()]
-            form['scale_labels'].initial = ','.join(scale_labels)
+            form['scale_labels'].initial = question.scale_labels
             form['legend'].initial = question.legend
 
 
@@ -226,42 +222,62 @@ class UploadItemListForm(crispy_forms.CrispyForm):
         initial=1,
         help_text='Specify which column contains the item list number.',
     )
-    item_number_column = forms.IntegerField(
+    items_column = forms.IntegerField(
         initial=2,
-        help_text='Specify which column contains the item number.',
-    )
-    item_condition_column = forms.IntegerField(
-        initial=3,
-        help_text='Specify which column contains the condition.',
+        help_text='Specify which column contains the experiment items.'
+                  'Format: Comma separated list of <Item>-<Condition> (e.g. Filler-1a,Exp-2b,...).'
     )
 
     def __init__(self, *args, **kwargs):
         self.experiment = kwargs.pop('experiment')
         super().__init__(*args, **kwargs)
 
+    @staticmethod
+    def read_items(experiment, items_string):
+        items = []
+        error_msg = None
+        item_strings = items_string.split(',')
+        for item_string in item_strings:
+            pattern = re.compile('(\d+)(\D+)')
+            match = pattern.match(item_string)
+            if not match or len(match.groups()) != 2:
+                error_msg = 'Not a valid item format "{}".'.format(item_string)
+                break
+            item_num = match.group(1)
+            item_cond = match.group(2)
+            try:
+                item = models.Item.objects.get(
+                    experiment=experiment,
+                    number=item_num,
+                    condition=item_cond,
+                )
+                items.append(item)
+            except models.Item.DoesNotExist:
+                error_msg = 'Item {} does not exist.'.format(item_string)
+                break
+        if error_msg:
+            raise forms.ValidationError(error_msg)
+        return items
+
     def clean(self):
         cleaned_data = super().clean()
         data = contrib_csv.read_file(cleaned_data)
         sniff_data = contrib_csv.sniff(data)
-        validator_int_columns = ['list_column', 'item_number_column']
+        validator_int_columns = ['list_column']
         delimiter, quoting, has_header = contrib_csv.detect_dialect(sniff_data, cleaned_data, validator_int_columns)
         reader = csv.reader(StringIO(data), delimiter=delimiter, quoting=quoting)
         if has_header:
             next(reader)
         try:
-            item_count = 0
+            used_items = set()
             for row in reader:
-                assert int(row[cleaned_data['list_column'] - 1])
-                assert int(row[cleaned_data['item_number_column'] - 1])
-                item_number = row[cleaned_data['item_number_column'] - 1]
-                item_condition = row[cleaned_data['item_condition_column'] -1]
-                if not self.experiment.item_set.filter(number=item_number, condition=item_condition).exists():
-                    error = 'Item {}{} is not defined.'.format(item_number, item_condition)
-                    raise forms.ValidationError(error)
-                item_count += 1
-            if not item_count == self.experiment.item_set.count():
+                int(row[cleaned_data['list_column'] - 1])
+                items_string = row[cleaned_data['items_column'] -1]
+                used_items.update(self.read_items(self.experiment, items_string))
+            if not len(used_items) == models.Item.objects.filter(experiment=self.experiment).count():
                 raise forms.ValidationError('Not all items used in lists.')
             contrib_csv.seek_file(cleaned_data)
+            self.detected_csv = { 'delimiter': delimiter, 'quoting': quoting, 'has_header': has_header }
         except (ValueError, AssertionError):
             raise forms.ValidationError(
                 'File: Unexpected format in line %(n_line)s.',

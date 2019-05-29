@@ -4,6 +4,7 @@ from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.urls import reverse
+from django.utils.timezone import now
 from django.views import generic
 
 from apps.contrib import views as contrib_views
@@ -229,7 +230,7 @@ class ExperimentResultsCSVDownloadView(ExperimentObjectMixin, study_views.CheckS
     model = models.Experiment
 
     def get(self, request, *args, **kwargs):
-        filename = self.experiment.slug + '.csv'
+        filename = '{}_RESULTS_{}.csv'.format(self.experiment.title.replace(' ', '_'), str(now().date()))
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
         self.experiment.results_csv(response)

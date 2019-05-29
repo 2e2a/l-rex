@@ -55,6 +55,12 @@ class StudyForm(crispy_forms.CrispyModelForm):
             return self.cleaned_data['use_blocks']
 
 
+class StudyFromArchiveForm(crispy_forms.CrispyForm):
+    file = forms.FileField(
+        help_text='An L-Rex archive file previously downloaded.'
+    )
+
+
 class StudyInstructionsForm(crispy_forms.CrispyModelForm):
     optional_label_ignore_fields = [
         'instructions',
@@ -77,6 +83,26 @@ class StudyInstructionsForm(crispy_forms.CrispyModelForm):
                 'outro': 'Thank you for participating!',
             })
         super().__init__(*args, **kwargs)
+
+
+class ArchiveForm(crispy_forms.CrispyModelForm):
+    is_archived = forms.BooleanField(
+        required=True,
+        label='Please, confirm that you have successfully downloaded and checked the archive file and want to proceed.'
+    )
+
+
+    class Meta:
+        model = models.Study
+        fields = [
+            'is_archived',
+        ]
+
+    def clean_is_archived(self):
+        is_archived = self.cleaned_data['is_archived']
+        if not is_archived:
+            raise forms.ValidationError('Please confirm before proceeding.')
+        return is_archived
 
 
 class QuestionForm(crispy_forms.CrispyModelForm):

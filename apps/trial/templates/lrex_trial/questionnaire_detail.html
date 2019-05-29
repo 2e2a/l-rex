@@ -4,6 +4,18 @@
 <table class="table bg-white">
     <thead>
     <tr>
+        <th>Item Lists</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr><td>
+        {% for list in questionnaire.item_lists.all %}{{ list }}{% if not forloop.last %}, {% endif %}{% empty %}-{% endfor %}
+    </td></tr>
+    </tbody>
+</table>
+<table class="table bg-white">
+    <thead>
+    <tr>
         {% if study.use_blocks %}
         <th>Block</th>
         {% endif %}

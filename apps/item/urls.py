@@ -5,9 +5,11 @@ from . import views
 urlpatterns_experiment = [
     path('pregenerate/', views.ItemPregenerateView.as_view(), name='items-pregenerate'),
     path('upload/', views.ItemUploadView.as_view(), name='items-upload'),
+    path('download/', views.ItemCSVDownloadView.as_view(), name='items-download'),
     path('delete-all/', views.ItemDeleteAllView.as_view(), name='items-delete'),
     path('lists/', views.ItemListListView.as_view(), name='itemlists'),
     path('lists/upload/', views.ItemListUploadView.as_view(), name='itemlist-upload'),
+    path('lists/download/', views.ItemListCSVDownloadView.as_view(), name='itemlist-download'),
     path('create/text/', views.TextItemCreateView.as_view(), name='text-item-create'),
     path('create/markdown/', views.MarkdownItemCreateView.as_view(), name='markdown-item-create'),
     path('create/audio-link/', views.AudioLinkItemCreateView.as_view(), name='audio-link-item-create'),

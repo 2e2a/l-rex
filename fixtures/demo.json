@@ -160,7 +160,8 @@
         "trial_limit": null,
         "is_published": true,
         "shared_with": null,
-        "created_date": "2019-04-17"
+        "created_date": "2019-04-17",
+        "is_archived": false
     }
 },
 {
@@ -184,7 +185,8 @@
         "trial_limit": null,
         "is_published": true,
         "shared_with": null,
-        "created_date": "2019-04-17"
+        "created_date": "2019-04-17",
+        "is_archived": false
     }
 },
 {
@@ -2538,7 +2540,7 @@
     "pk": 2,
     "fields": {
         "experiment": 1,
-        "number": 0,
+        "number": 1,
         "items": [
             2,
             7,
@@ -2556,7 +2558,7 @@
     "pk": 3,
     "fields": {
         "experiment": 1,
-        "number": 0,
+        "number": 2,
         "items": [
             3,
             8,
@@ -2574,7 +2576,7 @@
     "pk": 4,
     "fields": {
         "experiment": 1,
-        "number": 0,
+        "number": 3,
         "items": [
             4,
             5,
@@ -2636,7 +2638,7 @@
     "pk": 7,
     "fields": {
         "experiment": 3,
-        "number": 0,
+        "number": 1,
         "items": [
             50,
             55,
@@ -2654,7 +2656,7 @@
     "pk": 8,
     "fields": {
         "experiment": 3,
-        "number": 0,
+        "number": 2,
         "items": [
             51,
             56,
@@ -2672,7 +2674,7 @@
     "pk": 9,
     "fields": {
         "experiment": 3,
-        "number": 0,
+        "number": 3,
         "items": [
             52,
             53,
@@ -2706,7 +2708,7 @@
     "pk": 11,
     "fields": {
         "experiment": 4,
-        "number": 0,
+        "number": 1,
         "items": [
             82,
             86,
@@ -2722,7 +2724,7 @@
     "pk": 12,
     "fields": {
         "experiment": 4,
-        "number": 0,
+        "number": 2,
         "items": [
             83,
             84,
@@ -2787,7 +2789,7 @@
     "pk": 2,
     "fields": {
         "item": 81,
-        "number": 0,
+        "number": 1,
         "question": "Is it plausible that a waiter cleans a table?",
         "scale_labels": null,
         "legend": null
@@ -2809,7 +2811,7 @@
     "pk": 4,
     "fields": {
         "item": 82,
-        "number": 0,
+        "number": 1,
         "question": "Is it plausible that a waiter cleans a table?",
         "scale_labels": null,
         "legend": null
@@ -2831,7 +2833,7 @@
     "pk": 6,
     "fields": {
         "item": 83,
-        "number": 0,
+        "number": 1,
         "question": "Is it plausible that a waiter cleans a table?",
         "scale_labels": null,
         "legend": null
@@ -2853,7 +2855,7 @@
     "pk": 8,
     "fields": {
         "item": 84,
-        "number": 0,
+        "number": 1,
         "question": "Is it plausible that a lady reads a paper?",
         "scale_labels": null,
         "legend": null
@@ -2875,7 +2877,7 @@
     "pk": 10,
     "fields": {
         "item": 85,
-        "number": 0,
+        "number": 1,
         "question": "Is it plausible that a lady reads a paper?",
         "scale_labels": null,
         "legend": null
@@ -2897,7 +2899,7 @@
     "pk": 12,
     "fields": {
         "item": 86,
-        "number": 0,
+        "number": 1,
         "question": "Is it plausible that a lady reads a paper?",
         "scale_labels": null,
         "legend": null
@@ -2919,7 +2921,7 @@
     "pk": 14,
     "fields": {
         "item": 87,
-        "number": 0,
+        "number": 1,
         "question": "Is it plausible that a landlord sells a lamp?",
         "scale_labels": null,
         "legend": null
@@ -2941,7 +2943,7 @@
     "pk": 16,
     "fields": {
         "item": 88,
-        "number": 0,
+        "number": 1,
         "question": "Is it plausible that a landlord sells a lamp?",
         "scale_labels": null,
         "legend": null
@@ -2963,7 +2965,7 @@
     "pk": 18,
     "fields": {
         "item": 89,
-        "number": 0,
+        "number": 1,
         "question": "Is it plausible that a landlord sells a lamp?",
         "scale_labels": null,
         "legend": null
@@ -2985,7 +2987,7 @@
     "pk": 20,
     "fields": {
         "item": 90,
-        "number": 0,
+        "number": 1,
         "question": "Is it plausible that a driver loses a map?",
         "scale_labels": null,
         "legend": null
@@ -3007,7 +3009,7 @@
     "pk": 22,
     "fields": {
         "item": 91,
-        "number": 0,
+        "number": 1,
         "question": "Is it plausible that a driver loses a map?",
         "scale_labels": null,
         "legend": null
@@ -3029,7 +3031,7 @@
     "pk": 24,
     "fields": {
         "item": 92,
-        "number": 0,
+        "number": 1,
         "question": "Is it plausible that a driver loses a map?",
         "scale_labels": null,
         "legend": null
@@ -3051,7 +3053,7 @@
     "pk": 26,
     "fields": {
         "item": 93,
-        "number": 0,
+        "number": 1,
         "question": "Is it plausible that a daughter repairs a radio?",
         "scale_labels": null,
         "legend": null
@@ -3073,7 +3075,7 @@
     "pk": 28,
     "fields": {
         "item": 94,
-        "number": 0,
+        "number": 1,
         "question": "Is it plausible that a daughter repairs a radio?",
         "scale_labels": null,
         "legend": null
@@ -3095,7 +3097,7 @@
     "pk": 30,
     "fields": {
         "item": 95,
-        "number": 0,
+        "number": 1,
         "question": "Is it plausible that a daughter repairds a radio?",
         "scale_labels": null,
         "legend": null
@@ -3117,7 +3119,7 @@
     "pk": 32,
     "fields": {
         "item": 96,
-        "number": 0,
+        "number": 1,
         "question": "Is it plausible that a son breaks a cup?",
         "scale_labels": null,
         "legend": null
@@ -3139,7 +3141,7 @@
     "pk": 34,
     "fields": {
         "item": 97,
-        "number": 0,
+        "number": 1,
         "question": "Is it plausible that a son breaks a cup?",
         "scale_labels": null,
         "legend": null
@@ -3161,7 +3163,7 @@
     "pk": 36,
     "fields": {
         "item": 98,
-        "number": 0,
+        "number": 1,
         "question": "Is it plausible that a son breaks a cup?",
         "scale_labels": null,
         "legend": null

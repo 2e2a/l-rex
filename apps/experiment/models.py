@@ -68,15 +68,6 @@ class Experiment(models.Model):
         return sorted(item_bocks)
 
     @cached_property
-    def is_allowed_create_items(self):
-        if not self.experiments:
-            return False
-        for experiment in self.experiments:
-            if not experiment.is_complete:
-                return False
-        return True
-
-    @cached_property
     def is_complete(self):
         # TODO: check if valid, differentiate from has_lists
         return self.itemlist_set.exists()
@@ -140,7 +131,7 @@ class Experiment(models.Model):
                         len(item_question.scale_labels.split(',')) !=  \
                         questions[item_question.number].scalevalue_set.count():
                     msg = 'Scale of the item question "{}" does not match the study question {} ' \
-                          'scale.'.format(item, item_question.number)
+                          'scale.'.format(item, item_question.number + 1)
                     raise AssertionError(msg)
 
         if self.study.has_text_items or self.study.has_markdown_items:
@@ -170,8 +161,11 @@ class Experiment(models.Model):
         if distribute:
             conditions = self.conditions
             condition_count = len(conditions)
-            for _ in range(condition_count):
-                item_list = item_models.ItemList.objects.create(experiment=self)
+            for i in range(condition_count):
+                item_list = item_models.ItemList.objects.create(
+                    experiment=self,
+                    number=i,
+                )
                 item_lists.append(item_list)
 
             for i, item in enumerate(self.item_set.all().order_by('number', 'condition')):
@@ -200,11 +194,8 @@ class Experiment(models.Model):
             row['question'] = rating.question
             row['rating'] = rating.scale_value.number
             row['label'] = rating.scale_value.label
-            if hasattr(item, 'textitem'):
-                row['text'] = item.textitem.text
-
+            row['content'] = item.content
             results.append(row)
-
         results_sorted = sorted(results, key=lambda r: (r['subject'], r['item'], r['condition']))
         return results_sorted
 
@@ -275,20 +266,164 @@ class Experiment(models.Model):
                 n_questions = len(self.study.questions)
                 for col in ['subject', 'item', 'condition', 'position']:
                     new_row[col] = row[col]
-                if 'text' in row:
-                    new_row['text'] =  row['text']
+                if 'content' in row:
+                    new_row['content'] =  row['content']
                 new_row['ratings'] = [-1] * n_questions
                 new_row['ratings'][row['question']] = row['label']
                 aggregated_results.append(new_row)
         return aggregated_results
+
+    def items_csv_header(self, add_experiment_column=False):
+        csv_row = ['experiment'] if add_experiment_column else []
+        csv_row.extend(['item', 'condition', 'content', 'block'])
+        for question in self.study.questions:
+            csv_row.append('question{}'.format(question.number + 1))
+            csv_row.append('scale{}'.format(question.number + 1))
+            csv_row.append('legend{}'.format(question.number + 1))
+        return csv_row
+
+    def items_csv(self, fileobj, add_header=True, add_experiment_column=False):
+        writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
+        if add_header:
+            header = self.items_csv_header(add_experiment_column=add_experiment_column)
+            writer.writerow(header)
+        for item in self.items:
+            csv_row = [self.title] if add_experiment_column else []
+            csv_row.extend([item.number, item.condition, item.content, item.block])
+            for question in self.study.questions:
+                if item.itemquestion_set.filter(number=question.number).exists():
+                    itemquestion = item.itemquestion_set.get(number=question.number)
+                    csv_row.extend([
+                        itemquestion.question if itemquestion.question else '',
+                        itemquestion.scale_labels if itemquestion.scale_labels else '',
+                        itemquestion.legend if itemquestion.legend else '',
+                    ])
+                else:
+                    csv_row.extend(['', '', ''])
+            writer.writerow(csv_row)
+
+    def _csv_columns(self, header_func, add_experiment_column=False, user_columns=None):
+        columns = {}
+        if user_columns:
+            columns = user_columns
+            if add_experiment_column:
+                columns.update({'experiment': 0})
+        else:
+            header = header_func(add_experiment_column=add_experiment_column)
+            for i, column in enumerate(header):
+                columns.update({column: i})
+        return columns
+
+    def items_csv_create(self, fileobj, has_experiment_column=False, user_columns=None, detected_csv=contrib_csv.DEFAULT_DIALECT):
+        new_items = []
+        items_to_delete = list(item_models.Item.objects.filter(experiment=self).all())
+        columns = self._csv_columns(self.items_csv_header, add_experiment_column=has_experiment_column, user_columns=user_columns)
+        reader = csv.reader(fileobj, delimiter=detected_csv['delimiter'], quoting=detected_csv['quoting'])
+        if detected_csv['has_header']:
+            next(reader)
+        for row in reader:
+            if not row:
+                continue
+            if has_experiment_column and not row[columns['experiment']] == self.title:
+                continue
+            item = None
+            if 'block' in columns and row[columns['block']]:
+                block = int(row[columns['block']])
+            else:
+                block = 1
+            if self.study.has_text_items:
+                item, created = item_models.TextItem.objects.get_or_create(
+                    number=row[columns['item']],
+                    condition=row[columns['condition']],
+                    text=row[columns['content']],
+                    experiment=self,
+                    block=block,
+                )
+            elif self.study.has_markdown_items:
+                item, created = item_models.MarkdownItem.objects.get_or_create(
+                    number=row[columns['item']],
+                    condition=row[columns['condition']],
+                    text=row[columns['content']],
+                    experiment=self,
+                    block=block,
+                )
+            elif self.study.has_audiolink_items:
+                item, created = item_models.AudioLinkItem.objects.get_or_create(
+                    number=row[columns['item']],
+                    condition=row[columns['condition']],
+                    url=row[columns['content']],
+                    experiment=self,
+                    block=block,
+                )
+
+            if created:
+                new_items.append(item)
+            else:
+                items_to_delete.remove(item.item_ptr)
+
+            for question in self.study.questions:
+                question_column = 'question{}'.format(question.number + 1)
+                if question_column in columns:
+                    question_question = row[columns[question_column]]
+                    scale_labels_column = 'scale{}'.format(question.number + 1)
+                    legend_column = 'legend{}'.format(question.number + 1)
+                    scale_labels = row[columns[scale_labels_column]] if scale_labels_column in columns else None
+                    legend = row[columns[legend_column]] if legend_column in columns else None
+                    item_models.ItemQuestion.objects.get_or_create(
+                        item=item,
+                        question=question_question,
+                        number=question.number,
+                        scale_labels=scale_labels,
+                        legend=legend,
+                    )
+        if new_items or items_to_delete and self.is_complete:
+            self.delete_lists()
+        for item in items_to_delete:
+            item.delete()
+        self.validate_items()
+
+    def itemlists_csv_header(self, add_experiment_column=False):
+        csv_row = ['experiment'] if add_experiment_column else []
+        csv_row.extend(['list', 'items'])
+        return csv_row
+
+    def itemlists_csv(self, fileobj, add_header=True, add_experiment_column=False):
+        writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
+        if add_header:
+            header = self.itemlists_csv_header()
+            writer.writerow(header)
+        for item_list in self.itemlist_set.all():
+            csv_row = [self.title] if add_experiment_column else []
+            csv_row.extend([
+                item_list.number,
+                ','.join([str(item) for item in item_list.items.all()])
+            ])
+            writer.writerow(csv_row)
+
+    def itemlists_csv_create(self, fileobj, has_experiment_column=False, user_columns=None, detected_csv=contrib_csv.DEFAULT_DIALECT):
+        from apps.item.forms import UploadItemListForm
+        self.delete_lists()
+        reader = csv.reader(fileobj, delimiter=detected_csv['delimiter'], quoting=detected_csv['quoting'])
+        if detected_csv['has_header']:
+            next(reader)
+        columns = self._csv_columns(self.itemlists_csv_header, add_experiment_column=has_experiment_column, user_columns=user_columns)
+        for row in reader:
+            if not row:
+                continue
+            if has_experiment_column and not row[columns['experiment']] == self.title:
+                continue
+            list_num = row[columns['list']]
+            items_string = row[columns['items']]
+            items = UploadItemListForm.read_items(self, items_string)
+            itemlist = item_models.ItemList.objects.create(experiment=self, number=list_num)
+            itemlist.items.set(items)
 
     def results_csv_header(self, add_experiment_column=False):
         csv_row = ['experiment'] if add_experiment_column else []
         csv_row.extend(['subject', 'item', 'condition', 'position'])
         for question in self.study.questions:
             csv_row.append('rating{}'.format(question.number + 1))
-        if self.study.has_text_items:
-            csv_row.append('text')
+        csv_row.append('content')
         return csv_row
 
     def results_csv(self, fileobj, add_header=True, add_experiment_column=False):
@@ -303,8 +438,7 @@ class Experiment(models.Model):
             csv_row.extend([row['subject'], row['item'], row['condition'], row['position']])
             for rating in row['ratings']:
                 csv_row.append(rating)
-            if self.study.has_text_items:
-                csv_row.append(row['text'])
+            csv_row.append(row['content'])
             writer.writerow(csv_row)
 
     STEP_DESCRIPTION = {

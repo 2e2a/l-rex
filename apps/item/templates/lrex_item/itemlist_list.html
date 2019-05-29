@@ -18,10 +18,12 @@
         </div>
     </div>
     </form>
-<!--    <a href="{% url 'itemlist-upload' experiment.slug %} class="btn btn-secondary btn-sm mx-1">Upload custom CSV</a>-->
+    <a href="{% url 'itemlist-upload' experiment.slug %}" class="btn btn-secondary btn-sm mx-1">Upload CSV</a>
     {% else %}
     <a href="" class="btn btn-primary btn-sm mx-1 disabled">Generate lists</a>
+    <a href="" class="btn btn-secondary btn-sm mx-1 disabled">Upload CSV</a>
     {% endif %}
+    <a href="{% url 'itemlist-download' experiment.slug %}" class="btn btn-secondary btn-sm mx-1">Download CSV</a>
 </div>
 <table class="table bg-white">
     <thead>

@@ -235,6 +235,7 @@ class QuestionnaireBlock(models.Model):
         choices=RANDOMIZATION_TYPE,
         default=RANDOMIZATION_PSEUDO,
         help_text='Randomize items in each questionnaire block',
+        blank=True,
     )
     study = models.ForeignKey(
         'lrex_study.Study',

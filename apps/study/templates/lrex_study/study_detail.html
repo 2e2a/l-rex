@@ -3,18 +3,15 @@
 {% load static %}
 
 {% block content %}
+{% if not study.is_archived %}
 <div class="text-center mb-2">
     {% if allow_publish %}
     <form class="form-inline" method="post">
         {% csrf_token %}
         {% if study.is_published %}
-        <button type="submit" name="action" value="unpublish" class="btn btn-warning btn-sm mx-1">
-            Unpublish
-        </button>
+        <button type="submit" name="action" value="unpublish" class="btn btn-warning btn-sm mx-1">Unpublish</button>
         {% else %}
-        <button type="submit" name="action" value="publish" class="btn btn-success btn-sm mx-1">
-            Publish
-        </button>
+        <button type="submit" name="action" value="publish" class="btn btn-success btn-sm mx-1">Publish</button>
         {% endif %}
     </form>
     {% else %}
@@ -324,4 +321,9 @@
         </div>
     </div>
 </div>
+{% else %}
+<div class="p-4 border bg-white">
+    Study has been archived. <a href="{% url 'study-archive-restore' study.slug %}">Restore the study?</a>
+</div>
+{% endif %}
 {% endblock %}

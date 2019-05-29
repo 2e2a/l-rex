@@ -29,6 +29,16 @@ class Item(models.Model):
     class Meta:
         ordering = ['number', 'condition']
 
+    @property
+    def content(self):
+        if self.textitem:
+            return self.textitem.text
+        elif self.markdownitem:
+            return self.markdownitem.text
+        elif self.audiolinkitem:
+            return self.audiolinkitem.url
+        return ''
+
     def __str__(self):
         return '{}{}'.format(self.number, self.condition)
 
@@ -85,10 +95,6 @@ class ItemList(models.Model):
 
     def __str__(self):
         return '{} {}'.format(self.experiment, self.number)
-
-    @property
-    def num(self):
-        return list(ItemList.objects.filter(experiment=self.experiment)).index(self) + 1
 
     def next(self):
         next_list =  self.experiment.itemlist_set.filter(pk__gt=self.pk).first()

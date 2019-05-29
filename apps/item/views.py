@@ -4,9 +4,11 @@ from string import ascii_lowercase
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import ValidationError
+from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.safestring import mark_safe
+from django.utils.timezone import now
 from django.views import generic
 
 from apps.contrib import views as contrib_views
@@ -321,81 +323,26 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
 
     def form_valid(self, form):
         result = super().form_valid(form)
-
-        new_items = []
-        items_to_delete = list(models.Item.objects.filter(experiment=self.experiment).all())
-
-        num_col = form.cleaned_data['number_column'] - 1
-        cond_col = form.cleaned_data['condition_column'] - 1
-        content_col = form.cleaned_data['content_column'] - 1
-        block_col = form.cleaned_data['block_column'] - 1 if form.cleaned_data['block_column'] > 0 else None
-
-        data = contrib_csv.read_file(form.cleaned_data)
-        reader = csv.reader(
-            StringIO(data), delimiter=form.detected_csv['delimiter'], quoting=form.detected_csv['quoting']
-        )
-        if form.detected_csv['has_header']:
-            next(reader)
-        for row in reader:
-            if not row:
-                continue
-            item = None
-            if self.study.has_text_items:
-                item, created = models.TextItem.objects.get_or_create(
-                    number=row[num_col],
-                    condition=row[cond_col],
-                    text=row[content_col],
-                    experiment=self.experiment,
-                    block=row[block_col] if block_col else 1,
-                )
-            elif self.study.has_markdown_items:
-                item, created = models.MarkdownItem.objects.get_or_create(
-                    number=row[num_col],
-                    condition=row[cond_col],
-                    text=row[content_col],
-                    experiment=self.experiment,
-                    block=row[block_col] if block_col else 1,
-                )
-            elif self.study.has_audiolink_items:
-                item, created = models.AudioLinkItem.objects.get_or_create(
-                    number=row[num_col],
-                    condition=row[cond_col],
-                    url=row[content_col],
-                    experiment=self.experiment,
-                    block=row[block_col] if block_col else 1,
-                )
-
-            if created:
-                new_items.append(item)
-            else:
-                items_to_delete.remove(item)
-
-            create_item_questions = False
-            for question in self.study.questions:
-                if form.cleaned_data['question_{}_question_column'.format(question.number + 1)] > 0:
-                    create_item_questions = True
-                    break
-            if create_item_questions:
-                for question in self.study.questions:
-                    question_col = form.cleaned_data['question_{}_question_column'.format(question.number + 1)] - 1
-                    if question_col > 0:
-                        scale_col = form.cleaned_data['question_{}_scale_column'.format(question.number + 1)] - 1
-                        legend_col = form.cleaned_data['question_{}_legend_column'.format(question.number + 1)] - 1
-                        models.ItemQuestion.objects.get_or_create(
-                            item=item,
-                            question=row[question_col],
-                            number=question.number,
-                            scale_labels=row[scale_col] if scale_col>0 else None,
-                            legend=row[legend_col] if legend_col>0 else None,
-                        )
+        columns = {
+            'item': form.cleaned_data['number_column'] - 1,
+            'condition': form.cleaned_data['condition_column'] - 1,
+            'content': form.cleaned_data['content_column'] - 1,
+        }
+        if form.cleaned_data['block_column'] > 0:
+            columns.update({'block': form.cleaned_data['block'] - 1})
+        for i, question in enumerate(self.study.questions):
+            question_column = 'question_{}_question_column'.format(question.number + 1)
+            if form.cleaned_data[question_column] > 0:
+                columns.update({'question{}'.format(i): form.cleaned_data[question_column] - 1})
+            scale_column = 'question_{}_scale_column'.format(question.number + 1)
+            if form.cleaned_data[scale_column] > 0:
+                columns.update({'scale{}'.format(i): form.cleaned_data[scale_column] - 1})
+            legend_column = 'question_{}_legend_column'.format(question.number + 1)
+            if form.cleaned_data[legend_column] > 0:
+                columns.update({'legend{}'.format(i): form.cleaned_data[legend_column] - 1})
+        data = StringIO(contrib_csv.read_file(form.cleaned_data))
+        self.experiment.items_csv_create(data, has_experiment_column=False, user_columns=columns, detected_csv=form.detected_csv)
         messages.success(self.request, 'Items uploaded')
-        if new_items or items_to_delete and self.experiment.is_complete:
-            self.experiment.delete_lists()
-            msg = 'Note: Items have changed. Deleting old lists and questionnaires.'
-            messages.info(self.request, msg)
-        for item in items_to_delete:
-            item.delete()
-        self.validate_items()
         return result
 
     def get_success_url(self):
@@ -502,6 +449,18 @@ class ItemQuestionsUpdateView(ItemMixin, study_views.CheckStudyCreatorMixin, stu
         ]
 
 
+class ItemCSVDownloadView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin, generic.View):
+
+    def get(self, request, *args, **kwargs):
+        filename = '{}_{}_ITEMS_{}.csv'.format(
+            self.study.title.replace(' ', '_'), self.experiment.title.replace(' ', '_'), str(now().date())
+        )
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
+        self.experiment.items_csv(response)
+        return response
+
+
 class ItemListListView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin, study_views.NextStepsMixin,
                        study_views.DisableFormIfStudyActiveMixin, generic.ListView):
     model = models.ItemList
@@ -552,38 +511,13 @@ class ItemListUploadView(experiment_views.ExperimentMixin, study_views.CheckStud
     def form_valid(self, form):
         result =  super().form_valid(form)
         self.experiment.itemlist_set.all().delete()
-        file = form.cleaned_data['file']
-        list_col = form.cleaned_data['list_column'] - 1
-        num_col = form.cleaned_data['item_number_column'] - 1
-        cond_col = form.cleaned_data['item_condition_column'] - 1
-        try:
-            data = file.read().decode('utf-8')
-        except UnicodeDecodeError:
-            file.seek(0)
-            data = file.read().decode('latin-1')
-        data_len = len(data)
-        sniff_data = data[:16 if data_len > 16 else data_len]
-        has_header = csv.Sniffer().has_header(sniff_data)
-        dialect = csv.Sniffer().sniff(sniff_data)
-        reader = csv.reader(StringIO(data), dialect)
-        if has_header:
-            next(reader)
-        items = []
-        list_num_last = None
-        for row in reader:
-            if not row:
-                continue
-            list_num = row[list_col]
-            if list_num_last and list_num_last != list_num:
-                itemlist = models.ItemList.objects.create(experiment=self.experiment)
-                itemlist.items.set(items)
-                items = []
-            item = self.experiment.item_set.get(number=row[num_col], condition=row[cond_col])
-            items.append(item)
-            list_num_last = list_num
-        itemlist = models.ItemList.objects.create(experiment=self.experiment)
-        itemlist.items.set(items)
-        messages.success(self.request, 'Lists uploaded.')
+        columns = {
+            'list': form.cleaned_data['list_column'] - 1,
+            'items': form.cleaned_data['items_column'] - 1,
+        }
+        data = StringIO(contrib_csv.read_file(form.cleaned_data))
+        self.experiment.itemlists_csv_create(data, has_experiment_column=False, user_columns=columns, detected_csv=form.detected_csv)
+        messages.success(self.request, 'Item lists uploaded')
         return result
 
     def get_success_url(self):
@@ -601,3 +535,13 @@ class ItemListUploadView(experiment_views.ExperimentMixin, study_views.CheckStud
         ]
 
 
+class ItemListCSVDownloadView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin, generic.View):
+
+    def get(self, request, *args, **kwargs):
+        filename = '{}_{}_LISTS_{}.csv'.format(
+            self.study.title.replace(' ', '_'), self.experiment.title.replace(' ', '_'), str(now().date())
+        )
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
+        self.experiment.itemlists_csv(response)
+        return response

@@ -18,12 +18,13 @@
             {% endif %}
         </div>
         <div>
-            <a href="{% url 'study' study.slug %}" class="btn btn-outline-primary btn-sm mx-1">
-                Details
-            </a>
-            <a href="{% url 'study-delete' study.slug %}" class="btn btn-outline-danger btn-sm mx-1">
-                Delete
-            </a>
+            <a href="{% url 'study' study.slug %}" class="btn btn-outline-primary btn-sm mx-1">Details</a>
+            {% if not study.is_archived %}
+            <a href="{% url 'study-archive' study.slug %}" class="btn btn-outline-secondary btn-sm mx-1">Archive</a>
+            {% else %}
+            <a href="{% url 'study-archive-restore' study.slug %}" class="btn btn-outline-secondary btn-sm mx-1">Restore</a>
+            {% endif %}
+            <a href="{% url 'study-delete' study.slug %}" class="btn btn-outline-danger btn-sm mx-1">Delete</a>
         </div>
     </li>
     {% empty %}

@@ -7,6 +7,7 @@ from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.safestring import mark_safe
+from django.utils.timezone import now
 from django.views import generic
 
 from apps.contrib import views as contib_views
@@ -34,6 +35,7 @@ class WarnUserIfStudyActiveMixin:
 
 
 class DisableFormIfStudyActiveMixin(WarnUserIfStudyActiveMixin):
+    # TODO: disable fields
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
@@ -230,6 +232,72 @@ class StudyDeleteView(StudyObjectMixin, CheckStudyCreatorMixin, contib_views.Def
         return reverse('studies')
 
 
+class StudyArchiveView(StudyObjectMixin, CheckStudyCreatorMixin, generic.UpdateView):
+    model = models.Study
+    template_name = 'lrex_study/study_archive.html'
+    form_class = forms.ArchiveForm
+    title = 'Archive the study'
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        self.study.archive()
+        return redirect('studies')
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('archive', ''),
+        ]
+
+
+class StudyArchiveDownloadView(StudyObjectMixin, CheckStudyCreatorMixin, generic.DetailView):
+    model = models.Study
+
+    def get(self, request, *args, **kwargs):
+        filename = '{}_ARCHIVE_{}.zip'.format(self.study.title.replace(' ', '_'), str(now().date()))
+        response = HttpResponse(content_type='application/zip')
+        response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
+        self.study.archive_file(response)
+        return response
+
+
+class StudyCreateFromArchiveView(LoginRequiredMixin, generic.FormView):
+    model = models.Study
+    title = 'Create study from archive'
+    template_name = 'lrex_contrib/crispy_form.html'
+    form_class = forms.StudyFromArchiveForm
+    success_message = 'Study successfully created.'
+
+    def form_valid(self, form):
+        form.instance.creator = self.request.user
+        response = super().form_valid(form)
+        messages.success(self.request, 'Study successfully created.')
+        return response
+
+
+class StudyRestoreFromArchiveView(StudyMixin, CheckStudyCreatorMixin, SuccessMessageMixin, generic.FormView):
+    title = 'Restore study from archive'
+    template_name = 'lrex_contrib/crispy_form.html'
+    form_class = forms.StudyFromArchiveForm
+    success_message = 'Study successfully restored.'
+
+
+    def get(self, request, *args, **kwargs):
+        messages.info(self.request, 'Note: Please be patient, restoring a study might take a while.')
+        return super().get(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        file = form['file'].value()
+        self.study.restore_from_archive(file)
+        return response
+
+    def get_success_url(self):
+        return reverse('study', args=[self.study.slug])
+
+
 class StudyInstructionsUpdateView(StudyObjectMixin, CheckStudyCreatorMixin, SuccessMessageMixin,
                                   DisableFormIfStudyActiveMixin, generic.UpdateView):
     model = models.Study
@@ -348,8 +416,8 @@ class StudyResultsCSVDownloadView(StudyObjectMixin, CheckStudyCreatorMixin, gene
     model = models.Study
 
     def get(self, request, *args, **kwargs):
-        filename = self.study.slug + '.csv'
+        filename = '{}_RESULTS_{}.zip'.format(self.study.title.replace(' ', '_'), str(now().date()))
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
-        self.study.results_csv(response,  )
+        self.study.results_csv(response)
         return response

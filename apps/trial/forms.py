@@ -1,4 +1,5 @@
 import csv
+import re
 from io import StringIO
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import HTML, Field, Fieldset, Layout, Submit
@@ -6,7 +7,6 @@ from django import forms
 
 from apps.contrib import forms as crispy_forms
 from apps.contrib import csv as contrib_csv
-from apps.experiment import models as experiment_models
 from apps.item import models as item_models
 from apps.study import models as study_models
 
@@ -88,60 +88,105 @@ class UploadQuestionnaireForm(crispy_forms.CrispyForm):
         initial=1,
         help_text='Specify which column contains the questionnaire number.',
     )
-    experiment_column = forms.IntegerField(
-        initial=2,
-        help_text='Specify which column contains the experiment title.',
-    )
-    item_number_column = forms.IntegerField(
+    items_column = forms.IntegerField(
         initial=3,
-        help_text='Specify which column contains the item number.',
+        help_text='Specify which column contains the questionnaire items.'
+                  'Format: Comma separated list of <ExperimentTitle>-<Item>-<Condition> (e.g. Filler-1a,Exp-2b,...).'
     )
-    item_condition_column = forms.IntegerField(
-        initial=4,
-        help_text='Specify which column contains the condition.',
+    item_lists_column = forms.IntegerField(
+        initial=-1,
+        help_text='Specify which column contains the questionnaire item lists.'
+                  'Format: Comma separated list of <ExperimentTitle>-<ListNumber> (e.g. Filler-0,Exp-1,...).'
     )
 
     def __init__(self, *args, **kwargs):
         self.study = kwargs.pop('study')
         super().__init__(*args, **kwargs)
 
+    @staticmethod
+    def read_items(study, items_string):
+        items = []
+        error_msg = None
+        item_strings = items_string.split(',')
+        for item_string in item_strings:
+            pattern = re.compile('(.*)-(\d+)(\D+)')
+            match = pattern.match(item_string)
+            if not match or len(match.groups()) != 3:
+                error_msg = 'Not a valid item format "{}".'.format(item_string)
+                break
+            experiment_title = match.group(1)
+            item_num = match.group(2)
+            item_cond = match.group(3)
+            try:
+                item = item_models.Item.objects.get(
+                    experiment__study=study,
+                    experiment__title=experiment_title,
+                    number=item_num,
+                    condition=item_cond,
+                )
+                items.append(item)
+            except item_models.Item.DoesNotExist:
+                error_msg = 'Item {} does not exist.'.format(item_string)
+                break
+        if error_msg:
+            raise forms.ValidationError(error_msg)
+        return items
+
+    @staticmethod
+    def read_item_lists(study, list_string):
+        lists = []
+        error_msg = None
+        list_strings = list_string.split(',')
+        for list_string in list_strings:
+            pattern = re.compile('(.*)-(\d+)')
+            match = pattern.match(list_string)
+            if not match or len(match.groups()) != 2:
+                error_msg = 'Not a valid item list format "{}".'.format(list_string)
+                break
+            experiment_title = match.group(1)
+            list_num = match.group(2)
+            try:
+                item_list = item_models.ItemList.objects.get(
+                    experiment__study=study,
+                    experiment__title=experiment_title,
+                    number=list_num,
+                )
+                lists.append(item_list)
+            except item_models.ItemList.DoesNotExist:
+                error_msg = 'Item list {} does not exist.'.format(list_string)
+                break
+        if error_msg:
+            raise forms.ValidationError(error_msg)
+        return lists
+
     def clean(self):
-        cleaned_data = super().clean()
-        file = cleaned_data['file']
         cleaned_data = super().clean()
         data = contrib_csv.read_file(cleaned_data)
         sniff_data = contrib_csv.sniff(data)
-        validator_int_columns = ['questionnaire_column', 'item_number_column']
+        validator_int_columns = ['questionnaire_column']
         delimiter, quoting, has_header = contrib_csv.detect_dialect(sniff_data, cleaned_data, validator_int_columns)
         reader = csv.reader(StringIO(data), delimiter=delimiter, quoting=quoting)
         if has_header:
             next(reader)
         try:
-            item_count = 0
-            experiments = set()
+            used_items = set()
             for row in reader:
-                assert int(row[cleaned_data['questionnaire_column'] - 1])
-                assert int(row[cleaned_data['item_number_column'] - 1])
-                experiment_title = row[cleaned_data['experiment_column'] - 1]
-                try:
-                    experiment = self.study.experiment_set.get(title=experiment_title)
-                except experiment_models.Experiment.DoesNotExist:
-                    raise forms.ValidationError('Experiment with title "{}" does not exists.'.format(experiment_title))
-                item_number = row[cleaned_data['item_number_column'] - 1]
-                item_condition = row[cleaned_data['item_condition_column'] -1]
-                if not experiment.item_set.filter(number=item_number, condition=item_condition).exists():
-                    error = 'Item {}{} of "{}" is not defined.'.format(item_number, item_condition, experiment_title)
-                    raise forms.ValidationError(error)
-                item_count += 1
-                experiments.add(experiment)
+                int(row[cleaned_data['questionnaire_column'] - 1])
+                item_lists_col = cleaned_data['item_lists_column']
+                items_string = row[cleaned_data['items_column'] - 1]
+                used_items.update(self.read_items(self.study, items_string))
+                if item_lists_col > 0:
+                    item_lists_string = row[item_lists_col - 1]
+                    self.read_item_lists(self.study, item_lists_string)
             contrib_csv.seek_file(cleaned_data)
-            if not item_count == item_models.Item.objects.filter(experiment__in=experiments).count():
+            if not len(used_items) == item_models.Item.objects.filter(experiment__study=self.study).count():
                 raise forms.ValidationError('Not all items used in questionnaires.')
         except (ValueError, AssertionError):
             raise forms.ValidationError(
                 'File: Unexpected format in line %(n_line)s.',
                 code='invalid',
                 params={'n_line': reader.line_num})
+        self.detected_csv = { 'delimiter': delimiter, 'quoting': quoting, 'has_header': has_header }
         return cleaned_data
 
 
