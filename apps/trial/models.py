@@ -1,9 +1,13 @@
 from collections import deque
 from itertools import groupby
-from markdownx.models import MarkdownxField
+from itertools import permutations
+from itertools import repeat
+from math import ceil
 import random
 import string
 import uuid
+
+from markdownx.models import MarkdownxField
 
 from collections import OrderedDict
 from datetime import timedelta
@@ -50,7 +54,11 @@ class Questionnaire(models.Model):
 
     @cached_property
     def questionnaire_items_preview(self):
-        return self.questionnaireitem_set.all()[:10]
+        return self.questionnaireitem_set.all().prefetch_related('item')[:10]
+
+    @cached_property
+    def questionnaire_items(self):
+        return self.questionnaireitem_set.all().prefetch_related('item')
 
     @cached_property
     def questionnaire_items_by_block(self):
@@ -81,7 +89,7 @@ class Questionnaire(models.Model):
                 item=item,
             )
             questionnaire_items.append(questionnaire_item)
-        QuestionnaireItem.objects.bulk_create(questionnaire_items)
+        return questionnaire_items
 
     def _generate_items_random(self, block_items, block_offset):
         random.SystemRandom().shuffle(block_items)
@@ -140,7 +148,7 @@ class Questionnaire(models.Model):
                 item=item,
             )
             questionnaire_items.append(questionnaire_item)
-        QuestionnaireItem.objects.bulk_create(questionnaire_items)
+        return questionnaire_items
 
     def _compute_block_slots(self, block_items, experiments):
         filler = list([ id for id, experiment in experiments.items() if experiment.is_filler])
@@ -193,6 +201,21 @@ class Questionnaire(models.Model):
                 slots[block] = self._compute_block_slots(block_items, experiments)
         return slots
 
+    def _random_question_permutations(self, n_items):
+        questions = [question.number for question in self.study.questions]
+        question_permutations = list(permutations(questions))
+        n_permutations = len(question_permutations)
+        per_permutation = ceil(n_items/n_permutations)
+        question_permutations = per_permutation*question_permutations
+        random.SystemRandom().shuffle(question_permutations)
+        return question_permutations
+
+    def _randomize_question_order(self, questionnaire_items):
+        n_items = len(questionnaire_items)
+        question_permutations = self._random_question_permutations(n_items)
+        for questionnaire_item, permutation in zip(questionnaire_items, question_permutations):
+            questionnaire_item.question_order = ','.join(str(p) for p in permutation)
+
     def generate_items(self, experiments=None):
         if not experiments:
             experiments = {e.id: e for e in experiment_models.Experiment.objects.filter(study=self.study)}
@@ -200,15 +223,21 @@ class Questionnaire(models.Model):
         slots = self._compute_slots(experiments, block_randomization)
         items_by_block = groupby(self._item_list_items, lambda x: x.block)
         block_offset = 0
+        questionnaire_items = []
         for block, block_items in items_by_block:
             block_items = list(block_items)
             if block_randomization[block] == QuestionnaireBlock.RANDOMIZATION_TRUE:
-                self._generate_items_random(block_items, block_offset)
+                questionnaire_items.extend(self._generate_items_random(block_items, block_offset))
             elif block_randomization[block] == QuestionnaireBlock.RANDOMIZATION_PSEUDO:
-                self._generate_items_pseudo_random(block_items, block_offset, slots[block], experiments)
+                questionnaire_items.extend(
+                    self._generate_items_pseudo_random(block_items, block_offset, slots[block], experiments)
+                )
             else:
-                self._generate_block_items(block_items, block_offset)
+                questionnaire_items.extend(self._generate_block_items(block_items, block_offset))
             block_offset += len(block_items)
+        if self.study.pseudo_randomize_question_order:
+            self._randomize_question_order(questionnaire_items)
+        QuestionnaireItem.objects.bulk_create(questionnaire_items)
 
     def __str__(self):
         return str(self.number)
@@ -253,6 +282,7 @@ class QuestionnaireItem(models.Model):
     number = models.IntegerField()
     questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE)
     item = models.ForeignKey(item_models.Item, on_delete=models.CASCADE)
+    question_order = models.CharField(max_length=200, blank=True, null=True)
 
     class Meta:
         ordering = ['number']
@@ -312,15 +342,15 @@ class Trial(models.Model):
     def items(self):
         return self.questionnaire.items
 
-    @property
-    def item_ratings(self):
+    @cached_property
+    def questionnaire_item_ratings(self):
         item_ratings = []
         for questionnaire_item in self.questionnaire.questionnaireitem_set.all():
             ratings = Rating.objects.filter(trial=self, questionnaire_item=questionnaire_item).all()
-            item_ratings.append((questionnaire_item.item, ratings))
+            item_ratings.append((questionnaire_item, ratings))
         return item_ratings
 
-    @property
+    @cached_property
     def ratings_completed(self):
         return Rating.objects.filter(trial=self, question=0).count()
 

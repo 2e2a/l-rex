@@ -6,6 +6,7 @@
     <tr>
         <th>Experiment</th>
         <th>Item</th>
+        {% if study.pseudo_randomize_question_order %}<th>Question order</th>{% endif %}
         <th>Content</th>
         {% for qustions in trial.questionnaire.study.questions %}
         <th>Rating</th>
@@ -13,18 +14,21 @@
     </tr>
     </thead>
     <tbody>
-    {% for item, ratings in trial.item_ratings %}
+    {% for q_item, ratings in trial.questionnaire_item_ratings %}
     <tr>
-        <td>{{ item.experiment }}</td>
+        <td>{{ q_item.item.experiment }}</td>
         <td>
-            {{ item }}
+            {{ q_item.item }}
         </td>
+        {% if study.pseudo_randomize_question_order %}
+        <td>{{ q_item.question_order }}</td>
+        {% endif %}
         <td>
-            {% if item.textitem %}
-                {{ item.textitem.text|linebreaks }}
+            {% if q_item.item.textitem %}
+                {{ q_item.item.textitem.text|linebreaks }}
             {% else %}
                 <audio controls="controls">
-                    <source src="{{ item.audiolinkitem.url }}">
+                    <source src="{{ q_item.item.audiolinkitem.url }}">
                     Your browser does not support the <code>audio</code> element.
                 </audio>
             {% endif %}

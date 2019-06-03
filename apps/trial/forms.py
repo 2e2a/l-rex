@@ -311,14 +311,24 @@ def ratingformset_factory(n_questions=1):
     )
 
 
-def customize_to_questions(ratingformset, questions, item_questions):
+def customize_to_questions(ratingformset, questions, item_questions, questionnaire_item, pseudo_randomize_question_order=False):
 
     def _get_item_question(num, item_questions):
         for item_question in item_questions:
             if item_question.number == num:
                 return item_question
 
-    for question, form in zip(questions, ratingformset):
+    def _get_reordered_questions_random(questions, question_order):
+        reordered_questions = []
+        for question_num in question_order.split(','):
+            reordered_questions.append(questions[int(question_num)])
+        return reordered_questions
+
+    if pseudo_randomize_question_order:
+        ordered_questions = _get_reordered_questions_random(questions, questionnaire_item.question_order)
+    else:
+        ordered_questions = questions
+    for question, form in zip(ordered_questions, ratingformset):
         item_question = _get_item_question(question.number, item_questions)
         form.fields['question'].initial = question.number
         scale_value = form.fields.get('scale_value')

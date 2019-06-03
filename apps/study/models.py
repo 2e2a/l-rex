@@ -108,6 +108,10 @@ class Study(models.Model):
         help_text='If you want to set a maximal number of participants, enter a number.',
         verbose_name='Maximal number of participants',
     )
+    pseudo_randomize_question_order = models.BooleanField(
+        default=False,
+        help_text='Show questions in a random order, if multiple questions defined.',
+    )
     is_published = models.BooleanField(
         default=False,
         help_text='Enable to publish your study. It will then be available for participation.',

@@ -16,28 +16,40 @@
 <table class="table bg-white">
     <thead>
     <tr>
+        <th>#</th>
+        <th>Item</th>
         {% if study.use_blocks %}
         <th>Block</th>
         {% endif %}
-        <th>Items</th>
+        {% if study.pseudo_randomize_question_order %}
+        <th>Question order</th>
+        {% endif %}
     </tr>
     </thead>
     <tbody>
     {% if study.use_blocks %}
-    {% for block, items in questionnaire.questionnaire_items_by_block.items %}
+    {% for block, q_items in questionnaire.questionnaire_items_by_block.items %}
+    {% for q_item in q_items %}
     <tr>
         <td>{{ forloop.counter }}</td>
-        <td>
-            {% for item in items %}{{ item.item.experiment }}-{{ item.item }}{% if not forloop.last %}, {% endif %}{% endfor %}
-        </td>
+        <td>{{ q_item.item.experiment }}-{{ q_item.item }}</td>
+        <td rowspan="{{ q_items|length }}">{{ block }}</td>
+        {% if study.pseudo_randomize_question_order %}
+        <td>{{ q_item.quetion_order }}</td>
+        {% endif %}
     </tr>
     {% endfor %}
+    {% endfor %}
     {% else %}
+    {% for q_item in questionnaire.questionnaire_items %}
     <tr>
-        <td>
-            {% for item in questionnaire.items %}{{ item.experiment }}-{{ item }}{% if not forloop.last %}, {% endif %}{% endfor %}
-        </td>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ q_item.item.experiment }}-{{ q_item.item }}</td>
+        {% if study.pseudo_randomize_question_order %}
+        <td>{{ q_item.question_order }}</td>
+        {% endif %}
     </tr>
+    {% endfor %}
     {% endif %}
     </tbody>
 </table>

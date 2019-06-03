@@ -16,6 +16,7 @@ class StudyForm(crispy_forms.CrispyModelForm):
             'title',
             'item_type',
             'use_blocks',
+            'pseudo_randomize_question_order',
             'password',
             'require_participant_id',
             'generate_participation_code',
