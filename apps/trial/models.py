@@ -287,6 +287,10 @@ class QuestionnaireItem(models.Model):
     class Meta:
         ordering = ['number']
 
+    @cached_property
+    def question_order_user(self):
+        return ','.join(str(int(question_num) + 1) for question_num in self.question_order.split(','))
+
     def __str__(self):
         return '{} - {}'.format(self.number, self.item)
 
