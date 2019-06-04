@@ -421,7 +421,7 @@ class StudyResultsCSVDownloadView(StudyObjectMixin, CheckStudyCreatorMixin, gene
     model = models.Study
 
     def get(self, request, *args, **kwargs):
-        filename = '{}_RESULTS_{}.zip'.format(self.study.title.replace(' ', '_'), str(now().date()))
+        filename = '{}_RESULTS_{}.csv'.format(self.study.title.replace(' ', '_'), str(now().date()))
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
         self.study.results_csv(response)

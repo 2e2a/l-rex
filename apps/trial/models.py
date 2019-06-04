@@ -93,7 +93,7 @@ class Questionnaire(models.Model):
 
     def _generate_items_random(self, block_items, block_offset):
         random.SystemRandom().shuffle(block_items)
-        self._generate_block_items(block_items, block_offset)
+        return self._generate_block_items(block_items, block_offset)
 
     def _experiment_items_with_alternating_conditions(self, experiment_items):
         n_tries = 100

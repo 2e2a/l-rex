@@ -191,6 +191,8 @@ class Experiment(models.Model):
             row['item'] = item.number
             row['condition'] = item.condition
             row['position'] = rating.questionnaire_item.number + 1
+            if self.study.pseudo_randomize_question_order:
+                row['question_order'] = rating.questionnaire_item.question_order_user
             row['question'] = rating.question
             row['rating'] = rating.scale_value.number
             row['label'] = rating.scale_value.label
@@ -266,8 +268,10 @@ class Experiment(models.Model):
                 n_questions = len(self.study.questions)
                 for col in ['subject', 'item', 'condition', 'position']:
                     new_row[col] = row[col]
+                if 'question_order' in row:
+                    new_row['question_order'] = row['question_order']
                 if 'content' in row:
-                    new_row['content'] =  row['content']
+                    new_row['content'] = row['content']
                 new_row['ratings'] = [-1] * n_questions
                 new_row['ratings'][row['question']] = row['label']
                 aggregated_results.append(new_row)
@@ -421,6 +425,8 @@ class Experiment(models.Model):
     def results_csv_header(self, add_experiment_column=False):
         csv_row = ['experiment'] if add_experiment_column else []
         csv_row.extend(['subject', 'item', 'condition', 'position'])
+        if self.study.pseudo_randomize_question_order:
+            csv_row.append('question order')
         for question in self.study.questions:
             csv_row.append('rating{}'.format(question.number + 1))
         csv_row.append('content')
@@ -436,6 +442,8 @@ class Experiment(models.Model):
         for row in results:
             csv_row = [self.title] if add_experiment_column else []
             csv_row.extend([row['subject'], row['item'], row['condition'], row['position']])
+            if self.study.pseudo_randomize_question_order:
+                csv_row.append(row['question_order'])
             for rating in row['ratings']:
                 csv_row.append(rating)
             csv_row.append(row['content'])
