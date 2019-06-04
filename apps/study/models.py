@@ -65,6 +65,10 @@ class Study(models.Model):
         help_text='Enable if you want to divide the questionnaire into separate parts (blocks) with individual '
                   'instructions',
     )
+    pseudo_randomize_question_order = models.BooleanField(
+        default=False,
+        help_text='Show questions in a random order, if multiple questions defined.',
+    )
     password = models.CharField(
         blank=True,
         null=True,
@@ -107,10 +111,6 @@ class Study(models.Model):
         blank=True,
         help_text='If you want to set a maximal number of participants, enter a number.',
         verbose_name='Maximal number of participants',
-    )
-    pseudo_randomize_question_order = models.BooleanField(
-        default=False,
-        help_text='Show questions in a random order, if multiple questions defined.',
     )
     is_published = models.BooleanField(
         default=False,

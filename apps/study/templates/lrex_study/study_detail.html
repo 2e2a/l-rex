@@ -116,6 +116,22 @@
                 </div>
                 <div class="row small text-secondary">
                     <div class="col-sm-6">
+                        Use blocks:
+                    </div>
+                    <div class="col-sm-4">
+                        {{ study.use_blocks|yesno }}
+                    </div>
+                </div>
+                <div class="row small text-secondary">
+                    <div class="col-sm-6">
+                        Random questions:
+                    </div>
+                    <div class="col-sm-4">
+                        {{ study.pseudo_randomize_question_order|yesno }}
+                    </div>
+                </div>
+                <div class="row small text-secondary">
+                    <div class="col-sm-6">
                         Participant id:
                     </div>
                     <div class="col-sm-4">
