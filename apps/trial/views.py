@@ -222,6 +222,32 @@ class QuestionnaireGenerateView(study_views.StudyMixin, study_views.CheckStudyCr
         ]
 
 
+class QuestionnaireDeleteAllView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin,
+                              study_views.DisableFormIfStudyActiveMixin, generic.TemplateView):
+    title = 'Confirm Delete'
+    template_name = 'lrex_contrib/confirm_delete.html'
+    message = 'Delete all questionnaires?'
+
+    def post(self, request, *args, **kwargs):
+        self.study.delete_questionnaires()
+        messages.success(self.request, 'All quetionnaires deleted')
+        return redirect(self.get_success_url())
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('questionnaires', reverse('questionnaires', args=[self.study.slug])),
+            ('delete', '')
+        ]
+
+    def get_success_url(self):
+        return reverse('questionnaires', args=[self.study.slug])
+
+
+
+
 class QuestionnaireBlockInstructionsUpdateView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, generic.TemplateView):
     title = 'Edit questionnaire block instructions'
     template_name = 'lrex_contrib/crispy_formset_form.html'
