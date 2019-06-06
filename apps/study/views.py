@@ -428,6 +428,7 @@ class QuestionUpdateView(StudyMixin, CheckStudyCreatorMixin, DisableFormIfStudyA
                     self._invalidate_experiment_items()
                 for scale_value in scale_values_old:
                     scale_value.delete()
+            self.n_questions = self.study.question_set.count()
             extra = len(self.formset.forms) - self.n_questions
             if 'submit' in request.POST:
                 messages.success(request, 'Questions saved.')
