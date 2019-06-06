@@ -514,7 +514,7 @@ class Study(models.Model):
         return columns
 
     def questionnaires_csv_header(self):
-        return ['questionnaire', 'lists', 'items']
+        return ['questionnaire', 'lists', 'items', 'question_order']
 
     def questionnaires_csv(self, fileobj):
         writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
@@ -525,8 +525,14 @@ class Study(models.Model):
                 questionnaire.number,
                 ','.join(['{}-{}'.format(item_list.experiment.title, item_list.number)
                           for item_list in questionnaire.item_lists.all()]),
-                ','.join(['{}-{}'.format(item.experiment.title, item) for item in questionnaire.items])
+                ','.join(['{}-{}'.format(item.experiment.title, item) for item in questionnaire.items]),
             ]
+            if self.pseudo_randomize_question_order:
+                csv_row.append(
+                    ','.join('"{}"'.format(q_item.question_order) for q_item in questionnaire.questionnaire_items)
+                )
+            else:
+                csv_row.append('')
             writer.writerow(csv_row)
 
     def questionnaires_csv_restore(self, fileobj, user_columns=None, detected_csv=contrib_csv.DEFAULT_DIALECT):
@@ -545,8 +551,16 @@ class Study(models.Model):
                 item_lists = UploadQuestionnaireForm.read_item_lists(self, row[columns['lists']])
                 questionnaire.item_lists.set(item_lists)
             items = UploadQuestionnaireForm.read_items(self, row[columns['items']])
+            if self.pseudo_randomize_question_order:
+                question_orders = re.findall('"([^"]+)"', row[columns['question_order']])
             for i, item in enumerate(items):
-                QuestionnaireItem.objects.create(number=i, questionnaire=questionnaire, item=item)
+                QuestionnaireItem.objects.create(
+                    number=i,
+                    questionnaire=questionnaire,
+                    item=item,
+                    question_order=question_orders[i] if self.pseudo_randomize_question_order else None,
+                )
+            questionnaire.save()
 
     def questionnaire_blocks_csv_header(self):
         return ['block', 'randomization', 'instructions']
