@@ -2,9 +2,8 @@
 
 {% block content %}
 <div class="text-center mb-2">
-    <a href="{% url 'study-create' %}" class="btn btn-primary btn-sm mx-1">
-        New study
-    </a>
+    <a href="{% url 'study-create' %}" class="btn btn-primary btn-sm mx-1">New study</a>
+    <a href="{% url 'study-create-archive' %}" class="btn btn-secondary btn-sm mx-1">New study from archive</a>
 </div>
 <ul class="list-group">
     {% for study in study_list %}

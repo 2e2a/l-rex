@@ -136,7 +136,7 @@ class Study(models.Model):
     def save(self, *args, **kwargs):
         new_slug = slugify_unique(self.title, Study, self.id)
         if self.slug != new_slug:
-            self.slug = slugify_unique(self.title, Study, self.id)
+            self.slug = new_slug
             for experiment in self.experiments:
                 experiment.save()
         return super().save(*args, **kwargs)
@@ -388,6 +388,7 @@ class Study(models.Model):
         writer.writerow(['title', self.title])
         writer.writerow(['item_type', self.item_type])
         writer.writerow(['use_blocks', self.use_blocks])
+        writer.writerow(['pseudo_randomize_question_order', self.pseudo_randomize_question_order])
         writer.writerow(['password', self.password])
         writer.writerow(['require_participant_id', self.require_participant_id])
         writer.writerow(['generate_participation_code', self.generate_participation_code])
@@ -409,13 +410,35 @@ class Study(models.Model):
                 study_settings.update({row[0]: row[1]})
         return study_settings
 
+    SETTING_BOOL_FIELDS = [
+        'use_blocks',
+        'pseudo_randomize_question_order',
+        'require_participant_id',
+        'generate_participation_code',
+    ]
+
+    SETTING_CHAR_FIELDS = [
+        'title',
+        'item_type',
+        'password',
+        'end_date',
+        'trial_limit',
+        'instructions',
+        'outro'
+    ]
+
     def settings_csv_restore(self, fileobj):
         from apps.experiment.models import Experiment
         reader = csv.reader(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
         study_settings = self._read_settings(reader)
         if not self.is_archived:
-            self.title = study_settings['title']
-            # TODO
+            for field in self.SETTING_CHAR_FIELDS:
+                if field in study_settings and study_settings[field]:
+                    setattr(self, field, study_settings[field])
+            for field in self.SETTING_BOOL_FIELDS:
+                if field in study_settings and study_settings[field]:
+                    setattr(self, field, study_settings[field] in ['True', 'true'])
+            self.save()
         questions = re.findall('"([^"]+)"', study_settings['questions'])
         scales = re.findall('"([^"]+)"', study_settings['question_scales'])
         legends = re.findall('"([^"]*)"', study_settings['question_legends'])
@@ -462,7 +485,7 @@ class Study(models.Model):
             experiment.items_csv(fileobj, add_header=False, add_experiment_column=True)
 
     def items_csv_restore(self, fileobj, **kwargs):
-        for experiment in self.experiments:
+        for experiment in self.experiment_set.all():
             fileobj.seek(0)
             experiment.items_csv_create(fileobj, has_experiment_column=True)
 
@@ -475,7 +498,7 @@ class Study(models.Model):
             experiment.itemlists_csv(fileobj, add_header=False, add_experiment_column=True)
 
     def itemlists_csv_restore(self, fileobj, **kwargs):
-        for experiment in self.experiments:
+        for experiment in self.experiment_set.all():
             fileobj.seek(0)
             experiment.itemlists_csv_create(fileobj, has_experiment_column=True)
 
@@ -529,11 +552,11 @@ class Study(models.Model):
         return ['block', 'randomization', 'instructions']
 
     def questionnaire_blocks_csv(self, fileobj):
-        if not self.use_blocks:
-            return
         writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
         header = self.questionnaire_blocks_csv_header()
         writer.writerow(header)
+        if not self.use_blocks:
+            return
         for block in self.questionnaireblock_set.all():
             csv_row = [
                 block.block,
@@ -603,9 +626,11 @@ class Study(models.Model):
                         pass
 
     @classmethod
-    def create_from_archive_file(cls, fileobj):
-        # TODO: generate new title?
-        pass
+    def create_from_archive_file(cls, fileobj, creator, detected_csv_dialect=None):
+        study = cls()
+        study.creator = creator
+        study.restore_from_archive(fileobj, detected_csv_dialect=detected_csv_dialect)
+        return study
 
     STEP_DESCRIPTION = {
         StudySteps.STEP_STD_QUESTION_CREATE: 'Create a question',

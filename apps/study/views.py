@@ -143,6 +143,40 @@ class StudyCreateView(LoginRequiredMixin, generic.CreateView):
         messages.success(self.request, 'Study successfully created.')
         return response
 
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            ('new', ''),
+        ]
+
+
+class StudyCreateFromArchiveView(LoginRequiredMixin, generic.FormView):
+    title = 'Create a new study from archive'
+    template_name = 'lrex_contrib/crispy_form.html'
+    form_class = forms.StudyFromArchiveForm
+    success_message = 'Study successfully created.'
+
+    def get(self, request, *args, **kwargs):
+        messages.info(self.request, 'Note: Please be patient, creating a study might take a while.')
+        return super().get(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        super().form_valid(form)
+        file = form['file'].value()
+        study = models.Study.create_from_archive_file(file, self.request.user)
+        return redirect('study', study_slug=study.slug)
+
+    def get_success_url(self):
+        return reverse('studies', args=[])
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            ('new from archive', ''),
+        ]
+
 
 class StudyDetailView(StudyObjectMixin, CheckStudyCreatorMixin, NextStepsMixin, generic.DetailView):
     model = models.Study
@@ -268,26 +302,11 @@ class StudyArchiveDownloadView(StudyObjectMixin, CheckStudyCreatorMixin, generic
         return response
 
 
-class StudyCreateFromArchiveView(LoginRequiredMixin, generic.FormView):
-    model = models.Study
-    title = 'Create study from archive'
-    template_name = 'lrex_contrib/crispy_form.html'
-    form_class = forms.StudyFromArchiveForm
-    success_message = 'Study successfully created.'
-
-    def form_valid(self, form):
-        form.instance.creator = self.request.user
-        response = super().form_valid(form)
-        messages.success(self.request, 'Study successfully created.')
-        return response
-
-
 class StudyRestoreFromArchiveView(StudyMixin, CheckStudyCreatorMixin, SuccessMessageMixin, generic.FormView):
     title = 'Restore study from archive'
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.StudyFromArchiveForm
     success_message = 'Study successfully restored.'
-
 
     def get(self, request, *args, **kwargs):
         messages.info(self.request, 'Note: Please be patient, restoring a study might take a while.')

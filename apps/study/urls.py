@@ -9,6 +9,7 @@ from apps.trial import urls as trial_urls
 urlpatterns = [
     path('', views.StudyListView.as_view(), name='studies'),
     path('create/', views.StudyCreateView.as_view(), name='study-create'),
+    path('create/from-archive/', views.StudyCreateFromArchiveView.as_view(), name='study-create-archive'),
     path('<slug:study_slug>/', views.StudyDetailView.as_view(), name='study'),
     path('<slug:study_slug>/settings/', views.StudyUpdateView.as_view(), name='study-update'),
     path('<slug:study_slug>/delete/', views.StudyDeleteView.as_view(), name='study-delete'),
