@@ -20,6 +20,7 @@ urlpatterns = [
     path('<slug:study_slug>/archive/', views.StudyArchiveView.as_view(), name='study-archive'),
     path('<slug:study_slug>/archive/download/', views.StudyArchiveDownloadView.as_view(), name='study-archive-download'),
     path('<slug:study_slug>/restore/', views.StudyRestoreFromArchiveView.as_view(), name='study-archive-restore'),
+    path('<slug:study_slug>/copy/', views.StudyCreateCopyView.as_view(), name='study-copy'),
     path('<slug:study_slug>/experiments/', include(experiment_urls.urlpatterns_study)),
     path('<slug:study_slug>/questionnaires/', include(trial_urls.urlpatterns_questionnaires_study)),
     path('<slug:study_slug>/trials/', include(trial_urls.urlpatterns_study)),

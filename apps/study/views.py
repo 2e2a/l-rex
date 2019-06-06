@@ -1,3 +1,5 @@
+from tempfile import TemporaryFile
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.messages.views import SuccessMessageMixin
@@ -151,14 +153,14 @@ class StudyCreateView(LoginRequiredMixin, generic.CreateView):
         ]
 
 
-class StudyCreateFromArchiveView(LoginRequiredMixin, generic.FormView):
+class StudyCreateFromArchiveView(LoginRequiredMixin,  SuccessMessageMixin, generic.FormView):
     title = 'Create a new study from archive'
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.StudyFromArchiveForm
     success_message = 'Study successfully created.'
 
     def get(self, request, *args, **kwargs):
-        messages.info(self.request, 'Note: Please be patient, creating a study might take a while.')
+        messages.info(self.request, 'Note: Please be patient, this study might take a while.')
         return super().get(request, *args, **kwargs)
 
     def form_valid(self, form):
@@ -320,6 +322,45 @@ class StudyRestoreFromArchiveView(StudyMixin, CheckStudyCreatorMixin, SuccessMes
 
     def get_success_url(self):
         return reverse('study', args=[self.study.slug])
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('restore', ''),
+        ]
+
+class StudyCreateCopyView(StudyMixin, CheckStudyCreatorMixin, SuccessMessageMixin, generic.FormView):
+    title = 'Create a copy of a study'
+    template_name = 'lrex_contrib/crispy_form.html'
+    form_class = forms.StudyCopyForm
+    success_message = 'Study successfully created.'
+
+    def get(self, request, *args, **kwargs):
+        messages.info(self.request, 'Note: Please be patient, this might take a while.')
+        return super().get(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        super().form_valid(form)
+        title = form['title'].value()
+        file = TemporaryFile()
+        self.study.archive_file(file)
+        study = models.Study.create_from_archive_file(file, self.request.user)
+        study.title = title
+        study.save()
+        return redirect('study', study_slug=study.slug)
+
+    def get_success_url(self):
+        return reverse('studies', args=[])
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('copy', ''),
+        ]
 
 
 class StudyInstructionsUpdateView(StudyObjectMixin, CheckStudyCreatorMixin, SuccessMessageMixin,

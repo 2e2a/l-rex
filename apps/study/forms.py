@@ -65,6 +65,13 @@ class StudyFromArchiveForm(crispy_forms.CrispyForm):
     )
 
 
+class StudyCopyForm(crispy_forms.CrispyForm):
+    title = forms.CharField(
+        max_length=100,
+        help_text='Title of the new study.'
+    )
+
+
 class StudyInstructionsForm(crispy_forms.CrispyModelForm):
     optional_label_ignore_fields = [
         'instructions',
