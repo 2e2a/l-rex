@@ -1,3 +1,5 @@
+from markdownx.models import MarkdownxField
+
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
@@ -10,7 +12,7 @@ class News(models.Model):
     title = models.CharField(
         max_length=200,
     )
-    text = models.TextField(
+    text = MarkdownxField(
         max_length=5000,
     )
     date = models.DateTimeField(

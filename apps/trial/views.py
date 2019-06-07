@@ -1,5 +1,3 @@
-import csv
-from io import StringIO
 from markdownx.utils import markdownify
 
 from django.contrib import messages
@@ -15,7 +13,6 @@ from django.views import generic
 from apps.contrib import csv as contrib_csv
 from apps.contrib import views as contrib_views
 from apps.experiment import views as experiment_views
-from apps.item import models as item_models
 from apps.study import views as study_views
 
 from . import forms

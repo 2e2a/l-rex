@@ -1,5 +1,8 @@
+from markdownx.utils import markdownify
+
 from django.conf import settings
 from django.urls import reverse
+from django.utils.safestring import mark_safe
 from django.views import generic
 
 from . import models
@@ -37,7 +40,15 @@ class ImprintView(generic.TemplateView):
 
 class NewsView(generic.DetailView):
     model = models.News
-    title = 'News'
+
+    @property
+    def title(self):
+        return self.get_object().title
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['news_rich'] = mark_safe(markdownify(self.get_object().text))
+        return data
 
     @property
     def breadcrumbs(self):
