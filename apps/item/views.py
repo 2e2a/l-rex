@@ -329,7 +329,7 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
             'content': form.cleaned_data['content_column'] - 1,
         }
         if form.cleaned_data['block_column'] > 0:
-            columns.update({'block': form.cleaned_data['block'] - 1})
+            columns.update({'block': form.cleaned_data['block_column'] - 1})
         for i, question in enumerate(self.study.questions):
             question_column = 'question_{}_question_column'.format(question.number + 1)
             if form.cleaned_data[question_column] > 0:
