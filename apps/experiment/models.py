@@ -366,7 +366,7 @@ class Experiment(models.Model):
                 items_to_delete.remove(item.item_ptr)
 
             for question in self.study.questions:
-                question_column = 'question{}'.format(question.number + 1)
+                question_column = 'question{}'.format(question.number)
                 if question_column in columns:
                     question_question = row[columns[question_column]]
                     scale_labels_column = 'scale{}'.format(question.number + 1)
