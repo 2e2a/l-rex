@@ -599,7 +599,9 @@ class RatingsCreateView(RatingCreateMixin, TrialMixin, generic.TemplateView):
         if self.questionnaire_item.rating_set.filter(trial=self.trial).exists():
             return redirect(self.get_next_url())
         self.formset = forms.ratingformset_factory(self.n_questions)(request.POST, request.FILES)
-        #forms.customize_to_questions(self.formset, self.study.questions, self.item_questions)
+        forms.customize_to_questions(
+            self.formset, self.study.questions, self.item_questions, self.questionnaire_item, self.study.pseudo_randomize_question_order
+        )
         if self.formset.is_valid():
             instances = self.formset.save(commit=False)
             if len(instances) < self.n_questions:
