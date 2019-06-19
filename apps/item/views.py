@@ -401,9 +401,8 @@ class ItemQuestionsUpdateView(ItemMixin, study_views.CheckStudyCreatorMixin, stu
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
-        item_questions_q = models.ItemQuestion.objects.filter(item=self.item)
-        self.formset = forms.itemquestion_factory(self.n_questions, n_item_questions=item_questions_q.count())(
-            queryset=item_questions_q
+        self.formset = forms.itemquestion_factory(self.n_questions)(
+            queryset=models.ItemQuestion.objects.filter(item=self.item),
         )
         forms.initialize_with_questions(self.formset, self.study.questions)
         if self.n_questions == 0:
@@ -418,7 +417,8 @@ class ItemQuestionsUpdateView(ItemMixin, study_views.CheckStudyCreatorMixin, stu
             if self.formset.is_valid():
                 instances = self.formset.save(commit=False)
                 scale_labels_valid = True
-                for instance, question in zip(instances, self.study.questions):
+                for instance in instances:
+                    question = next(question for question in self.study.questions if question.number == instance.number)
                     if instance.scale_labels \
                             and len(instance.scale_labels.split(',')) != question.scalevalue_set.count():
                         self.formset._errors[question.number]['scale_labels'] = \
