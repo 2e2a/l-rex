@@ -33,7 +33,7 @@
     <tr>
         <td>{{ forloop.counter }}</td>
         <td>{{ q_item.item.experiment }}-{{ q_item.item }}</td>
-        <td rowspan="{{ q_items|length }}">{{ block }}</td>
+        <td>{{ block }}</td>
         {% if study.pseudo_randomize_question_order %}
         <td>{{ q_item.quetion_order }}</td>
         {% endif %}
