@@ -392,7 +392,6 @@ class Experiment(models.Model):
             self.delete_lists()
         for item in items_to_delete:
             item.delete()
-        self.validate_items()
 
     def itemlists_csv_header(self, add_experiment_column=False):
         csv_row = ['experiment'] if add_experiment_column else []

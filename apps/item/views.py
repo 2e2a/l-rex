@@ -343,6 +343,7 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
         data = StringIO(contrib_csv.read_file(form.cleaned_data))
         self.experiment.items_csv_create(data, has_experiment_column=False, user_columns=columns, detected_csv=form.detected_csv)
         messages.success(self.request, 'Items uploaded')
+        self.validate_items()
         return result
 
     def get_success_url(self):
