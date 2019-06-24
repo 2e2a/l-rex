@@ -102,8 +102,13 @@ class Experiment(models.Model):
                 break
 
         condition_count = len(conditions)
-        if len(items) % condition_count != 0:
-            raise AssertionError('Number of items is not a multiple of the number of conditions.')
+        n_items= len(items)
+        if n_items % condition_count != 0:
+            msg = 'Number of items is not a multiple of the number of conditions (items: {}, conditions: {})'.format(
+                n_items,
+                ','.join('"{}"'.format(condition) for condition in conditions)
+            )
+            raise AssertionError(msg)
 
         item_number = 0
         for i, item in enumerate(items):
@@ -149,7 +154,11 @@ class Experiment(models.Model):
                 items = list(items_with_same_link)
                 if len(items) > 1:
                     warnings.append('Items {} have the same URL.'.format(','.join([str(item) for item in items])))
-
+        msg = 'Delected {} items with following conditions: {}.'.format(
+            n_items,
+            ','.join('"{}"'.format(condition) for condition in conditions)
+        )
+        warnings.append(msg)
         self.items_validated = True
         self.save()
         return warnings

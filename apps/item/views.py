@@ -63,7 +63,7 @@ class ItemsValidateMixin:
             warnings = self.experiment.validate_items()
             messages.success(self.request, 'Items seem valid')
             for warning in warnings:
-                messages.warning(self.request, 'Warning: {}'.format(warning))
+                messages.warning(self.request, '{}'.format(warning))
         except AssertionError as e:
             messages.error(self.request, str(e))
 
