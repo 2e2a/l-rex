@@ -37,7 +37,6 @@ class WarnUserIfStudyActiveMixin:
 
 
 class DisableFormIfStudyActiveMixin(WarnUserIfStudyActiveMixin):
-    # TODO: disable fields
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)

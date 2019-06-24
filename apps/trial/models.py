@@ -96,7 +96,7 @@ class Questionnaire(models.Model):
         return self._generate_block_items(block_items, block_offset)
 
     def _experiment_items_with_alternating_conditions(self, experiment_items):
-        n_tries = 100
+        n_tries = 200
         original_items = deque(experiment_items)
         while n_tries:
             items = original_items.copy()
