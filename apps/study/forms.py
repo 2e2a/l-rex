@@ -31,11 +31,15 @@ class StudyForm(crispy_forms.CrispyModelForm):
         super().__init__(*args, **kwargs)
         if self.disable:
             self.fields['title'].widget.attrs['readonly'] = True
+            self.fields['title'].widget.attrs['disabled'] = True
             self.fields['use_blocks'].widget.attrs['readonly'] = True
+            self.fields['use_blocks'].widget.attrs['disabled'] = True
         if self.disable_itemtype:
             self.fields['item_type'].widget.attrs['readonly'] = True
+            self.fields['item_type'].widget.attrs['disabled'] = True
         if self.disable_question_order:
             self.fields['pseudo_randomize_question_order'].widget.attrs['readonly'] = True
+            self.fields['pseudo_randomize_question_order'].widget.attrs['disabled'] = True
 
     def clean_title(self):
         if self.disable:

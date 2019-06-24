@@ -347,6 +347,7 @@ class Study(models.Model):
                     questionnaire_permutation.generate_items(experiments)
 
     def generate_questionnaires(self):
+        # TODO: add more pseudo-randomization tries
         self.questionnaire_set.all().delete()
         experiments = {e.id: e for e in self.experiments}
         questionnaire_count = self._questionnaire_count()
