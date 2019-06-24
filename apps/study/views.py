@@ -44,9 +44,15 @@ class DisableFormIfStudyActiveMixin(WarnUserIfStudyActiveMixin):
         data['disable_actions'] = self.study.is_active
         return data
 
+    def _disbable_form(self, form):
+        for field in form.fields.values():
+            field.widget.attrs['readonly'] = True
+            field.widget.attrs['disabled'] = True
+
     def get_form(self, form_class=None):
         form = super().get_form(form_class=form_class)
         if self.study.is_active:
+            self._disbable_form(form)
             for helper_input in form.helper.inputs:
                 helper_input.field_classes += '  disabled'
                 helper_input.flat_attrs += '  disabled=True'
@@ -58,6 +64,9 @@ class DisableFormIfStudyActiveMixin(WarnUserIfStudyActiveMixin):
                 for helper_input in self.helper.inputs:
                     helper_input.field_classes += '  disabled'
                     helper_input.flat_attrs += '  disabled=True'
+            if hasattr(self, 'formset'):
+                for form in self.formset:
+                    self._disbable_form(form)
         return  super().get(request, *args, **kwargs)
 
 
