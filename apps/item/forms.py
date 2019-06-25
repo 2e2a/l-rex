@@ -56,8 +56,7 @@ class PregenerateItemsForm(crispy_forms.CrispyForm):
 )
 
 
-# TODO: ItemUploadForm
-class UploadItemsForm(crispy_forms.CrispyForm):
+class ItemUploadForm(crispy_forms.CrispyForm):
     file = forms.FileField(
         help_text='The CSV file must contain columns for item number, condition, and text/link to the audio file. '
                   'Valid column delimiters: colon, semicolon, comma, space, or tab.',
@@ -214,7 +213,7 @@ def itemquestion_formset_helper():
     return formset_helper
 
 
-class UploadItemListForm(crispy_forms.CrispyForm):
+class ItemListUploadForm(crispy_forms.CrispyForm):
     file = forms.FileField(
         help_text='The CSV file must contain a column for the item list number, item number and condition.'
                   'Valid column delimiters: colon, semicolon, comma, space, or tab.',

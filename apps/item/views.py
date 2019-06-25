@@ -306,7 +306,7 @@ class ItemPregenerateView(experiment_views.ExperimentMixin, study_views.CheckStu
 class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin, ItemsValidateMixin,
                      study_views.DisableFormIfStudyActiveMixin, generic.FormView):
     title = 'Items'
-    form_class = forms.UploadItemsForm
+    form_class = forms.ItemUploadForm
     template_name = 'lrex_contrib/crispy_form.html'
 
     def dispatch(self, request, *args, **kwargs):
@@ -322,6 +322,7 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
         return kwargs
 
     def form_valid(self, form):
+        # TODO: optional get delimeter from form
         result = super().form_valid(form)
         columns = {
             'item': form.cleaned_data['number_column'] - 1,
@@ -501,7 +502,7 @@ class ItemListListView(experiment_views.ExperimentMixin, study_views.CheckStudyC
 class ItemListUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin,
                          study_views.DisableFormIfStudyActiveMixin, generic.FormView):
     title = 'Upload custom item lists'
-    form_class = forms.UploadItemListForm
+    form_class = forms.ItemListUploadForm
     template_name = 'lrex_contrib/crispy_form.html'
 
     def get_form_kwargs(self):

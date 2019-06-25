@@ -79,7 +79,7 @@ def questionnaire_block_update_formset_helper():
     return formset_helper
 
 
-class UploadQuestionnaireForm(crispy_forms.CrispyForm):
+class QuestionnaireUploadForm(crispy_forms.CrispyForm):
     file = forms.FileField(
         help_text='The CSV file must contain a column for the questionnaire number, experiment title, item number and '
                   'condition. Valid column delimiters: colon, semicolon, comma, space, or tab.',

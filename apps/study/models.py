@@ -537,7 +537,7 @@ class Study(models.Model):
 
     def questionnaires_csv_restore(self, fileobj, user_columns=None, detected_csv=contrib_csv.DEFAULT_DIALECT):
         from apps.trial.models import Questionnaire, QuestionnaireItem
-        from apps.trial.forms import UploadQuestionnaireForm
+        from apps.trial.forms import QuestionnaireUploadForm
         self.delete_questionnaires()
         reader = csv.reader(fileobj, delimiter=detected_csv['delimiter'], quoting=detected_csv['quoting'])
         if detected_csv['has_header']:
@@ -548,9 +548,9 @@ class Study(models.Model):
                 continue
             questionnaire = Questionnaire.objects.create(study=self, number=row[columns['questionnaire']])
             if 'lists' in columns:
-                item_lists = UploadQuestionnaireForm.read_item_lists(self, row[columns['lists']])
+                item_lists = QuestionnaireUploadForm.read_item_lists(self, row[columns['lists']])
                 questionnaire.item_lists.set(item_lists)
-            items = UploadQuestionnaireForm.read_items(self, row[columns['items']])
+            items = QuestionnaireUploadForm.read_items(self, row[columns['items']])
             if self.pseudo_randomize_question_order:
                 question_orders = re.findall('"([^"]+)"', row[columns['question_order']])
             for i, item in enumerate(items):

@@ -421,7 +421,7 @@ class Experiment(models.Model):
             writer.writerow(csv_row)
 
     def itemlists_csv_create(self, fileobj, has_experiment_column=False, user_columns=None, detected_csv=contrib_csv.DEFAULT_DIALECT):
-        from apps.item.forms import UploadItemListForm
+        from apps.item.forms import ItemListUploadForm
         self.delete_lists()
         reader = csv.reader(fileobj, delimiter=detected_csv['delimiter'], quoting=detected_csv['quoting'])
         if detected_csv['has_header']:
@@ -434,7 +434,7 @@ class Experiment(models.Model):
                 continue
             list_num = row[columns['list']]
             items_string = row[columns['items']]
-            items = UploadItemListForm.read_items(self, items_string)
+            items = ItemListUploadForm.read_items(self, items_string)
             itemlist = item_models.ItemList.objects.create(experiment=self, number=list_num)
             itemlist.items.set(items)
 

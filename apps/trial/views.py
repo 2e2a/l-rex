@@ -293,7 +293,7 @@ class QuestionnaireBlockInstructionsUpdateView(study_views.StudyMixin, study_vie
 class QuestionnaireUploadView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin,
                               study_views.DisableFormIfStudyActiveMixin, generic.FormView,):
     title = 'Upload custom questionnaires'
-    form_class = forms.UploadQuestionnaireForm
+    form_class = forms.QuestionnaireUploadForm
     template_name = 'lrex_contrib/crispy_form.html'
 
     def get_form_kwargs(self):
