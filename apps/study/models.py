@@ -229,9 +229,27 @@ class Study(models.Model):
         return Trial.objects.filter(questionnaire__study=self, is_test=False).count()
 
     @cached_property
-    def test_trial_count(self):
+    def trial_count_test(self):
         from apps.trial.models import Trial
         return Trial.objects.filter(questionnaire__study=self, is_test=True).count()
+
+    @cached_property
+    def trial_count_active(self):
+        from apps.trial.models import Trial, TrialStatus
+        trials = Trial.objects.filter(questionnaire__study=self, is_test=False)
+        return len([trial for trial in trials if trial.status in [TrialStatus.CREATED, TrialStatus.STARTED]])
+
+    @cached_property
+    def trial_count_finished(self):
+        from apps.trial.models import Trial, TrialStatus
+        trials = Trial.objects.filter(questionnaire__study=self, is_test=False)
+        return len([trial for trial in trials if trial.status == TrialStatus.FINISHED])
+
+    @cached_property
+    def trial_count_abandoned(self):
+        from apps.trial.models import Trial, TrialStatus
+        trials = Trial.objects.filter(questionnaire__study=self, is_test=False)
+        return len([trial for trial in trials if trial.status == TrialStatus.ABANDONED])
 
     @cached_property
     def is_rating_possible(self):

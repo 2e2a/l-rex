@@ -69,10 +69,10 @@
                 </div>
                 <div class="row small text-secondary">
                     <div class="col-sm-5">
-                        Trials:
+                        Trials completed:
                     </div>
                     <div class="col-sm-5">
-                        {{ trial_count }}
+                        {{ trial_count_finished }}
                     </div>
                 </div>
                 <div class="row small text-secondary">
@@ -85,14 +85,6 @@
                         {% else %}
                         <a class="card-link text-muted">Test link</a>
                         {% endif %}
-                    </div>
-                </div>
-                <div class="row small text-secondary">
-                    <div class="col-sm-5">
-                        Test trials:
-                    </div>
-                    <div class="col-sm-5">
-                        {{ test_trial_count }}
                     </div>
                 </div>
             </div>
@@ -315,10 +307,26 @@
                 </p>
                 <div class="row small text-secondary small text-secondary">
                     <div class="col-sm-3">
-                        Trials taken:
+                        Trials active:
                     </div>
                     <div class="col-sm-7">
-                        {{ trial_count }}
+                        {{ trial_count_active }}
+                    </div>
+                </div>
+                <div class="row small text-secondary small text-secondary">
+                    <div class="col-sm-3">
+                        Trials completed:
+                    </div>
+                    <div class="col-sm-7">
+                        {{ trial_count_finished }}
+                    </div>
+                </div>
+                <div class="row small text-secondary small text-secondary">
+                    <div class="col-sm-3">
+                        Trials abandoned:
+                    </div>
+                    <div class="col-sm-7">
+                        {{ trial_count_abandoned }}
                     </div>
                 </div>
                 <div class="row small text-secondary small text-secondary">
@@ -326,7 +334,7 @@
                         Test trials:
                     </div>
                     <div class="col-sm-7">
-                        {{ trial_count }}
+                        {{ trial_count_test }}
                     </div>
                 </div>
                 <hr>
