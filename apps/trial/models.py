@@ -358,15 +358,20 @@ class Trial(models.Model):
     def ratings_completed(self):
         return Rating.objects.filter(trial=self, question=0).count()
 
+    ABANDONED_AFTER_HRS = 1
+
     @property
     def status(self):
         if self.ratings_completed > 0:
             n_items = len(self.items)
             if self.ratings_completed == n_items:
                 return TrialStatus.FINISHED
-            if self.created + timedelta(1) < timezone.now():
+            if self.created + timedelta(hours=self.ABANDONED_AFTER_HRS) < timezone.now():
                 return TrialStatus.ABANDONED
             return TrialStatus.STARTED
+        else:
+            if self.created + timedelta(hours=self.ABANDONED_AFTER_HRS) < timezone.now():
+                return TrialStatus.ABANDONED
         return TrialStatus.CREATED
 
     def init(self, study):
