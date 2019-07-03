@@ -28,6 +28,7 @@ class StudyForm(crispy_forms.CrispyModelForm):
         self.disable = kwargs.pop('disable', False)
         self.disable_itemtype = kwargs.pop('disable_itemtype', False)
         self.disable_question_order = kwargs.pop('disable_question_order', False)
+        self.disable_use_blocks = kwargs.pop('disable_use_blocks', False)
         super().__init__(*args, **kwargs)
         if self.disable:
             self.fields['title'].widget.attrs['readonly'] = True
@@ -40,6 +41,9 @@ class StudyForm(crispy_forms.CrispyModelForm):
         if self.disable_question_order:
             self.fields['pseudo_randomize_question_order'].widget.attrs['readonly'] = True
             self.fields['pseudo_randomize_question_order'].widget.attrs['disabled'] = True
+        if self.disable_use_blocks:
+            self.fields['use_blocks'].widget.attrs['readonly'] = True
+            self.fields['use_blocks'].widget.attrs['disabled'] = True
 
     def clean_title(self):
         if self.disable:

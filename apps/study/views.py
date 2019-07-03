@@ -247,8 +247,10 @@ class StudyUpdateView(StudyObjectMixin, CheckStudyCreatorMixin, SuccessMessageMi
                   ' (<a href="{}">here</a>).'.format(reverse('experiments', args=[self.study.slug]))
             messages.info(request, mark_safe(msg))
         if self.study.has_questionnaires:
-            msg = 'Note: To change the "question order" setting you would need to remove questionnaires first' \
-                  ' (<a href="{}">here</a>).'.format(reverse('questionnaires', args=[self.study.slug]))
+            msg = 'Note: To change the "question order" and "use blocks" settings you would need to remove ' \
+                  'questionnaires first (<a href="{}">here</a>).'.format(
+                      reverse('questionnaires', args=[self.study.slug])
+            )
             messages.info(request, mark_safe(msg))
         return super().get(request, *args, **kwargs)
 
@@ -257,6 +259,7 @@ class StudyUpdateView(StudyObjectMixin, CheckStudyCreatorMixin, SuccessMessageMi
         kwargs['disable'] =  self.study.is_active
         kwargs['disable_itemtype'] = self.study.has_items
         kwargs['disable_question_order'] = self.study.has_questionnaires
+        kwargs['disable_use_blocks'] = self.study.has_questionnaires
         return kwargs
 
     @property
