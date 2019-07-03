@@ -30,6 +30,12 @@ class Item(models.Model):
         ordering = ['number', 'condition']
 
     @property
+    def experiment_block(self):
+        if self.experiment.is_example:
+            return 0
+        return self.block
+
+    @property
     def content(self):
         if self.textitem:
             return self.textitem.text

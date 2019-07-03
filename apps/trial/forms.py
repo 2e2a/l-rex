@@ -2,7 +2,7 @@ import csv
 import re
 from io import StringIO
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import HTML, Field, Fieldset, Layout, Submit
+from crispy_forms.layout import Field, Fieldset, Layout, Submit
 from django import forms
 
 from apps.contrib import forms as crispy_forms
@@ -37,11 +37,12 @@ def customize_randomization(questionnaireblock_formset, study):
                                      if k != models.QuestionnaireBlock.RANDOMIZATION_PSEUDO]
 
 
-def questionnaire_block_formset_helper():
+def questionnaire_block_formset_helper(has_exmaple_block=False):
     formset_helper = FormHelper()
+    label = 'Item block {{ forloop.counter0 }}' if has_exmaple_block else 'Item block {{ forloop.counter }}'
     formset_helper.add_layout(
         Layout(
-            Fieldset('Item block {{ forloop.counter }}', None, 'instructions', 'randomization'),
+            Fieldset(label, None, 'instructions', 'randomization'),
         ),
     )
     formset_helper.add_input(

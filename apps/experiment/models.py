@@ -36,6 +36,10 @@ class Experiment(models.Model):
         help_text='Mark the items of this experiment as fillers. '
                   'This setting will be relevant if you choose to pseudo-randomize the questionnaire.',
     )
+    is_example = models.BooleanField(
+        default=False,
+        help_text='Items of this experiment will automatically be in the item block 0.'
+    )
     items_validated = models.BooleanField(
         default=False,
     )
@@ -54,7 +58,9 @@ class Experiment(models.Model):
 
     @cached_property
     def items(self):
-        return self.item_set.all().order_by('block','number', 'condition')
+        items = self.item_set.all().order_by('number', 'condition')
+        items = sorted(items, key=lambda x:x.experiment_block)
+        return items
 
     @cached_property
     def conditions(self):
@@ -64,6 +70,8 @@ class Experiment(models.Model):
 
     @cached_property
     def item_blocks(self):
+        if self.is_example:
+            return [0]
         item_bocks = set([item.block for item in self.items])
         return sorted(item_bocks)
 

@@ -19,6 +19,16 @@
                          {{ experiment.is_filler|yesno }}
                      </div>
                  </div>
+                 {% if study.use_blocks %}
+                 <div class="row small text-secondary">
+                     <div class="col-sm-5">
+                         Example:
+                     </div>
+                     <div class="col-sm-5">
+                         {{ experiment.is_example|yesno }}
+                     </div>
+                 </div>
+                 {% endif %}
                  <hr>
                  <a href="{% url 'experiment-update' experiment.slug %}" class="card-link">Settings</a>
              </div>

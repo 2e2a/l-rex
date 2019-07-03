@@ -64,10 +64,10 @@ class Questionnaire(models.Model):
     def questionnaire_items_by_block(self):
         blocks = OrderedDict()
         for questionnaire_item in self.questionnaireitem_set.all():
-            if questionnaire_item.item.block in blocks:
-                blocks[questionnaire_item.item.block].append(questionnaire_item)
+            if questionnaire_item.item.experiment_block in blocks:
+                blocks[questionnaire_item.item.experiment_block].append(questionnaire_item)
             else:
-                blocks[questionnaire_item.item.block] = [questionnaire_item]
+                blocks[questionnaire_item.item.experiment_block] = [questionnaire_item]
         return blocks
 
     def block_items(self, block):
@@ -134,7 +134,6 @@ class Questionnaire(models.Model):
             items_by_experiment[id] = items
         return items_by_experiment
 
-
     def _generate_items_pseudo_random(self, block_items, block_offset, block_slots, experiments):
         questionnaire_items = []
         if len(block_slots) != len(block_items):
@@ -191,12 +190,13 @@ class Questionnaire(models.Model):
     @cached_property
     def _item_list_items(self):
         item_lists = self.item_lists.all()
-        items = item_models.Item.objects.filter(itemlist__in=item_lists).order_by('block', 'experiment_id')
+        items = item_models.Item.objects.filter(itemlist__in=item_lists).order_by('experiment_id')
+        items = sorted(items, key=lambda x: x.experiment_block)
         return list(items)
 
     def _compute_slots(self, experiments, block_randomization):
         slots = {}
-        items_by_block = groupby(self._item_list_items, lambda x: x.block)
+        items_by_block = groupby(self._item_list_items, lambda x: x.experiment_block)
         for block, block_items in items_by_block:
             block_items = list(block_items)
             if block_randomization[block] == QuestionnaireBlock.RANDOMIZATION_PSEUDO:
@@ -223,7 +223,7 @@ class Questionnaire(models.Model):
             experiments = {e.id: e for e in experiment_models.Experiment.objects.filter(study=self.study)}
         block_randomization = self._block_randomization()
         slots = self._compute_slots(experiments, block_randomization)
-        items_by_block = groupby(self._item_list_items, lambda x: x.block)
+        items_by_block = groupby(self._item_list_items, lambda x: x.experiment_block)
         block_offset = 0
         questionnaire_items = []
         for block, block_items in items_by_block:

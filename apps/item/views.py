@@ -318,7 +318,7 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['study'] = self.study
+        kwargs['experiment'] = self.experiment
         return kwargs
 
     def form_valid(self, form):

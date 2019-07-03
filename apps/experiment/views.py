@@ -70,6 +70,11 @@ class ExperimentCreateView(study_views.StudyMixin, study_views.CheckStudyCreator
     form_class = forms.ExperimentForm
     success_message = 'Experiment created.'
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['study'] = self.study
+        return kwargs
+
     def form_valid(self, form):
         form.instance.study = self.study
         response = super().form_valid(form)
@@ -115,6 +120,11 @@ class ExperimentUpdateView(ExperimentObjectMixin, study_views.CheckStudyCreatorM
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.ExperimentForm
     success_message = 'Experiment successfully updated.'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['study'] = self.study
+        return kwargs
 
     @property
     def breadcrumbs(self):

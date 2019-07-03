@@ -297,6 +297,10 @@ class Study(models.Model):
         return False
 
     @cached_property
+    def has_exmaples(self):
+        return any(experiment.is_example for experiment in self.experiments)
+
+    @cached_property
     def has_questionnaires(self):
         return self.questionnaire_set.exists()
 

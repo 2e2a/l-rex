@@ -171,7 +171,7 @@ class QuestionnaireGenerateView(study_views.StudyMixin, study_views.CheckStudyCr
     helper = None
 
     def dispatch(self, request, *args, **kwargs):
-        self.helper = forms.questionnaire_block_formset_helper()
+        self.helper = forms.questionnaire_block_formset_helper(has_exmaple_block=self.study.has_exmaples)
         self.blocks = self.study.item_blocks
         if not self.study.is_allowed_pseudo_randomization:
             messages.info(request, 'Note: Define filler experiments to use pseudo randomization.')
@@ -517,7 +517,8 @@ class RatingCreateMixin(ProgressMixin, TestWarningMixin):
     def get_next_url(self):
         trial_items = self.trial.items
         if self.num < len(trial_items) - 1:
-            if self.study.use_blocks and trial_items[self.num].block != trial_items[self.num + 1].block:
+            if self.study.use_blocks and \
+                    trial_items[self.num].experiment_block != trial_items[self.num + 1].experiment_block:
                 return reverse('rating-block-instructions', args=[self.trial.slug, self.num + 1])
             return reverse('rating-create', args=[self.trial.slug, self.num + 1])
         return reverse('rating-outro', args=[self.trial.slug])
@@ -633,7 +634,7 @@ class RatingBlockInstructionsView(ProgressMixin, TestWarningMixin, TrialMixin, g
         )
         questionnaire_block = models.QuestionnaireBlock.objects.get(
             study=self.study,
-            block=questionnaire_item.item.block
+            block=questionnaire_item.item.experiment_block
         )
         data['block_instructions_rich'] = mark_safe(markdownify(questionnaire_block.instructions))
         data['trial'] = self.trial

@@ -28,7 +28,7 @@
     <li class="list-group-item d-flex flex-column flex-md-row">
         <div class="mr-4">
             <strong>{{ item }}</strong>
-            {% if study.use_blocks %}<span class="badge badge-secondary">block {{ item.block }}</span>{% endif %}
+            {% if study.use_blocks %}<span class="badge badge-secondary">block {{ item.experiment_block }}</span>{% endif %}
         </div>
         <div class="flex-grow-1 mr-4">
             {% if item.textitem %}
