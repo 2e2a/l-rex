@@ -104,7 +104,7 @@ class Experiment(models.Model):
         condition_count = len(conditions)
         n_items= len(items)
         if n_items % condition_count != 0:
-            msg = 'Number of items is not a multiple of the number of conditions (items: {}, conditions: {})'.format(
+            msg = 'Number of stimuli is not a multiple of the number of conditions (stimuli: {}, conditions: {})'.format(
                 n_items,
                 ','.join('"{}"'.format(condition) for condition in conditions)
             )
@@ -154,9 +154,10 @@ class Experiment(models.Model):
                 items = list(items_with_same_link)
                 if len(items) > 1:
                     warnings.append('Items {} have the same URL.'.format(','.join([str(item) for item in items])))
-        msg = 'Delected {} items with following conditions: {}.'.format(
+        msg = 'Detected {} items with following conditions: {} ({} stimuli).'.format(
+            item_number,
+            ','.join('"{}"'.format(condition) for condition in conditions),
             n_items,
-            ','.join('"{}"'.format(condition) for condition in conditions)
         )
         warnings.append(msg)
         self.items_validated = True
