@@ -122,7 +122,7 @@ class ItemCreateMixin:
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['study'] = self.study
+        kwargs['experiment'] = self.experiment
         return kwargs
 
     def form_valid(self, form):
@@ -158,7 +158,7 @@ class ItemUpdateMixin:
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['study'] = self.study
+        kwargs['experiment'] = self.experiment
         return kwargs
 
     def form_valid(self, form):

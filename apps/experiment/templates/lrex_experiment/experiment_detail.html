@@ -29,6 +29,16 @@
                      </div>
                  </div>
                  {% endif %}
+                 {% if experiment.block > 0 %}
+                 <div class="row small text-secondary">
+                     <div class="col-sm-5">
+                         Block:
+                     </div>
+                     <div class="col-sm-5">
+                         {{ experiment.block }}
+                     </div>
+                 </div>
+                 {% endif %}
                  <hr>
                  <a href="{% url 'experiment-update' experiment.slug %}" class="card-link">Settings</a>
              </div>

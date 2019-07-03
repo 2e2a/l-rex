@@ -33,6 +33,8 @@ class Item(models.Model):
     def experiment_block(self):
         if self.experiment.is_example:
             return 0
+        if self.experiment.block > 0:
+            return self.experiment.block
         return self.block
 
     @property

@@ -40,6 +40,10 @@ class Experiment(models.Model):
         default=False,
         help_text='Items of this experiment will automatically be in the item block 0.'
     )
+    block = models.IntegerField(
+        help_text='Items of this experiment will automatically be in this item block (-1 disabled).',
+        default=-1,
+    )
     items_validated = models.BooleanField(
         default=False,
     )
@@ -72,6 +76,8 @@ class Experiment(models.Model):
     def item_blocks(self):
         if self.is_example:
             return [0]
+        if self.block > 0:
+            return [self.block]
         item_bocks = set([item.block for item in self.items])
         return sorted(item_bocks)
 

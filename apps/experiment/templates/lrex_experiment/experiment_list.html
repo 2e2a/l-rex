@@ -13,6 +13,8 @@
         <div class="flex-grow-1">
             <strong>{{ experiment.title }}</strong>
             {% if experiment.is_filler %}<span class="badge badge-primary">filler</span>{% endif %}
+            {% if experiment.is_example %}<span class="badge badge-secondary">example</span>{% endif %}
+            {% if experiment.block > 0 %}<span class="badge badge-secondary">block{{ experiment.block }}</span>{% endif %}
         </div>
         <div>
             <a href="{% url 'experiment' experiment.slug %}"

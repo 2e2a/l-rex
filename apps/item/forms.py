@@ -18,9 +18,9 @@ class ItemFormMixin:
         return self.cleaned_data['condition'].strip()
 
     def __init__(self, *args, **kwargs):
-        study = kwargs.pop('study')
+        experiment = kwargs.pop('experiment')
         super().__init__(*args, **kwargs)
-        if not study.use_blocks:
+        if not experiment.study.use_blocks or experiment.is_example or experiment.block > 0:
             self.fields['block'].widget = forms.HiddenInput()
 
 
@@ -89,7 +89,7 @@ class ItemUploadForm(crispy_forms.CrispyForm):
         elif self.study.has_audiolink_items:
             content_help_text = 'Specify which column contains the link to the audio file.',
         self.fields['content_column'].help_text = content_help_text
-        if not self.study.use_blocks or self.experiment.is_example:
+        if not self.study.use_blocks or self.experiment.is_example or self.experiment.block > 0:
             self.fields['block_column'].widget = forms.HiddenInput()
         for question in self.study.questions:
             self.fields.update(

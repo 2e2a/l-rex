@@ -4,6 +4,7 @@ from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.urls import reverse
+from django.utils.safestring import mark_safe
 from django.utils.timezone import now
 from django.views import generic
 
@@ -121,9 +122,17 @@ class ExperimentUpdateView(ExperimentObjectMixin, study_views.CheckStudyCreatorM
     form_class = forms.ExperimentForm
     success_message = 'Experiment successfully updated.'
 
+    def get(self, request, *args, **kwargs):
+        if self.study.has_questionnaires:
+            msg = 'Note: To change the block related settings you would need to remove questionnaires first' \
+                  ' (<a href="{}">here</a>).'.format(reverse('questionnaires', args=[self.study.slug]))
+            messages.info(request, mark_safe(msg))
+        return super().get(request, *args, **kwargs)
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['study'] = self.study
+        kwargs['disable_block_settings'] = self.study.has_questionnaires
         return kwargs
 
     @property
