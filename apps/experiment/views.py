@@ -119,7 +119,7 @@ class ExperimentUpdateView(ExperimentObjectMixin, study_views.CheckStudyCreatorM
     model = models.Experiment
     title = 'Edit Experiment'
     template_name = 'lrex_contrib/crispy_form.html'
-    form_class = forms.ExperimentForm
+    form_class = forms.ExperimentUpdateForm
     success_message = 'Experiment successfully updated.'
 
     def get(self, request, *args, **kwargs):
