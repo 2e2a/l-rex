@@ -24,33 +24,31 @@
         {% if study.pseudo_randomize_question_order %}
         <th>Question order</th>
         {% endif %}
+        {% if study.has_question_with_random_scale %}
+        <th>Scale</th>
+        {% endif %}
     </tr>
     </thead>
     <tbody>
-    {% if study.use_blocks %}
-    {% for block, q_items in questionnaire.questionnaire_items_by_block.items %}
-    {% for q_item in q_items %}
+    {% for block, q_item, question_properties in questionnaire_items %}
     <tr>
         <td>{{ forloop.counter }}</td>
         <td>{{ q_item.item.experiment }}-{{ q_item.item }}</td>
+        {% if study.use_blocks %}
         <td>{{ block }}</td>
+        {% endif %}
         {% if study.pseudo_randomize_question_order %}
         <td>{{ q_item.quetion_order }}</td>
         {% endif %}
-    </tr>
-    {% endfor %}
-    {% endfor %}
-    {% else %}
-    {% for q_item in questionnaire.questionnaire_items %}
-    <tr>
-        <td>{{ forloop.counter }}</td>
-        <td>{{ q_item.item.experiment }}-{{ q_item.item }}</td>
-        {% if study.pseudo_randomize_question_order %}
-        <td>{{ q_item.question_order_user }}</td>
+        {% if study.has_question_with_random_scale %}
+        <td>
+            {% for question_property in question_properties %}
+            Q{{ forloop.counter }}: "{{ question_property.question_scale_user }}"<br>
+            {% endfor %}
+        </td>
         {% endif %}
     </tr>
     {% endfor %}
-    {% endif %}
     </tbody>
 </table>
 {% endblock %}

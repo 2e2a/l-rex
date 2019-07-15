@@ -268,6 +268,7 @@ class RatingForm(crispy_forms.CrispyModelForm):
     def __init__(self, *args, **kwargs):
         self.study = kwargs.pop('study')
         question = kwargs.pop('question')
+        questionnaire_item = kwargs.pop('questionnaire_item')
         item_question = kwargs.pop('item_question', None)
         super().__init__(*args, **kwargs)
         self.fields['scale_value'].empty_label = None
@@ -283,6 +284,15 @@ class RatingForm(crispy_forms.CrispyModelForm):
                 for (pk, _ ), custom_label in zip(self.fields['scale_value'].choices, item_labels):
                     custom_choices.append((pk, custom_label))
                 self.fields['scale_value'].choices = custom_choices
+        if question.randomize_scale:
+            custom_choices = []
+            initial_choices = [(pk, label) for pk, label in self.fields['scale_value'].choices]
+            for scale_num in questionnaire_item.question_property(question.number).scale_order.split(','):
+                custom_choices.append(initial_choices[int(scale_num)])
+            self.fields['scale_value'].choices = custom_choices
+
+
+
 
 
 class RatingFormsetForm(forms.ModelForm):

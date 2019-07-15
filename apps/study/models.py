@@ -183,6 +183,10 @@ class Study(models.Model):
         return len(self.questions) > 1
 
     @cached_property
+    def has_question_with_random_scale(self):
+        return any(question.randomize_scale for question in self.questions)
+
+    @cached_property
     def has_items(self):
         from apps.item.models import Item
         return Item.objects.filter(experiment__in=self.experiments).exists()
@@ -732,11 +736,19 @@ class Question(models.Model):
         null=True,
         help_text='Legend to clarify the scale (e.g. "1 = bad, 5 = good")',
     )
+    randomize_scale = models.BooleanField(
+        default=False,
+        help_text='Show scales in a pseudo-random order.',
+    )
 
     class Meta:
         ordering = ['study', 'number']
 
-    @property
+    @cached_property
+    def scale_values(self):
+        return list(self.scalevalue_set.all())
+
+    @cached_property
     def scale_labels(self):
         return ','.join([scale_value.label for scale_value in self.scalevalue_set.all()])
 

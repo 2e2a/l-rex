@@ -406,10 +406,19 @@ class QuestionUpdateView(StudyMixin, CheckStudyCreatorMixin, DisableFormIfStudyA
         return super().dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
+        if self.study.has_questionnaires:
+            msg = 'Note: To change the "randomize scale" settings you need to remove questionnaires first ' \
+                  '(<a href="{}">here</a>).'.format(reverse('questionnaires', args=[self.study.slug])
+            )
+            messages.info(request, mark_safe(msg))
         self.formset = forms.question_formset_factory(self.n_questions, 0 if self.n_questions > 0 else 1)(
             queryset=models.Question.objects.filter(study=self.study)
         )
         forms.initialize_with_questions(self.formset, self.study.questions)
+        forms.question_formset_disable_fields(
+            self.formset,
+            disable_randomize_scale=self.study.has_questionnaires,
+        )
         return super().get(request, *args, **kwargs)
 
     def _invalidate_experiment_items(self):
@@ -462,6 +471,10 @@ class QuestionUpdateView(StudyMixin, CheckStudyCreatorMixin, DisableFormIfStudyA
                     queryset=models.Question.objects.filter(study=self.study)
                 )
             forms.initialize_with_questions(self.formset, self.study.questions)
+            forms.question_formset_disable_fields(
+                self.formset,
+                disable_randomize_scale=self.study.has_questionnaires,
+            )
         return super().get(request, *args, **kwargs)
 
     @property

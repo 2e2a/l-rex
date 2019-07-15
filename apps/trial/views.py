@@ -153,6 +153,27 @@ class QuestionnaireDetailView(QuestionnaireObjectMixin, study_views.CheckStudyCr
     model = models.Questionnaire
     title = 'Questionnaire'
 
+    def _add_items_for_block(self, context_items, block, q_items):
+        for q_item in q_items:
+            question_properties = q_item.question_properties
+            context_items.append(
+                (block, q_item, question_properties)
+            )
+
+    def _context_questionnaire_items(self):
+        context_items = []
+        if self.study.use_blocks:
+            for block, q_items in self.questionnaire.questionnaire_items_by_block.items():
+                self._add_items_for_block(context_items, block, q_items)
+        else:
+            self._add_items_for_block(context_items, 1, self.questionnaire.questionnaire_items)
+        return context_items
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['questionnaire_items'] = self._context_questionnaire_items()
+        return context
+
     @property
     def breadcrumbs(self):
         return [
@@ -501,7 +522,6 @@ class RatingCreateMixin(ProgressMixin, TestWarningMixin):
             {'n_trial_items': len(self.trial.items), 'num': self.num}
         )
         return super().get_context_data(**kwargs)
-        return super().get_context_data(**kwargs)
 
     def _redirect_to_correct_num(self, num):
         try:
@@ -551,6 +571,7 @@ class RatingCreateView(RatingCreateMixin, TrialMixin, generic.CreateView):
         kwargs = super().get_form_kwargs()
         kwargs['study'] = self.study
         kwargs['question'] = self.study.question
+        kwargs['questionnaire_item'] = self.questionnaire_item
         if self.item_questions:
             kwargs['item_question'] = self.item_questions[0]
         return kwargs

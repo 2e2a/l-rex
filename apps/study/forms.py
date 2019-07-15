@@ -137,6 +137,7 @@ class QuestionForm(crispy_forms.CrispyModelForm):
             'question',
             'scale_labels',
             'legend',
+            'randomize_scale',
         ]
 
     def clean_scale_labels(self):
@@ -160,11 +161,19 @@ def initialize_with_questions(question_formset, questions):
         form['scale_labels'].initial = ','.join([scale_value.label for scale_value in question.scalevalue_set.all()])
 
 
+def question_formset_disable_fields(question_formset, **kwargs):
+    disable_randomize_scales = kwargs.pop('disable_randomize_scale', False)
+    for form in question_formset:
+        if disable_randomize_scales:
+            form.fields['randomize_scale'].widget.attrs['readonly'] = True
+            form.fields['randomize_scale'].widget.attrs['disabled'] = True
+
+
 def question_formset_helper():
     formset_helper = FormHelper()
     formset_helper.add_layout(
         Layout(
-            Fieldset('Question {{ forloop.counter }}', None, 'question', 'scale_labels', 'legend'),
+            Fieldset('Question {{ forloop.counter }}', None, 'question', 'scale_labels', 'legend', 'randomize_scale'),
         ),
     )
     formset_helper.add_input(
