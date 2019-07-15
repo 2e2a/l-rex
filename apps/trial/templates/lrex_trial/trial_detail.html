@@ -8,6 +8,9 @@
         <th>Item</th>
         {% if study.pseudo_randomize_question_order %}<th>Question order</th>{% endif %}
         <th>Content</th>
+        {% if study.has_question_with_random_scale %}
+        <th>Random scale</th>
+        {% endif %}
         {% for qustions in trial.questionnaire.study.questions %}
         <th>Rating</th>
         {% endfor %}
