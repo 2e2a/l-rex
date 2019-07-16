@@ -183,6 +183,12 @@ class Study(models.Model):
         return len(self.questions) > 1
 
     @cached_property
+    def has_question_rating_comments(self):
+        return self.question_set.filter(
+            rating_comment__in=[Question.RATING_COMMENT_OPTIONAL, Question.RATING_COMMENT_REQUIRED]
+        ).exists()
+
+    @cached_property
     def has_items(self):
         from apps.item.models import Item
         return Item.objects.filter(experiment__in=self.experiments).exists()
@@ -732,13 +738,31 @@ class Question(models.Model):
         null=True,
         help_text='Legend to clarify the scale (e.g. "1 = bad, 5 = good")',
     )
+    RATING_COMMENT_NONE = 'none'
+    RATING_COMMENT_OPTIONAL = 'optional'
+    RATING_COMMENT_REQUIRED = 'required'
+    RATING_COMMENT = (
+        (RATING_COMMENT_NONE, 'None'),
+        (RATING_COMMENT_OPTIONAL, 'Optional'),
+        (RATING_COMMENT_REQUIRED, 'Required'),
+    )
+    rating_comment = models.CharField(
+        max_length=10,
+        choices=RATING_COMMENT,
+        default=RATING_COMMENT_NONE,
+        help_text='Let the participant add a comment to the rating (free text).',
+    )
 
     class Meta:
         ordering = ['study', 'number']
 
-    @property
+    @cached_property
     def scale_labels(self):
         return ','.join([scale_value.label for scale_value in self.scalevalue_set.all()])
+
+    @cached_property
+    def has_rating_comment(self):
+        return self.rating_comment != self.RATING_COMMENT_NONE
 
     def get_absolute_url(self):
         return reverse('study-question', args=[self.study.slug, self.pk])

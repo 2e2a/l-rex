@@ -150,6 +150,7 @@
         ],
         "item_type": "txt",
         "use_blocks": false,
+        "pseudo_randomize_question_order": false,
         "password": "test",
         "instructions": "Please rate the following sentences on a scale from 1 to 7. If a sentence sounds completely fine, e.g., \"The students met the teachers\", it should receive a high rating. If a sentence sounds bad, e.g., \"The students meets the teachers\", it should receive a low rating.",
         "require_participant_id": false,
@@ -158,7 +159,6 @@
         "continue_label": "Continue",
         "end_date": null,
         "trial_limit": null,
-        "pseudo_randomize_question_order": false,
         "is_published": true,
         "shared_with": null,
         "created_date": "2019-04-17",
@@ -176,6 +176,7 @@
         ],
         "item_type": "txt",
         "use_blocks": true,
+        "pseudo_randomize_question_order": false,
         "password": "test",
         "instructions": "In this experiment, you will rate sentences on a scale from 1-7. Additionally, you will answer a yes/no question about each sentence. You will first see two examples.",
         "require_participant_id": true,
@@ -184,7 +185,6 @@
         "continue_label": "Continue",
         "end_date": null,
         "trial_limit": null,
-        "pseudo_randomize_question_order": false,
         "is_published": true,
         "shared_with": null,
         "created_date": "2019-04-17",
@@ -198,7 +198,8 @@
         "study": 1,
         "number": 0,
         "question": "How good is this sentence?",
-        "legend": "1 = bad, 7 = good"
+        "legend": "1 = bad, 7 = good",
+        "rating_comment": "none"
     }
 },
 {
@@ -208,7 +209,8 @@
         "study": 2,
         "number": 0,
         "question": "How good is this sentence?",
-        "legend": "1 = bad, 7 = good"
+        "legend": "1 = bad, 7 = good",
+        "rating_comment": "none"
     }
 },
 {
@@ -218,7 +220,8 @@
         "study": 2,
         "number": 1,
         "question": "Does the sentence describe a plausible situation?",
-        "legend": null
+        "legend": null,
+        "rating_comment": "none"
     }
 },
 {
@@ -373,6 +376,8 @@
         "slug": "simpledemo-particleverbs",
         "study": 1,
         "is_filler": false,
+        "is_example": false,
+        "block": -1,
         "items_validated": true
     }
 },
@@ -384,6 +389,8 @@
         "slug": "simpledemo-fillers",
         "study": 1,
         "is_filler": true,
+        "is_example": false,
+        "block": -1,
         "items_validated": true
     }
 },
@@ -395,6 +402,8 @@
         "slug": "complexdemo-particleverbs",
         "study": 2,
         "is_filler": false,
+        "is_example": false,
+        "block": -1,
         "items_validated": true
     }
 },
@@ -406,6 +415,8 @@
         "slug": "complexdemo-objectpreposing",
         "study": 2,
         "is_filler": false,
+        "is_example": false,
+        "block": -1,
         "items_validated": true
     }
 },
@@ -417,6 +428,8 @@
         "slug": "complexdemo-fillers",
         "study": 2,
         "is_filler": true,
+        "is_example": false,
+        "block": -1,
         "items_validated": true
     }
 },
@@ -428,6 +441,8 @@
         "slug": "complexdemo-examples",
         "study": 2,
         "is_filler": false,
+        "is_example": false,
+        "block": -1,
         "items_validated": true
     }
 },

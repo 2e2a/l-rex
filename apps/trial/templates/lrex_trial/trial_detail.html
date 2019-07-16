@@ -8,8 +8,11 @@
         <th>Item</th>
         {% if study.pseudo_randomize_question_order %}<th>Question order</th>{% endif %}
         <th>Content</th>
-        {% for qustions in trial.questionnaire.study.questions %}
+        {% for question in trial.questionnaire.study.questions %}
         <th>Rating</th>
+        {% if question.has_rating_comment %}
+        <th>Comment</th>
+        {% endif %}
         {% endfor %}
     </tr>
     </thead>
@@ -37,6 +40,13 @@
         <td>
             {{ rating.scale_value.label }}
         </td>
+        {% if rating.question_object.has_rating_comment %}
+        <td>
+            {% if rating.comment %}
+            "{{ rating.comment }}"
+            {% endif %}
+        </td>
+        {% endif %}
         {% endfor %}
     </tr>
     {% endfor %}

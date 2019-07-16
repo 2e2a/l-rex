@@ -219,6 +219,7 @@ class Experiment(models.Model):
                 row['question_order'] = rating.questionnaire_item.question_order_user
             row['question'] = rating.question
             row['rating'] = rating.scale_value.number
+            row['comment'] = rating.comment
             row['label'] = rating.scale_value.label
             row['content'] = item.content
             results.append(row)
@@ -265,7 +266,6 @@ class Experiment(models.Model):
                     row[aggregated_column] = ''
                 row['rating_count'] = 1
                 row['ratings'] = [0.0] * scale_value_count
-
                 row['ratings'][question_scale_offset[row['question']] + row['rating']] = 1.0
                 aggregated_results.append(row)
 
@@ -282,15 +282,15 @@ class Experiment(models.Model):
 
     def _result_lists_for_questions(self, results):
         aggregated_results = []
-
         for row in results:
             match = self._matching_row(row, aggregated_results, ['subject', 'item', 'condition'])
             if match >= 0:
                 aggregated_results[match]['ratings'][row['question']] = row['label']
+                aggregated_results[match]['comments'][row['question']] = row['comment']
             else:
                 new_row = {}
                 n_questions = len(self.study.questions)
-                for col in ['subject', 'item', 'condition', 'position']:
+                for col in ['subject', 'item', 'condition', 'position',]:
                     new_row[col] = row[col]
                 if 'question_order' in row:
                     new_row['question_order'] = row['question_order']
@@ -298,6 +298,8 @@ class Experiment(models.Model):
                     new_row['content'] = row['content']
                 new_row['ratings'] = [-1] * n_questions
                 new_row['ratings'][row['question']] = row['label']
+                new_row['comments'] = [''] * n_questions
+                new_row['comments'][row['question']] = row['comment']
                 aggregated_results.append(new_row)
         return aggregated_results
 
@@ -460,6 +462,9 @@ class Experiment(models.Model):
             csv_row.append('question order')
         for question in self.study.questions:
             csv_row.append('rating{}'.format(question.number + 1))
+        if self.study.has_question_rating_comments:
+            for question in self.study.questions:
+                csv_row.append('comment{}'.format(question.number + 1))
         csv_row.append('content')
         return csv_row
 
@@ -477,6 +482,9 @@ class Experiment(models.Model):
                 csv_row.append(row['question_order'])
             for rating in row['ratings']:
                 csv_row.append(rating)
+            if self.study.has_question_rating_comments:
+                for comment in row['comments']:
+                    csv_row.append(comment if comment else '')
             csv_row.append(row['content'])
             writer.writerow(csv_row)
 

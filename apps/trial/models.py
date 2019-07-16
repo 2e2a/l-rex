@@ -246,9 +246,9 @@ class Questionnaire(models.Model):
 
 class QuestionnaireBlock(models.Model):
     block = models.IntegerField()
-    instructions = MarkdownxField(
-        max_length=5000,
-        help_text='These instructions will be presented to the participant before the experiment begins.',
+    instructions = models.TextField(
+        max_length=2000,
+        help_text='These instructions will be presented to the participant before the questionnaire block begins.',
         blank=True,
         null=True,
     )
@@ -402,6 +402,19 @@ class Rating(models.Model):
     questionnaire_item = models.ForeignKey(QuestionnaireItem, on_delete=models.CASCADE)
     question = models.IntegerField(default=0)
     scale_value = models.ForeignKey(study_models.ScaleValue, on_delete=models.CASCADE)
+    comment = models.CharField(
+        blank=True,
+        null=True,
+        max_length=2000,
+    )
 
     class Meta:
         ordering = ['trial', 'questionnaire_item', 'question']
+
+    @cached_property
+    def question_user(self):
+        return self.question + 1
+
+    @cached_property
+    def question_object(self):
+        return self.questionnaire_item.questionnaire.study.question_set.get(number=self.question)

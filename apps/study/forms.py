@@ -137,6 +137,7 @@ class QuestionForm(crispy_forms.CrispyModelForm):
             'question',
             'scale_labels',
             'legend',
+            'rating_comment',
         ]
 
     def clean_scale_labels(self):
@@ -164,7 +165,7 @@ def question_formset_helper():
     formset_helper = FormHelper()
     formset_helper.add_layout(
         Layout(
-            Fieldset('Question {{ forloop.counter }}', None, 'question', 'scale_labels', 'legend'),
+            Fieldset('Question {{ forloop.counter }}', None, 'question', 'scale_labels', 'legend', 'rating_comment'),
         ),
     )
     formset_helper.add_input(

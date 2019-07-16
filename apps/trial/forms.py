@@ -241,6 +241,7 @@ class TrialForm(crispy_forms.CrispyModelForm):
 
 
 class RatingForm(crispy_forms.CrispyModelForm):
+    optional_label_ignore_fields = ['comment',]
 
     @property
     def submit_label(self):
@@ -248,7 +249,7 @@ class RatingForm(crispy_forms.CrispyModelForm):
 
     class Meta:
         model = models.Rating
-        fields = ['scale_value']
+        fields = ['scale_value', 'comment']
         error_messages = {
             'scale_value': {
                 'required': 'Please answer this question.',
@@ -261,6 +262,7 @@ class RatingForm(crispy_forms.CrispyModelForm):
         helper.add_layout(
             Layout(
                 Field('scale_value', template='lrex_trial/ratings_scale_value_field.html'),
+                Field('comment'),
             ),
         )
         return helper
@@ -283,13 +285,18 @@ class RatingForm(crispy_forms.CrispyModelForm):
                 for (pk, _ ), custom_label in zip(self.fields['scale_value'].choices, item_labels):
                     custom_choices.append((pk, custom_label))
                 self.fields['scale_value'].choices = custom_choices
+        if question.rating_comment == question.RATING_COMMENT_NONE:
+            self.fields['comment'].widget = forms.HiddenInput()
+        elif question.rating_comment == question.RATING_COMMENT_REQUIRED:
+            self.fields['comment'].required = True
+        else:
+            self.fields['comment'].label = self.fields['comment'].label + ' (optional)'
 
 
 class RatingFormsetForm(forms.ModelForm):
-
     class Meta:
         model = models.Rating
-        fields = ['scale_value', 'question']
+        fields = ['scale_value', 'question', 'comment']
         widgets = {
             'question': forms.HiddenInput(),
             'scale_value': forms.RadioSelect(),
@@ -341,6 +348,13 @@ def customize_to_questions(ratingformset, questions, item_questions, questionnai
             for (pk, _ ), custom_label in zip(scale_value.choices, item_question.scale_labels.split(',')):
                 custom_choices.append((pk, custom_label))
             scale_value.choices = custom_choices
+        if question.rating_comment == question.RATING_COMMENT_NONE:
+            form.fields['comment'].widget = forms.HiddenInput()
+        elif question.rating_comment == question.RATING_COMMENT_REQUIRED:
+            form.fields['comment'].required = True
+        else:
+            form.fields['comment'].label = form.fields['comment'].label + ' (optional)'
+
 
 
 def rating_formset_helper(submit_label='Continue'):
@@ -348,6 +362,7 @@ def rating_formset_helper(submit_label='Continue'):
     formset_helper.add_layout(
         Layout(
             Field('scale_value', template='lrex_trial/ratings_scale_value_field.html'),
+            Field('comment'),
         ),
     )
     formset_helper.add_input(
