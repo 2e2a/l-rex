@@ -94,7 +94,7 @@ class Questionnaire(models.Model):
         random.SystemRandom().shuffle(block_items)
         return self._generate_block_items(block_items, block_offset)
 
-    PSEUDO_RANDOMIZE_TRIES = 10000
+    PSEUDO_RANDOMIZE_TRIES = 100000
 
     def _experiment_items_with_alternating_conditions(self, experiment_items):
         n_tries = self.PSEUDO_RANDOMIZE_TRIES
