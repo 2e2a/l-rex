@@ -404,8 +404,8 @@ class Experiment(models.Model):
                     question_column = 'question{}'.format(question.number)
                     if question_column in columns:
                         question_question = row[columns[question_column]]
-                        scale_labels_column = 'scale{}'.format(question.number + 1)
-                        legend_column = 'legend{}'.format(question.number + 1)
+                        scale_labels_column = 'scale{}'.format(question.number)
+                        legend_column = 'legend{}'.format(question.number)
                         scale_labels = row[columns[scale_labels_column]] if scale_labels_column in columns else None
                         legend = row[columns[legend_column]] if legend_column in columns else None
                     else:
