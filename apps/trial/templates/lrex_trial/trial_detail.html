@@ -8,6 +8,9 @@
         <th>Item</th>
         {% if study.pseudo_randomize_question_order %}<th>Question order</th>{% endif %}
         <th>Content</th>
+        {% if study.has_question_with_random_scale %}
+        <th>Random scale</th>
+        {% endif %}
         {% for question in trial.questionnaire.study.questions %}
         <th>Rating</th>
         {% if question.has_rating_comment %}
@@ -36,6 +39,13 @@
                 </audio>
             {% endif %}
         </td>
+        {% if study.has_question_with_random_scale %}
+        <td>
+            {% for question_property in q_item.question_properties %}
+            Q{{ forloop.counter }}: "{{ question_property.question_scale_user }}"<br>
+            {% endfor %}
+        </td>
+        {% endif %}
         {% for rating in ratings %}
         <td>
             {{ rating.scale_value.label }}

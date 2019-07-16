@@ -217,6 +217,27 @@ class Questionnaire(models.Model):
         for questionnaire_item, permutation in zip(questionnaire_items, question_permutations):
             questionnaire_item.question_order = ','.join(str(p) for p in permutation)
 
+    def _random_scale_permutations(self, question, n_items):
+        scale = range(0, question.scalevalue_set.count())
+        scale_permutations = list(permutations(scale))
+        n_permutations = len(scale_permutations)
+        per_permutation = ceil(n_items/n_permutations)
+        scale_permutations = per_permutation*scale_permutations
+        random.SystemRandom().shuffle(scale_permutations)
+        return scale_permutations
+
+    def _randomize_question_scales(self, questionnaire_items):
+        for question in self.study.questions:
+            if question.randomize_scale:
+                n_items = len(questionnaire_items)
+                scale_permutations = self._random_scale_permutations(question, n_items)
+                for questionnaire_item, permutation in zip(questionnaire_items, scale_permutations):
+                    QuestionProperty.objects.create(
+                        number=question.number,
+                        questionnaire_item=questionnaire_item,
+                        scale_order=','.join(str(p) for p in permutation)
+                    )
+
     def generate_items(self, experiments=None):
         if not experiments:
             experiments = {e.id: e for e in experiment_models.Experiment.objects.filter(study=self.study)}
@@ -239,6 +260,8 @@ class Questionnaire(models.Model):
         if self.study.pseudo_randomize_question_order:
             self._randomize_question_order(questionnaire_items)
         QuestionnaireItem.objects.bulk_create(questionnaire_items)
+        if self.study.has_question_with_random_scale:
+            self._randomize_question_scales(questionnaire_items)
 
     def __str__(self):
         return str(self.number)
@@ -292,8 +315,34 @@ class QuestionnaireItem(models.Model):
     def question_order_user(self):
         return ','.join(str(int(question_num) + 1) for question_num in self.question_order.split(','))
 
+    @cached_property
+    def question_properties(self):
+        return list(self.questionproperty_set.all())
+
+    def question_property(self, number):
+        return self.questionproperty_set.get(number=number)
+
     def __str__(self):
         return '{} - {}'.format(self.number, self.item)
+
+
+class QuestionProperty(models.Model):
+    number = models.IntegerField()
+    questionnaire_item = models.ForeignKey(QuestionnaireItem, on_delete=models.CASCADE)
+    scale_order = models.CharField(max_length=200, blank=True, null=True)
+
+    class Meta:
+        ordering = ['number']
+
+    @cached_property
+    def question_scale_user(self):
+        scale = []
+        study = self.questionnaire_item.questionnaire.study
+        question = study.question_set.get(number=self.number)
+        scale_labels = [scale_value.label for scale_value in question.scalevalue_set.all()]
+        for pos in self.scale_order.split(','):
+            scale.append(scale_labels[int(pos)])
+        return ','.join(scale)
 
 
 class TrialStatus(Enum):

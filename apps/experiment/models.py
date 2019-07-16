@@ -217,6 +217,10 @@ class Experiment(models.Model):
             row['position'] = rating.questionnaire_item.number + 1
             if self.study.pseudo_randomize_question_order:
                 row['question_order'] = rating.questionnaire_item.question_order_user
+            if self.study.has_question_with_random_scale:
+                row['random_scale'] = '\n'.join(
+                    q_property.question_scale_user for q_property in rating.questionnaire_item.question_properties
+                )
             row['question'] = rating.question
             row['rating'] = rating.scale_value.number
             row['comment'] = rating.comment
@@ -290,7 +294,8 @@ class Experiment(models.Model):
             else:
                 new_row = {}
                 n_questions = len(self.study.questions)
-                for col in ['subject', 'item', 'condition', 'position',]:
+                # TODO: Fixme. Need to adjust for new fields
+                for col in ['subject', 'item', 'condition', 'position', 'random_scale']:
                     new_row[col] = row[col]
                 if 'question_order' in row:
                     new_row['question_order'] = row['question_order']
@@ -460,6 +465,8 @@ class Experiment(models.Model):
         csv_row.extend(['subject', 'item', 'condition', 'position'])
         if self.study.pseudo_randomize_question_order:
             csv_row.append('question order')
+        if self.study.has_question_with_random_scale:
+            csv_row.append('random scale')
         for question in self.study.questions:
             csv_row.append('rating{}'.format(question.number + 1))
         if self.study.has_question_rating_comments:
@@ -480,6 +487,8 @@ class Experiment(models.Model):
             csv_row.extend([row['subject'], row['item'], row['condition'], row['position']])
             if self.study.pseudo_randomize_question_order:
                 csv_row.append(row['question_order'])
+            if self.study.has_question_with_random_scale:
+                csv_row.append(row['random_scale'])
             for rating in row['ratings']:
                 csv_row.append(rating)
             if self.study.has_question_rating_comments:

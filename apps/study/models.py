@@ -183,6 +183,10 @@ class Study(models.Model):
         return len(self.questions) > 1
 
     @cached_property
+    def has_question_with_random_scale(self):
+        return any(question.randomize_scale for question in self.questions)
+
+    @cached_property
     def has_question_rating_comments(self):
         return self.question_set.filter(
             rating_comment__in=[Question.RATING_COMMENT_OPTIONAL, Question.RATING_COMMENT_REQUIRED]
@@ -738,6 +742,10 @@ class Question(models.Model):
         null=True,
         help_text='Legend to clarify the scale (e.g. "1 = bad, 5 = good")',
     )
+    randomize_scale = models.BooleanField(
+        default=False,
+        help_text='Show scales in a pseudo-random order.',
+    )
     RATING_COMMENT_NONE = 'none'
     RATING_COMMENT_OPTIONAL = 'optional'
     RATING_COMMENT_REQUIRED = 'required'
@@ -755,6 +763,10 @@ class Question(models.Model):
 
     class Meta:
         ordering = ['study', 'number']
+
+    @cached_property
+    def scale_values(self):
+        return list(self.scalevalue_set.all())
 
     @cached_property
     def scale_labels(self):
