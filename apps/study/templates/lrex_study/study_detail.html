@@ -108,22 +108,6 @@
                 </div>
                 <div class="row small text-secondary">
                     <div class="col-sm-6">
-                        Use blocks:
-                    </div>
-                    <div class="col-sm-4">
-                        {{ study.use_blocks|yesno }}
-                    </div>
-                </div>
-                <div class="row small text-secondary">
-                    <div class="col-sm-6">
-                        Random questions:
-                    </div>
-                    <div class="col-sm-4">
-                        {{ study.pseudo_randomize_question_order|yesno }}
-                    </div>
-                </div>
-                <div class="row small text-secondary">
-                    <div class="col-sm-6">
                         Participant id:
                     </div>
                     <div class="col-sm-4">
@@ -177,6 +161,7 @@
                 </div>
                 <hr>
                 <a  class="card-link" href="{% url 'study-update' study.slug %}">Settings</a>
+                <a  class="card-link" href="{% url 'study-advanced' study.slug %}">Advanced settings</a>
                 <a  class="card-link" href="{% url 'study-share' study.slug %}">Share</a>
             </div>
         </div>

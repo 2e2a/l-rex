@@ -228,7 +228,8 @@ class StudyDetailView(StudyObjectMixin, CheckStudyCreatorMixin, NextStepsMixin, 
         ]
 
 
-class StudyUpdateView(StudyObjectMixin, CheckStudyCreatorMixin, SuccessMessageMixin, generic.UpdateView):
+class StudyUpdateView(StudyObjectMixin, CheckStudyCreatorMixin, SuccessMessageMixin, DisableFormIfStudyActiveMixin,
+                      generic.UpdateView):
     model = models.Study
     title = 'Edit study'
     template_name = 'lrex_contrib/crispy_form.html'
@@ -236,30 +237,15 @@ class StudyUpdateView(StudyObjectMixin, CheckStudyCreatorMixin, SuccessMessageMi
     success_message = 'Study successfully updated.'
 
     def get(self, request, *args, **kwargs):
-        if self.study.is_active:
-            msg = 'Note: You cannot change the title of an active study. Please <a href="{}">unpublish</a> ' \
-                  'the study and save and <a href="{}">remove the results</a> first'.format(
-                    reverse('study', args=[self.study.slug]),
-                    reverse('trials', args=[self.study.slug]))
-            messages.info(request, mark_safe(msg))
         if self.study.has_items:
             msg = 'Note: To change the "item type" setting you would need to remove old items first' \
                   ' (<a href="{}">here</a>).'.format(reverse('experiments', args=[self.study.slug]))
-            messages.info(request, mark_safe(msg))
-        if self.study.has_questionnaires:
-            msg = 'Note: To change the "question order" and "use blocks" settings you would need to remove ' \
-                  'questionnaires first (<a href="{}">here</a>).'.format(
-                      reverse('questionnaires', args=[self.study.slug])
-            )
             messages.info(request, mark_safe(msg))
         return super().get(request, *args, **kwargs)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['disable'] =  self.study.is_active
         kwargs['disable_itemtype'] = self.study.has_items
-        kwargs['disable_question_order'] = self.study.has_questionnaires
-        kwargs['disable_use_blocks'] = self.study.has_questionnaires
         return kwargs
 
     @property
@@ -375,6 +361,36 @@ class StudyCreateCopyView(StudyMixin, CheckStudyCreatorMixin, SuccessMessageMixi
             ('copy', ''),
         ]
 
+
+class StudyAdvancedUpdateView(StudyObjectMixin, CheckStudyCreatorMixin, SuccessMessageMixin,
+                              DisableFormIfStudyActiveMixin, generic.UpdateView):
+    model = models.Study
+    title = 'Edit advanced settings.'
+    template_name = 'lrex_contrib/crispy_form.html'
+    form_class = forms.StudyAdvancedForm
+    success_message = 'Advanced settings saved.'
+
+    def get(self, request, *args, **kwargs):
+        if self.study.has_questionnaires:
+            msg = 'Note: To change the "Use blocks" and "Randomize question order" settings you would need to remove ' \
+                  'questionnaires first (<a href="{}">here</a>).'.format(
+                    reverse('questionnaires', args=[self.study.slug]))
+            messages.info(request, mark_safe(msg))
+        return super().get(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['disable_randomize_question_order'] = self.study.has_questionnaires
+        kwargs['disable_use_blocks'] = self.study.has_questionnaires
+        return kwargs
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('advanced', ''),
+        ]
 
 class StudyInstructionsUpdateView(StudyObjectMixin, CheckStudyCreatorMixin, SuccessMessageMixin,
                                   DisableFormIfStudyActiveMixin, generic.UpdateView):

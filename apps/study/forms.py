@@ -15,8 +15,6 @@ class StudyForm(crispy_forms.CrispyModelForm):
         fields = [
             'title',
             'item_type',
-            'use_blocks',
-            'pseudo_randomize_question_order',
             'password',
             'require_participant_id',
             'generate_participation_code',
@@ -25,32 +23,11 @@ class StudyForm(crispy_forms.CrispyModelForm):
         ]
 
     def __init__(self, *args, **kwargs):
-        self.disable = kwargs.pop('disable', False)
         self.disable_itemtype = kwargs.pop('disable_itemtype', False)
-        self.disable_question_order = kwargs.pop('disable_question_order', False)
-        self.disable_use_blocks = kwargs.pop('disable_use_blocks', False)
         super().__init__(*args, **kwargs)
-        if self.disable:
-            self.fields['title'].widget.attrs['readonly'] = True
-            self.fields['title'].widget.attrs['disabled'] = True
-            self.fields['use_blocks'].widget.attrs['readonly'] = True
-            self.fields['use_blocks'].widget.attrs['disabled'] = True
         if self.disable_itemtype:
             self.fields['item_type'].widget.attrs['readonly'] = True
             self.fields['item_type'].widget.attrs['disabled'] = True
-        if self.disable_question_order:
-            self.fields['pseudo_randomize_question_order'].widget.attrs['readonly'] = True
-            self.fields['pseudo_randomize_question_order'].widget.attrs['disabled'] = True
-        if self.disable_use_blocks:
-            self.fields['use_blocks'].widget.attrs['readonly'] = True
-            self.fields['use_blocks'].widget.attrs['disabled'] = True
-
-    def clean_title(self):
-        if self.disable:
-            instance = getattr(self, 'instance', None)
-            return instance.title if instance and instance.pk else self.cleaned_data['title']
-        else:
-            return self.cleaned_data['title']
 
     def clean_item_type(self):
         if self.disable_itemtype:
@@ -59,8 +36,29 @@ class StudyForm(crispy_forms.CrispyModelForm):
         else:
             return self.cleaned_data['item_type']
 
+
+class StudyAdvancedForm(crispy_forms.CrispyModelForm):
+
+    class Meta:
+        model = models.Study
+        fields = [
+            'use_blocks',
+            'pseudo_randomize_question_order',
+        ]
+
+    def __init__(self, *args, **kwargs):
+        self.disable_question_order = kwargs.pop('disable_randomize_question_order', False)
+        self.disable_use_blocks = kwargs.pop('disable_use_blocks', False)
+        super().__init__(*args, **kwargs)
+        if self.disable_question_order:
+            self.fields['pseudo_randomize_question_order'].widget.attrs['readonly'] = True
+            self.fields['pseudo_randomize_question_order'].widget.attrs['disabled'] = True
+        if self.disable_use_blocks:
+            self.fields['use_blocks'].widget.attrs['readonly'] = True
+            self.fields['use_blocks'].widget.attrs['disabled'] = True
+
     def clean_use_blocks(self):
-        if self.disable:
+        if self.disable_use_blocks:
             instance = getattr(self, 'use_blocks', None)
             return instance.use_blocks if instance and instance.pk else self.cleaned_data['use_blocks']
         else:
