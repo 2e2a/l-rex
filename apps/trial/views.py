@@ -248,7 +248,7 @@ class QuestionnaireDeleteAllView(study_views.StudyMixin, study_views.CheckStudyC
 
     def post(self, request, *args, **kwargs):
         self.study.delete_questionnaires()
-        messages.success(self.request, 'All quetionnaires deleted')
+        messages.success(self.request, 'All questionnaires deleted')
         return redirect(self.get_success_url())
 
     @property

@@ -83,11 +83,11 @@ class ItemUploadForm(crispy_forms.CrispyForm):
         self.study = self.experiment.study
         super().__init__(*args, **kwargs)
         if self.study.has_text_items:
-            content_help_text = 'Specify which column contains the item text.',
+            content_help_text = 'Specify which column contains the item text.'
         elif self.study.has_markdown_items:
             content_help_text = 'Specify which column contains the item text formatted with markdown.'
         elif self.study.has_audiolink_items:
-            content_help_text = 'Specify which column contains the link to the audio file.',
+            content_help_text = 'Specify which column contains the link to the audio file.'
         self.fields['content_column'].help_text = content_help_text
         if not self.study.use_blocks or self.experiment.is_example or self.experiment.block > 0:
             self.fields['block_column'].widget = forms.HiddenInput()

@@ -23,9 +23,9 @@ class WarnUserIfStudyActiveMixin:
     def get(self, request, *args, **kwargs):
         if self.study.is_active:
             if hasattr(self, 'form_valid') or hasattr(self, 'helper'):
-                msg = 'Note: Form is disabled.'
+                msg = 'Note: Form is disabled. '
             else:
-                msg = 'Note: Actions are disabled.'
+                msg = 'Note: Actions are disabled. '
             msg = msg + 'You cannot change an active study. Please <a href="{}">unpublish</a> ' \
                         'the study and save and <a href="{}">remove the results</a> first.'\
                         .format(
