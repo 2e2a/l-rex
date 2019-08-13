@@ -322,7 +322,6 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
         return kwargs
 
     def form_valid(self, form):
-        # TODO: optional get delimeter from form
         result = super().form_valid(form)
         columns = {
             'item': form.cleaned_data['number_column'] - 1,
@@ -511,7 +510,7 @@ class ItemListUploadView(experiment_views.ExperimentMixin, study_views.CheckStud
         return kwargs
 
     def form_valid(self, form):
-        result =  super().form_valid(form)
+        result = super().form_valid(form)
         self.experiment.itemlist_set.all().delete()
         columns = {
             'list': form.cleaned_data['list_column'] - 1,

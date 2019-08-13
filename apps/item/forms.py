@@ -56,7 +56,7 @@ class PregenerateItemsForm(crispy_forms.CrispyForm):
 )
 
 
-class ItemUploadForm(crispy_forms.CrispyForm):
+class ItemUploadForm(crispy_forms.CSVUploadForm):
     file = forms.FileField(
         help_text='The CSV file must contain columns for item number, condition, and text/link to the audio file. '
                   'Valid column delimiters: colon, semicolon, comma, space, or tab.',
@@ -77,6 +77,8 @@ class ItemUploadForm(crispy_forms.CrispyForm):
         help_text='Optional: specify which column contains the questionnaire block. '
                   'Set to 0 if the questionnaire does not contain more than one block.',
     )
+
+    validator_int_columns = ['number_column']
 
     def __init__(self, *args, **kwargs):
         self.experiment = kwargs.pop('experiment')
@@ -127,11 +129,10 @@ class ItemUploadForm(crispy_forms.CrispyForm):
     def clean(self):
         cleaned_data = super().clean()
         data = contrib_csv.read_file(cleaned_data)
-        sniff_data = contrib_csv.sniff(data)
-        validator_int_columns = ['number_column',]
-        delimiter, quoting, has_header = contrib_csv.detect_dialect(sniff_data, cleaned_data, validator_int_columns)
-        reader = csv.reader(StringIO(data), delimiter=delimiter, quoting=quoting)
-        if has_header:
+        reader = csv.reader(
+            StringIO(data), delimiter=self.detected_csv['delimiter'], quoting=self.detected_csv['quoting']
+        )
+        if self.detected_csv['has_header']:
             next(reader)
         try:
             min_columns = contrib_csv.get_min_columns(cleaned_data)
@@ -151,11 +152,10 @@ class ItemUploadForm(crispy_forms.CrispyForm):
                     if cleaned_data['question_{}_scale_column'.format(question.number + 1)] > 0:
                         assert row[cleaned_data['question_{}_scale_column'.format(question.number + 1)] - 1]
                         assert len(row[cleaned_data['question_{}_scale_column'.format(question.number + 1)] - 1].split(',')) == \
-                               question.scalevalue_set.count()
+                            question.scalevalue_set.count()
                     if cleaned_data['question_{}_legend_column'.format(question.number + 1)] > 0:
                         assert row[cleaned_data['question_{}_legend_column'.format(question.number + 1)] - 1]
             contrib_csv.seek_file(cleaned_data)
-            self.detected_csv = { 'delimiter': delimiter, 'quoting': quoting, 'has_header': has_header }
         except (ValueError, AssertionError):
             raise forms.ValidationError(
                 'File: Unexpected format in line %(n_line)s.',
@@ -216,7 +216,7 @@ def itemquestion_formset_helper():
     return formset_helper
 
 
-class ItemListUploadForm(crispy_forms.CrispyForm):
+class ItemListUploadForm(crispy_forms.CSVUploadForm):
     file = forms.FileField(
         help_text='The CSV file must contain a column for the item list number, item number and condition.'
                   'Valid column delimiters: colon, semicolon, comma, space, or tab.',
@@ -230,6 +230,8 @@ class ItemListUploadForm(crispy_forms.CrispyForm):
         help_text='Specify which column contains the experiment items.'
                   'Format: Comma separated list of <Item>-<Condition> (e.g. Filler-1a,Exp-2b,...).'
     )
+
+    validator_int_columns = ['list_column']
 
     def __init__(self, *args, **kwargs):
         self.experiment = kwargs.pop('experiment')
@@ -265,11 +267,9 @@ class ItemListUploadForm(crispy_forms.CrispyForm):
     def clean(self):
         cleaned_data = super().clean()
         data = contrib_csv.read_file(cleaned_data)
-        sniff_data = contrib_csv.sniff(data)
-        validator_int_columns = ['list_column']
-        delimiter, quoting, has_header = contrib_csv.detect_dialect(sniff_data, cleaned_data, validator_int_columns)
-        reader = csv.reader(StringIO(data), delimiter=delimiter, quoting=quoting)
-        if has_header:
+        reader = csv.reader(
+            StringIO(data), delimiter=self.detected_csv['delimiter'], quoting=self.detected_csv['quoting'])
+        if self.detected_csv['has_header']:
             next(reader)
         try:
             used_items = set()
@@ -280,7 +280,6 @@ class ItemListUploadForm(crispy_forms.CrispyForm):
             if not len(used_items) == models.Item.objects.filter(experiment=self.experiment).count():
                 raise forms.ValidationError('Not all items used in lists.')
             contrib_csv.seek_file(cleaned_data)
-            self.detected_csv = { 'delimiter': delimiter, 'quoting': quoting, 'has_header': has_header }
         except (ValueError, AssertionError):
             raise forms.ValidationError(
                 'File: Unexpected format in line %(n_line)s.',

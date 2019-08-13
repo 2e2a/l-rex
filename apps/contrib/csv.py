@@ -39,7 +39,7 @@ def get_min_columns(form_cleaned_data):
     return min_columns
 
 
-def detect_dialect(data, form_cleaned_data, int_column_names=None):
+def detect_dialect(data, form_cleaned_data, int_column_names=None, user_delimiter=None):
 
     SNIFF_ROWS = 2
 
@@ -60,7 +60,7 @@ def detect_dialect(data, form_cleaned_data, int_column_names=None):
     try:
         int_columns = [form_cleaned_data[column_name] for column_name in int_column_names]
         min_columns = get_min_columns(form_cleaned_data)
-        delimiters = [';', '\t', ',']
+        delimiters = [user_delimiter] if user_delimiter else [';', '\t', ',']
         for delimiter in delimiters:
             reader = csv.reader(StringIO(data), delimiter=delimiter, quoting=csv.QUOTE_MINIMAL)
             first_row = next(reader)
@@ -84,6 +84,8 @@ def detect_dialect(data, form_cleaned_data, int_column_names=None):
                     return delimiter, csv.QUOTE_MINIMAL, False
         raise forms.ValidationError('Unsupported CSV format.')
     except (UnicodeDecodeError, TypeError):
-        raise forms.ValidationError('Unsupported file encoding. Use UTF-8 or Latin-1.')
+        raise forms.ValidationError(
+            'Unsupported file encoding or format. Use UTF-8 or Latin-1 and check the CSV for errors.'
+        )
     except csv.Error:
         raise forms.ValidationError('Unsupported CSV format.')

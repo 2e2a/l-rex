@@ -3,6 +3,9 @@ from crispy_forms.layout import Submit
 from django import forms
 
 
+from . import csv as contrib_csv
+
+
 class OptionalLabelMixin:
     optional_label_ignore_fields = None
 
@@ -37,3 +40,31 @@ class CrispyModelForm(OptionalLabelMixin, HelperMixin, forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.init_helper()
         self.append_optional_to_labels()
+
+
+class CSVUploadForm(CrispyForm):
+    file = forms.FileField(
+        help_text='The CSV file.',
+    )
+    delimiter = forms.CharField(
+        label='CSV delimiter',
+        max_length=2,
+        required=False,
+        help_text='If the upload fails with CSV errors, try setting the delimiter character used in your CSV to '
+                  'separate the columns.',
+    )
+
+    validator_int_columns = None
+    detected_csv = None
+
+    def clean(self):
+        cleaned_data = super().clean()
+        data = contrib_csv.read_file(cleaned_data)
+        delimiter = cleaned_data['delimiter']
+        sniff_data = contrib_csv.sniff(data)
+        delimiter, quoting, has_header = contrib_csv.detect_dialect(
+            sniff_data, cleaned_data, self.validator_int_columns, user_delimiter=delimiter
+        )
+        self.detected_csv = {'delimiter': delimiter, 'quoting': quoting, 'has_header': has_header}
+        return cleaned_data
+

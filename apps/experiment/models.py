@@ -83,7 +83,6 @@ class Experiment(models.Model):
 
     @cached_property
     def is_complete(self):
-        # TODO: check if valid, differentiate from has_lists
         return self.itemlist_set.exists()
 
     def set_items_validated(self, valid):

@@ -80,7 +80,7 @@ def questionnaire_block_update_formset_helper():
     return formset_helper
 
 
-class QuestionnaireUploadForm(crispy_forms.CrispyForm):
+class QuestionnaireUploadForm(crispy_forms.CSVUploadForm):
     file = forms.FileField(
         help_text='The CSV file must contain a column for the questionnaire number, experiment title, item number and '
                   'condition. Valid column delimiters: colon, semicolon, comma, space, or tab.',
@@ -99,6 +99,8 @@ class QuestionnaireUploadForm(crispy_forms.CrispyForm):
         help_text='Specify which column contains the questionnaire item lists.'
                   'Format: Comma separated list of <ExperimentTitle>-<ListNumber> (e.g. Filler-0,Exp-1,...).'
     )
+
+    validator_int_columns = ['questionnaire_column']
 
     def __init__(self, *args, **kwargs):
         self.study = kwargs.pop('study')
@@ -163,11 +165,10 @@ class QuestionnaireUploadForm(crispy_forms.CrispyForm):
     def clean(self):
         cleaned_data = super().clean()
         data = contrib_csv.read_file(cleaned_data)
-        sniff_data = contrib_csv.sniff(data)
-        validator_int_columns = ['questionnaire_column']
-        delimiter, quoting, has_header = contrib_csv.detect_dialect(sniff_data, cleaned_data, validator_int_columns)
-        reader = csv.reader(StringIO(data), delimiter=delimiter, quoting=quoting)
-        if has_header:
+        reader = csv.reader(
+            StringIO(data), delimiter=self.detected_csv['delimiter'], quoting=self.detected_csv['quoting']
+        )
+        if self.detected_csv['has_header']:
             next(reader)
         try:
             used_items = set()
@@ -187,7 +188,6 @@ class QuestionnaireUploadForm(crispy_forms.CrispyForm):
                 'File: Unexpected format in line %(n_line)s.',
                 code='invalid',
                 params={'n_line': reader.line_num})
-        self.detected_csv = { 'delimiter': delimiter, 'quoting': quoting, 'has_header': has_header }
         return cleaned_data
 
 
