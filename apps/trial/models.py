@@ -94,7 +94,7 @@ class Questionnaire(models.Model):
         random.SystemRandom().shuffle(block_items)
         return self._generate_block_items(block_items, block_offset)
 
-    PSEUDO_RANDOMIZE_TRIES = 100000
+    PSEUDO_RANDOMIZE_TRIES = 1000
 
     def _experiment_items_with_alternating_conditions(self, experiment_items):
         n_tries = self.PSEUDO_RANDOMIZE_TRIES
@@ -150,9 +150,11 @@ class Questionnaire(models.Model):
             questionnaire_items.append(questionnaire_item)
         return questionnaire_items
 
+    PSEUDO_RANDOMIZE_SLOT_TRIES = 1000
+
     def _compute_block_slots(self, block_items, experiments):
         filler = list([ id for id, experiment in experiments.items() if experiment.is_filler])
-        n_tries = 10
+        n_tries = self.PSEUDO_RANDOMIZE_SLOT_TRIES
         while n_tries:
             slots = []
             items = block_items.copy()
