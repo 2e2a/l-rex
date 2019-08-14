@@ -261,6 +261,17 @@ class Study(models.Model):
         trials = Trial.objects.filter(questionnaire__study=self, is_test=False)
         return len([trial for trial in trials if trial.status == TrialStatus.ABANDONED])
 
+    def delete_abandoned_trials(self):
+        from apps.trial.models import Trial, TrialStatus
+        trials = Trial.objects.filter(questionnaire__study=self, is_test=False)
+        for trial in trials:
+            if trial.status == TrialStatus.ABANDONED:
+                trial.delete()
+
+    def delete_test_trials(self):
+        from apps.trial.models import Trial
+        Trial.objects.filter(questionnaire__study=self, is_test=True).delete()
+
     @cached_property
     def is_rating_possible(self):
         return self.status == StudyStatus.ACTIVE or self.status == StudyStatus.STARTED

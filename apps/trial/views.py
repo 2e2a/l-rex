@@ -371,6 +371,12 @@ class TrialListView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, 
             response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
             self.study.rating_proofs_csv(response)
             return response
+        elif action and action == 'delete_tests':
+            self.study.delete_test_trials()
+            messages.success(request, 'All test trials deleted.')
+        elif action and action == 'delete_abandoned':
+            self.study.delete_abandoned_trials()
+            messages.success(request, 'All abandoned trials deleted.')
         return redirect('trials', study_slug=self.study.slug)
 
     def get_queryset(self):
@@ -390,6 +396,9 @@ class TrialDeleteAllView(study_views.StudyMixin, study_views.CheckStudyCreatorMi
     template_name = 'lrex_contrib/confirm_delete.html'
     message = 'Delete all trials?'
 
+    def get_success_url(self):
+        return reverse('trials', args=[self.study.slug])
+
     def post(self, request, *args, **kwargs):
         models.Trial.objects.filter(questionnaire__study=self.study).delete()
         messages.success(self.request, 'All trials deleted')
@@ -403,9 +412,6 @@ class TrialDeleteAllView(study_views.StudyMixin, study_views.CheckStudyCreatorMi
             ('trials', reverse('trials', args=[self.study.slug])),
             ('delete-all', ''),
         ]
-
-    def get_success_url(self):
-        return reverse('study', args=[self.study.slug])
 
 
 class TrialCreateView(study_views.StudyMixin, generic.CreateView):
