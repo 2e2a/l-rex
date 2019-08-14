@@ -294,10 +294,12 @@ class Experiment(models.Model):
                 new_row = {}
                 n_questions = len(self.study.questions)
                 # TODO: Fixme. Need to adjust for new fields
-                for col in ['subject', 'item', 'condition', 'position', 'random_scale']:
+                for col in ['subject', 'item', 'condition', 'position']:
                     new_row[col] = row[col]
                 if 'question_order' in row:
                     new_row['question_order'] = row['question_order']
+                if 'random_scale' in row in row:
+                    new_row['random_scale'] = row['random_scale']
                 if 'content' in row:
                     new_row['content'] = row['content']
                 new_row['ratings'] = [-1] * n_questions
