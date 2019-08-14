@@ -1,4 +1,5 @@
 {% extends "lrex_home/base.html" %}
+{% load item_tags %}
 
 {% block content %}
 <table class="table bg-white">
@@ -31,12 +32,14 @@
         {% endif %}
         <td>
             {% if q_item.item.textitem %}
-                {{ q_item.item.textitem.text|linebreaks }}
+            {{ q_item.item.textitem.text|linebreaks }}
+            {% elif q_item.item.markdownitem %}
+            {{ q_item.item.markdownitem|markdownify_item }}
             {% else %}
-                <audio controls="controls">
-                    <source src="{{ q_item.item.audiolinkitem.url }}">
-                    Your browser does not support the <code>audio</code> element.
-                </audio>
+            <audio controls="controls">
+                <source src="{{ q_item.item.audiolinkitem.url }}">
+                Your browser does not support the <code>audio</code> element.
+            </audio>
             {% endif %}
         </td>
         {% if study.has_question_with_random_scale %}
