@@ -66,5 +66,6 @@ class CSVUploadForm(CrispyForm):
             sniff_data, cleaned_data, self.validator_int_columns, user_delimiter=delimiter
         )
         self.detected_csv = {'delimiter': delimiter, 'quoting': quoting, 'has_header': has_header}
+        contrib_csv.seek_file(cleaned_data)
         return cleaned_data
 
