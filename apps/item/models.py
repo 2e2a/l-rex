@@ -39,11 +39,11 @@ class Item(models.Model):
 
     @property
     def content(self):
-        if self.textitem:
+        if hasattr(self, 'textitem'):
             return self.textitem.text
-        elif self.markdownitem:
+        elif hasattr(self, 'markdownitem'):
             return self.markdownitem.text
-        elif self.audiolinkitem:
+        elif hasattr(self, 'audiolinkitem'):
             return self.audiolinkitem.url
         return ''
 
