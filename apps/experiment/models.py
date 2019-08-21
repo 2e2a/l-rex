@@ -298,7 +298,7 @@ class Experiment(models.Model):
                     new_row[col] = row[col]
                 if 'question_order' in row:
                     new_row['question_order'] = row['question_order']
-                if 'random_scale' in row in row:
+                if 'random_scale' in row:
                     new_row['random_scale'] = row['random_scale']
                 if 'content' in row:
                     new_row['content'] = row['content']
