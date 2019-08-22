@@ -653,8 +653,9 @@ class RatingsCreateView(RatingCreateMixin, TrialMixin, generic.TemplateView):
         self.formset = forms.ratingformset_factory(self.n_questions)(
             queryset=models.Rating.objects.none()
         )
-        forms.customize_to_questions(
-            self.formset, self.study.questions, self.item_questions, self.questionnaire_item, self.study.pseudo_randomize_question_order
+        forms.ratingformset_init(
+            self.formset, self.study.questions, self.item_questions, self.questionnaire_item,
+            self.study.pseudo_randomize_question_order
         )
         return super().get(request, *args, **kwargs)
 
@@ -662,22 +663,29 @@ class RatingsCreateView(RatingCreateMixin, TrialMixin, generic.TemplateView):
         if self.questionnaire_item.rating_set.filter(trial=self.trial).exists():
             return redirect(self.get_next_url())
         self.formset = forms.ratingformset_factory(self.n_questions)(request.POST, request.FILES)
-        forms.customize_to_questions(
-            self.formset, self.study.questions, self.item_questions, self.questionnaire_item, self.study.pseudo_randomize_question_order
+        forms.ratingformset_init(
+            self.formset, self.study.questions, self.item_questions, self.questionnaire_item,
+            self.study.pseudo_randomize_question_order
         )
         if self.formset.is_valid():
             instances = self.formset.save(commit=False)
             if len(instances) < self.n_questions:
                 self.formset._non_form_errors = \
-                    self.formset.error_class(ValidationError('Please answer all questions').error_list)
-            else:
-                for instance in instances:
-                    instance.trial = self.trial
-                    instance.questionnaire_item = self.questionnaire_item
-                    instance.save()
-                for experiment in self.study.experiments:
-                    experiment_views.ExperimentResultsView.clear_cache(experiment)
-                return redirect(self.get_next_url())
+                    self.formset.error_class(ValidationError('Please answer all questions.').error_list)
+                return super().get(request, *args, **kwargs)
+            elif self.study.enable_item_rating_feedback:
+                    show_feedback, feedbacks = self._handle_feedbacks(self.formset, instances)
+                    if show_feedback:
+                        response = self.get(request, *args, **kwargs)
+                        forms.ratingformset_handle_feedbacks(self.formset, feedbacks)
+                        return response
+            for instance in instances:
+                instance.trial = self.trial
+                instance.questionnaire_item = self.questionnaire_item
+                instance.save()
+            for experiment in self.study.experiments:
+                experiment_views.ExperimentResultsView.clear_cache(experiment)
+            return redirect(self.get_next_url())
         return super().get(request, *args, **kwargs)
 
 

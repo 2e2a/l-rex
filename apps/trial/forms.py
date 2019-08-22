@@ -245,6 +245,7 @@ class RatingBaseForm(crispy_forms.CrispyModelForm):
         max_length=5000,
         required=False,
         widget=forms.HiddenInput(),
+        label='Feedback',
     )
     feedbacks_given = forms.CharField(
         required=False,
@@ -257,10 +258,6 @@ class RatingBaseForm(crispy_forms.CrispyModelForm):
             self['feedback'].initial = feedback.feedback
             self.fields['feedback'].widget = forms.Textarea()
             self.fields['feedback'].widget.attrs['readonly'] = True
-            self.full_clean()
-            self._errors[forms.forms.NON_FIELD_ERRORS] = self.error_class([
-                'Please note the following feedback.'  # TODO: Use translatbale label setting
-            ])
         self['feedbacks_given'].initial = ','.join(str(f) for f in feedbacks_given)
 
 
@@ -318,9 +315,6 @@ class RatingForm(RatingBaseForm):
             for scale_num in questionnaire_item.question_property(question.number).scale_order.split(','):
                 custom_choices.append(initial_choices[int(scale_num)])
             self.fields['scale_value'].choices = custom_choices
-
-
-
         if question.rating_comment == question.RATING_COMMENT_NONE:
             self.fields['comment'].widget = forms.HiddenInput()
         elif question.rating_comment == question.RATING_COMMENT_REQUIRED:
@@ -328,11 +322,20 @@ class RatingForm(RatingBaseForm):
         else:
             self.fields['comment'].label = self.fields['comment'].label + ' (optional)'
 
+    def handle_feedbacks(self, feedbacks_given, feedback=None):
+        super().handle_feedbacks(feedbacks_given, feedback)
+        if feedback:
+            self.full_clean()
+            self._errors[forms.forms.NON_FIELD_ERRORS] = self.error_class([
+                'Please note the following feedback.'  # TODO: Use translatbale label setting
+            ])
 
-class RatingFormsetForm(forms.ModelForm):
+
+class RatingFormsetForm(RatingBaseForm):
+    optional_label_ignore_fields = ['comment', 'feedback']
     class Meta:
         model = models.Rating
-        fields = ['scale_value', 'question', 'comment']
+        fields = ['question', 'scale_value', 'feedback', 'comment', 'feedbacks_given']
         widgets = {
             'question': forms.HiddenInput(),
             'scale_value': forms.RadioSelect(),
@@ -355,7 +358,8 @@ def ratingformset_factory(n_questions=1):
     )
 
 
-def customize_to_questions(ratingformset, questions, item_questions, questionnaire_item, pseudo_randomize_question_order=False):
+def ratingformset_init(ratingformset, questions, item_questions, questionnaire_item,
+                       pseudo_randomize_question_order=False):
 
     def _get_item_question(num, item_questions):
         for item_question in item_questions:
@@ -384,6 +388,7 @@ def customize_to_questions(ratingformset, questions, item_questions, questionnai
             for (pk, _ ), custom_label in zip(scale_value.choices, item_question.scale_labels.split(',')):
                 custom_choices.append((pk, custom_label))
             scale_value.choices = custom_choices
+
         if question.rating_comment == question.RATING_COMMENT_NONE:
             form.fields['comment'].widget = forms.HiddenInput()
         elif question.rating_comment == question.RATING_COMMENT_REQUIRED:
@@ -391,6 +396,17 @@ def customize_to_questions(ratingformset, questions, item_questions, questionnai
         else:
             form.fields['comment'].label = form.fields['comment'].label + ' (optional)'
 
+        form.fields['feedback'].widget = forms.HiddenInput()
+        form.fields['feedbacks_given'].widget = forms.HiddenInput()
+
+
+def ratingformset_handle_feedbacks(ratingformset, feedbacks):
+    for form, feedbacks_given, feedback in feedbacks:
+        ratingformset[form].handle_feedbacks(feedbacks_given, feedback=feedback)
+    ratingformset._non_form_errors = \
+        ratingformset.error_class(forms.ValidationError(
+            'Please note the following feedback.'  # TODO: Use translatbale label setting
+        ).error_list)
 
 
 def rating_formset_helper(submit_label='Continue'):
@@ -398,7 +414,9 @@ def rating_formset_helper(submit_label='Continue'):
     formset_helper.add_layout(
         Layout(
             Field('scale_value', template='lrex_trial/ratings_scale_value_field.html'),
+            Field('feedback'),
             Field('comment'),
+            Field('feedbacks_given'),
         ),
     )
     formset_helper.add_input(
