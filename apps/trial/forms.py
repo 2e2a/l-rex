@@ -399,10 +399,13 @@ def ratingformset_init(ratingformset, questions, item_questions, questionnaire_i
 
 
 def ratingformset_handle_feedbacks(study, ratingformset, feedbacks):
+    show_feedback = False
     for form, feedbacks_given, feedback in feedbacks:
+        show_feedback = True
         ratingformset[form].handle_feedbacks(study, feedbacks_given, feedback=feedback)
-    ratingformset._non_form_errors = \
-        ratingformset.error_class(forms.ValidationError(study.feedback_message).error_list)
+    if show_feedback:
+        ratingformset._non_form_errors = \
+            ratingformset.error_class(forms.ValidationError(study.feedback_message).error_list)
 
 
 def rating_formset_helper(submit_label='Continue'):
