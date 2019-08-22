@@ -105,6 +105,11 @@ class Study(models.Model):
         default='Continue',
         help_text='Label of the "Continue" button used during participation.',
     )
+    feedback_message = models.CharField(
+        max_length=500,
+        default='Please note the following feedback.',
+        help_text='Message indicating that feedback is shown in for some ratings',
+    )
     end_date = DateField(
         blank=True,
         null=True,
@@ -431,6 +436,7 @@ class Study(models.Model):
             writer.writerow(csv_row)
 
     def settings_csv(self, fileobj):
+        # TODO: Add archive version + possibility for migrations
         writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
         writer.writerow(['title', self.title])
         writer.writerow(['item_type', self.item_type])

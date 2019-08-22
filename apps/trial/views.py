@@ -598,7 +598,7 @@ class RatingCreateView(RatingCreateMixin, TrialMixin, generic.CreateView):
                 form_kwargs = self.get_form_base_kwargs()
                 form = self.get_form_class()(**form_kwargs)
                 for _, feedbacks_given, feedback in feedbacks:
-                    form.handle_feedbacks(feedbacks_given, feedback=feedback)
+                    form.handle_feedbacks(self.study, feedbacks_given, feedback=feedback)
                 response.context_data['form'] = form
                 return response
         return super().post(request, *args, **kwargs)
@@ -677,7 +677,7 @@ class RatingsCreateView(RatingCreateMixin, TrialMixin, generic.TemplateView):
                     show_feedback, feedbacks = self._handle_feedbacks(self.formset, instances)
                     if show_feedback:
                         response = self.get(request, *args, **kwargs)
-                        forms.ratingformset_handle_feedbacks(self.formset, feedbacks)
+                        forms.ratingformset_handle_feedbacks(self.study, self.formset, feedbacks)
                         return response
             for instance in instances:
                 instance.trial = self.trial

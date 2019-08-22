@@ -81,6 +81,7 @@ class StudyInstructionsForm(crispy_forms.CrispyModelForm):
             'instructions',
             'outro',
             'continue_label',
+            'feedback_message',
         ]
 
     def __init__(self, *args, **kwargs):

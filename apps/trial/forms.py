@@ -252,7 +252,7 @@ class RatingBaseForm(crispy_forms.CrispyModelForm):
         widget=forms.HiddenInput(),
     )
 
-    def handle_feedbacks(self, feedbacks_given, feedback=None):
+    def handle_feedbacks(self, study, feedbacks_given, feedback=None):
         if feedback:
             feedbacks_given.append(feedback.pk)
             self['feedback'].initial = feedback.feedback
@@ -322,13 +322,11 @@ class RatingForm(RatingBaseForm):
         else:
             self.fields['comment'].label = self.fields['comment'].label + ' (optional)'
 
-    def handle_feedbacks(self, feedbacks_given, feedback=None):
-        super().handle_feedbacks(feedbacks_given, feedback)
+    def handle_feedbacks(self, study, feedbacks_given, feedback=None):
+        super().handle_feedbacks(study, feedbacks_given, feedback)
         if feedback:
             self.full_clean()
-            self._errors[forms.forms.NON_FIELD_ERRORS] = self.error_class([
-                'Please note the following feedback.'  # TODO: Use translatbale label setting
-            ])
+            self._errors[forms.forms.NON_FIELD_ERRORS] = self.error_class([study.feedback_message])
 
 
 class RatingFormsetForm(RatingBaseForm):
@@ -400,13 +398,11 @@ def ratingformset_init(ratingformset, questions, item_questions, questionnaire_i
         form.fields['feedbacks_given'].widget = forms.HiddenInput()
 
 
-def ratingformset_handle_feedbacks(ratingformset, feedbacks):
+def ratingformset_handle_feedbacks(study, ratingformset, feedbacks):
     for form, feedbacks_given, feedback in feedbacks:
-        ratingformset[form].handle_feedbacks(feedbacks_given, feedback=feedback)
+        ratingformset[form].handle_feedbacks(study, feedbacks_given, feedback=feedback)
     ratingformset._non_form_errors = \
-        ratingformset.error_class(forms.ValidationError(
-            'Please note the following feedback.'  # TODO: Use translatbale label setting
-        ).error_list)
+        ratingformset.error_class(forms.ValidationError(study.feedback_message).error_list)
 
 
 def rating_formset_helper(submit_label='Continue'):
