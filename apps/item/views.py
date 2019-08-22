@@ -489,6 +489,7 @@ class ItemFeedbackUpdateView(ItemMixin, study_views.CheckStudyCreatorMixin, stud
             if scale_values_valid:
                 for instance in instances:
                     instance.save()
+            self.n_feedback = self.item.itemfeedback_set.count()
             extra = n_forms - self.n_feedback
             if 'submit' in request.POST:
                 if scale_values_valid:
@@ -501,8 +502,8 @@ class ItemFeedbackUpdateView(ItemMixin, study_views.CheckStudyCreatorMixin, stud
             else: # delete last
                 if extra > 0:
                     extra -= 1
-                elif self.n_feedback> 0:
-                    self.study.question_set.last().delete()
+                elif self.n_feedback > 0:
+                    self.item.itemfeedback_set.last().delete(),
                     self.n_feedback -= 1
                 self.formset = forms.itemfeedback_formset_factory(extra)(
                     queryset=self.item.itemfeedback_set.all(),
