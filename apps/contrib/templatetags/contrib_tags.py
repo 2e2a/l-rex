@@ -1,4 +1,8 @@
+from markdownx.utils import markdownify as markdownx_markdownify
+
 from django import template
+from django.utils.safestring import mark_safe
+
 
 register = template.Library()
 
@@ -15,3 +19,8 @@ def bootstrap_alert_class(message_level):
         return 'alert-warning'
     if message_level == 'error':
         return 'alert-danger'
+
+
+@register.filter
+def markdownify(text):
+    return mark_safe(markdownx_markdownify(text))

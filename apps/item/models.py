@@ -83,6 +83,13 @@ class AudioLinkItem(Item):
         verbose_name='URL',
         help_text='Link to the audio file (e.g., https://yourserver.org/item1a.ogg).',
     )
+    description = MarkdownxField(
+        max_length=5000,
+        help_text='Additional description shown with the audio item.',
+        blank=True,
+        null=True,
+
+    )
 
     def get_absolute_url(self):
         return reverse('audiolink-item-update', args=[self.experiment.study.slug, self.experiment.slug, self.pk])

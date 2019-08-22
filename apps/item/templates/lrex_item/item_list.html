@@ -1,5 +1,5 @@
 {% extends "lrex_home/base.html" %}
-{% load item_tags %}
+{% load contrib_tags %}
 
 {% block content %}
 <div class="text-center mb-2">
@@ -34,7 +34,7 @@
             {% if item.textitem %}
             {{ item.textitem.text|linebreaks }}
             {% elif item.markdownitem %}
-            {{ item.markdownitem|markdownify_item }}
+            {{ item.markdownitem.text|markdownify }}
             {% else %}
             <audio controls="controls">
                 <source src="{{ item.audiolinkitem.url }}">

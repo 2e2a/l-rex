@@ -312,6 +312,8 @@ class Experiment(models.Model):
     def items_csv_header(self, add_experiment_column=False):
         csv_row = ['experiment'] if add_experiment_column else []
         csv_row.extend(['item', 'condition', 'content', 'block'])
+        if self.study.has_audiolink_items:
+            csv_row.append('audio_description')
         for question in self.study.questions:
             csv_row.append('question{}'.format(question.number + 1))
             csv_row.append('scale{}'.format(question.number + 1))
@@ -384,10 +386,12 @@ class Experiment(models.Model):
                     block=block,
                 )
             elif self.study.has_audiolink_items:
+                description=row[columns['audio_description']]
                 item, created = item_models.AudioLinkItem.objects.get_or_create(
                     number=row[columns['item']],
                     condition=row[columns['condition']],
                     url=row[columns['content']],
+                    description=description,
                     experiment=self,
                     block=block,
                 )

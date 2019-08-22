@@ -42,7 +42,7 @@ class AudioLinkItemForm(ItemFormMixin, crispy_forms.CrispyModelForm):
 
     class Meta:
         model = models.AudioLinkItem
-        fields = ['number', 'condition', 'url', 'block']
+        fields = ['number', 'condition', 'url', 'description', 'block']
 
 
 class PregenerateItemsForm(crispy_forms.CrispyForm):
@@ -90,6 +90,16 @@ class ItemUploadForm(crispy_forms.CSVUploadForm):
             content_help_text = 'Specify which column contains the item text formatted with markdown.'
         elif self.study.has_audiolink_items:
             content_help_text = 'Specify which column contains the link to the audio file.'
+            self.fields.update(
+                {
+                    'audio_description_column':
+                        forms.IntegerField(
+                            initial=0,
+                            help_text='Optional: specify which column contains a description shown with the audio item.'
+                        )
+                }
+            )
+
         self.fields['content_column'].help_text = content_help_text
         if not self.study.use_blocks or self.experiment.is_example or self.experiment.block > 0:
             self.fields['block_column'].widget = forms.HiddenInput()

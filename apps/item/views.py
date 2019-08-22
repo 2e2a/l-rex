@@ -330,6 +330,8 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
         }
         if form.cleaned_data['block_column'] > 0:
             columns.update({'block': form.cleaned_data['block_column'] - 1})
+        elif self.study.has_audiolink_items:
+            columns.update({'audio_description': form.cleaned_data['audio_description_column'] - 1})
         for i, question in enumerate(self.study.questions):
             question_column = 'question_{}_question_column'.format(question.number + 1)
             if form.cleaned_data[question_column] > 0:
