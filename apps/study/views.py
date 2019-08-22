@@ -382,6 +382,7 @@ class StudyAdvancedUpdateView(StudyObjectMixin, CheckStudyCreatorMixin, SuccessM
         kwargs = super().get_form_kwargs()
         kwargs['disable_randomize_question_order'] = self.study.has_questionnaires
         kwargs['disable_use_blocks'] = self.study.has_questionnaires
+        kwargs['disable_feedback'] = self.study.is_active
         return kwargs
 
     @property
@@ -428,7 +429,7 @@ class QuestionUpdateView(StudyMixin, CheckStudyCreatorMixin, DisableFormIfStudyA
             )
             messages.info(request, mark_safe(msg))
         self.formset = forms.question_formset_factory(self.n_questions, 0 if self.n_questions > 0 else 1)(
-            queryset=models.Question.objects.filter(study=self.study)
+            queryset=self.study.question_set.all()
         )
         forms.initialize_with_questions(self.formset, self.study.questions)
         forms.question_formset_disable_fields(

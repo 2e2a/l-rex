@@ -141,6 +141,33 @@ class ItemQuestion(models.Model):
     class Meta:
         ordering = ['item', 'number']
 
-
     def __str__(self):
         return '{}{}'.format(self.item, self.number)
+
+
+class ItemFeedback(models.Model):
+    item = models.ForeignKey(
+        Item,
+        on_delete=models.CASCADE,
+        help_text='Item for the feedback.',
+    )
+    question = models.ForeignKey(
+        'lrex_study.Question',
+        on_delete=models.CASCADE,
+        help_text='Question for the feedback.',
+    )
+    scale_values = models.CharField(
+        max_length=500,
+        help_text='Scale values, separated by commas (e.g. "1,3"). The feedback will be shown to the '
+                  'participant if one of these ratings is selected.'
+    )
+    feedback = models.TextField(
+        max_length=5000,
+        help_text='Feedback shown to the participant for the selected rating scale values.',
+    )
+
+    class Meta:
+        ordering = ['item', 'question']
+
+    def show_feedback(self, scale_value):
+        return scale_value.label in self.scale_values.split(',')

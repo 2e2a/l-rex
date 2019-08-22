@@ -50,6 +50,11 @@
             <a href="{% url 'item-questions' item_slug=item.slug %}" class="btn btn-outline-secondary btn-sm mx-1">
                 Customize questions
             </a>
+            {% if study.enable_item_rating_feedback %}
+            <a href="{% url 'item-feedback' item_slug=item.slug %}" class="btn btn-outline-secondary btn-sm mx-1">
+                Feedback
+            </a>
+            {% endif %}
             <a href="{% url 'item-delete' item_slug=item.slug %}" class="btn btn-outline-danger btn-sm mx-1">
                 Delete
             </a>

@@ -402,7 +402,7 @@ class ItemQuestionsUpdateView(ItemMixin, study_views.CheckStudyCreatorMixin, stu
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
-        self.formset = forms.itemquestion_factory(self.n_questions)(
+        self.formset = forms.itemquestion_formset_factory(self.n_questions)(
             queryset=models.ItemQuestion.objects.filter(item=self.item),
         )
         forms.initialize_with_questions(self.formset, self.study.questions)
@@ -414,7 +414,7 @@ class ItemQuestionsUpdateView(ItemMixin, study_views.CheckStudyCreatorMixin, stu
 
     def post(self, request, *args, **kwargs):
         if 'submit' in request.POST:
-            self.formset = forms.itemquestion_factory(self.n_questions)(request.POST, request.FILES)
+            self.formset = forms.itemquestion_formset_factory(self.n_questions)(request.POST, request.FILES)
             if self.formset.is_valid():
                 instances = self.formset.save(commit=False)
                 scale_labels_valid = True
@@ -447,6 +447,78 @@ class ItemQuestionsUpdateView(ItemMixin, study_views.CheckStudyCreatorMixin, stu
             (self.experiment.title, reverse('experiment', args=[self.experiment.slug])),
             ('items', reverse('items', args=[self.experiment.slug])),
             ('{}-questions'.format(self.item),'')
+        ]
+
+
+class ItemFeedbackUpdateView(ItemMixin, study_views.CheckStudyCreatorMixin, study_views.NextStepsMixin,
+                              study_views.DisableFormIfStudyActiveMixin, generic.TemplateView):
+    title = 'Customize item feedback'
+    template_name = 'lrex_contrib/crispy_formset_form.html'
+    formset = None
+    helper = None
+
+    def dispatch(self, request, *args, **kwargs):
+        self.helper = forms.itemfeedback_formset_helper()
+        self.n_feedback = self.item.itemfeedback_set.count()
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        extra = 0 if self.n_feedback > 0 else  1
+        self.formset = forms.itemfeedback_formset_factory(extra=extra)(
+            queryset=self.item.itemfeedback_set.all(),
+        )
+        forms.itemfeedback_init_formset(self.formset, self.study)
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.formset = forms.itemfeedback_formset_factory()(request.POST, request.FILES)
+        n_forms = len(self.formset.forms)
+        if self.formset.is_valid():
+            instances = self.formset.save(commit=False)
+            scale_values_valid = True
+            n_instances = len(instances)
+            for i, instance in enumerate(instances):
+                scale_values = instance.scale_values.split(',')
+                if not all(instance.question.is_valid_scale_value(scale_value) for scale_value in scale_values):
+                    form_num = n_forms - n_instances
+                    self.formset._errors[form_num]['scale_values'] = \
+                        self.formset.error_class(ValidationError('Invalid scale values').error_list)
+                    scale_values_valid = False
+                    break
+                instance.item = self.item
+            if scale_values_valid:
+                for instance in instances:
+                    instance.save()
+            extra = n_forms - self.n_feedback
+            if 'submit' in request.POST:
+                if scale_values_valid:
+                    messages.success(request, 'Feedback saved.')
+                    return redirect('items', experiment_slug=self.experiment.slug)
+            elif 'add' in request.POST:
+                self.formset = forms.itemfeedback_formset_factory(extra + 1)(
+                    queryset=self.item.itemfeedback_set.all(),
+                )
+            else: # delete last
+                if extra > 0:
+                    extra -= 1
+                elif self.n_feedback> 0:
+                    self.study.question_set.last().delete()
+                    self.n_feedback -= 1
+                self.formset = forms.itemfeedback_formset_factory(extra)(
+                    queryset=self.item.itemfeedback_set.all(),
+                )
+            forms.itemfeedback_init_formset(self.formset, self.study)
+        return super().get(request, *args, **kwargs)
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('experiments',reverse('experiments', args=[self.study.slug])),
+            (self.experiment.title, reverse('experiment', args=[self.experiment.slug])),
+            ('items', reverse('items', args=[self.experiment.slug])),
+            ('{}-feedback'.format(self.item),'')
         ]
 
 

@@ -69,6 +69,10 @@ class Study(models.Model):
         default=False,
         help_text='Show questions in a random order, if multiple questions defined.',
     )
+    enable_item_rating_feedback = models.BooleanField(
+        default=False,
+        help_text='Allows you to define feedback shown to participants for individual item ratings.',
+    )
     password = models.CharField(
         blank=True,
         null=True,
@@ -786,6 +790,9 @@ class Question(models.Model):
     @cached_property
     def has_rating_comment(self):
         return self.rating_comment != self.RATING_COMMENT_NONE
+
+    def is_valid_scale_value(self, scale_value_label):
+        return any(scale_value.label == scale_value_label for scale_value in self.scalevalue_set.all())
 
     def get_absolute_url(self):
         return reverse('study-question', args=[self.study.slug, self.pk])

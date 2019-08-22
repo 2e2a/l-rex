@@ -22,4 +22,5 @@ urlpatterns = [
     path('<slug:item_slug>/update/audio-link/', views.AudioLinkItemUpdateView.as_view(), name='audio-link-item-update'),
     path('<slug:item_slug>/delete/', views.ItemDeleteView.as_view(), name='item-delete'),
     path('<slug:item_slug>/questions/', views.ItemQuestionsUpdateView.as_view(), name='item-questions'),
+    path('<slug:item_slug>/feedback/', views.ItemFeedbackUpdateView.as_view(), name='item-feedback'),
 ]

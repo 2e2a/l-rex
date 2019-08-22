@@ -175,7 +175,7 @@ class ItemQuestionForm(crispy_forms.OptionalLabelMixin, forms.ModelForm):
         fields = ['question', 'scale_labels', 'legend']
 
 
-def itemquestion_factory(n_questions):
+def itemquestion_formset_factory(n_questions):
     return modelformset_factory(
         models.ItemQuestion,
         form=ItemQuestionForm,
@@ -286,3 +286,52 @@ class ItemListUploadForm(crispy_forms.CSVUploadForm):
                 code='invalid',
                 params={'n_line': reader.line_num})
         return cleaned_data
+
+
+class ItemFeedbackForm(crispy_forms.OptionalLabelMixin, forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.append_optional_to_labels()
+
+    class Meta:
+        model = models.ItemFeedback
+        fields = ['question', 'scale_values', 'feedback']
+
+
+def itemfeedback_formset_factory(extra=0):
+    return modelformset_factory(
+        models.ItemFeedback,
+        form=ItemFeedbackForm,
+        extra=extra,
+    )
+
+
+def itemfeedback_init_formset(itemfeedback_formset, study):
+
+    for form in itemfeedback_formset:
+        question = form.fields.get('question')
+        question.queryset = question.queryset.filter(study=study)
+        question.empty_label = None
+
+
+
+
+
+def itemfeedback_formset_helper():
+    formset_helper = FormHelper()
+    formset_helper.add_layout(
+        Layout(
+            Fieldset('Feedback {{ forloop.counter }}', None, 'question', 'scale_values', 'feedback'),
+        ),
+    )
+    formset_helper.add_input(
+        Submit("submit", "Submit"),
+    )
+    formset_helper.add_input(
+        Submit("add", "Add", css_class="btn-secondary"),
+    )
+    formset_helper.add_input(
+        Submit("delete", "Delete last", css_class="btn-danger"),
+    )
+    return formset_helper

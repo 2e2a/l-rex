@@ -29,13 +29,6 @@ class StudyForm(crispy_forms.CrispyModelForm):
             self.fields['item_type'].widget.attrs['readonly'] = True
             self.fields['item_type'].widget.attrs['disabled'] = True
 
-    def clean_item_type(self):
-        if self.disable_itemtype:
-            instance = getattr(self, 'instance', None)
-            return instance.item_type if instance and instance.pk else self.cleaned_data['item_type']
-        else:
-            return self.cleaned_data['item_type']
-
 
 class StudyAdvancedForm(crispy_forms.CrispyModelForm):
 
@@ -44,11 +37,13 @@ class StudyAdvancedForm(crispy_forms.CrispyModelForm):
         fields = [
             'use_blocks',
             'pseudo_randomize_question_order',
+            'enable_item_rating_feedback',
         ]
 
     def __init__(self, *args, **kwargs):
         self.disable_question_order = kwargs.pop('disable_randomize_question_order', False)
         self.disable_use_blocks = kwargs.pop('disable_use_blocks', False)
+        self.disable_feedback = kwargs.pop('disable_feedback', False)
         super().__init__(*args, **kwargs)
         if self.disable_question_order:
             self.fields['pseudo_randomize_question_order'].widget.attrs['readonly'] = True
@@ -56,13 +51,9 @@ class StudyAdvancedForm(crispy_forms.CrispyModelForm):
         if self.disable_use_blocks:
             self.fields['use_blocks'].widget.attrs['readonly'] = True
             self.fields['use_blocks'].widget.attrs['disabled'] = True
-
-    def clean_use_blocks(self):
-        if self.disable_use_blocks:
-            instance = getattr(self, 'use_blocks', None)
-            return instance.use_blocks if instance and instance.pk else self.cleaned_data['use_blocks']
-        else:
-            return self.cleaned_data['use_blocks']
+        if self.disable_feedback:
+            self.fields['enable_item_rating_feedback'].widget.attrs['readonly'] = True
+            self.fields['enable_item_rating_feedback'].widget.attrs['disabled'] = True
 
 
 class StudyFromArchiveForm(crispy_forms.CrispyForm):
