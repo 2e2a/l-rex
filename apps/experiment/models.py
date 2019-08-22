@@ -132,8 +132,8 @@ class Experiment(models.Model):
                 if not item.markdownitem.text:
                     raise AssertionError('Item {} has no text.'.format(item))
             elif self.study.has_audiolink_items:
-                if not item.audiolinkitem.url:
-                    raise AssertionError('Item {} has no URL.'.format(item))
+                if not item.audiolinkitem.urls:
+                    raise AssertionError('Item {} has no URLs.'.format(item))
 
             if i % condition_count == 0:
                 item_number += 1
@@ -162,11 +162,16 @@ class Experiment(models.Model):
                 if len(items) > 1:
                     warnings.append('Items {} have the same text.'.format(', '.join([str(item) for item in items])))
         elif self.study.has_audiolink_items:
-            items_by_link = groupby(items, lambda x: x.audiolinkitem.url)
+            item_links = [(item, url) for url in item.audiolinkitem.urls.split(',') for item in items]
+            items_by_link = groupby(item_links, lambda x: x[1])
             for _, items_with_same_link in items_by_link:
                 items = list(items_with_same_link)
                 if len(items) > 1:
-                    warnings.append('Items {} have the same URL.'.format(','.join([str(item) for item in items])))
+                    if len(set(items)) > 1:
+                        warnings.append('Items {} have the same URL.'.format(','.join([str(item) for item,_ in items])))
+                    else:
+                        warnings.append('Item {} uses the same URL multiple times.'.format(items[0][0]))
+
         msg = 'Detected {} items with following conditions: {} ({} stimuli).'.format(
             item_number,
             ','.join('"{}"'.format(condition) for condition in conditions),
@@ -390,7 +395,7 @@ class Experiment(models.Model):
                 item, created = item_models.AudioLinkItem.objects.get_or_create(
                     number=row[columns['item']],
                     condition=row[columns['condition']],
-                    url=row[columns['content']],
+                    urls=row[columns['content']],
                     description=description,
                     experiment=self,
                     block=block,

@@ -31,7 +31,7 @@ class AudioLinkItemAdmin(admin.ModelAdmin):
         'item',
         'study',
         'experiment',
-        'url',
+        'urls',
     )
     list_per_page = 32
     search_fields = (

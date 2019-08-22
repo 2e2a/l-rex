@@ -42,7 +42,7 @@ class AudioLinkItemForm(ItemFormMixin, crispy_forms.CrispyModelForm):
 
     class Meta:
         model = models.AudioLinkItem
-        fields = ['number', 'condition', 'url', 'description', 'block']
+        fields = ['number', 'condition', 'urls', 'description', 'block']
 
 
 class PregenerateItemsForm(crispy_forms.CrispyForm):

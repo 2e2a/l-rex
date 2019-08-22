@@ -36,10 +36,14 @@
             {% elif item.markdownitem %}
             {{ item.markdownitem.text|markdownify }}
             {% else %}
-            <audio controls="controls">
-                <source src="{{ item.audiolinkitem.url }}">
-                Your browser does not support the <code>audio</code> element.
-            </audio>
+            {% for item_url in item.audiolinkitem.urls_list %}
+            <div>
+                <audio controls="controls">
+                    <source src="{{ item_url }}">
+                    Your browser does not support the <code>audio</code> element.
+                </audio>
+            </div>
+            {% endfor %}
             {% endif %}
         </div>
         <div class="flex-shrink-0">

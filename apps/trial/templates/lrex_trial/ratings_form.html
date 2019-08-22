@@ -1,40 +1,9 @@
-{% extends "lrex_home/participant_base.html" %}
+{% extends "lrex_trial/rating_form.html" %}
 {% load crispy_forms_tags %}
 {% load contrib_tags %}
 
-{% block content %}
-<div class="my-2 p-4 border bg-white item-content">
-    {% if view.questionnaire_item.item.textitem %}
-    <p>
-        {{ view.questionnaire_item.item.textitem.text|linebreaks }}
-    </p>
-    {% elif view.questionnaire_item.item.markdownitem %}
-    {{ view.questionnaire_item.item.markdownitem.text|markdownify }}
-    {% else %}
-    <p>
-        {{ view.questionnaire_item.item.audiolinkitem.description|markdownify }}
-    </p>
-    <div class="text-center my-2">
-        <audio controls="controls" autoplay="autoplay">
-            <source src="{{ view.questionnaire_item.item.audiolinkitem.url }}">
-            Your browser does not support the <code>audio</code> element.
-        </audio>
-    </div>
-    <div class="text-right small">
-        <a href="{{ view.questionnaire_item.item.audiolinkitem.url }}">Download link</a>
-    </div>
-    {% endif %}
+{% block rating_form %}
+<div class="my-2">
+    {% crispy view.formset view.helper %}
 </div>
-<div class="my-2 p-4 border bg-white">
-    <div class="my-2">
-        {% crispy view.formset view.helper %}
-    </div>
-    <div class="text-center my-4">
-        <div class="progress" style="height: 2px;">
-            <div class="progress-bar" role="progressbar" style="width: {{ progress }}%" aria-valuenow="{{ view.progress }}" aria-valuemin="0" aria-valuemax="100"></div>
-        </div>
-        <small>question {{ progress_i }}/{{ progress_count }} </small>
-    </div>
-</div>
-
 {% endblock %}

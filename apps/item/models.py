@@ -44,7 +44,7 @@ class Item(models.Model):
         elif hasattr(self, 'markdownitem'):
             return self.markdownitem.text
         elif hasattr(self, 'audiolinkitem'):
-            return self.audiolinkitem.url
+            return self.audiolinkitem.urls
         return ''
 
     def __str__(self):
@@ -79,9 +79,11 @@ class MarkdownItem(Item):
 
 
 class AudioLinkItem(Item):
-    url = models.URLField(
-        verbose_name='URL',
-        help_text='Link to the audio file (e.g., https://yourserver.org/item1a.ogg).',
+    urls = models.CharField(
+        max_length=5000,
+        verbose_name='URLs',
+        help_text='Links to the audio files separated by commas '
+                  '(e.g., https://yourserver.org/item1a-i.ogg,https://yourserver.org/item1a-ii.ogg). ',
     )
     description = MarkdownxField(
         max_length=5000,
@@ -90,6 +92,10 @@ class AudioLinkItem(Item):
         null=True,
 
     )
+
+    @property
+    def urls_list(self):
+        return self.urls.split(',')
 
     def get_absolute_url(self):
         return reverse('audiolink-item-update', args=[self.experiment.study.slug, self.experiment.slug, self.pk])
