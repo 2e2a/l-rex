@@ -92,6 +92,8 @@ class StudyInstructionsForm(crispy_forms.CrispyModelForm):
                 'outro': 'Thank you for participating!',
             })
         super().__init__(*args, **kwargs)
+        if instance and not instance.enable_item_rating_feedback:
+            self.fields['feedback_message'].widget = forms.HiddenInput()
 
 
 class ArchiveForm(crispy_forms.CrispyModelForm):
