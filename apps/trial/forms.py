@@ -240,8 +240,32 @@ class TrialForm(crispy_forms.CrispyModelForm):
         return password
 
 
-class RatingForm(crispy_forms.CrispyModelForm):
-    optional_label_ignore_fields = ['comment',]
+class RatingBaseForm(crispy_forms.CrispyModelForm):
+    feedback = forms.CharField(
+        max_length=5000,
+        required=False,
+        widget=forms.HiddenInput(),
+    )
+    feedbacks_given = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput(),
+    )
+
+    def handle_feedbacks(self, feedbacks_given, feedback=None):
+        if feedback:
+            feedbacks_given.append(feedback.pk)
+            self['feedback'].initial = feedback.feedback
+            self.fields['feedback'].widget = forms.Textarea()
+            self.fields['feedback'].widget.attrs['readonly'] = True
+            self.full_clean()
+            self._errors[forms.forms.NON_FIELD_ERRORS] = self.error_class([
+                'Please note the following feedback.'  # TODO: Use translatbale label setting
+            ])
+        self['feedbacks_given'].initial = ','.join(str(f) for f in feedbacks_given)
+
+
+class RatingForm(RatingBaseForm):
+    optional_label_ignore_fields = ['comment', 'feedback']
 
     @property
     def submit_label(self):
@@ -249,7 +273,7 @@ class RatingForm(crispy_forms.CrispyModelForm):
 
     class Meta:
         model = models.Rating
-        fields = ['scale_value', 'comment']
+        fields = ['scale_value', 'comment', 'feedback', 'feedbacks_given']
         error_messages = {
             'scale_value': {
                 'required': 'Please answer this question.',
@@ -263,6 +287,8 @@ class RatingForm(crispy_forms.CrispyModelForm):
             Layout(
                 Field('scale_value', template='lrex_trial/ratings_scale_value_field.html'),
                 Field('comment'),
+                Field('feedback'),
+                Field('feedbacks_given'),
             ),
         )
         return helper

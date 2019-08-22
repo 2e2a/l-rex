@@ -549,6 +549,25 @@ class RatingCreateMixin(ProgressMixin, TestWarningMixin):
             return reverse('rating-create', args=[self.trial.slug, self.num + 1])
         return reverse('rating-outro', args=[self.trial.slug])
 
+    def _handle_feedbacks(self, ratingforms, instances):
+        feedbacks = []
+        reload_form_with_feedback = False
+        feedbacks_qs = self.questionnaire_item.item.itemfeedback_set
+        if feedbacks_qs.count() > 0:
+            for i, instance in enumerate(instances):
+                question_feedbacks = feedbacks_qs.filter(question=instance.scale_value.question)
+                feedbacks_given = ratingforms[i]['feedbacks_given'].value()
+                feedbacks_given = [int(f) for f in feedbacks_given.split(',')] if feedbacks_given else []
+                show_feedback = None
+                for feedback in question_feedbacks:
+                    if feedback.pk not in feedbacks_given and feedback.show_feedback(instance.scale_value):
+                        reload_form_with_feedback = True
+                        show_feedback = feedback
+                    feedbacks.append(
+                        (i, feedbacks_given, show_feedback)
+                    )
+        return reload_form_with_feedback, feedbacks
+
 
 class RatingCreateView(RatingCreateMixin, TrialMixin, generic.CreateView):
     model = models.Rating
@@ -571,15 +590,31 @@ class RatingCreateView(RatingCreateMixin, TrialMixin, generic.CreateView):
     def post(self, request, *args, **kwargs):
         if self.questionnaire_item.rating_set.filter(trial=self.trial).exists():
             return redirect(self.get_next_url())
+        form = self.get_form()
+        if form.is_valid():
+            show_feedback, feedbacks = self._handle_feedbacks([form], [form.instance])
+            if show_feedback:
+                response = super().get(request)
+                form_kwargs = self.get_form_base_kwargs()
+                form = self.get_form_class()(**form_kwargs)
+                for _, feedbacks_given, feedback in feedbacks:
+                    form.handle_feedbacks(feedbacks_given, feedback=feedback)
+                response.context_data['form'] = form
+                return response
         return super().post(request, *args, **kwargs)
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
+    def get_form_base_kwargs(self):
+        kwargs = dict()
         kwargs['study'] = self.study
         kwargs['question'] = self.study.question
         kwargs['questionnaire_item'] = self.questionnaire_item
         if self.item_questions:
             kwargs['item_question'] = self.item_questions[0]
+        return kwargs
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update(**self.get_form_base_kwargs())
         return kwargs
 
     def form_valid(self, form):
