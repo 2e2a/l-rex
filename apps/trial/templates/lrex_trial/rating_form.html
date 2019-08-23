@@ -3,13 +3,11 @@
 {% load contrib_tags %}
 
 {% block content %}
-<div class="my-2 p-4 border bg-white item-content">
+<div class="my-2 p-4 border bg-white">
     {% if item.textitem %}
-    <p>
-        {{ item.textitem.text|linebreaks }}
-    </p>
+    <div class="item-content"><p>{{ item.textitem.text|linebreaks }}</p></div>
     {% elif item.markdownitem %}
-    {{ item.markdownitem.text|markdownify }}
+    <div class="item-content">{{ item.markdownitem.text|markdownify }}</div>
     {% else %}
     <p>
         {{ item.audiolinkitem.description|markdownify }}
