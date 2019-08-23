@@ -162,7 +162,7 @@ class Experiment(models.Model):
                 if len(items) > 1:
                     warnings.append('Items {} have the same text.'.format(', '.join([str(item) for item in items])))
         elif self.study.has_audiolink_items:
-            item_links = [(item, url) for url in item.audiolinkitem.urls.split(',') for item in items]
+            item_links = [(item, url) for url in item.audiolinkitem.urls_list for item in items]
             items_by_link = groupby(item_links, lambda x: x[1])
             for _, items_with_same_link in items_by_link:
                 items = list(items_with_same_link)

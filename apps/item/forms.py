@@ -3,6 +3,8 @@ import re
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Fieldset, Layout, Submit
 from django import forms
+from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory
 from io import StringIO
 
@@ -38,11 +40,32 @@ class MarkdownItemForm(ItemFormMixin, crispy_forms.CrispyModelForm):
         fields = ['number', 'condition', 'text', 'block']
 
 
+def clean_url_list(urls):
+    return urls.replace(' ', '').replace('\n', '')
+
+
+def validate_urls(urls):
+    url_list = [url.strip() for url in urls.split(',')]
+    validator = URLValidator()
+    for url in url_list:
+        try:
+            validator(url)
+        except ValidationError:
+            raise ValidationError(
+                '"{}" is not a valid URL.'.format(url)
+            )
+
+
 class AudioLinkItemForm(ItemFormMixin, crispy_forms.CrispyModelForm):
 
     class Meta:
         model = models.AudioLinkItem
         fields = ['number', 'condition', 'urls', 'description', 'block']
+
+    def clean_urls(self):
+        urls = self.cleaned_data['urls']
+        validate_urls(urls)
+        return clean_url_list(urls)
 
 
 class PregenerateItemsForm(crispy_forms.CrispyForm):
@@ -154,6 +177,8 @@ class ItemUploadForm(crispy_forms.CSVUploadForm):
                 assert row[cleaned_data['condition_column'] - 1]
                 assert len(row[cleaned_data['condition_column'] - 1]) < 8
                 assert row[cleaned_data['content_column'] - 1]
+                if self.study.has_audiolink_items:
+                    validate_urls(row[cleaned_data['content_column'] - 1])
                 if cleaned_data['block_column'] > 0:
                     int(row[cleaned_data['block_column'] - 1])
                 for question in self.study.questions:
