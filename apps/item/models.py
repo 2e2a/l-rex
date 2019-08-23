@@ -79,7 +79,7 @@ class MarkdownItem(Item):
 
 
 class AudioLinkItem(Item):
-    urls = models.CharField(
+    urls = models.TextField(
         max_length=5000,
         verbose_name='URLs',
         help_text='Links to the audio files separated by commas '
@@ -95,7 +95,7 @@ class AudioLinkItem(Item):
 
     @property
     def urls_list(self):
-        return self.urls.split(',')
+        return [url.strip() for url in self.urls.split(',')]
 
     def get_absolute_url(self):
         return reverse('audiolink-item-update', args=[self.experiment.study.slug, self.experiment.slug, self.pk])
