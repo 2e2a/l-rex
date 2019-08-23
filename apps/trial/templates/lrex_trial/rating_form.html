@@ -4,20 +4,20 @@
 
 {% block content %}
 <div class="my-2 p-4 border bg-white item-content">
-    {% if view.questionnaire_item.item.textitem %}
+    {% if item.textitem %}
     <p>
-        {{ view.questionnaire_item.item.textitem.text|linebreaks }}
+        {{ item.textitem.text|linebreaks }}
     </p>
-    {% elif view.questionnaire_item.item.markdownitem %}
-    {{ view.questionnaire_item.item.markdownitem.text|markdownify }}
+    {% elif item.markdownitem %}
+    {{ item.markdownitem.text|markdownify }}
     {% else %}
     <p>
-        {{ view.questionnaire_item.item.audiolinkitem.description|markdownify }}
+        {{ item.audiolinkitem.description|markdownify }}
     </p>
     <div class="text-center my-2">
-        {% for item_url in view.questionnaire_item.item.audiolinkitem.urls_list %}
+        {% for item_url in item.audiolinkitem.urls_list %}
         <div>
-            <audio controls="controls" autoplay="autoplay">
+            <audio controls="controls" {% if not item.audiolinkitem.has_multiple_urls %}autoplay="autoplay"{% endif %}>
                 <source src="{{ item_url }}">
                 Your browser does not support the <code>audio</code> element.
             </audio>

@@ -525,7 +525,10 @@ class RatingCreateMixin(ProgressMixin, TestWarningMixin):
 
     def get_context_data(self, **kwargs):
         kwargs.update(
-            {'n_trial_items': len(self.trial.items), 'num': self.num}
+            {
+                'n_trial_items': len(self.trial.items), 'num': self.num,
+                'item': self.questionnaire_item.item
+            }
         )
         return super().get_context_data(**kwargs)
 

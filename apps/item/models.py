@@ -1,6 +1,7 @@
 from markdownx.models import MarkdownxField
 from django.db import models
 from django.urls import reverse
+from django.utils.functional import cached_property
 
 from apps.contrib.utils import slugify_unique
 
@@ -93,9 +94,13 @@ class AudioLinkItem(Item):
 
     )
 
-    @property
+    @cached_property
     def urls_list(self):
         return [url.strip() for url in self.urls.split(',')]
+
+    @cached_property
+    def has_multiple_urls(self):
+        return len(self.urls_list) > 1
 
     def get_absolute_url(self):
         return reverse('audiolink-item-update', args=[self.experiment.study.slug, self.experiment.slug, self.pk])
