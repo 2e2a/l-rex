@@ -403,9 +403,7 @@ def ratingformset_handle_feedbacks(study, ratingformset, feedbacks):
     for form, feedbacks_given, feedback in feedbacks:
         show_feedback = True
         ratingformset[form].handle_feedbacks(study, feedbacks_given, feedback=feedback)
-    if show_feedback:
-        ratingformset._non_form_errors = \
-            ratingformset.error_class(forms.ValidationError(study.feedback_message).error_list)
+    return show_feedback
 
 
 def rating_formset_helper(submit_label='Continue'):

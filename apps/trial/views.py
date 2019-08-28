@@ -676,8 +676,7 @@ class RatingsCreateView(RatingCreateMixin, TrialMixin, generic.TemplateView):
                 response = self.get(request, *args, **kwargs)
                 for instance in instances:
                     self.formset[instance.question].fields['scale_value'].initial = instance.scale_value.pk
-                self.formset._non_form_errors = \
-                    self.formset.error_class(ValidationError('Please answer all questions.').error_list)
+                messages.error(request, 'Please answer all questions.')
                 return response
             elif self.study.enable_item_rating_feedback:
                     show_feedback, feedbacks = self._handle_feedbacks(self.formset, instances)
@@ -685,7 +684,9 @@ class RatingsCreateView(RatingCreateMixin, TrialMixin, generic.TemplateView):
                         response = self.get(request, *args, **kwargs)
                         for instance in instances:
                             self.formset[instance.question].fields['scale_value'].initial = instance.scale_value.pk
-                        forms.ratingformset_handle_feedbacks(self.study, self.formset, feedbacks)
+                        show_feedback = forms.ratingformset_handle_feedbacks(self.study, self.formset, feedbacks)
+                        if show_feedback:
+                            messages.error(request, self.study.feedback_message)
                         return response
             for instance in instances:
                 instance.trial = self.trial
