@@ -597,12 +597,15 @@ class RatingCreateView(RatingCreateMixin, TrialMixin, generic.CreateView):
         if form.is_valid():
             show_feedback, feedbacks = self._handle_feedbacks([form], [form.instance])
             if show_feedback:
+                rating = form.save(commit=False)
                 response = super().get(request)
                 form_kwargs = self.get_form_base_kwargs()
                 form = self.get_form_class()(**form_kwargs)
+                form.fields['scale_value'].initial = rating.scale_value.id
                 for _, feedbacks_given, feedback in feedbacks:
-                    form.handle_feedbacks(self.study, feedbacks_given, feedback=feedback)
+                    form.handle_feedbacks(feedbacks_given, feedback=feedback)
                 response.context_data['form'] = form
+                messages.error(request, self.study.feedback_message)
                 return response
         return super().post(request, *args, **kwargs)
 
@@ -684,7 +687,7 @@ class RatingsCreateView(RatingCreateMixin, TrialMixin, generic.TemplateView):
                         response = self.get(request, *args, **kwargs)
                         for instance in instances:
                             self.formset[instance.question].fields['scale_value'].initial = instance.scale_value.pk
-                        show_feedback = forms.ratingformset_handle_feedbacks(self.study, self.formset, feedbacks)
+                        show_feedback = forms.ratingformset_handle_feedbacks(self.formset, feedbacks)
                         if show_feedback:
                             messages.error(request, self.study.feedback_message)
                         return response

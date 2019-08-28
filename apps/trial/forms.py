@@ -252,7 +252,7 @@ class RatingBaseForm(crispy_forms.CrispyModelForm):
         widget=forms.HiddenInput(),
     )
 
-    def handle_feedbacks(self, study, feedbacks_given, feedback=None):
+    def handle_feedbacks(self, feedbacks_given, feedback=None):
         if feedback:
             feedbacks_given.append(feedback.pk)
             self['feedback'].initial = feedback.feedback
@@ -321,12 +321,6 @@ class RatingForm(RatingBaseForm):
             self.fields['comment'].required = True
         else:
             self.fields['comment'].label = self.fields['comment'].label + ' (optional)'
-
-    def handle_feedbacks(self, study, feedbacks_given, feedback=None):
-        super().handle_feedbacks(study, feedbacks_given, feedback)
-        if feedback:
-            self.full_clean()
-            self._errors[forms.forms.NON_FIELD_ERRORS] = self.error_class([study.feedback_message])
 
 
 class RatingFormsetForm(RatingBaseForm):
@@ -398,11 +392,11 @@ def ratingformset_init(ratingformset, questions, item_questions, questionnaire_i
         form.fields['feedbacks_given'].widget = forms.HiddenInput()
 
 
-def ratingformset_handle_feedbacks(study, ratingformset, feedbacks):
+def ratingformset_handle_feedbacks(ratingformset, feedbacks):
     show_feedback = False
     for form, feedbacks_given, feedback in feedbacks:
         show_feedback = True
-        ratingformset[form].handle_feedbacks(study, feedbacks_given, feedback=feedback)
+        ratingformset[form].handle_feedbacks(feedbacks_given, feedback=feedback)
     return show_feedback
 
 
