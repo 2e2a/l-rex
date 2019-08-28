@@ -271,7 +271,7 @@ class Questionnaire(models.Model):
 
 class QuestionnaireBlock(models.Model):
     block = models.IntegerField()
-    instructions = models.TextField(
+    instructions = MarkdownxField(
         max_length=2000,
         help_text='These instructions will be presented to the participant before the questionnaire block begins.',
         blank=True,
