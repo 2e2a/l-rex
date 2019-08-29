@@ -191,7 +191,11 @@ class Questionnaire(models.Model):
     @cached_property
     def _item_list_items(self):
         item_lists = self.item_lists.all()
-        items = item_models.Item.objects.filter(itemlist__in=item_lists).order_by('experiment_id')
+        items = item_models.Item.objects.filter(
+            itemlist__in=item_lists
+        ).order_by(
+            'experiment_id', 'number', 'condition'
+        )
         items = sorted(items, key=lambda x: x.experiment_block)
         return list(items)
 
