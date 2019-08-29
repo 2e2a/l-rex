@@ -602,6 +602,7 @@ class RatingCreateView(RatingCreateMixin, TrialMixin, generic.CreateView):
                 form_kwargs = self.get_form_base_kwargs()
                 form = self.get_form_class()(**form_kwargs)
                 form.fields['scale_value'].initial = rating.scale_value.id
+                form.fields['comment'].initial = rating.comment
                 for _, feedbacks_given, feedback in feedbacks:
                     form.handle_feedbacks(feedbacks_given, feedback=feedback)
                 response.context_data['form'] = form
@@ -679,6 +680,7 @@ class RatingsCreateView(RatingCreateMixin, TrialMixin, generic.TemplateView):
                 response = self.get(request, *args, **kwargs)
                 for instance in instances:
                     self.formset[instance.question].fields['scale_value'].initial = instance.scale_value.pk
+                    self.formset[instance.question].fields['comment'].initial = instance.comment
                 messages.error(request, 'Please answer all questions.')
                 return response
             elif self.study.enable_item_rating_feedback:
