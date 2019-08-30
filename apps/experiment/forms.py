@@ -30,7 +30,5 @@ class ExperimentUpdateForm(ExperimentForm):
         disable_block_settings= kwargs.pop('disable_block_settings')
         super().__init__(*args, **kwargs)
         if disable_block_settings:
-            self.fields['is_example'].widget.attrs['readonly'] = True
-            self.fields['is_example'].widget.attrs['disabled'] = True
-            self.fields['block'].widget.attrs['readonly'] = True
-            self.fields['block'].widget.attrs['disabled'] = True
+            crispy_forms.disable_form_field(self, 'is_example')
+            crispy_forms.disable_form_field(self, 'block')

@@ -26,8 +26,7 @@ class StudyForm(crispy_forms.CrispyModelForm):
         self.disable_itemtype = kwargs.pop('disable_itemtype', False)
         super().__init__(*args, **kwargs)
         if self.disable_itemtype:
-            self.fields['item_type'].widget.attrs['readonly'] = True
-            self.fields['item_type'].widget.attrs['disabled'] = True
+            crispy_forms.disable_form_field(self, 'item_type')
 
 
 class StudyAdvancedForm(crispy_forms.CrispyModelForm):
@@ -41,19 +40,16 @@ class StudyAdvancedForm(crispy_forms.CrispyModelForm):
         ]
 
     def __init__(self, *args, **kwargs):
-        self.disable_question_order = kwargs.pop('disable_randomize_question_order', False)
-        self.disable_use_blocks = kwargs.pop('disable_use_blocks', False)
-        self.disable_feedback = kwargs.pop('disable_feedback', False)
+        disable_question_order = kwargs.pop('disable_randomize_question_order', False)
+        disable_use_blocks = kwargs.pop('disable_use_blocks', False)
+        disable_feedback = kwargs.pop('disable_feedback', False)
         super().__init__(*args, **kwargs)
-        if self.disable_question_order:
-            self.fields['pseudo_randomize_question_order'].widget.attrs['readonly'] = True
-            self.fields['pseudo_randomize_question_order'].widget.attrs['disabled'] = True
-        if self.disable_use_blocks:
-            self.fields['use_blocks'].widget.attrs['readonly'] = True
-            self.fields['use_blocks'].widget.attrs['disabled'] = True
-        if self.disable_feedback:
-            self.fields['enable_item_rating_feedback'].widget.attrs['readonly'] = True
-            self.fields['enable_item_rating_feedback'].widget.attrs['disabled'] = True
+        if disable_question_order:
+            crispy_forms.disable_form_field(self, 'pseudo_randomize_question_order')
+        if disable_use_blocks:
+            crispy_forms.disable_form_field(self, 'use_blocks')
+        if disable_feedback:
+            crispy_forms.disable_form_field(self, 'enable_item_rating_feedback')
 
 
 class StudyFromArchiveForm(crispy_forms.CrispyForm):

@@ -6,6 +6,12 @@ from django import forms
 from . import csv as contrib_csv
 
 
+def disable_form_field(form, field):
+    form.fields[field].widget.attrs['readonly'] = True
+    form.fields[field].widget.attrs['disabled'] = True
+    form.fields[field].required = False
+
+
 class OptionalLabelMixin:
     optional_label_ignore_fields = None
 

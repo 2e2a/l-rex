@@ -248,6 +248,9 @@ class StudyUpdateView(StudyObjectMixin, CheckStudyCreatorMixin, SuccessMessageMi
         kwargs['disable_itemtype'] = self.study.has_items
         return kwargs
 
+    def get_success_url(self):
+        return self.object.get_absolute_url()
+
     @property
     def breadcrumbs(self):
         return [
