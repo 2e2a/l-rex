@@ -192,6 +192,9 @@ class TextItemUpdateView(SuccessMessageMixin, ItemObjectMixin, study_views.Check
     model = models.TextItem
     form_class = forms.TextItemForm
 
+    def get_success_url(self):
+        return self.object.get_absolute_url()
+
 
 class MarkdownItemCreateView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin,
                              study_views.DisableFormIfStudyActiveMixin, ItemCreateMixin, generic.CreateView):
@@ -204,14 +207,14 @@ class MarkdownItemUpdateView(SuccessMessageMixin, ItemObjectMixin, study_views.C
     model = models.MarkdownItem
     form_class = forms.MarkdownItemForm
 
+    def get_success_url(self):
+        return self.object.get_absolute_url()
+
 
 class AudioLinkItemCreateView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin,
                               study_views.DisableFormIfStudyActiveMixin, ItemCreateMixin, generic.CreateView):
     model = models.AudioLinkItem
     form_class = forms.AudioLinkItemForm
-
-    def get_success_url(self):
-        return reverse('items', args=[self.experiment.slug])
 
 
 class AudioLinkItemUpdateView(ItemObjectMixin, study_views.CheckStudyCreatorMixin, SuccessMessageMixin,
@@ -220,7 +223,7 @@ class AudioLinkItemUpdateView(ItemObjectMixin, study_views.CheckStudyCreatorMixi
     form_class = forms.AudioLinkItemForm
 
     def get_success_url(self):
-        return reverse('items', args=[self.experiment.slug])
+        return self.object.get_absolute_url()
 
 
 class ItemDeleteView(ItemObjectMixin, study_views.CheckStudyCreatorMixin, study_views.DisableFormIfStudyActiveMixin,

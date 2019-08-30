@@ -66,7 +66,7 @@ class TextItem(Item):
     )
 
     def get_absolute_url(self):
-        return reverse('text-item-update', args=[self.experiment.study.slug, self.experiment.slug, self.pk])
+        return reverse('text-item-update', args=[self.slug])
 
 
 class MarkdownItem(Item):
@@ -76,7 +76,7 @@ class MarkdownItem(Item):
     )
 
     def get_absolute_url(self):
-        return reverse('markdown-item-update', args=[self.experiment.study.slug, self.experiment.slug, self.pk])
+        return reverse('markdown-item-update', args=[self.slug])
 
 
 class AudioLinkItem(Item):
@@ -103,7 +103,7 @@ class AudioLinkItem(Item):
         return len(self.urls_list) > 1
 
     def get_absolute_url(self):
-        return reverse('audiolink-item-update', args=[self.experiment.study.slug, self.experiment.slug, self.pk])
+        return reverse('audiolink-item-update', args=[self.slug])
 
 
 class ItemList(models.Model):
