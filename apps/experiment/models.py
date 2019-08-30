@@ -395,7 +395,7 @@ class Experiment(models.Model):
                     block=block,
                 )
             elif self.study.has_audiolink_items:
-                description=row[columns['audio_description']]
+                description=row[columns['audio_description']] if 'audio_description' in columns else None
                 item, created = item_models.AudioLinkItem.objects.get_or_create(
                     number=row[columns['item']],
                     condition=row[columns['condition']],
