@@ -103,7 +103,7 @@ class AudioLinkItem(Item):
         return len(self.urls_list) > 1
 
     def get_absolute_url(self):
-        return reverse('audiolink-item-update', args=[self.slug])
+        return reverse('audio-link-item-update', args=[self.slug])
 
 
 class ItemList(models.Model):
