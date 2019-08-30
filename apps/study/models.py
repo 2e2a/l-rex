@@ -52,7 +52,7 @@ class Study(models.Model):
     ITEM_TYPE = (
         (ITEM_TYPE_TXT, 'Plain text'),
         (ITEM_TYPE_MARKDOWN, 'Rich text with markdown'),
-        (ITEM_TYPE_AUDIO_LINK, 'Audio link'),
+        (ITEM_TYPE_AUDIO_LINK, 'Audio links'),
     )
     item_type = models.CharField(
         max_length=3,
