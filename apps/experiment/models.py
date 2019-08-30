@@ -333,6 +333,10 @@ class Experiment(models.Model):
         for item in self.items:
             csv_row = [self.title] if add_experiment_column else []
             csv_row.extend([item.number, item.condition, item.content, item.block])
+            if self.study.has_audiolink_items:
+                csv_row.append(
+                    item.audiolinkitem.description
+                )
             for question in self.study.questions:
                 if item.itemquestion_set.filter(number=question.number).exists():
                     itemquestion = item.itemquestion_set.get(number=question.number)
