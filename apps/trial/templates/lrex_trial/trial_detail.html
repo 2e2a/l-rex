@@ -36,10 +36,14 @@
             {% elif q_item.item.markdownitem %}
             {{ q_item.item.markdownitem.text|markdownify }}
             {% else %}
-            <audio controls="controls">
-                <source src="{{ q_item.item.audiolinkitem.url }}">
-                Your browser does not support the <code>audio</code> element.
-            </audio>
+            {% for item_url in q_item.item.audiolinkitem.urls_list %}
+            <div>
+                <audio controls="controls">
+                    <source src="{{ item_url }}">
+                    Your browser does not support the <code>audio</code> element.
+                </audio>
+            </div>
+            {% endfor %}
             {% endif %}
         </td>
         {% if study.has_question_with_random_scale %}
