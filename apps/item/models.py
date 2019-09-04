@@ -185,7 +185,7 @@ class ItemFeedback(models.Model):
     )
 
     class Meta:
-        ordering = ['item', 'question']
+        ordering = ['item', 'question', 'pk']
 
     def show_feedback(self, scale_value):
         return scale_value.label in self.scale_values.split(',')
