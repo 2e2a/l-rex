@@ -18,3 +18,14 @@ class DefaultDeleteView(generic.DeleteView):
     @property
     def message(self):
         return 'Delete "{}"?'.format(self.object)
+
+
+class LeaveWarningMixin:
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'leave_warning': True,
+        })
+        return context
+

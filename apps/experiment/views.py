@@ -46,8 +46,12 @@ class ExperimentObjectMixin(ExperimentMixin):
         return self.experiment_object
 
 
-class ExperimentListView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, study_views.NextStepsMixin,
-                         generic.ListView):
+class ExperimentListView(
+    study_views.StudyMixin,
+    study_views.CheckStudyCreatorMixin,
+    study_views.NextStepsMixin,
+    generic.ListView
+):
     model = models.Experiment
     title = 'Experiments'
 
@@ -63,8 +67,12 @@ class ExperimentListView(study_views.StudyMixin, study_views.CheckStudyCreatorMi
         ]
 
 
-class ExperimentCreateView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin,
-                           study_views.DisableFormIfStudyActiveMixin, generic.CreateView):
+class ExperimentCreateView(
+    study_views.StudyMixin,
+    study_views.CheckStudyCreatorMixin,
+    study_views.DisableFormIfStudyActiveMixin,
+    generic.CreateView
+):
     model = models.Experiment
     title = 'Create experiment'
     template_name = 'lrex_contrib/crispy_form.html'
@@ -91,8 +99,12 @@ class ExperimentCreateView(study_views.StudyMixin, study_views.CheckStudyCreator
         ]
 
 
-class ExperimentDetailView(ExperimentObjectMixin, study_views.CheckStudyCreatorMixin, study_views.NextStepsMixin,
-                           generic.DetailView):
+class ExperimentDetailView(
+    ExperimentObjectMixin,
+    study_views.CheckStudyCreatorMixin,
+    study_views.NextStepsMixin,
+    generic.DetailView
+):
     model = models.Experiment
 
     @property
@@ -114,8 +126,13 @@ class ExperimentDetailView(ExperimentObjectMixin, study_views.CheckStudyCreatorM
         ]
 
 
-class ExperimentUpdateView(ExperimentObjectMixin, study_views.CheckStudyCreatorMixin, SuccessMessageMixin,
-                           generic.UpdateView):
+class ExperimentUpdateView(
+    ExperimentObjectMixin,
+    study_views.CheckStudyCreatorMixin,
+    SuccessMessageMixin,
+    contrib_views.LeaveWarningMixin,
+    generic.UpdateView
+):
     model = models.Experiment
     title = 'Edit Experiment'
     template_name = 'lrex_contrib/crispy_form.html'
@@ -146,8 +163,12 @@ class ExperimentUpdateView(ExperimentObjectMixin, study_views.CheckStudyCreatorM
         ]
 
 
-class ExperimentDeleteView(ExperimentObjectMixin, study_views.CheckStudyCreatorMixin, study_views.DisableFormIfStudyActiveMixin,
-                           contrib_views.DefaultDeleteView):
+class ExperimentDeleteView(
+    ExperimentObjectMixin,
+    study_views.CheckStudyCreatorMixin,
+    study_views.DisableFormIfStudyActiveMixin,
+    contrib_views.DefaultDeleteView
+):
     model = models.Experiment
 
     @property

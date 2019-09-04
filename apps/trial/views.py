@@ -82,8 +82,13 @@ class TrialObjectMixin(TrialMixin):
         return self.trial_object
 
 
-class QuestionnaireListView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, study_views.NextStepsMixin,
-                            study_views.DisableFormIfStudyActiveMixin, generic.ListView):
+class QuestionnaireListView(
+    study_views.StudyMixin,
+    study_views.CheckStudyCreatorMixin,
+    study_views.NextStepsMixin,
+    study_views.DisableFormIfStudyActiveMixin,
+    generic.ListView
+):
     model = models.Questionnaire
     title = 'Questionnaires'
     page = 1
@@ -148,8 +153,12 @@ class QuestionnaireListView(study_views.StudyMixin, study_views.CheckStudyCreato
         ]
 
 
-class QuestionnaireDetailView(QuestionnaireObjectMixin, study_views.CheckStudyCreatorMixin, study_views.NextStepsMixin,
-                              generic.DetailView):
+class QuestionnaireDetailView(
+    QuestionnaireObjectMixin,
+    study_views.CheckStudyCreatorMixin,
+    study_views.NextStepsMixin,
+    generic.DetailView
+):
     model = models.Questionnaire
     title = 'Questionnaire'
 
@@ -184,8 +193,12 @@ class QuestionnaireDetailView(QuestionnaireObjectMixin, study_views.CheckStudyCr
         ]
 
 
-class QuestionnaireGenerateView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin,
-                                study_views.DisableFormIfStudyActiveMixin, generic.TemplateView):
+class QuestionnaireGenerateView(
+    study_views.StudyMixin,
+    study_views.CheckStudyCreatorMixin,
+    study_views.DisableFormIfStudyActiveMixin,
+    generic.TemplateView
+):
     title = 'Generate questionnaires'
     template_name = 'lrex_contrib/crispy_formset_form.html'
     formset = None
@@ -240,8 +253,12 @@ class QuestionnaireGenerateView(study_views.StudyMixin, study_views.CheckStudyCr
         ]
 
 
-class QuestionnaireDeleteAllView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin,
-                              study_views.DisableFormIfStudyActiveMixin, generic.TemplateView):
+class QuestionnaireDeleteAllView(
+    study_views.StudyMixin,
+    study_views.CheckStudyCreatorMixin,
+    study_views.DisableFormIfStudyActiveMixin,
+    generic.TemplateView
+):
     title = 'Confirm Delete'
     template_name = 'lrex_contrib/confirm_delete.html'
     message = 'Delete all questionnaires?'
@@ -264,8 +281,12 @@ class QuestionnaireDeleteAllView(study_views.StudyMixin, study_views.CheckStudyC
         return reverse('questionnaires', args=[self.study.slug])
 
 
-class QuestionnaireBlockInstructionsUpdateView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin,
-                                               generic.TemplateView):
+class QuestionnaireBlockInstructionsUpdateView(
+    study_views.StudyMixin,
+    study_views.CheckStudyCreatorMixin,
+    contrib_views.LeaveWarningMixin,
+    generic.TemplateView,
+):
     title = 'Edit questionnaire block instructions'
     template_name = 'lrex_contrib/crispy_formset_form.html'
     formset = None
@@ -312,8 +333,12 @@ class QuestionnaireBlockInstructionsUpdateView(study_views.StudyMixin, study_vie
         ]
 
 
-class QuestionnaireUploadView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin,
-                              study_views.DisableFormIfStudyActiveMixin, generic.FormView,):
+class QuestionnaireUploadView(
+    study_views.StudyMixin,
+    study_views.CheckStudyCreatorMixin,
+    study_views.DisableFormIfStudyActiveMixin,
+    generic.FormView,
+):
     title = 'Upload custom questionnaires'
     form_class = forms.QuestionnaireUploadForm
     template_name = 'lrex_contrib/crispy_form.html'

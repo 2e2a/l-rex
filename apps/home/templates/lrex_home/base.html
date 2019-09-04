@@ -8,6 +8,24 @@
     <script src="{% static 'js/jquery.slim.min.js' %}"></script>
     <script src="{% static 'js/popper.min.js' %}"></script>
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    {% if leave_warning %}
+    <script type="text/javascript">
+        $(document).ready(function(){
+            var wasFormFlag = false;
+            window.addEventListener('beforeunload', function (e) {
+                if (wasFormFlag) return;
+                var msg = "Make sure to submit any changes.";
+                (e || window.event).returnValue = msg;
+                return msg;
+            });
+            document.querySelectorAll('form').forEach(function (form) {
+                form.addEventListener('submit', function () {
+                    wasFormFlag = true;
+                })
+            });
+        });
+    </script>
+    {% endif %}
     <link rel="stylesheet" href="{% static 'css/lrex.css' %}">
     <link rel="shortcut icon" type="image/sgv" href="{% static 'img/favicon.svg' %}"/>
 </head>

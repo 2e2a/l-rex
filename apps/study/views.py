@@ -228,8 +228,14 @@ class StudyDetailView(StudyObjectMixin, CheckStudyCreatorMixin, NextStepsMixin, 
         ]
 
 
-class StudyUpdateView(StudyObjectMixin, CheckStudyCreatorMixin, SuccessMessageMixin, DisableFormIfStudyActiveMixin,
-                      generic.UpdateView):
+class StudyUpdateView(
+    StudyObjectMixin,
+    CheckStudyCreatorMixin,
+    SuccessMessageMixin,
+    DisableFormIfStudyActiveMixin,
+    contib_views.LeaveWarningMixin,
+    generic.UpdateView
+):
     model = models.Study
     title = 'Edit study'
     template_name = 'lrex_contrib/crispy_form.html'
@@ -338,6 +344,7 @@ class StudyRestoreFromArchiveView(StudyMixin, CheckStudyCreatorMixin, SuccessMes
             ('restore', ''),
         ]
 
+
 class StudyCreateCopyView(StudyMixin, CheckStudyCreatorMixin, SuccessMessageMixin, generic.FormView):
     title = 'Create a copy of a study'
     template_name = 'lrex_contrib/crispy_form.html'
@@ -370,8 +377,14 @@ class StudyCreateCopyView(StudyMixin, CheckStudyCreatorMixin, SuccessMessageMixi
         ]
 
 
-class StudyAdvancedUpdateView(StudyObjectMixin, CheckStudyCreatorMixin, SuccessMessageMixin,
-                              DisableFormIfStudyActiveMixin, generic.UpdateView):
+class StudyAdvancedUpdateView(
+    StudyObjectMixin,
+    CheckStudyCreatorMixin,
+    SuccessMessageMixin,
+    DisableFormIfStudyActiveMixin,
+    contib_views.LeaveWarningMixin,
+    generic.UpdateView,
+):
     model = models.Study
     title = 'Edit advanced settings.'
     template_name = 'lrex_contrib/crispy_form.html'
@@ -409,8 +422,15 @@ class StudyAdvancedUpdateView(StudyObjectMixin, CheckStudyCreatorMixin, SuccessM
             ('advanced', ''),
         ]
 
-class StudyInstructionsUpdateView(StudyObjectMixin, CheckStudyCreatorMixin, SuccessMessageMixin,
-                                  DisableFormIfStudyActiveMixin, generic.UpdateView):
+
+class StudyInstructionsUpdateView(
+    StudyObjectMixin,
+    CheckStudyCreatorMixin,
+    SuccessMessageMixin,
+    DisableFormIfStudyActiveMixin,
+    contib_views.LeaveWarningMixin,
+    generic.UpdateView,
+):
     model = models.Study
     title ='Edit study instructions'
     template_name = 'lrex_contrib/crispy_form.html'
@@ -438,7 +458,13 @@ class StudyInstructionsUpdateView(StudyObjectMixin, CheckStudyCreatorMixin, Succ
         ]
 
 
-class QuestionUpdateView(StudyMixin, CheckStudyCreatorMixin, DisableFormIfStudyActiveMixin, generic.DetailView):
+class QuestionUpdateView(
+            StudyMixin,
+            CheckStudyCreatorMixin,
+            DisableFormIfStudyActiveMixin,
+            contib_views.LeaveWarningMixin,
+            generic.DetailView,
+        ):
     model = models.Study
     title = 'Questions'
     template_name = 'lrex_contrib/crispy_formset_form.html'
@@ -533,7 +559,13 @@ class QuestionUpdateView(StudyMixin, CheckStudyCreatorMixin, DisableFormIfStudyA
         ]
 
 
-class SharedWithView(StudyObjectMixin, CheckStudyCreatorMixin, NextStepsMixin, generic.UpdateView):
+class SharedWithView(
+    StudyObjectMixin,
+    CheckStudyCreatorMixin,
+    NextStepsMixin,
+    contib_views.LeaveWarningMixin,
+    generic.UpdateView
+):
     model = models.Study
     title = 'Share study'
     form_class = forms.SharedWithForm

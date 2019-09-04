@@ -156,7 +156,7 @@ class ItemCreateMixin:
         ]
 
 
-class ItemUpdateMixin:
+class ItemUpdateMixin(contrib_views.LeaveWarningMixin):
     title = 'Edit item'
     template_name = 'lrex_contrib/crispy_form.html'
     success_message = 'Item successfully updated.'
@@ -192,26 +192,48 @@ class ItemUpdateMixin:
         ]
 
 
-class TextItemCreateView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin,
-                         study_views.DisableFormIfStudyActiveMixin, ItemCreateMixin, generic.CreateView):
+class TextItemCreateView(
+    experiment_views.ExperimentMixin,
+    study_views.CheckStudyCreatorMixin,
+    study_views.DisableFormIfStudyActiveMixin,
+    ItemCreateMixin,
+    generic.CreateView
+):
     model = models.TextItem
     form_class = forms.TextItemForm
 
 
-class TextItemUpdateView(SuccessMessageMixin, ItemObjectMixin, study_views.CheckStudyCreatorMixin,
-                         study_views.DisableFormIfStudyActiveMixin, ItemUpdateMixin, generic.UpdateView):
+class TextItemUpdateView(
+    SuccessMessageMixin,
+    ItemObjectMixin,
+    study_views.CheckStudyCreatorMixin,
+    study_views.DisableFormIfStudyActiveMixin,
+    ItemUpdateMixin,
+    generic.UpdateView
+):
     model = models.TextItem
     form_class = forms.TextItemForm
 
 
-class MarkdownItemCreateView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin,
-                             study_views.DisableFormIfStudyActiveMixin, ItemCreateMixin, generic.CreateView):
+class MarkdownItemCreateView(
+    experiment_views.ExperimentMixin,
+    study_views.CheckStudyCreatorMixin,
+    study_views.DisableFormIfStudyActiveMixin,
+    ItemCreateMixin,
+    generic.CreateView
+):
     model = models.MarkdownItem
     form_class = forms.MarkdownItemForm
 
 
-class MarkdownItemUpdateView(SuccessMessageMixin, ItemObjectMixin, study_views.CheckStudyCreatorMixin,
-                             study_views.DisableFormIfStudyActiveMixin, ItemUpdateMixin, generic.UpdateView):
+class MarkdownItemUpdateView(
+    SuccessMessageMixin,
+    ItemObjectMixin,
+    study_views.CheckStudyCreatorMixin,
+    study_views.DisableFormIfStudyActiveMixin,
+    ItemUpdateMixin,
+    generic.UpdateView
+):
     model = models.MarkdownItem
     form_class = forms.MarkdownItemForm
 
@@ -219,14 +241,25 @@ class MarkdownItemUpdateView(SuccessMessageMixin, ItemObjectMixin, study_views.C
         return self.object.get_absolute_url()
 
 
-class AudioLinkItemCreateView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin,
-                              study_views.DisableFormIfStudyActiveMixin, ItemCreateMixin, generic.CreateView):
+class AudioLinkItemCreateView(
+    experiment_views.ExperimentMixin,
+    study_views.CheckStudyCreatorMixin,
+    study_views.DisableFormIfStudyActiveMixin,
+    ItemCreateMixin,
+    generic.CreateView
+):
     model = models.AudioLinkItem
     form_class = forms.AudioLinkItemForm
 
 
-class AudioLinkItemUpdateView(ItemObjectMixin, study_views.CheckStudyCreatorMixin, SuccessMessageMixin,
-                              study_views.DisableFormIfStudyActiveMixin, ItemUpdateMixin, generic.UpdateView):
+class AudioLinkItemUpdateView(
+    ItemObjectMixin,
+    study_views.CheckStudyCreatorMixin,
+    SuccessMessageMixin,
+    study_views.DisableFormIfStudyActiveMixin,
+    ItemUpdateMixin,
+    generic.UpdateView
+):
     model = models.AudioLinkItem
     form_class = forms.AudioLinkItemForm
 
@@ -234,8 +267,12 @@ class AudioLinkItemUpdateView(ItemObjectMixin, study_views.CheckStudyCreatorMixi
         return self.object.get_absolute_url()
 
 
-class ItemDeleteView(ItemObjectMixin, study_views.CheckStudyCreatorMixin, study_views.DisableFormIfStudyActiveMixin,
-                     contrib_views.DefaultDeleteView):
+class ItemDeleteView(
+    ItemObjectMixin,
+    study_views.CheckStudyCreatorMixin,
+    study_views.DisableFormIfStudyActiveMixin,
+    contrib_views.DefaultDeleteView
+):
     model = models.Item
 
     def delete(self, *args, **kwargs):
@@ -260,8 +297,13 @@ class ItemDeleteView(ItemObjectMixin, study_views.CheckStudyCreatorMixin, study_
         ]
 
 
-class ItemPregenerateView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin, SuccessMessageMixin,
-                          study_views.DisableFormIfStudyActiveMixin, generic.FormView):
+class ItemPregenerateView(
+    experiment_views.ExperimentMixin,
+    study_views.CheckStudyCreatorMixin,
+    SuccessMessageMixin,
+    study_views.DisableFormIfStudyActiveMixin,
+    generic.FormView
+):
     title = 'Pregenerate items'
     form_class = forms.PregenerateItemsForm
     template_name = 'lrex_contrib/crispy_form.html'
@@ -314,8 +356,13 @@ class ItemPregenerateView(experiment_views.ExperimentMixin, study_views.CheckStu
         ]
 
 
-class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin, ItemsValidateMixin,
-                     study_views.DisableFormIfStudyActiveMixin, generic.FormView):
+class ItemUploadView(
+    experiment_views.ExperimentMixin,
+    study_views.CheckStudyCreatorMixin,
+    ItemsValidateMixin,
+    study_views.DisableFormIfStudyActiveMixin,
+    generic.FormView
+):
     title = 'Items'
     form_class = forms.ItemUploadForm
     template_name = 'lrex_contrib/crispy_form.html'
@@ -374,8 +421,12 @@ class ItemUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCre
         ]
 
 
-class ItemDeleteAllView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin,
-                        study_views.DisableFormIfStudyActiveMixin, generic.TemplateView):
+class ItemDeleteAllView(
+    experiment_views.ExperimentMixin,
+    study_views.CheckStudyCreatorMixin,
+    study_views.DisableFormIfStudyActiveMixin,
+    generic.TemplateView
+):
     title = 'Confirm Delete'
     template_name = 'lrex_contrib/confirm_delete.html'
     message =  'Delete all items?'
@@ -402,8 +453,14 @@ class ItemDeleteAllView(experiment_views.ExperimentMixin, study_views.CheckStudy
         return reverse('items', args=[self.experiment.slug])
 
 
-class ItemQuestionsUpdateView(ItemMixin, study_views.CheckStudyCreatorMixin, study_views.NextStepsMixin,
-                              study_views.DisableFormIfStudyActiveMixin, generic.TemplateView):
+class ItemQuestionsUpdateView(
+    ItemMixin,
+    study_views.CheckStudyCreatorMixin,
+    study_views.NextStepsMixin,
+    study_views.DisableFormIfStudyActiveMixin,
+    contrib_views.LeaveWarningMixin,
+    generic.TemplateView
+):
     title = 'Customize item questions'
     template_name = 'lrex_contrib/crispy_formset_form.html'
     formset = None
@@ -466,8 +523,14 @@ class ItemQuestionsUpdateView(ItemMixin, study_views.CheckStudyCreatorMixin, stu
         ]
 
 
-class ItemFeedbackUpdateView(ItemMixin, study_views.CheckStudyCreatorMixin, study_views.NextStepsMixin,
-                              study_views.DisableFormIfStudyActiveMixin, generic.TemplateView):
+class ItemFeedbackUpdateView(
+    ItemMixin,
+    study_views.CheckStudyCreatorMixin,
+    study_views.NextStepsMixin,
+    study_views.DisableFormIfStudyActiveMixin,
+    contrib_views.LeaveWarningMixin,
+    generic.TemplateView
+):
     title = 'Customize item feedback'
     template_name = 'lrex_contrib/crispy_formset_form.html'
     formset = None
@@ -555,8 +618,13 @@ class ItemCSVDownloadView(experiment_views.ExperimentMixin, study_views.CheckStu
         return response
 
 
-class ItemListListView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin, study_views.NextStepsMixin,
-                       study_views.DisableFormIfStudyActiveMixin, generic.ListView):
+class ItemListListView(
+    experiment_views.ExperimentMixin,
+    study_views.CheckStudyCreatorMixin,
+    study_views.NextStepsMixin,
+    study_views.DisableFormIfStudyActiveMixin,
+    generic.ListView
+):
     model = models.ItemList
     title = 'Item lists'
 
@@ -591,8 +659,12 @@ class ItemListListView(experiment_views.ExperimentMixin, study_views.CheckStudyC
         ]
 
 
-class ItemListUploadView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin,
-                         study_views.DisableFormIfStudyActiveMixin, generic.FormView):
+class ItemListUploadView(
+    experiment_views.ExperimentMixin,
+    study_views.CheckStudyCreatorMixin,
+    study_views.DisableFormIfStudyActiveMixin,
+    generic.FormView
+):
     title = 'Upload custom item lists'
     form_class = forms.ItemListUploadForm
     template_name = 'lrex_contrib/crispy_form.html'
