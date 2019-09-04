@@ -238,16 +238,11 @@ def initialize_with_questions(itemquestion_formset, questions):
 def itemquestion_formset_helper():
     formset_helper = FormHelper()
     formset_helper.add_layout(
-        Layout(
-            Fieldset('Question {{ forloop.counter }}', None, 'question', 'scale_labels', 'legend'),
-        ),
+        Layout(Fieldset('Question {{ forloop.counter }}', None, 'question', 'scale_labels', 'legend'))
     )
-    formset_helper.add_input(
-        Submit("submit", "Submit"),
-    )
-    formset_helper.add_input(
-        Submit("reset", "Reset"),
-    )
+    formset_helper.add_input(Submit('submit', 'Submit'))
+    formset_helper.add_input(Submit('save', 'Save', css_class='btn-secondary'))
+    formset_helper.add_input(Submit('reset', 'Reset'))
     return formset_helper
 
 
@@ -350,23 +345,13 @@ def itemfeedback_init_formset(itemfeedback_formset, study):
         question.empty_label = None
 
 
-
-
-
 def itemfeedback_formset_helper():
     formset_helper = FormHelper()
     formset_helper.add_layout(
-        Layout(
-            Fieldset('Feedback {{ forloop.counter }}', None, 'question', 'scale_values', 'feedback'),
-        ),
+        Layout(Fieldset('Feedback {{ forloop.counter }}', None, 'question', 'scale_values', 'feedback'))
     )
-    formset_helper.add_input(
-        Submit("submit", "Submit"),
-    )
-    formset_helper.add_input(
-        Submit("add", "Add", css_class="btn-secondary"),
-    )
-    formset_helper.add_input(
-        Submit("delete", "Delete last", css_class="btn-danger"),
-    )
+    formset_helper.add_input(Submit('submit', 'Submit'))
+    formset_helper.add_input(Submit('save', 'Save', css_class='btn-secondary'))
+    formset_helper.add_input(Submit('add', 'Add', css_class='btn-secondary'))
+    formset_helper.add_input(Submit('delete', 'Delete last', css_class='btn-danger'))
     return formset_helper

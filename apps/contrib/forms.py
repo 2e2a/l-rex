@@ -24,23 +24,33 @@ class OptionalLabelMixin:
 
 
 class HelperMixin:
+    add_save = False
+
+    def __init__(self, *args, **kwargs):
+        self.add_save = kwargs.pop('add_save', False)
+        super().__init__(*args, **kwargs)
 
     def init_helper(self):
         self.helper = self.custom_helper if hasattr(self, 'custom_helper') else FormHelper()
         self.helper.add_input(Submit('submit', self.submit_label))
+        if self.add_save:
+            self.helper.add_input(Submit('save', self.save_label, css_class='btn-secondary'))
 
 
 class CrispyForm(OptionalLabelMixin, HelperMixin, forms.Form):
     submit_label = 'Submit'
+    save_label = 'Save'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.valid()
         self.init_helper()
         self.append_optional_to_labels()
 
 
 class CrispyModelForm(OptionalLabelMixin, HelperMixin, forms.ModelForm):
     submit_label = 'Submit'
+    save_label = 'Save'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

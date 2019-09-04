@@ -165,15 +165,10 @@ def question_formset_helper():
             Fieldset('Question {{ forloop.counter }}', None, 'question', 'scale_labels', 'randomize_scale', 'legend', 'rating_comment'),
         ),
     )
-    formset_helper.add_input(
-        Submit("submit", "Submit"),
-    )
-    formset_helper.add_input(
-        Submit("add", "Add", css_class="btn-secondary"),
-    )
-    formset_helper.add_input(
-        Submit("delete", "Delete last", css_class="btn-danger"),
-    )
+    formset_helper.add_input(Submit('submit', 'Submit'))
+    formset_helper.add_input(Submit('save', 'Save', css_class='btn-secondary'))
+    formset_helper.add_input(Submit('add', 'Add', css_class='btn-secondary'))
+    formset_helper.add_input(Submit('delete', 'Delete last', css_class='btn-danger'))
     return formset_helper
 
 
@@ -187,7 +182,8 @@ class SharedWithForm(crispy_forms.CrispyModelForm):
 
     def clean_shared_with(self):
         shared_with = self.cleaned_data['shared_with']
-        for username in shared_with.split(','):
-            if not User.objects.filter(username=username).exists():
-                raise forms.ValidationError('No user with username {} registered'.format(username))
+        if shared_with:
+            for username in shared_with.split(','):
+                if not User.objects.filter(username=username).exists():
+                    raise forms.ValidationError('No user with username {} registered'.format(username))
         return shared_with

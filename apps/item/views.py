@@ -122,7 +122,10 @@ class ItemCreateMixin:
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['experiment'] = self.experiment
+        kwargs.update({
+            'add_save': True,
+            'experiment': self.experiment,
+        })
         return kwargs
 
     def form_valid(self, form):
@@ -137,6 +140,8 @@ class ItemCreateMixin:
         return result
 
     def get_success_url(self):
+        if 'save' in self.request.POST:
+            return self.object.get_absolute_url()
         return reverse('items', args=[self.experiment.slug])
 
     @property
@@ -156,9 +161,13 @@ class ItemUpdateMixin:
     template_name = 'lrex_contrib/crispy_form.html'
     success_message = 'Item successfully updated.'
 
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['experiment'] = self.experiment
+        kwargs.update({
+            'add_save': True,
+            'experiment': self.experiment,
+        })
         return kwargs
 
     def form_valid(self, form):
@@ -167,6 +176,8 @@ class ItemUpdateMixin:
         return result
 
     def get_success_url(self):
+        if 'save' in self.request.POST:
+            return self.object.get_absolute_url()
         return reverse('items', args=[self.experiment.slug])
 
     @property
@@ -191,9 +202,6 @@ class TextItemUpdateView(SuccessMessageMixin, ItemObjectMixin, study_views.Check
                          study_views.DisableFormIfStudyActiveMixin, ItemUpdateMixin, generic.UpdateView):
     model = models.TextItem
     form_class = forms.TextItemForm
-
-    def get_success_url(self):
-        return self.object.get_absolute_url()
 
 
 class MarkdownItemCreateView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin,
@@ -418,29 +426,32 @@ class ItemQuestionsUpdateView(ItemMixin, study_views.CheckStudyCreatorMixin, stu
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        if 'submit' in request.POST:
-            self.formset = forms.itemquestion_formset_factory(self.n_questions)(request.POST, request.FILES)
-            if self.formset.is_valid():
-                instances = self.formset.save(commit=False)
-                scale_labels_valid = True
-                for instance in instances:
-                    question = next(question for question in self.study.questions if question.number == instance.number)
-                    if instance.scale_labels \
-                            and len(instance.scale_labels.split(',')) != question.scalevalue_set.count():
-                        self.formset._errors[question.number]['scale_labels'] = \
-                            self.formset.error_class(ValidationError('Invalid scale labels').error_list)
-                        scale_labels_valid = False
-                        break
-                    instance.number = question.number
-                    instance.item = self.item
-
-                if scale_labels_valid:
-                    for instance in instances:
-                        instance.save()
-                    return redirect('items', experiment_slug=self.experiment.slug)
-        else: # reset
+        if 'reset' in request.POST:
             self.item.itemquestion_set.all().delete()
             return self.get(request, *args, **kwargs)
+        self.formset = forms.itemquestion_formset_factory(self.n_questions)(request.POST, request.FILES)
+        if self.formset.is_valid():
+            instances = self.formset.save(commit=False)
+            scale_labels_valid = True
+            for instance in instances:
+                question = next(question for question in self.study.questions if question.number == instance.number)
+                if instance.scale_labels \
+                        and len(instance.scale_labels.split(',')) != question.scalevalue_set.count():
+                    self.formset._errors[question.number]['scale_labels'] = \
+                        self.formset.error_class(ValidationError('Invalid scale labels').error_list)
+                    scale_labels_valid = False
+                    break
+                instance.number = question.number
+                instance.item = self.item
+
+            if scale_labels_valid:
+                for instance in instances:
+                    instance.save()
+                messages.success(request, 'Item questions saved.')
+                if 'submit' in request.POST:
+                    return redirect('items', experiment_slug=self.experiment.slug)
+                else:  # save
+                    return redirect('item-questions', item_slug=self.item.slug)
         return super().get(request, *args, **kwargs)
 
     @property
@@ -500,6 +511,10 @@ class ItemFeedbackUpdateView(ItemMixin, study_views.CheckStudyCreatorMixin, stud
                 if scale_values_valid:
                     messages.success(request, 'Feedback saved.')
                     return redirect('items', experiment_slug=self.experiment.slug)
+            elif 'save' in request.POST:
+                if scale_values_valid:
+                    messages.success(request, 'Feedback saved.')
+                    return redirect('item-feedback', item_slug=self.item.slug)
             elif 'add' in request.POST:
                 self.formset = forms.itemfeedback_formset_factory(extra + 1)(
                     queryset=self.item.itemfeedback_set.all(),

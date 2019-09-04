@@ -264,9 +264,8 @@ class QuestionnaireDeleteAllView(study_views.StudyMixin, study_views.CheckStudyC
         return reverse('questionnaires', args=[self.study.slug])
 
 
-
-
-class QuestionnaireBlockInstructionsUpdateView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, generic.TemplateView):
+class QuestionnaireBlockInstructionsUpdateView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin,
+                                               generic.TemplateView):
     title = 'Edit questionnaire block instructions'
     template_name = 'lrex_contrib/crispy_formset_form.html'
     formset = None
@@ -294,12 +293,14 @@ class QuestionnaireBlockInstructionsUpdateView(study_views.StudyMixin, study_vie
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        if 'submit' in request.POST:
-            self.formset = forms.questionnaire_block_update_factory(len(self.blocks))(request.POST, request.FILES)
-            if self.formset.is_valid():
-                self.formset.save(commit=True)
-                messages.success(request, 'Block instructions updated')
+        self.formset = forms.questionnaire_block_update_factory(len(self.blocks))(request.POST, request.FILES)
+        if self.formset.is_valid():
+            self.formset.save(commit=True)
+            messages.success(request, 'Block instructions updated')
+            if 'submit' in request.POST:
                 return redirect('study', study_slug=self.study.slug)
+            else:  # save
+                return redirect('questionnaire-blocks', study_slug=self.study.slug)
         return super().get(request, *args, **kwargs)
 
     @property

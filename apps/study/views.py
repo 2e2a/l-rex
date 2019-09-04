@@ -245,10 +245,15 @@ class StudyUpdateView(StudyObjectMixin, CheckStudyCreatorMixin, SuccessMessageMi
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['disable_itemtype'] = self.study.has_items
+        kwargs.update({
+            'add_save': True,
+            'disable_itemtype': self.study.has_items,
+        })
         return kwargs
 
     def get_success_url(self):
+        if 'save' in self.request.POST:
+            return reverse('study-update', args=[self.object.slug])
         return self.object.get_absolute_url()
 
     @property
@@ -383,10 +388,18 @@ class StudyAdvancedUpdateView(StudyObjectMixin, CheckStudyCreatorMixin, SuccessM
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['disable_randomize_question_order'] = self.study.has_questionnaires
-        kwargs['disable_use_blocks'] = self.study.has_questionnaires
-        kwargs['disable_feedback'] = self.study.is_active
+        kwargs.update({
+            'add_save': True,
+            'disable_randomize_question_order': self.study.has_questionnaires,
+            'disable_use_blocks': self.study.has_questionnaires,
+            'disable_feedback': self.study.is_active,
+        })
         return kwargs
+
+    def get_success_url(self):
+        if 'save' in self.request.POST:
+            return reverse('study-advanced', args=[self.object.slug])
+        return self.object.get_absolute_url()
 
     @property
     def breadcrumbs(self):
@@ -403,6 +416,18 @@ class StudyInstructionsUpdateView(StudyObjectMixin, CheckStudyCreatorMixin, Succ
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.StudyInstructionsForm
     success_message = 'Instructions saved.'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({
+            'add_save': True,
+        })
+        return kwargs
+
+    def get_success_url(self):
+        if 'save' in self.request.POST:
+            return reverse('study-instructions', args=[self.object.slug])
+        return self.object.get_absolute_url()
 
     @property
     def breadcrumbs(self):
@@ -475,6 +500,8 @@ class QuestionUpdateView(StudyMixin, CheckStudyCreatorMixin, DisableFormIfStudyA
             if 'submit' in request.POST:
                 messages.success(request, 'Questions saved.')
                 return redirect('study', study_slug=self.study.slug)
+            elif 'save' in request.POST:
+                messages.success(request, 'Questions saved.')
             elif 'add' in request.POST:
                 self.formset = forms.question_formset_factory(self.n_questions, extra + 1)(
                     queryset=models.Question.objects.filter(study=self.study)
@@ -512,6 +539,18 @@ class SharedWithView(StudyObjectMixin, CheckStudyCreatorMixin, NextStepsMixin, g
     form_class = forms.SharedWithForm
     template_name = 'lrex_contrib/crispy_form.html'
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({
+            'add_save': True,
+        })
+        return kwargs
+
+    def get_success_url(self):
+        if 'save' in self.request.POST:
+            return reverse('study-share', args=[self.object.slug])
+        return self.object.get_absolute_url()
+
     @property
     def breadcrumbs(self):
         return [
@@ -519,9 +558,6 @@ class SharedWithView(StudyObjectMixin, CheckStudyCreatorMixin, NextStepsMixin, g
             (self.study.title, reverse('study', args=[self.study.slug])),
             ('share', ''),
         ]
-
-    def get_success_url(self):
-        return reverse('study', args=[self.study.slug])
 
 
 class StudyResultsCSVDownloadView(StudyObjectMixin, CheckStudyCreatorMixin, generic.DetailView):

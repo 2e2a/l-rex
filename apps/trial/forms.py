@@ -40,14 +40,8 @@ def customize_randomization(questionnaireblock_formset, study):
 def questionnaire_block_formset_helper(has_exmaple_block=False):
     formset_helper = FormHelper()
     label = 'Item block {{ forloop.counter0 }}' if has_exmaple_block else 'Item block {{ forloop.counter }}'
-    formset_helper.add_layout(
-        Layout(
-            Fieldset(label, None, 'instructions', 'randomization'),
-        ),
-    )
-    formset_helper.add_input(
-        Submit("submit", "Submit"),
-    )
+    formset_helper.add_layout(Layout(Fieldset(label, None, 'instructions', 'randomization')))
+    formset_helper.add_input(Submit('submit', 'Submit'))
     return formset_helper
 
 
@@ -69,14 +63,9 @@ def questionnaire_block_update_factory(n_blocks):
 
 def questionnaire_block_update_formset_helper():
     formset_helper = FormHelper()
-    formset_helper.add_layout(
-        Layout(
-            Fieldset('Item block {{ forloop.counter }}', None, 'instructions'),
-        ),
-    )
-    formset_helper.add_input(
-        Submit("submit", "Submit"),
-    )
+    formset_helper.add_layout(Layout(Fieldset('Item block {{ forloop.counter }}', None, 'instructions')))
+    formset_helper.add_input(Submit('submit', 'Submit'))
+    formset_helper.add_input(Submit('save', 'Save', css_class='btn-secondary'))
     return formset_helper
 
 
