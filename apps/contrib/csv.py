@@ -71,17 +71,15 @@ def detect_dialect(data, form_cleaned_data, int_column_names=None, user_delimite
             except StopIteration:
                 pass
             rows_valid = True
-            if len(rows) > 0:
-                for row in rows:
-                    if not _is_row_valid(row, int_columns, min_columns):
-                        rows_valid = False
-                        break
-                if rows_valid:
-                    has_header = _has_header(first_row, int_columns)
-                    return delimiter, csv.QUOTE_MINIMAL, has_header
-            else:
+            if len(rows) == 0:
+                raise forms.ValidationError('File not big enogh to detect format.')
+            for row in rows:
                 if not _is_row_valid(row, int_columns, min_columns):
-                    return delimiter, csv.QUOTE_MINIMAL, False
+                    rows_valid = False
+                    break
+            if rows_valid:
+                has_header = _has_header(first_row, int_columns)
+                return delimiter, csv.QUOTE_MINIMAL, has_header
         raise forms.ValidationError('Unsupported CSV format.')
     except (UnicodeDecodeError, TypeError):
         raise forms.ValidationError(
