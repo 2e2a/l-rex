@@ -559,9 +559,11 @@ class RatingCreateMixin(ProgressMixin, TestWarningMixin):
         return super().get_context_data(**kwargs)
 
     def _redirect_to_correct_num(self, num):
+        if self.trial.status == models.TrialStatus.FINISHED:
+            return reverse('rating-taken', args=[self.trial.slug])
+        if self.trial.is_test:
+            return None
         try:
-            if self.trial.status == models.TrialStatus.FINISHED:
-                return reverse('rating-taken', args=[self.trial.slug])
             n_ratings = models.Rating.objects.filter(trial=self.trial, question=0).count()
             if n_ratings != num:
                 return reverse('rating-create', args=[self.trial.slug, n_ratings])
