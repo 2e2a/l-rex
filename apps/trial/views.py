@@ -284,6 +284,7 @@ class QuestionnaireDeleteAllView(
 class QuestionnaireBlockInstructionsUpdateView(
     study_views.StudyMixin,
     study_views.CheckStudyCreatorMixin,
+    contrib_views.DisableFormMixin,
     contrib_views.LeaveWarningMixin,
     generic.TemplateView,
 ):
@@ -297,20 +298,22 @@ class QuestionnaireBlockInstructionsUpdateView(
         self.blocks = self.study.item_blocks
         return super().dispatch(*args, **kwargs)
 
+    @property
+    def is_disabled(self):
+        if not self.study.use_blocks:
+            return True
+        if any(not experiment.items_validated for experiment in self.study.experiments):
+            return True
+        return False
+
     def get(self, request, *args, **kwargs):
         self.formset = forms.questionnaire_block_update_factory(len(self.blocks))(
             queryset=models.QuestionnaireBlock.objects.filter(study=self.study)
         )
-        disable_form = False
-        if self.study.use_blocks and not self.study.has_questionnaires:
-            disable_form = True
         if not self.study.use_blocks:
-            disable_form = True
             messages.info(request, 'Blocks are disabled for this study.')
-        if disable_form:
-            for helper_input in self.helper.inputs:
-                helper_input.field_classes += '  disabled'
-                helper_input.flat_attrs += '  disabled=True'
+        elif any(not experiment.items_validated for experiment in self.study.experiments):
+            messages.info(request, 'All experiment items need to be validated before creating block instructions.')
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
