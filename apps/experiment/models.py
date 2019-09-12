@@ -162,16 +162,19 @@ class Experiment(models.Model):
                 if len(items) > 1:
                     warnings.append('Items {} have the same text.'.format(', '.join([str(item) for item in items])))
         elif self.study.has_audiolink_items:
-            item_links = [(item, url) for url in item.audiolinkitem.urls_list for item in items]
-            items_by_link = groupby(item_links, lambda x: x[1])
-            for _, items_with_same_link in items_by_link:
-                items = list(items_with_same_link)
-                if len(items) > 1:
-                    if len(set(items)) > 1:
-                        warnings.append('Items {} have the same URL.'.format(','.join([str(item) for item,_ in items])))
-                    else:
-                        warnings.append('Item {} uses the same URL multiple times.'.format(items[0][0]))
-
+            item_links = []
+            for item in items:
+                item_links.extend([(item, url) for url in item.audiolinkitem.urls_list])
+            item_links = sorted(item_links, key=lambda x: x[1])
+            prev_item_link = ()
+            for item, link in item_links:
+                if prev_item_link:
+                    if link == prev_item_link[1]:
+                        if  item == prev_item_link[0]:
+                            warnings.append('Item {} uses the same URL multiple times.'.format(item))
+                        else:
+                            warnings.append('Items {} and {} have the same URL.'.format(prev_item_link[0], item))
+                prev_item_link = (item, link)
         msg = 'Detected {} items with following conditions: {} ({} stimuli).'.format(
             item_number,
             ','.join('"{}"'.format(condition) for condition in conditions),
