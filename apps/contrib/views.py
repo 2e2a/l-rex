@@ -29,3 +29,39 @@ class LeaveWarningMixin:
         })
         return context
 
+
+class DisableFormMixin:
+
+    @property
+    def is_disabled(self):
+        raise NotImplementedError
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['disable_actions'] = self.is_disabled
+        return data
+
+    def _disbable_form(self, form):
+        for field in form.fields.values():
+            field.widget.attrs['readonly'] = True
+            field.widget.attrs['disabled'] = True
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class=form_class)
+        if self.is_disabled:
+            self._disbable_form(form)
+            for helper_input in form.helper.inputs:
+                helper_input.field_classes += '  disabled'
+                helper_input.flat_attrs += '  disabled=True'
+        return form
+
+    def get(self, request, *args, **kwargs):
+        if self.is_disabled:
+            if hasattr(self, 'helper'):
+                for helper_input in self.helper.inputs:
+                    helper_input.field_classes += '  disabled'
+                    helper_input.flat_attrs += '  disabled=True'
+            if hasattr(self, 'formset'):
+                for form in self.formset:
+                    self._disbable_form(form)
+        return  super().get(request, *args, **kwargs)
