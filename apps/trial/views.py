@@ -300,7 +300,7 @@ class QuestionnaireBlockInstructionsUpdateView(
 
     @property
     def is_disabled(self):
-        if not self.study.use_blocks:
+        if self.study.is_active or not self.study.use_blocks:
             return True
         if any(not experiment.items_validated for experiment in self.study.experiments):
             return True
