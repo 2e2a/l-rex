@@ -237,9 +237,6 @@ class MarkdownItemUpdateView(
     model = models.MarkdownItem
     form_class = forms.MarkdownItemForm
 
-    def get_success_url(self):
-        return self.object.get_absolute_url()
-
 
 class AudioLinkItemCreateView(
     experiment_views.ExperimentMixin,
@@ -262,9 +259,6 @@ class AudioLinkItemUpdateView(
 ):
     model = models.AudioLinkItem
     form_class = forms.AudioLinkItemForm
-
-    def get_success_url(self):
-        return self.object.get_absolute_url()
 
 
 class ItemDeleteView(
