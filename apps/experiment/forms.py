@@ -11,6 +11,7 @@ class ExperimentForm(crispy_forms.CrispyModelForm):
         model = models.Experiment
         fields = [
             'title',
+            'item_list_distribution',
             'is_filler',
             'is_example',
             'block',
@@ -27,8 +28,11 @@ class ExperimentForm(crispy_forms.CrispyModelForm):
 class ExperimentUpdateForm(ExperimentForm):
 
     def __init__(self, *args, **kwargs):
-        disable_block_settings= kwargs.pop('disable_block_settings')
+        disable_block_settings = kwargs.pop('disable_block_settings')
+        disable_list_settings = kwargs.pop('disable_list_setting')
         super().__init__(*args, **kwargs)
+        if disable_list_settings:
+            crispy_forms.disable_form_field(self, 'item_list_distribution')
         if disable_block_settings:
             crispy_forms.disable_form_field(self, 'is_example')
             crispy_forms.disable_form_field(self, 'block')

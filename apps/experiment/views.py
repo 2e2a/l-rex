@@ -149,6 +149,7 @@ class ExperimentUpdateView(
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['study'] = self.study
+        kwargs['disable_list_settings'] = self.study.has_item_lists
         kwargs['disable_block_settings'] = self.study.has_questionnaires
         return kwargs
 

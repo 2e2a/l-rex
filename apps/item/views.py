@@ -64,6 +64,12 @@ class ItemsValidateMixin:
             messages.success(self.request, 'Items seem valid')
             for warning in warnings:
                 messages.warning(self.request, '{}'.format(warning))
+            lists_url = reverse('itemlists', args=[self.experiment.slug])
+            msg = 'Lists automatically generated. <a href="{}">Check lists here.</a>'.format(lists_url)
+            messages.success(self.request, mark_safe(msg))
+            if self.study.has_questionnaires:
+                self.study.delete_questionnaires()
+                messages.info(self.request, 'Old questionnaires deleted.')
         except AssertionError as e:
             messages.error(self.request, str(e))
 
@@ -621,18 +627,6 @@ class ItemListListView(
 ):
     model = models.ItemList
     title = 'Item lists'
-
-    def post(self, request, *args, **kwargs):
-        action = request.POST.get('action', None)
-        if action and action == 'generate_distributed':
-            self.experiment.compute_item_lists(distribute=True)
-        elif action and action == 'generate_single':
-            self.experiment.compute_item_lists(distribute=False)
-        messages.success(self.request, 'Item lists generated.')
-        if self.study.has_questionnaires:
-            self.study.delete_questionnaires()
-            messages.info(self.request, 'Old questionnaires deleted.')
-        return redirect('itemlists', experiment_slug=self.experiment.slug)
 
     def get_queryset(self):
         return models.ItemList.objects.filter(experiment=self.experiment)

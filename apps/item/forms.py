@@ -76,7 +76,7 @@ class PregenerateItemsForm(crispy_forms.CrispyForm):
     num_conditions = forms.IntegerField(
         label='number of conditions',
         help_text='Empty text fields will be pregenerated to accommodate this number of conditions.',
-)
+    )
 
 
 class ItemUploadForm(crispy_forms.CSVUploadForm):

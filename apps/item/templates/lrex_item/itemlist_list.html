@@ -3,24 +3,8 @@
 {% block content %}
 <div class="text-center mb-2">
     {% if allow_actions and not disable_actions %}
-    <form name="actionForm" id="actionForm" method="POST" class="d-inline">
-    {% csrf_token %}
-    <input class="span2" id="action" name="action" type="text" hidden="hidden">
-    <div class="btn-group">
-        <button class="btn  btn-primary btn-sm mx-1 dropdown-toggle" type="button" id="dropdownAggregateBy"
-                data-toggle="dropdown"
-                aria-haspopup="true" aria-expanded="false">
-            Generate lists
-        </button>
-        <div class="dropdown-menu" aria-labelledby="dropdownAction">
-            <a href="#" class="dropdown-item"  onclick="$('#action').val('generate_distributed'); $('#actionForm').submit()">Latin-Square Distribution</a>
-            <a href="#" class="dropdown-item" onclick="$('#action').val('generate_single'); $('#actionForm').submit()">Show all conditions to all participants</a>
-        </div>
-    </div>
-    </form>
     <a href="{% url 'itemlist-upload' experiment.slug %}" class="btn btn-secondary btn-sm mx-1">Upload CSV</a>
     {% else %}
-    <a href="" class="btn btn-primary btn-sm mx-1 disabled">Generate lists</a>
     <a href="" class="btn btn-secondary btn-sm mx-1 disabled">Upload CSV</a>
     {% endif %}
     <a href="{% url 'itemlist-download' experiment.slug %}" class="btn btn-secondary btn-sm mx-1">Download CSV</a>

@@ -43,7 +43,6 @@ class CrispyForm(OptionalLabelMixin, HelperMixin, forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.valid()
         self.init_helper()
         self.append_optional_to_labels()
 

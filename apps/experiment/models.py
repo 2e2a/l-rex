@@ -31,6 +31,18 @@ class Experiment(models.Model):
         'lrex_study.Study',
         on_delete=models.CASCADE
     )
+    LIST_DISTRIBUTION_LATIN_SQUARE = 'latin-square'
+    LIST_DISTRIBUTION_ALL_TO_ALL = 'all-to-all'
+    LIST_DISTRIBUTION = (
+        (LIST_DISTRIBUTION_LATIN_SQUARE, 'Latin-Square Distribution'),
+        (LIST_DISTRIBUTION_ALL_TO_ALL, 'Show all conditions to all participants'),
+    )
+    item_list_distribution = models.CharField(
+        max_length=16,
+        choices=LIST_DISTRIBUTION,
+        default=LIST_DISTRIBUTION_LATIN_SQUARE,
+        help_text='How to distribute items across lists.',
+    )
     is_filler = models.BooleanField(
         default=False,
         help_text='Mark the items of this experiment as fillers. '
@@ -44,6 +56,7 @@ class Experiment(models.Model):
         help_text='Items of this experiment will automatically be in this item block (-1 disabled).',
         default=-1,
     )
+
     items_validated = models.BooleanField(
         default=False,
     )
@@ -81,9 +94,14 @@ class Experiment(models.Model):
         item_bocks = set([item.block for item in self.items])
         return sorted(item_bocks)
 
+
+    @cached_property
+    def has_lists(self):
+        return self.itemlist_set.exists()
+
     @cached_property
     def is_complete(self):
-        return self.itemlist_set.exists()
+        return self.has_lists
 
     def set_items_validated(self, valid):
         self.items_validated = valid
@@ -183,13 +201,13 @@ class Experiment(models.Model):
         warnings.append(msg)
         self.items_validated = True
         self.save()
+        self.compute_item_lists()
         return warnings
 
-    def compute_item_lists(self, distribute=True):
+    def compute_item_lists(self):
         self.itemlist_set.all().delete()
-
         item_lists = []
-        if distribute:
+        if self.item_list_distribution == self.LIST_DISTRIBUTION_LATIN_SQUARE:
             conditions = self.conditions
             condition_count = len(conditions)
             for i in range(condition_count):
@@ -198,12 +216,11 @@ class Experiment(models.Model):
                     number=i,
                 )
                 item_lists.append(item_list)
-
             for i, item in enumerate(self.item_set.all().order_by('number', 'condition')):
-                shift =  (i - (item.number - 1)) % condition_count
+                shift = (i - (item.number - 1)) % condition_count
                 item_list = item_lists[shift]
                 item_list.items.add(item)
-        else:
+        elif self.item_list_distribution == self.LIST_DISTRIBUTION_ALL_TO_ALL:
             item_list = item_models.ItemList.objects.create(experiment=self)
             item_list.items.add(*list(self.items))
 
@@ -329,6 +346,7 @@ class Experiment(models.Model):
         return csv_row
 
     def items_csv(self, fileobj, add_header=True, add_experiment_column=False):
+        # TODO: write audio description
         writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
         if add_header:
             header = self.items_csv_header(add_experiment_column=add_experiment_column)

@@ -224,6 +224,10 @@ class Study(models.Model):
                 return False
         return True
 
+    @cached_property
+    def has_item_lists(self):
+        return any(experiment.has_lists for experiment in self.experiments)
+
     @property
     def status(self):
         if self.is_archived:
