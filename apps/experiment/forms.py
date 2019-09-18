@@ -29,7 +29,7 @@ class ExperimentUpdateForm(ExperimentForm):
 
     def __init__(self, *args, **kwargs):
         disable_block_settings = kwargs.pop('disable_block_settings')
-        disable_list_settings = kwargs.pop('disable_list_setting')
+        disable_list_settings = kwargs.pop('disable_list_settings')
         super().__init__(*args, **kwargs)
         if disable_list_settings:
             crispy_forms.disable_form_field(self, 'item_list_distribution')
