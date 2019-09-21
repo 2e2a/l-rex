@@ -137,7 +137,7 @@ class Experiment(models.Model):
         if n_items % condition_count != 0:
             msg = 'Number of stimuli is not a multiple of the number of conditions (stimuli: {}, conditions: {})'.format(
                 n_items,
-                ','.join('"{}"'.format(condition) for condition in conditions)
+                ', '.join('"{}"'.format(condition) for condition in conditions)
             )
             raise AssertionError(msg)
 

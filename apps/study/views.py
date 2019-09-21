@@ -119,12 +119,16 @@ class StudyCreateView(LoginRequiredMixin, generic.CreateView):
     title = 'Create study'
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.StudyForm
-    success_message = 'Study successfully created.'
+    success_message = 'Study successfully created. Below, you will see suggestions what to do next.' \
+                      'They will point you to steps that need to be completed while setting up your study.' \
+                      'For more detailed help, consult the Wiki.'
 
     def form_valid(self, form):
         form.instance.creator = self.request.user
         response = super().form_valid(form)
-        messages.success(self.request, 'Study successfully created.')
+        messages.success(self.request, 'Study successfully created. Below, you will see suggestions what to do next.' \
+                      'They will point you to steps that need to be completed while setting up your study.' \
+                      'For more detailed help, consult the Wiki.')
         return response
 
     @property
@@ -142,7 +146,7 @@ class StudyCreateFromArchiveView(LoginRequiredMixin,  SuccessMessageMixin, gener
     success_message = 'Study successfully created.'
 
     def get(self, request, *args, **kwargs):
-        messages.info(self.request, 'Note: Please be patient, this study might take a while.')
+        messages.info(self.request, 'Note: Please be patient, this might take a while.')
         return super().get(request, *args, **kwargs)
 
     def form_valid(self, form):
