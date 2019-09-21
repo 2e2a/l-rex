@@ -195,7 +195,7 @@ class Experiment(models.Model):
                 prev_item_link = (item, link)
         msg = 'Detected {} items with following conditions: {} (sum: {} stimuli).'.format(
             item_number,
-            ','.join('"{}"'.format(condition) for condition in conditions),
+            ', '.join('"{}"'.format(condition) for condition in conditions),
             n_items,
         )
         warnings.append(msg)
