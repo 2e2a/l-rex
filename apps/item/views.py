@@ -370,7 +370,7 @@ class ItemUploadView(
     def dispatch(self, request, *args, **kwargs):
         if not self.study.questions:
             msg = 'Note: If you want to use per item question customization, please define the study question first ' \
-                  '(<a href="{}">here</a>)'.format(reverse('study-questions', args=[self.study.slug]))
+                  '(<a href="{}">here</a>).'.format(reverse('study-questions', args=[self.study.slug]))
             messages.info(self.request, mark_safe(msg))
         return super().dispatch(request, *args, **kwargs)
 
@@ -435,7 +435,7 @@ class ItemDeleteAllView(
         models.Item.objects.filter(experiment=self.experiment).delete()
         self.experiment.set_items_validated(False)
         self.experiment.delete_lists()
-        messages.success(self.request, 'All items deleted')
+        messages.success(self.request, 'All items deleted.')
         return redirect(self.get_success_url())
 
     @property
@@ -478,7 +478,7 @@ class ItemQuestionsUpdateView(
         forms.initialize_with_questions(self.formset, self.study.questions)
         if self.n_questions == 0:
             msg = 'Note: If you want to use per item question customization, please define the study question first ' \
-                  '(<a href="{}">here</a>)'.format(reverse('study-questions', args=[self.study.slug]))
+                  '(<a href="{}">here</a>).'.format(reverse('study-questions', args=[self.study.slug]))
             messages.info(self.request, mark_safe(msg))
         return super().get(request, *args, **kwargs)
 
@@ -671,7 +671,7 @@ class ItemListUploadView(
         }
         data = StringIO(contrib_csv.read_file(form.cleaned_data))
         self.experiment.itemlists_csv_create(data, has_experiment_column=False, user_columns=columns, detected_csv=form.detected_csv)
-        messages.success(self.request, 'Item lists uploaded')
+        messages.success(self.request, 'Item lists uploaded.')
         return result
 
     def get_success_url(self):

@@ -265,7 +265,7 @@ class QuestionnaireDeleteAllView(
 
     def post(self, request, *args, **kwargs):
         self.study.delete_questionnaires()
-        messages.success(self.request, 'All questionnaires deleted')
+        messages.success(self.request, 'All questionnaires deleted.')
         return redirect(self.get_success_url())
 
     @property
@@ -320,7 +320,7 @@ class QuestionnaireBlockInstructionsUpdateView(
         self.formset = forms.questionnaire_block_update_factory(len(self.blocks))(request.POST, request.FILES)
         if self.formset.is_valid():
             self.formset.save(commit=True)
-            messages.success(request, 'Block instructions updated')
+            messages.success(request, 'Block instructions updated.')
             if 'submit' in request.POST:
                 return redirect('study', study_slug=self.study.slug)
             else:  # save
@@ -361,7 +361,7 @@ class QuestionnaireUploadView(
         }
         data = contrib_csv.read_file(form.cleaned_data)
         self.study.questionnaires_csv_restore(data, user_columns=columns, detected_csv=form.detected_csv)
-        messages.success(self.request, 'Questionnaires uploaded')
+        messages.success(self.request, 'Questionnaires uploaded.')
         return result
 
     def get_success_url(self):
@@ -430,7 +430,7 @@ class TrialDeleteAllView(study_views.StudyMixin, study_views.CheckStudyCreatorMi
 
     def post(self, request, *args, **kwargs):
         models.Trial.objects.filter(questionnaire__study=self.study).delete()
-        messages.success(self.request, 'All trials deleted')
+        messages.success(self.request, 'All trials deleted.')
         return redirect(self.get_success_url())
 
     @property
@@ -453,7 +453,7 @@ class TrialCreateView(study_views.StudyMixin, generic.CreateView):
 
     def get(self, request, *args, **kwargs):
         if self.is_test_trial:
-            messages.warning(request, 'Warning: This is a test trial.')
+            messages.warning(request, 'Note: This is a test trial.')
         return super().get(request, *args, **kwargs)
 
     def get_form_kwargs(self):
@@ -546,7 +546,7 @@ class TestWarningMixin:
 
     def get(self, request, *args, **kwargs):
         if self.trial.is_test:
-            messages.warning(request, 'Warning: This is a test trial.')
+            messages.warning(request, 'Note: This is a test trial.')
         return super().get(request, *args, **kwargs)
 
 

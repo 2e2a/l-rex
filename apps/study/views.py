@@ -49,7 +49,7 @@ class NextStepsMixin:
         response = super().get(request, *args, **kwargs)
         next_steps = self.study.next_steps()
         for description, url in next_steps:
-            message = 'Next: {}'.format(description)
+            message = 'Now you can: {}.'.format(description)
             if url and self.request.path != url:
                 message = message + ' (<a href="{}">here</a>)'.format(url)
             messages.info(request, mark_safe(message))
