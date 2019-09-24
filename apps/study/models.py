@@ -63,11 +63,11 @@ class Study(models.Model):
     use_blocks = models.BooleanField(
         default=False,
         help_text='Enable if you want to divide the questionnaire into separate parts (blocks) with individual '
-                  'instructions',
+                  'instructions.',
     )
     pseudo_randomize_question_order = models.BooleanField(
         default=False,
-        help_text='Show questions in a random order, if multiple questions defined.',
+        help_text='Show questions in random order, if multiple questions defined.',
     )
     enable_item_rating_feedback = models.BooleanField(
         default=False,
@@ -87,12 +87,12 @@ class Study(models.Model):
     )
     require_participant_id = models.BooleanField(
         default=False,
-        help_text='Enable if you want participants to enter some ID before participation.',
+        help_text='Enable if you want participants to enter an ID before participation.',
         verbose_name='Participant ID required',
     )
     generate_participation_code = models.BooleanField(
         default=False,
-        help_text='Generate a proof code for the subject participation.',
+        help_text='Generate a proof code for participation.',
     )
     outro = MarkdownxField(
         blank=True,
@@ -108,7 +108,7 @@ class Study(models.Model):
     feedback_message = models.CharField(
         max_length=500,
         default='Please note the following feedback.',
-        help_text='Message indicating that feedback is shown in for some ratings',
+        help_text='Message indicating that feedback is shown for some ratings.',
     )
     end_date = DateField(
         blank=True,
@@ -129,7 +129,7 @@ class Study(models.Model):
         null=True,
         blank=True,
         max_length=200,
-        help_text='Give other users access to the study, enter comma separated user names.',
+        help_text='Give other users access to the study. Enter comma-separated user names (e.g. "user1, user2").',
     )
     created_date = DateField(
         default=now,
@@ -705,10 +705,10 @@ class Study(models.Model):
 
     STEP_DESCRIPTION = {
         StudySteps.STEP_STD_QUESTION_CREATE: 'Create a question',
-        StudySteps.STEP_STD_INSTRUCTIONS_EDIT: 'Create the instructions',
+        StudySteps.STEP_STD_INSTRUCTIONS_EDIT: 'Create instructions',
         StudySteps.STEP_STD_EXP_CREATE: 'Create an experiment',
         StudySteps.STEP_STD_QUESTIONNAIRES_GENERATE: 'Generate questionnaires',
-        StudySteps.STEP_STD_BLOCK_INSTRUCTIONS_CREATE: 'Define questionnaire block instructions',
+        StudySteps.STEP_STD_BLOCK_INSTRUCTIONS_CREATE: 'Define instructions for questionnaire blocks',
         StudySteps.STEP_STD_PUBLISH: 'Publish the study',
     }
 
@@ -759,13 +759,13 @@ class Question(models.Model):
     )
     question = models.CharField(
         max_length=1000,
-        help_text='Question text for this item (e.g. "How acceptable is this sentence?")',
+        help_text='Question text for this item (e.g. "How acceptable is this sentence?").',
     )
     legend = models.CharField(
         max_length=1000,
         blank=True,
         null=True,
-        help_text='Legend to clarify the scale (e.g. "1 = bad, 5 = good")',
+        help_text='Legend to clarify the scale (e.g. "1 = bad, 5 = good").',
     )
     randomize_scale = models.BooleanField(
         default=False,

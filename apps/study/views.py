@@ -49,7 +49,7 @@ class NextStepsMixin:
         response = super().get(request, *args, **kwargs)
         next_steps = self.study.next_steps()
         for description, url in next_steps:
-            message = 'Next: {}'.format(description)
+            message = 'Now you can: {}.'.format(description)
             if url and self.request.path != url:
                 message = message + ' (<a href="{}">here</a>)'.format(url)
             messages.info(request, mark_safe(message))
@@ -119,12 +119,14 @@ class StudyCreateView(LoginRequiredMixin, generic.CreateView):
     title = 'Create study'
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.StudyForm
-    success_message = 'Study successfully created.'
 
     def form_valid(self, form):
         form.instance.creator = self.request.user
         response = super().form_valid(form)
-        messages.success(self.request, 'Study successfully created.')
+        message = 'Study successfully created. Below, you will see suggestions what to do next. ' \
+                  'They will point you to steps that need to be completed while setting up your study. ' \
+                  'For more detailed help, consult the <a href="https://github.com/2e2a/l-rex/wiki">Wiki</a>.'
+        messages.info(self.request, mark_safe(message))
         return response
 
     @property
@@ -142,7 +144,7 @@ class StudyCreateFromArchiveView(LoginRequiredMixin,  SuccessMessageMixin, gener
     success_message = 'Study successfully created.'
 
     def get(self, request, *args, **kwargs):
-        messages.info(self.request, 'Note: Please be patient, this study might take a while.')
+        messages.info(self.request, 'Note: Please be patient, this might take a while.')
         return super().get(request, *args, **kwargs)
 
     def form_valid(self, form):
@@ -214,7 +216,7 @@ class StudyUpdateView(
     title = 'Edit study'
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.StudyForm
-    success_message = 'Study successfully updated.'
+    success_message = 'Study settings successfully updated.'
 
     def get(self, request, *args, **kwargs):
         if self.study.has_items:
@@ -363,7 +365,7 @@ class StudyAdvancedUpdateView(
     title = 'Edit advanced settings.'
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.StudyAdvancedForm
-    success_message = 'Advanced settings saved.'
+    success_message = 'Advanced study settings updated.'
 
     def get(self, request, *args, **kwargs):
         if self.study.has_questionnaires:

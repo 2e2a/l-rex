@@ -12,18 +12,18 @@ class Item(models.Model):
         max_length=230,
     )
     number = models.IntegerField(
-        help_text='Number of the item',
+        help_text='Number of the item.',
     )
     condition = models.CharField(
         max_length=8,
-        help_text='Condition of the item (character limit: 8)',
+        help_text='Condition of the item (character limit: 8).',
     )
     experiment = models.ForeignKey(
         'lrex_experiment.Experiment',
         on_delete=models.CASCADE
     )
     block = models.IntegerField(
-        help_text='Number of the questionnaire block in which the item will appear',
+        help_text='Number of the questionnaire block in which the item will appear.',
         default=1
     )
 
@@ -62,7 +62,7 @@ class Item(models.Model):
 class TextItem(Item):
     text = models.TextField(
         max_length=1024,
-        help_text='Content of the item (character limit: 1024)',
+        help_text='Content of the item (character limit: 1024).',
     )
 
     def get_absolute_url(self):
@@ -72,7 +72,7 @@ class TextItem(Item):
 class MarkdownItem(Item):
     text = MarkdownxField(
         max_length=1024,
-        help_text='Content of the item with markdown formatting (character limit: 1024)',
+        help_text='Content of the item with markdown formatting (character limit: 1024).',
     )
 
     def get_absolute_url(self):
@@ -88,7 +88,7 @@ class AudioLinkItem(Item):
     )
     description = MarkdownxField(
         max_length=5000,
-        help_text='Additional description shown with the audio item.',
+        help_text='Additional description presented with the audio item.',
         blank=True,
         null=True,
 
@@ -139,7 +139,7 @@ class ItemQuestion(models.Model):
     )
     question = models.CharField(
         max_length=1000,
-        help_text='Individual question text for this item (e.g. "How acceptable is this sentence?")',
+        help_text='Individual question text for this item (e.g. "How acceptable is this sentence?").',
     )
     scale_labels = models.CharField(
         max_length=500,

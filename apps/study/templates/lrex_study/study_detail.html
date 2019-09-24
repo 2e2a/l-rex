@@ -45,13 +45,13 @@
                 </div>
                 <div class="row small text-secondary">
                     <div class="col-sm-5">
-                        Participate:
+                        Make your study available:
                     </div>
                     <div class="col-sm-5">
                         {% if study.is_published %}
-                        <a href="{% url 'trial-create' study.slug %}">Participant link</a>
+                        <a href="{% url 'trial-create' study.slug %}">Link for participants</a>
                         {% else %}
-                        <a class="card-link text-muted">Participant link</a>
+                        <a class="card-link text-muted">Link for participants</a>
                         {% endif %}
                     </div>
                 </div>
@@ -77,13 +77,13 @@
                 </div>
                 <div class="row small text-secondary">
                     <div class="col-sm-5">
-                        Test:
+                        Test your study:
                     </div>
                     <div class="col-sm-5">
                         {% if allow_publish %}
-                        <a href="{% url 'trial-create' study.slug %}?test=True">Test link</a>
+                        <a href="{% url 'trial-create' study.slug %}?test=True">Link for testing</a>
                         {% else %}
-                        <a class="card-link text-muted">Test link</a>
+                        <a class="card-link text-muted">Link for testing</a>
                         {% endif %}
                     </div>
                 </div>
@@ -174,7 +174,8 @@
                     <span><img src="{% static 'icons/comment.svg' %} " width="20"></span>
                 </div>
                 <p class="card-text">
-                    Specify the task and task instructions.
+                    Specify one or more questions that the participants will be asked to answer.
+                    Add instructions that will explain to your participants what you want them to do in your study.
                 </p>
                 <div class="row small text-secondary">
                     <div class="col-sm-3">
@@ -219,7 +220,8 @@
                     <span><img src="{% static 'icons/flask.svg' %} " width="20"></span>
                 </div>
                 <p class="card-text">
-                    Add experiments (including fillers). Items of all experiments will be intermixed with each other within the same questionnaire.
+                    Add materials that the participants will be asked to rate.
+                    Decide how the materials will be distributed among participants.
                 </p>
                 <div class="row small text-secondary">
                     <div class="col-sm-3">
@@ -261,7 +263,8 @@
                     <span><img src="{% static 'icons/clipboard-list.svg' %} " width="20"></span>
                 </div>
                 <p class="card-text">
-                    Create questionnaires. A questionnaire is the ordered list of stimuli that an individual participant will see.
+                    Decide how the materials will be presented within a questionnaire
+                    (randomized or in a fixed order).
                 </p>
                 <div class="row small text-secondary">
                     <div class="col-sm-3">
@@ -288,7 +291,7 @@
                     <span><img src="{% static 'icons/poll.svg' %} " width="20"></span>
                 </div>
                 <p class="card-text">
-                    View a summary of the current results or the completed individual questionnaires.
+                    View a summary of the current results or the completed individual questionnaires. Download all results.
                 </p>
                 <div class="row small text-secondary small text-secondary">
                     <div class="col-sm-3">

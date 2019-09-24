@@ -50,10 +50,10 @@ class Experiment(models.Model):
     )
     is_example = models.BooleanField(
         default=False,
-        help_text='Items of this experiment will automatically be in the item block 0.'
+        help_text='Items will all be in block 0 (preceding all other materials).'
     )
     block = models.IntegerField(
-        help_text='Items of this experiment will automatically be in this item block (-1 disabled).',
+        help_text='Items will all be in this block (-1 = no automatic block assignment).',
         default=-1,
     )
 
@@ -137,7 +137,7 @@ class Experiment(models.Model):
         if n_items % condition_count != 0:
             msg = 'Number of stimuli is not a multiple of the number of conditions (stimuli: {}, conditions: {})'.format(
                 n_items,
-                ','.join('"{}"'.format(condition) for condition in conditions)
+                ', '.join('"{}"'.format(condition) for condition in conditions)
             )
             raise AssertionError(msg)
 
@@ -193,9 +193,9 @@ class Experiment(models.Model):
                         else:
                             warnings.append('Items {} and {} have the same URL.'.format(prev_item_link[0], item))
                 prev_item_link = (item, link)
-        msg = 'Detected {} items with following conditions: {} ({} stimuli).'.format(
+        msg = 'Detected {} items with following conditions: {} (sum: {} stimuli).'.format(
             item_number,
-            ','.join('"{}"'.format(condition) for condition in conditions),
+            ', '.join('"{}"'.format(condition) for condition in conditions),
             n_items,
         )
         warnings.append(msg)

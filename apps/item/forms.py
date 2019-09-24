@@ -258,7 +258,7 @@ class ItemListUploadForm(crispy_forms.CSVUploadForm):
     items_column = forms.IntegerField(
         initial=2,
         help_text='Specify which column contains the experiment items.'
-                  'Format: Comma separated list of <Item>-<Condition> (e.g. Filler-1a,Exp-2b,...).'
+                  'Format: comma-separated list of <Item>-<Condition> (e.g. Filler-1a,Exp-2b,...).'
     )
 
     validator_int_columns = ['list_column']

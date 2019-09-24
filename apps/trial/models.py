@@ -120,7 +120,7 @@ class Questionnaire(models.Model):
             if len(items) == 0:
                 return pseudo_random_items
             n_tries -= 1
-        raise RuntimeError('Unable to compute alternating conditions')
+        raise RuntimeError('Unable to compute alternating conditions.')
 
     def _pseudo_randomized_experiment_items(self, block_items, experiments):
         items_by_experiment = {}
@@ -136,12 +136,12 @@ class Questionnaire(models.Model):
     def _generate_items_pseudo_random(self, block_items, block_offset, block_slots, experiments):
         questionnaire_items = []
         if len(block_slots) != len(block_items):
-            raise RuntimeError('Block does not match master slots')
+            raise RuntimeError('Block does not match master slots.')
         items_by_experiment = self._pseudo_randomized_experiment_items(block_items, experiments)
         for i, slot_experiment in enumerate(block_slots):
             item = items_by_experiment[slot_experiment].pop()
             if not item:
-                raise RuntimeError('Block does not match master slots')
+                raise RuntimeError('Block does not match master slots.')
             questionnaire_item = QuestionnaireItem(
                 number=block_offset + i,
                 questionnaire=self,
@@ -186,7 +186,7 @@ class Questionnaire(models.Model):
                 return slots
             else:
                 n_tries -= 1
-        raise RuntimeError('Unable to compute slots')
+        raise RuntimeError('Unable to compute slots.')
 
     @cached_property
     def _item_list_items(self):
@@ -293,7 +293,7 @@ class QuestionnaireBlock(models.Model):
         max_length=8,
         choices=RANDOMIZATION_TYPE,
         default=RANDOMIZATION_PSEUDO,
-        help_text='Randomize items in each questionnaire block',
+        help_text='Randomize items in each questionnaire block.',
         blank=True,
     )
     study = models.ForeignKey(
