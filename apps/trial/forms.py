@@ -2,7 +2,8 @@ import csv
 import re
 from io import StringIO
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Field, Fieldset, Layout, Submit
+from crispy_forms.layout import Field, Fieldset, Layout, Submit, Button
+from crispy_forms.bootstrap import StrictButton, FieldWithButtons, InlineField, FormActions
 from django import forms
 
 from apps.contrib import forms as crispy_forms
@@ -11,6 +12,27 @@ from apps.item import models as item_models
 from apps.study import models as study_models
 
 from . import models
+
+
+class RandomizationForm(crispy_forms.CrispyForm):
+    randomization = forms.ChoiceField(choices=models.QuestionnaireBlock.RANDOMIZATION_TYPE, label='')
+
+    def __init__(self, *args, **kwargs):
+        randomization = kwargs.pop('randomization', None)
+        super().__init__(*args, **kwargs)
+        if randomization:
+            self.fields['randomization'].initial = randomization
+
+    def init_helper(self):
+        self.helper = FormHelper()
+        self.helper.form_class = 'form-inline'
+        self.helper.field_template = 'bootstrap4/layout/inline_field.html'
+        self.helper.layout = Layout(
+            FieldWithButtons(
+                'randomization',
+                Submit('generate', 'Generate', css_class='btn-primary btn-sm mx-1')
+            )
+        )
 
 
 class QuestionnaireBlockForm(forms.ModelForm):

@@ -1,7 +1,8 @@
 {% extends "lrex_home/base.html" %}
+{% load crispy_forms_tags %}
 
 {% block content %}
-<div class="text-center mb-2">
+<div class="d-flex justify-content-end align-items-center mb-2">
     {% if allow_actions and not disable_actions %}
     {% if study.use_blocks %}
     <a href="{% url 'questionnaire-generate' study.slug %}"
@@ -9,24 +10,7 @@
         Generate questionnaires
     </a>
     {% else %}
-    <form name="actionForm" id="actionForm" method="POST" class="d-inline">
-        {% csrf_token %}
-        <input class="span2" id="action" name="action" type="text" hidden="hidden">
-        <div class="btn-group">
-            <button class="btn  btn-primary btn-sm mx-1 dropdown-toggle" type="button" id="dropdownAggregateBy"
-                    data-toggle="dropdown"
-                    aria-haspopup="true" aria-expanded="false">
-                Generate questionnaires
-            </button>
-            <div class="dropdown-menu" aria-labelledby="dropdownAction">
-                {% if study.is_allowed_pseudo_randomization %}
-                <a href="#" class="dropdown-item" onclick="$('#action').val('generate_pseudo'); $('#actionForm').submit()">Pseudo-randomize</a>
-                {% endif %}
-                <a href="#" class="dropdown-item" onclick="$('#action').val('generate_random'); $('#actionForm').submit()">Randomize</a>
-                <a href="#" class="dropdown-item"  onclick="$('#action').val('generate_ordered'); $('#actionForm').submit()">Keep fixed item order</a>
-            </div>
-        </div>
-    </form>
+    {% crispy generate_form generate_form.helper %}
     {% endif %}
     <a href="{% url 'questionnaires-delete' study.slug %}" class="btn btn-danger btn-sm mx-1">Delete all</a>
     <a href="{% url 'questionnaire-upload' study.slug %}" class="btn btn-secondary btn-sm mx-1">Upload CSV </a>

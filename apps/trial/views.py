@@ -94,9 +94,18 @@ class QuestionnaireListView(
     page = 1
     paginate_by = 16
 
+    randomization_form = None
+
+    def _get_prev_randomization(self):
+        block = models.QuestionnaireBlock.objects.filter(study=self.study).first()
+        return block.randomization if block else None
+
     def get(self, request, *args, **kwargs):
         if not self.study.is_allowed_pseudo_randomization:
             messages.info(request, 'Note: Define filler experiments to use pseudo randomization.')
+        if not self.study.use_blocks:
+            randomization = self._get_prev_randomization()
+            self.randomization_form = forms.RandomizationForm(randomization=randomization)
         return super().get(request, *args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
@@ -106,35 +115,30 @@ class QuestionnaireListView(
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         data['allow_actions'] = self.study.is_allowed_create_questionnaires
+        if not self.study.use_blocks:
+            data['generate_form'] = self.randomization_form
         return data
 
-    def _create_default_questionnaire_block(self, randomization):
-        models.QuestionnaireBlock.objects.filter(study=self.study).delete()
-        models.QuestionnaireBlock.objects.create(
-            study=self.study,
-            block=1,
-            randomization=randomization,
-        )
-
-    def _get_randomization(self, action):
-        if action == 'generate_random':
-            return models.QuestionnaireBlock.RANDOMIZATION_TRUE
-        if action == 'generate_ordered':
-            return models.QuestionnaireBlock.RANDOMIZATION_NONE
-        if action == 'generate_pseudo':
-            return models.QuestionnaireBlock.RANDOMIZATION_PSEUDO
+    def _update_default_questionnaire_block(self, randomization):
+        block = models.QuestionnaireBlock.objects.filter(study=self.study).first()
+        if block:
+            block.randomization = randomization
+            block.save()
+        else:
+            block = models.QuestionnaireBlock.objects.create(study=self.study, block=1, randomization=randomization)
 
     def post(self, request, *args, **kwargs):
-        action = request.POST.get('action', None)
         if self.study.use_blocks:
             return redirect('questionnaire-generate',study_slug=self.study.slug)
-        randomization = self._get_randomization(action)
-        self._create_default_questionnaire_block(randomization)
-        try:
-            self.study.generate_questionnaires()
-            messages.success(request, 'Questionnaires generated')
-        except RuntimeError:
-            messages.error(request, 'Pseudo-randomization timed out. Retry or add more filler items.')
+        self.randomization_form = forms.RandomizationForm(request.POST, request.FILES)
+        if self.randomization_form.is_valid():
+            randomization = self.randomization_form['randomization'].value()
+            self._update_default_questionnaire_block(randomization)
+            try:
+                self.study.generate_questionnaires()
+                messages.success(request, 'Questionnaires generated')
+            except RuntimeError:
+                messages.error(request, 'Pseudo-randomization timed out. Retry or add more filler items.')
         return redirect('questionnaires',study_slug=self.study.slug)
 
     def get_queryset(self):
