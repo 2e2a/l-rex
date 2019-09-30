@@ -49,9 +49,9 @@ class NextStepsMixin:
         response = super().get(request, *args, **kwargs)
         next_steps = self.study.next_steps()
         for description, url in next_steps:
-            message = 'Now you can: {}.'.format(description)
             if url and self.request.path != url:
-                message = message + ' (<a href="{}">here</a>)'.format(url)
+               description = '<a href="{}">{}</a>'.format(url, description)
+            message = 'Now you can: {}.'.format(description)
             messages.info(request, mark_safe(message))
         return response
 
@@ -220,8 +220,8 @@ class StudyUpdateView(
 
     def get(self, request, *args, **kwargs):
         if self.study.has_items:
-            msg = 'Note: To change the "item type" setting you would need to remove old items first' \
-                  ' (<a href="{}">here</a>).'.format(reverse('experiments', args=[self.study.slug]))
+            msg = 'Note: To change the "item type" setting you would need to  first ' \
+                  '<a href="{}">remove old items</a> first.'.format(reverse('experiments', args=[self.study.slug]))
             messages.info(request, mark_safe(msg))
         return super().get(request, *args, **kwargs)
 
@@ -369,8 +369,8 @@ class StudyAdvancedUpdateView(
 
     def get(self, request, *args, **kwargs):
         if self.study.has_questionnaires:
-            msg = 'Note: To change the "Use blocks" and "Randomize question order" settings you would need to remove ' \
-                  'questionnaires first (<a href="{}">here</a>).'.format(
+            msg = 'Note: To change the "Use blocks" and "Randomize question order" settings you would need to ' \
+                  '<a href="{}">remove questionnaires </a> first.'.format(
                     reverse('questionnaires', args=[self.study.slug]))
             messages.info(request, mark_safe(msg))
         return super().get(request, *args, **kwargs)
@@ -454,8 +454,8 @@ class QuestionUpdateView(
 
     def get(self, request, *args, **kwargs):
         if self.study.has_questionnaires:
-            msg = 'Note: To change the "randomize scale" settings you need to remove questionnaires first ' \
-                  '(<a href="{}">here</a>).'.format(reverse('questionnaires', args=[self.study.slug])
+            msg = 'Note: To change the "randomize scale" settings you need to ' \
+                  '<a href="{}">remove questionnaires</a> first.'.format(reverse('questionnaires', args=[self.study.slug])
             )
             messages.info(request, mark_safe(msg))
         self.formset = forms.question_formset_factory(self.n_questions, 0 if self.n_questions > 0 else 1)(

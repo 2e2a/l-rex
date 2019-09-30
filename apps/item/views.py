@@ -65,7 +65,7 @@ class ItemsValidateMixin:
             for warning in warnings:
                 messages.warning(self.request, '{}'.format(warning))
             lists_url = reverse('itemlists', args=[self.experiment.slug])
-            msg = 'Lists automatically generated. <a href="{}">Check lists here.</a>'.format(lists_url)
+            msg = 'Lists automatically generated. <a href="{}">Check lists.</a>'.format(lists_url)
             messages.success(self.request, mark_safe(msg))
             if self.study.has_questionnaires:
                 self.study.delete_questionnaires()
@@ -369,8 +369,9 @@ class ItemUploadView(
 
     def dispatch(self, request, *args, **kwargs):
         if not self.study.questions:
-            msg = 'Note: If you want to use per item question customization, please define the study question first ' \
-                  '(<a href="{}">here</a>).'.format(reverse('study-questions', args=[self.study.slug]))
+            msg = 'Note: If you want to use per item question customization, please ' \
+                  '<a href="{}">define the study question</a> first.'.format(
+                    reverse('study-questions', args=[self.study.slug]))
             messages.info(self.request, mark_safe(msg))
         return super().dispatch(request, *args, **kwargs)
 
@@ -477,8 +478,9 @@ class ItemQuestionsUpdateView(
         )
         forms.initialize_with_questions(self.formset, self.study.questions)
         if self.n_questions == 0:
-            msg = 'Note: If you want to use per item question customization, please define the study question first ' \
-                  '(<a href="{}">here</a>).'.format(reverse('study-questions', args=[self.study.slug]))
+            msg = 'Note: If you want to use per item question customization, please ' \
+                  '<a href="{}">define the study question</a> first.'.format(
+                        reverse('study-questions', args=[self.study.slug]))
             messages.info(self.request, mark_safe(msg))
         return super().get(request, *args, **kwargs)
 

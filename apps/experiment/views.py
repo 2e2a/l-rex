@@ -141,8 +141,9 @@ class ExperimentUpdateView(
 
     def get(self, request, *args, **kwargs):
         if self.study.has_questionnaires:
-            msg = 'Note: To change the block related settings you would need to remove questionnaires first.' \
-                  ' (<a href="{}">here</a>).'.format(reverse('questionnaires', args=[self.study.slug]))
+            msg = 'Note: To change the block related settings you would need ' \
+                  '<a href="{}">to remove questionnaires first</a>.'.format(
+                    reverse('questionnaires', args=[self.study.slug]))
             messages.info(request, mark_safe(msg))
         return super().get(request, *args, **kwargs)
 

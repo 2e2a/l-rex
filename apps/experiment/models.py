@@ -547,7 +547,8 @@ class Experiment(models.Model):
             return reverse('itemlists', args=[self.slug])
 
     def _append_step_info(self, steps, step):
-        steps.append((self.STEP_DESCRIPTION[step], self.step_url(step)))
+        description = '{} ({})'.format(self.STEP_DESCRIPTION[step], self.title)
+        steps.append((description, self.step_url(step)))
 
     def next_steps(self):
         next_steps = []
