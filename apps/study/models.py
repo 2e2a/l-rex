@@ -145,7 +145,7 @@ class Study(models.Model):
         null=True,
         blank=True,
         max_length=1000,
-        help_text='Your affiliation (e.g., university or research institute) will be shown to participants'
+        help_text='This affiliation (e.g., university or research institute) will be shown to participants'
                   ' as part of the contact information before the study begins.',
     )
     contact_details = MarkdownxField(
@@ -161,8 +161,8 @@ class Study(models.Model):
         blank=True,
         max_length=5000,
         help_text='This statement will be shown to the participants before the study begins. '
-                  'It should be stated whether the study is fully anonymous or not. '
-                  'If you ask for an individual ID or personal data in your study, the privacy '
+                  'It should state whether the study is fully anonymous or not. '
+                  'If you ask for individual IDs or personal data in your study, the privacy '
                   'statement should include the following information: for what purpose '
                   'is the ID/personal data collected, how long will the data be stored in non-anonymized '
                   'form, and who is responsible for data processing?'
