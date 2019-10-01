@@ -214,7 +214,6 @@ class StudyContactForm(crispy_forms.CrispyModelForm):
     optional_label_ignore_fields = [
         'contact_name',
         'contact_email',
-        'contact_affiliation',
     ]
 
     class Meta:
@@ -228,7 +227,7 @@ class StudyContactForm(crispy_forms.CrispyModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for field in self.optional_label_ignore_fields:
+        for field in ['contact_name', 'contact_email']:
             self.fields[field].required = True
 
 
