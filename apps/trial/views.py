@@ -474,6 +474,7 @@ class TrialIntroView(study_views.StudyMixin, TestTrialMixin, generic.TemplateVie
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
+        data['intro_rich'] = mark_safe(markdownify(self.study.intro))
         data['privacy_statement_rich'] = mark_safe(markdownify(self.study.privacy_statement))
         data['contact'] = mark_safe(self.study.contact_html)
         data['is_test'] = self.is_test_trial

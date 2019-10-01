@@ -3,7 +3,7 @@
 {% block content %}
 {% if study.is_rating_possible or is_test %}
 <div class="my-2 p-4 border bg-white">
-    <div class="item-content"><p>{{ study.intro }}</p></div>
+    <div class="item-content"><p>{{ intro_rich }}</p></div>
     <h2>Contact</h2>
     <p>
         {{ contact }} (<a href="{% url 'trial-privacy' study.slug %}">Details</a>)
