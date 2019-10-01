@@ -474,9 +474,12 @@ class TrialIntroView(study_views.StudyMixin, TestTrialMixin, generic.TemplateVie
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        data['intro_rich'] = mark_safe(markdownify(self.study.intro))
-        data['privacy_statement_rich'] = mark_safe(markdownify(self.study.privacy_statement))
-        data['contact'] = mark_safe(self.study.contact_html)
+        if self.study.intro:
+            data['intro_rich'] = mark_safe(markdownify(self.study.intro))
+        if self.study.privacy_statement:
+            data['privacy_statement_rich'] = mark_safe(markdownify(self.study.privacy_statement))
+        if self.study.contact_name:
+            data['contact'] = mark_safe(self.study.contact_html)
         if self.study.contact_details:
             data['contact_details_rich'] = mark_safe(markdownify(self.study.contact_details))
         data['is_test'] = self.is_test_trial
@@ -559,7 +562,8 @@ class TrialPrivacyStatementView(study_views.StudyMixin, generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        data['privacy_statement_trial_rich'] = mark_safe(markdownify(self.study.privacy_statement))
+        if self.study.privacy_statement:
+            data['privacy_statement_trial_rich'] = mark_safe(markdownify(self.study.privacy_statement))
         data['privacy_statement_lrex_rich'] = mark_safe(markdownify(settings.LREX_PRIVACY_MD))
         return data
 
@@ -569,9 +573,23 @@ class TrialContactView(study_views.StudyMixin, generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        data['contact'] = mark_safe(self.study.contact_html)
-        data['contact_details_rich'] = mark_safe(markdownify(self.study.contact_details))
+        if self.study.contact_name:
+            data['contact'] = mark_safe(self.study.contact_html)
+        if self.study.contact_details:
+            data['contact_details_rich'] = mark_safe(markdownify(self.study.contact_details))
         data['contact_lrex_rich'] = mark_safe(markdownify(settings.LREX_CONTACT_MD))
+        return data
+
+
+class TrialInstructionsView(TrialMixin, generic.TemplateView):
+    template_name = 'lrex_trial/trial_instructions.html'
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['instructions_rich'] = mark_safe(self.study.instructions)
+        if self.study.use_blocks and self.study.link_block_instructions:
+            questionnaire_block = self.trial.current_block
+            data['block_instructions_rich'] = mark_safe(markdownify(questionnaire_block.instructions))
         return data
 
 
@@ -787,16 +805,8 @@ class RatingBlockInstructionsView(ProgressMixin, TestWarningMixin, TrialMixin, g
         kwargs.update(
             {'n_trial_items': len(self.trial.items)}
         )
-        num = self.kwargs['num']
         data = super().get_context_data(**kwargs)
-        questionnaire_item = models.QuestionnaireItem.objects.get(
-            questionnaire=self.trial.questionnaire,
-            number=num
-        )
-        questionnaire_block = models.QuestionnaireBlock.objects.get(
-            study=self.study,
-            block=questionnaire_item.item.experiment_block
-        )
+        questionnaire_block = self.trial.current_block
         data['block_instructions_rich'] = mark_safe(markdownify(questionnaire_block.instructions))
         data['trial'] = self.trial
         return data

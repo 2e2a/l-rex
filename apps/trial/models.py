@@ -414,6 +414,18 @@ class Trial(models.Model):
     def ratings_completed(self):
         return Rating.objects.filter(trial=self, question=0).count()
 
+    @cached_property
+    def current_block(self):
+        questionnaire_item = QuestionnaireItem.objects.get(
+            questionnaire=self.questionnaire,
+            number=self.ratings_completed
+        )
+        questionnaire_block = QuestionnaireBlock.objects.get(
+            study=self.questionnaire.study,
+            block=questionnaire_item.item.experiment_block
+        )
+        return questionnaire_block
+
     ABANDONED_AFTER_HRS = 1
 
     @property

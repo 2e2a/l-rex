@@ -41,6 +41,9 @@ class StudyAdvancedForm(crispy_forms.CrispyModelForm):
             'feedback_message',
             'privacy_statement_label',
             'contact_label',
+            'link_instructions',
+            'link_block_instructions',
+            'instructions_label'
         ]
 
     def __init__(self, *args, **kwargs):

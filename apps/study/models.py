@@ -117,6 +117,19 @@ class Study(models.Model):
         default='Contact',
         help_text='Label for "Contact" used during participation.',
     )
+    link_instructions = models.BooleanField(
+        default=False,
+        help_text='Make a link to the instructions available at any time during participation.',
+    )
+    link_block_instructions = models.BooleanField(
+        default=False,
+        help_text='Make the current block instructions available under the instructions link.',
+    )
+    instructions_label = models.CharField(
+        max_length=40,
+        default='Instructions',
+        help_text='Label of the "Instructions" link used during participation.',
+    )
     end_date = DateField(
         blank=True,
         null=True,
