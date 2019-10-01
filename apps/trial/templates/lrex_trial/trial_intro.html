@@ -6,8 +6,11 @@
     <div class="item-content"><p>{{ intro_rich }}</p></div>
     <h2>Contact</h2>
     <p>
-        {{ contact }} (<a href="{% url 'trial-privacy' study.slug %}">Details</a>)
+        {{ contact }}
     </p>
+    {% if contact_details_rich %}
+    {{ contact_details_rich }}
+    {% endif %}
     <h2>Privacy statement</h2>
     <p>
         {{ privacy_statement_rich }}

@@ -477,6 +477,8 @@ class TrialIntroView(study_views.StudyMixin, TestTrialMixin, generic.TemplateVie
         data['intro_rich'] = mark_safe(markdownify(self.study.intro))
         data['privacy_statement_rich'] = mark_safe(markdownify(self.study.privacy_statement))
         data['contact'] = mark_safe(self.study.contact_html)
+        if self.study.contact_details:
+            data['contact_details_rich'] = mark_safe(markdownify(self.study.contact_details))
         data['is_test'] = self.is_test_trial
         return data
 
