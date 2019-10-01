@@ -1,7 +1,7 @@
 from markdownx.utils import markdownify
 
 from django.contrib import messages
-from django.core.exceptions import ValidationError
+from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.utils.safestring import mark_safe
@@ -34,6 +34,12 @@ class QuestionnaireMixin:
             self.questionnaire_object = models.Questionnaire.objects.get(slug=questionnaire_slug)
         return self.questionnaire_object
 
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['study'] = self.study
+        data['questionnaire'] = self.questionnaire
+        return data
+
 
 class QuestionnaireObjectMixin(QuestionnaireMixin):
 
@@ -42,13 +48,6 @@ class QuestionnaireObjectMixin(QuestionnaireMixin):
         if not self.questionnaire_object:
             self.questionnaire_object =  self.get_object()
         return self.questionnaire_object
-
-
-    def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-        data['study'] = self.study
-        data['questionnaire'] = self.questionnaire
-        return data
 
 
 class TrialMixin:
@@ -447,9 +446,7 @@ class TrialDeleteAllView(study_views.StudyMixin, study_views.CheckStudyCreatorMi
         ]
 
 
-class TrialCreateView(study_views.StudyMixin, generic.CreateView):
-    model = models.Trial
-    form_class = forms.TrialForm
+class TestTrialMixin:
 
     @cached_property
     def is_test_trial(self):
@@ -468,8 +465,29 @@ class TrialCreateView(study_views.StudyMixin, generic.CreateView):
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        data['instructions_rich'] = mark_safe(markdownify(self.study.instructions))
         data['is_test'] = self.is_test_trial
+        return data
+
+
+class TrialIntroView(study_views.StudyMixin, TestTrialMixin, generic.TemplateView):
+    template_name = 'lrex_trial/trial_intro.html'
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['privacy_statement_rich'] = mark_safe(markdownify(self.study.privacy_statement))
+        data['contact'] = mark_safe(self.study.contact_html)
+        data['is_test'] = self.is_test_trial
+        return data
+
+
+class TrialCreateView(study_views.StudyMixin, TestTrialMixin, generic.CreateView):
+    model = models.Trial
+    form_class = forms.TrialForm
+    add_form_kwargs = True
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['instructions_rich'] = mark_safe(markdownify(self.study.instructions))
         return data
 
     def _trial_by_id(self, id):
@@ -531,6 +549,27 @@ class TrialDeleteView(TrialObjectMixin, study_views.CheckStudyCreatorMixin, cont
 
     def get_success_url(self):
         return reverse('trials', args=[self.study.slug])
+
+
+class TrialPrivacyStatementView(study_views.StudyMixin, generic.TemplateView):
+    template_name = 'lrex_trial/trial_privacy.html'
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['privacy_statement_trial_rich'] = mark_safe(markdownify(self.study.privacy_statement))
+        data['privacy_statement_lrex_rich'] = mark_safe(markdownify(settings.LREX_PRIVACY_MD))
+        return data
+
+
+class TrialContactView(study_views.StudyMixin, generic.TemplateView):
+    template_name = 'lrex_trial/trial_contact.html'
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['contact'] = mark_safe(self.study.contact_html)
+        data['contact_details_rich'] = mark_safe(markdownify(self.study.contact_details))
+        data['contact_lrex_rich'] = mark_safe(markdownify(settings.LREX_CONTACT_MD))
+        return data
 
 
 class ProgressMixin:
@@ -773,5 +812,3 @@ class RatingOutroView(TrialMixin, TestWarningMixin, generic.TemplateView):
 
 class RatingTakenView(TrialMixin, TestWarningMixin, generic.TemplateView):
     template_name = 'lrex_trial/rating_taken.html'
-
-

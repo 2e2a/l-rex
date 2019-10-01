@@ -2,8 +2,9 @@
 
 {% block content %}
 <div class="my-2 p-4 border bg-white">
-    <p>
-        The questionnaire for this subject ID has already been completed.
-    </p>
+    {{ privacy_statement_trial_rich }}
+</div>
+<div class="my-2 p-4 border bg-white">
+    {{ privacy_statement_lrex_rich }}
 </div>
 {% endblock %}

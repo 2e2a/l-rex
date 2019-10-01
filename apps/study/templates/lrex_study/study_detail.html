@@ -49,7 +49,7 @@
                     </div>
                     <div class="col-sm-5">
                         {% if study.is_published %}
-                        <a href="{% url 'trial-create' study.slug %}">Link for participants</a>
+                        <a href="{% url 'trial-intro' study.slug %}">Link for participants</a>
                         {% else %}
                         <a class="card-link text-muted">Link for participants</a>
                         {% endif %}
@@ -81,7 +81,7 @@
                     </div>
                     <div class="col-sm-5">
                         {% if allow_publish %}
-                        <a href="{% url 'trial-create' study.slug %}?test=True">Link for testing</a>
+                        <a href="{% url 'trial-intro' study.slug %}?test=True">Link for testing</a>
                         {% else %}
                         <a class="card-link text-muted">Link for testing</a>
                         {% endif %}
@@ -93,7 +93,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <h2 class="card-title">Settings</h2>
-                    <span><img src="{% static 'icons/sliders-h.svg' %} " width="20"></span>
+                    <span><img src="{% static 'icons/cog.svg' %} " width="20"></span>
                 </div>
                 <p class="card-text">
                     Set the general properties of the study. Share the study with other researchers.
@@ -170,8 +170,8 @@
         <div class="card my-2">
             <div class="card-body">
                 <div class="d-flex justify-content-between">
-                    <h2 class="card-title">Tasks</h2>
-                    <span><img src="{% static 'icons/comment.svg' %} " width="20"></span>
+                    <h2 class="card-title">Task and Instructions</h2>
+                    <span><img src="{% static 'icons/question-circle.svg' %} " width="20"></span>
                 </div>
                 <p class="card-text">
                     Specify one or more questions that the participants will be asked to answer.
@@ -188,7 +188,6 @@
                         {% empty %}
                         --
                         {% endfor %}
-
                     </div>
                 </div>
                 <div class="row small text-secondary">
@@ -201,6 +200,14 @@
                 </div>
                 <div class="row small text-secondary">
                     <div class="col-sm-3">
+                        Intro:
+                    </div>
+                    <div class="col-sm-7 text-truncate">
+                        {{ study.intro|default:"--" }}
+                    </div>
+                </div>
+                <div class="row small text-secondary">
+                    <div class="col-sm-3">
                         Outro:
                     </div>
                     <div class="col-sm-7 text-truncate">
@@ -208,8 +215,9 @@
                     </div>
                 </div>
                 <hr>
-                <a  class="card-link" href="{% url 'study-questions' study.slug %}">Questions</a>
-                <a  class="card-link" href="{% url 'study-instructions' study.slug %}">Instructions</a>
+                <a class="card-link" href="{% url 'study-questions' study.slug %}">Questions</a>
+                <a class="card-link" href="{% url 'study-instructions' study.slug %}">Instructions</a>
+                <a class="card-link" href="{% url 'study-intro' study.slug %}">Intro/outro</a>
             </div>
         </div>
 
@@ -217,7 +225,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <h2 class="card-title">Experiments</h2>
-                    <span><img src="{% static 'icons/flask.svg' %} " width="20"></span>
+                    <span><img src="{% static 'icons/file-upload.svg' %} " width="20"></span>
                 </div>
                 <p class="card-text">
                     Add materials that the participants will be asked to rate.
@@ -281,6 +289,41 @@
                     Block instructions
                 </a>
                 {% endif %}
+            </div>
+        </div>
+
+        <div class="card my-2">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <h2 class="card-title">Contact and Privacy</h2>
+                    <span><img src="{% static 'icons/envelope.svg' %} " width="20"></span>
+                </div>
+                <p class="card-text">
+                    Provide contact information and a privacy statement.
+                </p>
+                <div class="row small text-secondary">
+                    <div class="col-sm-3">
+                        Contact:
+                    </div>
+                    <div class="col-sm-7">
+                        {% if study.contact_name %}
+                        {{study.contact_name}} ({{study.contact_email}}, {{study.contact_affiliation}})
+                        {% else %}
+                        --
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row small text-secondary">
+                    <div class="col-sm-3">
+                        Privacy statement:
+                    </div>
+                    <div class="col-sm-7 text-truncate">
+                        {{ study.privacy_statement|default:"--" }}
+                    </div>
+                </div>
+                <hr>
+                <a  class="card-link" href="{% url 'study-contact' study.slug %}">Contact information</a>
+                <a  class="card-link" href="{% url 'study-privacy' study.slug %}">Privacy statement</a>
             </div>
         </div>
 

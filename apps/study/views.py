@@ -434,6 +434,43 @@ class StudyInstructionsUpdateView(
         ]
 
 
+class StudyIntroUpdateView(
+    StudyObjectMixin,
+    CheckStudyCreatorMixin,
+    SuccessMessageMixin,
+    DisableFormIfStudyActiveMixin,
+    contib_views.LeaveWarningMixin,
+    generic.UpdateView,
+):
+    model = models.Study
+    title ='Intro/outro'
+    template_name = 'lrex_contrib/crispy_form.html'
+    form_class = forms.StudyIntroForm
+    success_message = 'Intro/outro saved.'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({
+            'add_save': True,
+        })
+        return kwargs
+
+    def get_success_url(self):
+        if 'save' in self.request.POST:
+            return reverse('study-intro', args=[self.object.slug])
+        return self.object.get_absolute_url()
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('intro', ''),
+        ]
+
+
+
+
 class QuestionUpdateView(
             StudyMixin,
             CheckStudyCreatorMixin,
@@ -565,6 +602,76 @@ class SharedWithView(
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
             ('share', ''),
+        ]
+
+
+class StudyContactUpdateView(
+    StudyObjectMixin,
+    CheckStudyCreatorMixin,
+    SuccessMessageMixin,
+    DisableFormIfStudyActiveMixin,
+    contib_views.LeaveWarningMixin,
+    generic.UpdateView,
+):
+    model = models.Study
+    title ='Contact information'
+    template_name = 'lrex_contrib/crispy_form.html'
+    form_class = forms.StudyContactForm
+    success_message = 'Contact information saved.'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({
+            'add_save': True,
+        })
+        return kwargs
+
+    def get_success_url(self):
+        if 'save' in self.request.POST:
+            return reverse('study-contact', args=[self.object.slug])
+        return self.object.get_absolute_url()
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('contact', ''),
+        ]
+
+
+class StudyPrivacyUpdateView(
+    StudyObjectMixin,
+    CheckStudyCreatorMixin,
+    SuccessMessageMixin,
+    DisableFormIfStudyActiveMixin,
+    contib_views.LeaveWarningMixin,
+    generic.UpdateView,
+):
+    model = models.Study
+    title ='Privacy statement'
+    template_name = 'lrex_contrib/crispy_form.html'
+    form_class = forms.StudyPrivacyForm
+    success_message = 'Privacy statement saved.'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({
+            'add_save': True,
+        })
+        return kwargs
+
+    def get_success_url(self):
+        if 'save' in self.request.POST:
+            return reverse('study-privacy', args=[self.object.slug])
+        return self.object.get_absolute_url()
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('privacy', ''),
         ]
 
 

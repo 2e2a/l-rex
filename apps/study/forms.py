@@ -75,7 +75,6 @@ class StudyInstructionsForm(crispy_forms.CrispyModelForm):
         model = models.Study
         fields = [
             'instructions',
-            'outro',
             'continue_label',
             'feedback_message',
         ]
@@ -85,11 +84,33 @@ class StudyInstructionsForm(crispy_forms.CrispyModelForm):
         if instance and not instance.instructions:
             kwargs['initial'].update({
                 'instructions': 'Please rate the following sentences on the scale.',
-                'outro': 'Thank you for participating!',
             })
         super().__init__(*args, **kwargs)
         if instance and not instance.enable_item_rating_feedback:
             self.fields['feedback_message'].widget = forms.HiddenInput()
+
+
+class StudyIntroForm(crispy_forms.CrispyModelForm):
+    optional_label_ignore_fields = [
+        'intro',
+        'outro',
+    ]
+
+    class Meta:
+        model = models.Study
+        fields = [
+            'intro',
+            'outro',
+        ]
+
+    def __init__(self, *args, **kwargs):
+        instance = kwargs.get('instance', None)
+        if instance and not instance.instructions:
+            kwargs['initial'].update({
+                'intro': 'Welcome to this study.',
+                'outro': 'Thank you for participating!',
+            })
+        super().__init__(*args, **kwargs)
 
 
 class ArchiveForm(crispy_forms.CrispyModelForm):
@@ -187,3 +208,41 @@ class SharedWithForm(crispy_forms.CrispyModelForm):
                 if not User.objects.filter(username=username).exists():
                     raise forms.ValidationError('No user with username {} registered'.format(username))
         return shared_with
+
+
+class StudyContactForm(crispy_forms.CrispyModelForm):
+    optional_label_ignore_fields = [
+        'contact_name',
+        'contact_email',
+        'contact_affiliation',
+    ]
+
+    class Meta:
+        model = models.Study
+        fields = [
+            'contact_name',
+            'contact_email',
+            'contact_affiliation',
+            'contact_details',
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.optional_label_ignore_fields:
+            self.fields[field].required = True
+
+
+class StudyPrivacyForm(crispy_forms.CrispyModelForm):
+    optional_label_ignore_fields = [
+        'privacy_statement',
+    ]
+
+    class Meta:
+        model = models.Study
+        fields = [
+            'privacy_statement',
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['privacy_statement'].required = True

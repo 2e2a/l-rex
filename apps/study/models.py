@@ -30,10 +30,13 @@ class StudyStatus(Enum):
 class StudySteps(Enum):
     STEP_STD_QUESTION_CREATE = 1
     STEP_STD_INSTRUCTIONS_EDIT = 2
-    STEP_STD_EXP_CREATE = 3
-    STEP_STD_QUESTIONNAIRES_GENERATE = 4
-    STEP_STD_BLOCK_INSTRUCTIONS_CREATE = 5
-    STEP_STD_PUBLISH = 6
+    STEP_STD_INTRO_EDIT = 3
+    STEP_STD_EXP_CREATE = 4
+    STEP_STD_QUESTIONNAIRES_GENERATE = 5
+    STEP_STD_BLOCK_INSTRUCTIONS_CREATE = 6
+    STEP_STD_CONTACT_ADD = 7
+    STEP_STD_PRIVACY_ADD = 8
+    STEP_STD_PUBLISH = 9
 
 
 class Study(models.Model):
@@ -94,12 +97,6 @@ class Study(models.Model):
         default=False,
         help_text='Generate a proof code for participation.',
     )
-    outro = MarkdownxField(
-        blank=True,
-        null=True,
-        max_length=5000,
-        help_text='This text will be presented to the participant after the experiment is finished.',
-    )
     continue_label = models.CharField(
         max_length=40,
         default='Continue',
@@ -120,6 +117,49 @@ class Study(models.Model):
         blank=True,
         help_text='If you want to set a maximal number of participants, enter a number.',
         verbose_name='Maximal number of participants',
+    )
+    contact_name = models.CharField(
+        null=True,
+        blank=True,
+        max_length=1000,
+        help_text='Your name shown to participants as part of the contact information.',
+    )
+    contact_email = models.EmailField(
+        null=True,
+        blank=True,
+        help_text='Your email shown to participants as part of the contact information.',
+    )
+    contact_affiliation = models.CharField(
+        null=True,
+        blank=True,
+        max_length=1000,
+        help_text='Your affiliation (e.g., university or research institute) shown to participants as part of the '
+                  'contact information.',
+    )
+    contact_details = MarkdownxField(
+        blank=True,
+        null=True,
+        max_length=5000,
+        help_text='Additional details shown to participants as part of the contact information.',
+    )
+    privacy_statement = MarkdownxField(
+        null=True,
+        blank=True,
+        max_length=5000,
+        help_text='Privacy statement shown to the participants. '
+                  'Should include who has access to the data, how long will it be stored, for what purpose, etc.',
+    )
+    intro = MarkdownxField(
+        blank=True,
+        null=True,
+        max_length=5000,
+        help_text='Welcome text presented to the participant at first.',
+    )
+    outro = MarkdownxField(
+        blank=True,
+        null=True,
+        max_length=5000,
+        help_text='This text will be presented to the participant after the experiment is finished.',
     )
     is_published = models.BooleanField(
         default=False,
@@ -421,6 +461,15 @@ class Study(models.Model):
     def delete_questionnaire_blocks(self):
         self.questionnaireblock_set.all().delete()
 
+    @cached_property
+    def contact_html(self):
+        return '<strong>{}</strong>, {}, <a href="mailto:{}">{}</a>'.format(
+            self.contact_name,
+            self.contact_affiliation,
+            self.contact_email,
+            self.contact_email,
+        )
+
     def rating_proofs_csv(self, fileobj):
         from apps.trial.models import Trial
         writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
@@ -706,9 +755,12 @@ class Study(models.Model):
     STEP_DESCRIPTION = {
         StudySteps.STEP_STD_QUESTION_CREATE: 'Create a question',
         StudySteps.STEP_STD_INSTRUCTIONS_EDIT: 'Create instructions',
+        StudySteps.STEP_STD_INTRO_EDIT: 'Create intro/outro.',
         StudySteps.STEP_STD_EXP_CREATE: 'Create an experiment',
         StudySteps.STEP_STD_QUESTIONNAIRES_GENERATE: 'Generate questionnaires',
         StudySteps.STEP_STD_BLOCK_INSTRUCTIONS_CREATE: 'Define instructions for questionnaire blocks',
+        StudySteps.STEP_STD_CONTACT_ADD: 'Add contact information',
+        StudySteps.STEP_STD_PRIVACY_ADD: 'Add a privacy statement',
         StudySteps.STEP_STD_PUBLISH: 'Publish the study',
     }
 
@@ -717,12 +769,18 @@ class Study(models.Model):
             return reverse('study-questions', args=[self.slug])
         elif step == StudySteps.STEP_STD_INSTRUCTIONS_EDIT:
             return reverse('study-instructions', args=[self.slug])
+        elif step == StudySteps.STEP_STD_INTRO_EDIT:
+            return reverse('study-intro', args=[self.slug])
         elif step == StudySteps.STEP_STD_EXP_CREATE:
             return reverse('experiment-create', args=[self.slug])
         elif step == StudySteps.STEP_STD_QUESTIONNAIRES_GENERATE:
             return reverse('questionnaires', args=[self.slug])
         elif step == StudySteps.STEP_STD_BLOCK_INSTRUCTIONS_CREATE:
             return reverse('questionnaire-blocks', args=[self.slug])
+        elif step == StudySteps.STEP_STD_CONTACT_ADD:
+            return reverse('study-contact', args=[self.slug])
+        elif step == StudySteps.STEP_STD_PRIVACY_ADD:
+            return reverse('study-privacy', args=[self.slug])
         elif step == StudySteps.STEP_STD_PUBLISH:
             return reverse('study', args=[self.slug])
 
@@ -735,6 +793,8 @@ class Study(models.Model):
             self._append_step_info(next_steps, StudySteps.STEP_STD_QUESTION_CREATE)
         if not self.instructions:
             self._append_step_info(next_steps, StudySteps.STEP_STD_INSTRUCTIONS_EDIT)
+        if not self.intro:
+            self._append_step_info(next_steps, StudySteps.STEP_STD_INTRO_EDIT)
         if not self.experiments:
             self._append_step_info(next_steps, StudySteps.STEP_STD_EXP_CREATE)
         if self.is_allowed_create_questionnaires and not self.questionnaire_set.exists():
@@ -746,6 +806,10 @@ class Study(models.Model):
         for experiment in self.experiments:
             next_exp_steps = experiment.next_steps()
             next_steps.extend(next_exp_steps)
+        if not self.contact_name:
+            self._append_step_info(next_steps, StudySteps.STEP_STD_CONTACT_ADD)
+        if not self.privacy_statement:
+            self._append_step_info(next_steps, StudySteps.STEP_STD_PRIVACY_ADD)
         return next_steps
 
 
