@@ -4,14 +4,14 @@
 {% if study.is_rating_possible or is_test %}
 <div class="my-2 p-4 border bg-white">
     <div class="item-content"><p>{{ intro_rich }}</p></div>
-    <h2>Contact</h2>
+    <h2>{{ study.contact_label }}</h2>
     <p>
         {{ contact }}
     </p>
     {% if contact_details_rich %}
     {{ contact_details_rich }}
     {% endif %}
-    <h2>Privacy statement</h2>
+    <h2>{{ study.privacy_statement_label }}</h2>
     <p>
         {{ privacy_statement_rich }}
     </p>

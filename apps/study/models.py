@@ -107,6 +107,16 @@ class Study(models.Model):
         default='Please note the following feedback.',
         help_text='Message indicating that feedback is shown for some ratings.',
     )
+    privacy_statement_label = models.CharField(
+        max_length=40,
+        default='Privacy statement',
+        help_text='Label for "Privacy statement" used during participation.',
+    )
+    contact_label = models.CharField(
+        max_length=40,
+        default='Contact',
+        help_text='Label for "Contact" used during participation.',
+    )
     end_date = DateField(
         blank=True,
         null=True,

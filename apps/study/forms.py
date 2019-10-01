@@ -37,6 +37,10 @@ class StudyAdvancedForm(crispy_forms.CrispyModelForm):
             'use_blocks',
             'pseudo_randomize_question_order',
             'enable_item_rating_feedback',
+            'continue_label',
+            'feedback_message',
+            'privacy_statement_label',
+            'contact_label',
         ]
 
     def __init__(self, *args, **kwargs):
@@ -68,15 +72,12 @@ class StudyCopyForm(crispy_forms.CrispyForm):
 class StudyInstructionsForm(crispy_forms.CrispyModelForm):
     optional_label_ignore_fields = [
         'instructions',
-        'outro',
     ]
 
     class Meta:
         model = models.Study
         fields = [
             'instructions',
-            'continue_label',
-            'feedback_message',
         ]
 
     def __init__(self, *args, **kwargs):
