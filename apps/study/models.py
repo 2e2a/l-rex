@@ -70,7 +70,7 @@ class Study(models.Model):
     )
     pseudo_randomize_question_order = models.BooleanField(
         default=False,
-        help_text='Show questions in random order, if multiple questions defined.',
+        help_text='Show questions in random order (if multiple questions are defined).',
     )
     enable_item_rating_feedback = models.BooleanField(
         default=False,
@@ -105,7 +105,7 @@ class Study(models.Model):
     feedback_message = models.CharField(
         max_length=500,
         default='Please note the following feedback.',
-        help_text='Message indicating that feedback is shown for some ratings.',
+        help_text='Message indicating that feedback is shown for some ratings (only if feedback feature is enabled).',
     )
     privacy_statement_label = models.CharField(
         max_length=40,
@@ -132,44 +132,52 @@ class Study(models.Model):
         null=True,
         blank=True,
         max_length=1000,
-        help_text='Your name shown to participants as part of the contact information.',
+        help_text='This name will be shown to participants as part of the contact information '
+                  'before the study begins.',
     )
     contact_email = models.EmailField(
         null=True,
         blank=True,
-        help_text='Your email shown to participants as part of the contact information.',
+        help_text='This e-mail address will be shown to participants as part of the contact information '
+                  'before the study begins.',
     )
     contact_affiliation = models.CharField(
         null=True,
         blank=True,
         max_length=1000,
-        help_text='Your affiliation (e.g., university or research institute) shown to participants as part of the '
-                  'contact information.',
+        help_text='Your affiliation (e.g., university or research institute) will be shown to participants'
+                  ' as part of the contact information before the study begins.',
     )
     contact_details = MarkdownxField(
         blank=True,
         null=True,
         max_length=5000,
-        help_text='Additional details shown to participants as part of the contact information.',
+        help_text='You can optionally provide additional information about you and/or the research project '
+                  '(e.g., "This study is part of the research project XY, for more information, see ..."). '
+                  'This information will be shown to participants before the study begins.'
     )
     privacy_statement = MarkdownxField(
         null=True,
         blank=True,
         max_length=5000,
-        help_text='Privacy statement shown to the participants. '
-                  'Should include who has access to the data, how long will it be stored, for what purpose, etc.',
+        help_text='This statement will be shown to the participants before the study begins. '
+                  'It should be stated whether the study is fully anonymous or not. '
+                  'If you ask for an individual ID or personal data in your study, the privacy '
+                  'statement should include the following information: for what purpose '
+                  'is the ID/personal data collected, how long will the data be stored in non-anonymized '
+                  'form, and who is responsible for data processing?'
     )
     intro = MarkdownxField(
         blank=True,
         null=True,
         max_length=5000,
-        help_text='Welcome text presented to the participant at first.',
+        help_text='This text will be presented to the participants on the first page.',
     )
     outro = MarkdownxField(
         blank=True,
         null=True,
         max_length=5000,
-        help_text='This text will be presented to the participant after the experiment is finished.',
+        help_text='This text will be presented to the participants on the last page.',
     )
     is_published = models.BooleanField(
         default=False,
@@ -843,7 +851,7 @@ class Question(models.Model):
     )
     randomize_scale = models.BooleanField(
         default=False,
-        help_text='Show scales in a pseudo-random order.',
+        help_text='Show scale labels in random order.',
     )
     RATING_COMMENT_NONE = 'none'
     RATING_COMMENT_OPTIONAL = 'optional'

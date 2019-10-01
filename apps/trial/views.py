@@ -135,7 +135,7 @@ class QuestionnaireListView(
             self._update_default_questionnaire_block(randomization)
             try:
                 self.study.generate_questionnaires()
-                messages.success(request, 'Questionnaires generated')
+                messages.success(request, 'Questionnaires generated.')
             except RuntimeError:
                 messages.error(request, 'Pseudo-randomization timed out. Retry or add more filler items.')
         return redirect('questionnaires',study_slug=self.study.slug)

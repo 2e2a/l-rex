@@ -213,14 +213,14 @@ class StudyUpdateView(
     generic.UpdateView
 ):
     model = models.Study
-    title = 'Edit study'
+    title = 'Edit basic study settings'
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.StudyForm
     success_message = 'Study settings successfully updated.'
 
     def get(self, request, *args, **kwargs):
         if self.study.has_items:
-            msg = 'Note: To change the "item type" setting you would need to  first ' \
+            msg = 'Note: To change the "item type" setting you would need to first ' \
                   '<a href="{}">remove old items</a> first.'.format(reverse('experiments', args=[self.study.slug]))
             messages.info(request, mark_safe(msg))
         return super().get(request, *args, **kwargs)
@@ -362,7 +362,7 @@ class StudyAdvancedUpdateView(
     generic.UpdateView,
 ):
     model = models.Study
-    title = 'Edit advanced settings.'
+    title = 'Edit advanced study settings'
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.StudyAdvancedForm
     success_message = 'Advanced study settings updated.'
