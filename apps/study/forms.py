@@ -90,8 +90,6 @@ class StudyInstructionsForm(crispy_forms.CrispyModelForm):
                 'instructions': 'Please rate the following sentences on the scale.',
             })
         super().__init__(*args, **kwargs)
-        if instance and not instance.enable_item_rating_feedback:
-            self.fields['feedback_message'].widget = forms.HiddenInput()
 
 
 class StudyIntroForm(crispy_forms.CrispyModelForm):
