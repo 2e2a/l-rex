@@ -500,7 +500,7 @@ class Study(models.Model):
     def contact_html(self):
         return '<strong>{}</strong>, {}<a href="mailto:{}">{}</a>'.format(
             self.contact_name,
-            '{} ,'.format(self.contact_affiliation) if self.contact_affiliation else '',
+            '{}, '.format(self.contact_affiliation) if self.contact_affiliation else '',
             self.contact_email,
             self.contact_email,
         )
