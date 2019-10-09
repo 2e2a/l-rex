@@ -790,7 +790,7 @@ class Study(models.Model):
     STEP_DESCRIPTION = {
         StudySteps.STEP_STD_QUESTION_CREATE: 'Create a question',
         StudySteps.STEP_STD_INSTRUCTIONS_EDIT: 'Create instructions',
-        StudySteps.STEP_STD_INTRO_EDIT: 'Create intro/outro.',
+        StudySteps.STEP_STD_INTRO_EDIT: 'Create intro/outro',
         StudySteps.STEP_STD_EXP_CREATE: 'Create an experiment',
         StudySteps.STEP_STD_QUESTIONNAIRES_GENERATE: 'Generate questionnaires',
         StudySteps.STEP_STD_BLOCK_INSTRUCTIONS_CREATE: 'Define instructions for questionnaire blocks',
