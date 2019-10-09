@@ -214,10 +214,24 @@
                         {{ study.outro|default:"--" }}
                     </div>
                 </div>
+                <div class="row small text-secondary">
+                    <div class="col-sm-3">
+                        Demographics:
+                    </div>
+                    <div class="col-sm-7 text-truncate">
+
+                        {% for demographic_field in study.demographicfield_set.all %}
+                        {{ demographic_field }}{% if not forloop.last %}, {% endif %}
+                        {% empty %}
+                        --
+                        {% endfor %}
+                    </div>
+                </div>
                 <hr>
                 <a class="card-link" href="{% url 'study-questions' study.slug %}">Questions</a>
                 <a class="card-link" href="{% url 'study-instructions' study.slug %}">Instructions</a>
                 <a class="card-link" href="{% url 'study-intro' study.slug %}">Intro/outro</a>
+                <a class="card-link" href="{% url 'study-demographics' study.slug %}">Demographics</a>
             </div>
         </div>
 

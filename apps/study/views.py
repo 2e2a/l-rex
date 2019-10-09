@@ -469,15 +469,13 @@ class StudyIntroUpdateView(
         ]
 
 
-
-
 class QuestionUpdateView(
-            StudyMixin,
-            CheckStudyCreatorMixin,
-            DisableFormIfStudyActiveMixin,
-            contib_views.LeaveWarningMixin,
-            generic.DetailView,
-        ):
+    StudyMixin,
+    CheckStudyCreatorMixin,
+    DisableFormIfStudyActiveMixin,
+    contib_views.LeaveWarningMixin,
+    generic.DetailView,
+):
     model = models.Study
     title = 'Questions'
     template_name = 'lrex_contrib/crispy_formset_form.html'
@@ -684,3 +682,73 @@ class StudyResultsCSVDownloadView(StudyObjectMixin, CheckStudyCreatorMixin, gene
         response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
         self.study.results_csv(response)
         return response
+
+
+class DemographicsUpdateView(
+    StudyMixin,
+    CheckStudyCreatorMixin,
+    DisableFormIfStudyActiveMixin,
+    contib_views.LeaveWarningMixin,
+    generic.DetailView,
+):
+    model = models.Study
+    title = 'Demographics'
+    template_name = 'lrex_contrib/crispy_formset_form.html'
+    formset = None
+    helper = None
+
+    def dispatch(self, *args, **kwargs):
+        self.helper = forms.demographic_formset_helper()
+        self.n_fields = self.study.demographicfield_set.count()
+        return super().dispatch(*args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        msg = 'Please, respect the privacy of your participants. Do not collect private data that you do not need.'
+        messages.warning(self.request, msg)
+        self.formset = forms.demographic_formset_factory(self.n_fields, 0 if self.n_fields > 0 else 1)(
+            queryset=self.study.demographicfield_set.all()
+        )
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.formset = forms.demographic_formset_factory(self.n_fields)(request.POST, request.FILES)
+        if self.formset.is_valid():
+            instances = self.formset.save(commit=False)
+            for i, (instance, form) in enumerate(zip(instances, self.formset)):
+                instance.study = self.study
+                instance.number = i
+                instance.save()
+            self.n_fields = self.study.demographicfield_set.count()
+            extra = len(self.formset.forms) - self.n_fields
+            if 'submit' in request.POST:
+                messages.success(request, 'Demographics saved.')
+                return redirect('study', study_slug=self.study.slug)
+            elif 'save' in request.POST:
+                messages.success(request, 'Demographics saved.')
+                self.formset = forms.demographic_formset_factory(self.n_fields, extra)(
+                    queryset=self.study.demographicfield_set.all()
+                )
+            elif 'add' in request.POST:
+                self.formset = forms.demographic_formset_factory(self.n_fields, extra + 1)(
+                    queryset=self.study.demographicfield_set.all()
+                )
+            else: # delete last
+                if extra > 0:
+                    extra -= 1
+                elif self.n_fields > 0:
+                    self.study.demographicfield_set.last().delete()
+                    self.n_fields -= 1
+                self.formset = forms.demographic_formset_factory(self.n_fields, extra)(
+                    queryset=self.study.demographicfield_set.all()
+                )
+        return super().get(request, *args, **kwargs)
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('demographics', ''),
+        ]
+
+

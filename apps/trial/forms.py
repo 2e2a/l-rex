@@ -251,6 +251,47 @@ class TrialForm(crispy_forms.CrispyModelForm):
         return password
 
 
+class DemographicsFormsetForm(crispy_forms.CrispyModelForm):
+
+    class Meta:
+        model = models.DemographicValue
+        fields = ['field', 'value']
+        widgets = {
+            'field': forms.HiddenInput(),
+        }
+
+
+def demographics_formset_factory(n_fields, extra=0):
+    return forms.modelformset_factory(
+        models.DemographicValue,
+        form=DemographicsFormsetForm,
+        min_num=n_fields,
+        max_num=n_fields,
+        extra=extra,
+        validate_max=True,
+    )
+
+
+def demographics_formset_init(formset, fields):
+    for field, form in zip(fields, formset):
+        form.fields['field'].initial = field.pk
+        form.fields['value'].label = field.name
+
+
+def demographics_formset_helper(submit_label='Continue'):
+    formset_helper = FormHelper()
+    formset_helper.add_layout(
+        Layout(
+            Field('field'),
+            Field('value'),
+        ),
+    )
+    formset_helper.add_input(
+        Submit('submit', submit_label),
+    )
+    return formset_helper
+
+
 class RatingBaseForm(crispy_forms.CrispyModelForm):
     feedback = forms.CharField(
         max_length=5000,

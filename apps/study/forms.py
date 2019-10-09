@@ -249,3 +249,35 @@ class StudyPrivacyForm(crispy_forms.CrispyModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['privacy_statement'].required = True
+
+
+class DemographicFieldForm(crispy_forms.CrispyModelForm):
+
+    class Meta:
+        model = models.DemographicField
+        fields = [
+            'name',
+        ]
+
+
+def demographic_formset_factory(n_fields, extra=0):
+    return forms.modelformset_factory(
+        models.DemographicField,
+        form=DemographicFieldForm,
+        min_num=n_fields,
+        extra=extra,
+    )
+
+
+def demographic_formset_helper():
+    formset_helper = FormHelper()
+    formset_helper.add_layout(
+        Layout(
+            Fieldset('Demographic field {{ forloop.counter }}', None, 'name'),
+        ),
+    )
+    formset_helper.add_input(Submit('submit', 'Submit'))
+    formset_helper.add_input(Submit('save', 'Save', css_class='btn-secondary'))
+    formset_helper.add_input(Submit('add', 'Add', css_class='btn-secondary'))
+    formset_helper.add_input(Submit('delete', 'Delete last', css_class='btn-danger'))
+    return formset_helper

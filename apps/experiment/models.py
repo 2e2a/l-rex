@@ -235,6 +235,7 @@ class Experiment(models.Model):
         for rating in ratings:
             row = {}
             item = rating.questionnaire_item.item
+            row['_trial'] = rating.trial
             row['subject'] = rating.trial.subject_id
             row['item'] = item.number
             row['condition'] = item.condition
@@ -307,32 +308,6 @@ class Experiment(models.Model):
         aggregated_results_sorted = sorted(aggregated_results, key=lambda r: (r['subject'], r['item'], r['condition']))
 
         return aggregated_results_sorted
-
-    def _result_lists_for_questions(self, results):
-        aggregated_results = []
-        for row in results:
-            match = self._matching_row(row, aggregated_results, ['subject', 'item', 'condition'])
-            if match >= 0:
-                aggregated_results[match]['ratings'][row['question']] = row['label']
-                aggregated_results[match]['comments'][row['question']] = row['comment']
-            else:
-                new_row = {}
-                n_questions = len(self.study.questions)
-                # TODO: Fixme. Need to adjust for new fields
-                for col in ['subject', 'item', 'condition', 'position']:
-                    new_row[col] = row[col]
-                if 'question_order' in row:
-                    new_row['question_order'] = row['question_order']
-                if 'random_scale' in row:
-                    new_row['random_scale'] = row['random_scale']
-                if 'content' in row:
-                    new_row['content'] = row['content']
-                new_row['ratings'] = [-1] * n_questions
-                new_row['ratings'][row['question']] = row['label']
-                new_row['comments'] = [''] * n_questions
-                new_row['comments'][row['question']] = row['comment']
-                aggregated_results.append(new_row)
-        return aggregated_results
 
     def items_csv_header(self, add_experiment_column=False):
         csv_row = ['experiment'] if add_experiment_column else []
@@ -508,7 +483,43 @@ class Experiment(models.Model):
             for question in self.study.questions:
                 csv_row.append('comment{}'.format(question.number + 1))
         csv_row.append('content')
+        for i, demographic_field in enumerate(self.study.demographicfield_set.all(), 1):
+            csv_row.append('demographic{}'.format(i))
         return csv_row
+
+    def _result_lists_for_questions(self, results):
+        aggregated_results = []
+        for row in results:
+            match = self._matching_row(row, aggregated_results, ['subject', 'item', 'condition'])
+            if match >= 0:
+                aggregated_results[match]['ratings'][row['question']] = row['label']
+                aggregated_results[match]['comments'][row['question']] = row['comment']
+            else:
+                new_row = {}
+                n_questions = len(self.study.questions)
+                # TODO: Fixme. Need to adjust for new fields
+                for col in ['_trial', 'subject', 'item', 'condition', 'position']:
+                    new_row[col] = row[col]
+                if 'question_order' in row:
+                    new_row['question_order'] = row['question_order']
+                if 'random_scale' in row:
+                    new_row['random_scale'] = row['random_scale']
+                if 'content' in row:
+                    new_row['content'] = row['content']
+                new_row['ratings'] = [-1] * n_questions
+                new_row['ratings'][row['question']] = row['label']
+                new_row['comments'] = [''] * n_questions
+                new_row['comments'][row['question']] = row['comment']
+                aggregated_results.append(new_row)
+        return aggregated_results
+
+    def _add_demographics(self, results):
+        import pdb;pdb.set_trace()
+        for row in results:
+            trial = row['_trial']
+            row.update({
+                'demographics': [demographic_value.value for demographic_value in trial.demographicvalue_set.all()]
+            })
 
     def results_csv(self, fileobj, add_header=True, add_experiment_column=False):
         writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
@@ -517,6 +528,8 @@ class Experiment(models.Model):
             writer.writerow(header)
         results = self.results()
         results = self._result_lists_for_questions(results)
+        if self.study.has_demographics:
+            self._add_demographics(results)
         for row in results:
             csv_row = [self.title] if add_experiment_column else []
             csv_row.extend([row['subject'], row['item'], row['condition'], row['position']])
@@ -530,6 +543,9 @@ class Experiment(models.Model):
                 for comment in row['comments']:
                     csv_row.append(comment if comment else '')
             csv_row.append(row['content'])
+            if self.study.has_demographics:
+                csv_row.extend(row['demographics'])
+
             writer.writerow(csv_row)
 
     STEP_DESCRIPTION = {

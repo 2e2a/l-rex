@@ -299,6 +299,10 @@ class Study(models.Model):
     def has_item_lists(self):
         return any(experiment.has_lists for experiment in self.experiments)
 
+    @cached_property
+    def has_demographics(self):
+        return self.demographicfield_set.exists()
+
     @property
     def status(self):
         if self.is_archived:
@@ -924,3 +928,22 @@ class ScaleValue(models.Model):
 
     def __str__(self):
         return self.label
+
+
+class DemographicField(models.Model):
+    study = models.ForeignKey(
+        Study,
+        on_delete=models.CASCADE
+    )
+    name = models.CharField(
+        max_length=500,
+        help_text='You can enter a demographic question (e.g., "age" or "native languages"). The participants will '
+                  'have to answer it (free text input) at the beginning of the study.',
+        verbose_name='question'
+    )
+
+    class Meta:
+        ordering = ['study', 'pk']
+
+    def __str__(self):
+        return self.name

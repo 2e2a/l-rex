@@ -485,3 +485,14 @@ class Rating(models.Model):
     @cached_property
     def question_object(self):
         return self.questionnaire_item.questionnaire.study.question_set.get(number=self.question)
+
+
+class DemographicValue(models.Model):
+    trial = models.ForeignKey(Trial, on_delete=models.CASCADE)
+    field = models.ForeignKey(study_models.DemographicField, on_delete=models.CASCADE)
+    value = models.CharField(
+        max_length=2000,
+    )
+
+    class Meta:
+        ordering = ['trial', 'field']

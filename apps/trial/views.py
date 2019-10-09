@@ -469,6 +469,14 @@ class TestTrialMixin:
         return data
 
 
+class TestWarningMixin:
+
+    def get(self, request, *args, **kwargs):
+        if self.trial.is_test:
+            messages.warning(request, 'Note: This is a test trial.')
+        return super().get(request, *args, **kwargs)
+
+
 class TrialIntroView(study_views.StudyMixin, TestTrialMixin, generic.TemplateView):
     template_name = 'lrex_trial/trial_intro.html'
 
@@ -517,9 +525,49 @@ class TrialCreateView(study_views.StudyMixin, TestTrialMixin, generic.CreateView
         return super().form_valid(form)
 
     def get_success_url(self):
+        if self.study.has_demographics:
+            return reverse('trial-demographics', args=[self.object.slug])
         if self.study.use_blocks:
             return reverse('rating-block-instructions', args=[self.object.slug, 0])
         return reverse('rating-create', args=[self.object.slug, 0])
+
+
+class DemographicsCreateView(TrialMixin, TestWarningMixin, generic.TemplateView):
+    model = models.Rating
+    template_name = 'lrex_trial/trial_demographics.html'
+
+    formset = None
+    helper = None
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.trial.demographicvalue_set.exists():
+            return redirect(reverse('rating-create', args=[self.trial.slug, 0]))
+        self.fields_qs = self.study.demographicfield_set
+        self.n_fields = self.fields_qs.count()
+        self.helper = forms.demographics_formset_helper(self.study.continue_label)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        self.formset = forms.demographics_formset_factory(self.n_fields, self.n_fields)(
+            queryset=models.DemographicValue.objects.none()
+        )
+        forms.demographics_formset_init(self.formset, self.fields_qs.all())
+        return super().get(request, *args, **kwargs)
+
+    def get_success_url(self):
+        if self.study.use_blocks:
+            return reverse('rating-block-instructions', args=[self.object.slug, 0])
+        return reverse('rating-create', args=[self.trial.slug, 0])
+
+    def post(self, request, *args, **kwargs):
+        self.formset = forms.demographics_formset_factory(self.n_fields)(request.POST, request.FILES)
+        if self.formset.is_valid():
+            instances = self.formset.save(commit=False)
+            for instance in instances:
+                instance.trial = self.trial
+                instance.save()
+            return redirect(self.get_success_url())
+        return super().get(request, *args, **kwargs)
 
 
 class TrialDetailView(TrialObjectMixin, study_views.CheckStudyCreatorMixin, generic.DetailView):
@@ -604,14 +652,6 @@ class ProgressMixin:
         data['progress_count'] = count
         data['progress'] = i * 100 / (count + 1)
         return data
-
-
-class TestWarningMixin:
-
-    def get(self, request, *args, **kwargs):
-        if self.trial.is_test:
-            messages.warning(request, 'Note: This is a test trial.')
-        return super().get(request, *args, **kwargs)
 
 
 class RatingCreateMixin(ProgressMixin, TestWarningMixin):

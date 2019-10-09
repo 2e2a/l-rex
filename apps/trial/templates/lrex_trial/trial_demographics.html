@@ -1,0 +1,9 @@
+{% extends "lrex_trial/trial_base.html" %}
+{% load crispy_forms_tags %}
+{% load contrib_tags %}
+
+{% block content %}
+<div class="my-2 p-4 border bg-white">
+    {% crispy view.formset view.helper %}
+</div>
+{% endblock %}
