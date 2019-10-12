@@ -514,7 +514,6 @@ class Experiment(models.Model):
         return aggregated_results
 
     def _add_demographics(self, results):
-        import pdb;pdb.set_trace()
         for row in results:
             trial = row['_trial']
             row.update({
