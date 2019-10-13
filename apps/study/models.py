@@ -2,6 +2,7 @@ import csv
 import io
 import re
 import zipfile
+from collections import OrderedDict
 from itertools import groupby
 from markdownx.models import MarkdownxField
 
@@ -788,15 +789,15 @@ class Study(models.Model):
         return study
 
     STEP_DESCRIPTION = {
-        StudySteps.STEP_STD_QUESTION_CREATE: 'Create a question',
-        StudySteps.STEP_STD_INSTRUCTIONS_EDIT: 'Create instructions',
-        StudySteps.STEP_STD_INTRO_EDIT: 'Create intro/outro',
-        StudySteps.STEP_STD_EXP_CREATE: 'Create an experiment',
-        StudySteps.STEP_STD_QUESTIONNAIRES_GENERATE: 'Generate questionnaires',
-        StudySteps.STEP_STD_BLOCK_INSTRUCTIONS_CREATE: 'Define instructions for questionnaire blocks',
-        StudySteps.STEP_STD_CONTACT_ADD: 'Add contact information',
-        StudySteps.STEP_STD_PRIVACY_ADD: 'Add a privacy statement',
-        StudySteps.STEP_STD_PUBLISH: 'Publish the study',
+        StudySteps.STEP_STD_QUESTION_CREATE: 'create a question',
+        StudySteps.STEP_STD_INSTRUCTIONS_EDIT: 'create instructions',
+        StudySteps.STEP_STD_INTRO_EDIT: 'create intro/outro',
+        StudySteps.STEP_STD_EXP_CREATE: 'create an experiment',
+        StudySteps.STEP_STD_QUESTIONNAIRES_GENERATE: 'generate questionnaires',
+        StudySteps.STEP_STD_BLOCK_INSTRUCTIONS_CREATE: 'define instructions for questionnaire blocks',
+        StudySteps.STEP_STD_CONTACT_ADD: 'add contact information',
+        StudySteps.STEP_STD_PRIVACY_ADD: 'add a privacy statement',
+        StudySteps.STEP_STD_PUBLISH: 'publish the study',
     }
 
     def step_url(self, step):
@@ -819,32 +820,47 @@ class Study(models.Model):
         elif step == StudySteps.STEP_STD_PUBLISH:
             return reverse('study', args=[self.slug])
 
-    def _append_step_info(self, steps, step):
-        steps.append((self.STEP_DESCRIPTION[step], self.step_url(step)))
+    def _append_step_info(self, steps, step, group):
+        if group not in steps:
+            steps.update({group: []})
+        steps[group].append((self.STEP_DESCRIPTION[step], self.step_url(step)))
 
     def next_steps(self):
-        next_steps = []
+        next_steps = OrderedDict()
+
+        group = 'Task and instructions'
         if not self.questions:
-            self._append_step_info(next_steps, StudySteps.STEP_STD_QUESTION_CREATE)
+            self._append_step_info(next_steps, StudySteps.STEP_STD_QUESTION_CREATE, group)
         if not self.instructions:
-            self._append_step_info(next_steps, StudySteps.STEP_STD_INSTRUCTIONS_EDIT)
+            self._append_step_info(next_steps, StudySteps.STEP_STD_INSTRUCTIONS_EDIT, group)
         if not self.intro:
-            self._append_step_info(next_steps, StudySteps.STEP_STD_INTRO_EDIT)
+            self._append_step_info(next_steps, StudySteps.STEP_STD_INTRO_EDIT, group)
+
         if not self.experiments:
-            self._append_step_info(next_steps, StudySteps.STEP_STD_EXP_CREATE)
+            group = 'Experiments'
+            self._append_step_info(next_steps, StudySteps.STEP_STD_EXP_CREATE, group)
+        else:
+            for experiment in self.experiments:
+                next_exp_steps = experiment.next_steps()
+                next_steps.update(next_exp_steps)
+
+        group = 'Questionnaires'
         if self.is_allowed_create_questionnaires and not self.questionnaire_set.exists():
-            self._append_step_info(next_steps, StudySteps.STEP_STD_QUESTIONNAIRES_GENERATE)
+            self._append_step_info(next_steps, StudySteps.STEP_STD_QUESTIONNAIRES_GENERATE, group)
         if self.use_blocks and self.has_questionnaires and not self.has_block_instructions:
-            self._append_step_info(next_steps, StudySteps.STEP_STD_BLOCK_INSTRUCTIONS_CREATE)
-        if self.is_allowed_publish and not self.is_published:
-            self._append_step_info(next_steps, StudySteps.STEP_STD_PUBLISH)
-        for experiment in self.experiments:
-            next_exp_steps = experiment.next_steps()
-            next_steps.extend(next_exp_steps)
+            self._append_step_info(next_steps, StudySteps.STEP_STD_BLOCK_INSTRUCTIONS_CREATE, group)
+
+        group = 'Contact and privacy'
         if not self.contact_name:
-            self._append_step_info(next_steps, StudySteps.STEP_STD_CONTACT_ADD)
+            self._append_step_info(next_steps, StudySteps.STEP_STD_CONTACT_ADD, group)
         if not self.privacy_statement:
-            self._append_step_info(next_steps, StudySteps.STEP_STD_PRIVACY_ADD)
+            self._append_step_info(next_steps, StudySteps.STEP_STD_PRIVACY_ADD, group)
+
+        group = 'Publish'
+        if self.is_allowed_publish and not self.is_published:
+            self._append_step_info(next_steps, StudySteps.STEP_STD_PUBLISH, group)
+
+        print(next_steps)
         return next_steps
 
 

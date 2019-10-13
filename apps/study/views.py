@@ -48,10 +48,17 @@ class NextStepsMixin:
     def get(self, request, *args, **kwargs):
         response = super().get(request, *args, **kwargs)
         next_steps = self.study.next_steps()
-        for description, url in next_steps:
-            if url and self.request.path != url:
-               description = '<a href="{}">{}</a>'.format(url, description)
-            message = 'Now you can: {}.'.format(description)
+        for group, group_steps in next_steps.items():
+            message = '<div class="d-flex justify-content-between">\n' \
+                      '    <span>Now you can: {}.</span>\n' \
+                      '    <span class="text-right"><small><em>{}</em></small></span>\n' \
+                      '</div>'
+            step_descriptions = []
+            for description, url in group_steps:
+                if url and self.request.path != url:
+                    description = '<a href="{}">{}</a>'.format(url, description)
+                step_descriptions.append(description)
+            message = message.format(', '.join(step_descriptions), group)
             messages.info(request, mark_safe(message))
         return response
 

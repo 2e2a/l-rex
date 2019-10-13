@@ -548,9 +548,9 @@ class Experiment(models.Model):
             writer.writerow(csv_row)
 
     STEP_DESCRIPTION = {
-        ExperimentSteps.STEP_EXP_ITEMS_CREATE: 'Create or upload experiment items',
-        ExperimentSteps.STEP_EXP_ITEMS_VALIDATE: 'Validate consistency of the items',
-        ExperimentSteps.STEP_EXP_LISTS_GENERATE: 'Generate item lists',
+        ExperimentSteps.STEP_EXP_ITEMS_CREATE: 'create or upload experiment items',
+        ExperimentSteps.STEP_EXP_ITEMS_VALIDATE: 'validate consistency of the items',
+        ExperimentSteps.STEP_EXP_LISTS_GENERATE: 'generate item lists',
     }
 
     def step_url(self, step):
@@ -573,4 +573,4 @@ class Experiment(models.Model):
             self._append_step_info(next_steps, ExperimentSteps.STEP_EXP_ITEMS_VALIDATE)
         if self.items_validated and not self.itemlist_set.exists():
             self._append_step_info(next_steps, ExperimentSteps.STEP_EXP_LISTS_GENERATE)
-        return next_steps
+        return  {self.title: next_steps}
