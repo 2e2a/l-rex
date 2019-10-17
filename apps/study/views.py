@@ -49,6 +49,8 @@ class NextStepsMixin:
         response = super().get(request, *args, **kwargs)
         next_steps = self.study.next_steps()
         for group, group_steps in next_steps.items():
+            if not group_steps:
+                continue
             message = '<div class="d-flex justify-content-between">\n' \
                       '    <span>Now you can: {}.</span>\n' \
                       '    <span class="text-right"><small><em>{}</em></small></span>\n' \
