@@ -1,12 +1,12 @@
 import csv
 import re
+from io import StringIO
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Fieldset, Layout, Submit
 from django import forms
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory
-from io import StringIO
 
 from apps.contrib import csv as contrib_csv
 from apps.contrib import forms as crispy_forms
@@ -159,44 +159,30 @@ class ItemUploadForm(crispy_forms.CSVUploadForm):
                 }
             )
 
-    def clean(self):
-        cleaned_data = super().clean()
-        data = contrib_csv.read_file(cleaned_data)
-        reader = csv.reader(
-            StringIO(data), delimiter=self.detected_csv['delimiter'], quoting=self.detected_csv['quoting']
-        )
-        if self.detected_csv['has_header']:
-            next(reader)
-        try:
-            min_columns = contrib_csv.get_min_columns(cleaned_data)
-            for row in reader:
-                if not row:
-                    continue
-                assert len(row) >= min_columns
-                int(row[cleaned_data['number_column'] - 1])
-                assert row[cleaned_data['condition_column'] - 1]
-                assert len(row[cleaned_data['condition_column'] - 1]) < 8
-                assert row[cleaned_data['content_column'] - 1]
-                if self.study.has_audiolink_items:
-                    validate_urls(row[cleaned_data['content_column'] - 1])
-                if cleaned_data['block_column'] > 0:
-                    int(row[cleaned_data['block_column'] - 1])
-                for question in self.study.questions:
-                    if cleaned_data['question_{}_question_column'.format(question.number + 1)] > 0:
-                        assert row[cleaned_data['question_{}_question_column'.format(question.number + 1)] - 1 ]
-                    if cleaned_data['question_{}_scale_column'.format(question.number + 1)] > 0:
-                        assert row[cleaned_data['question_{}_scale_column'.format(question.number + 1)] - 1]
-                        assert len(row[cleaned_data['question_{}_scale_column'.format(question.number + 1)] - 1].split(',')) == \
-                            question.scalevalue_set.count()
-                    if cleaned_data['question_{}_legend_column'.format(question.number + 1)] > 0:
-                        assert row[cleaned_data['question_{}_legend_column'.format(question.number + 1)] - 1]
-            contrib_csv.seek_file(cleaned_data)
-        except (ValueError, AssertionError):
-            raise forms.ValidationError(
-                'File: Unexpected format in line %(n_line)s.',
-                code='invalid',
-                params={'n_line': reader.line_num})
-        return cleaned_data
+    def check_upload_form(self, reader, cleaned_data):
+        min_columns = contrib_csv.get_min_columns(cleaned_data)
+        for row in reader:
+            if not row:
+                continue
+            assert len(row) >= min_columns
+            int(row[cleaned_data['number_column'] - 1])
+            assert row[cleaned_data['condition_column'] - 1]
+            assert len(row[cleaned_data['condition_column'] - 1]) < 8
+            assert row[cleaned_data['content_column'] - 1]
+            if self.study.has_audiolink_items:
+                validate_urls(row[cleaned_data['content_column'] - 1])
+            if cleaned_data['block_column'] > 0:
+                int(row[cleaned_data['block_column'] - 1])
+            for question in self.study.questions:
+                if cleaned_data['question_{}_question_column'.format(question.number + 1)] > 0:
+                    assert row[cleaned_data['question_{}_question_column'.format(question.number + 1)] - 1]
+                if cleaned_data['question_{}_scale_column'.format(question.number + 1)] > 0:
+                    assert row[cleaned_data['question_{}_scale_column'.format(question.number + 1)] - 1]
+                    assert len(
+                        row[cleaned_data['question_{}_scale_column'.format(question.number + 1)] - 1].split(',')) == \
+                           question.scalevalue_set.count()
+                if cleaned_data['question_{}_legend_column'.format(question.number + 1)] > 0:
+                    assert row[cleaned_data['question_{}_legend_column'.format(question.number + 1)] - 1]
 
 
 class ItemQuestionForm(crispy_forms.OptionalLabelMixin, forms.ModelForm):
@@ -278,41 +264,27 @@ class ItemFeedbackUploadForm(crispy_forms.CSVUploadForm):
         self.experiment = kwargs.pop('experiment')
         super().__init__(*args, **kwargs)
 
-    def clean(self):
-        cleaned_data = super().clean()
-        data = contrib_csv.read_file(cleaned_data)
-        reader = csv.reader(
-            StringIO(data), delimiter=self.detected_csv['delimiter'], quoting=self.detected_csv['quoting'])
-        if self.detected_csv['has_header']:
-            next(reader)
-        try:
-            for row in reader:
-                item_num = int(row[cleaned_data['item_number_column'] - 1])
-                item_cond = row[cleaned_data['item_condition_column'] - 1]
-                assert item_cond
-                item_exists = models.Item.objects.filter(
-                    experiment=self.experiment,
-                    number=item_num,
-                    condition=item_cond,
-                ).exists()
-                if not item_exists:
-                    raise forms.ValidationError('Item {}{} does not exist.'.format(item_num, item_cond))
-                question_num = int(row[cleaned_data['question_column'] - 1]) - 1
-                question = self.experiment.study.get_question(question_num)
-                if not question:
-                    raise forms.ValidationError('Question {} does not exist.'.format(question_num))
-                scale_values = row[cleaned_data['scale_values_column'] - 1]
-                assert scale_values
-                if not all(question.is_valid_scale_value(scale_value) for scale_value in scale_values):
-                    raise forms.ValidationError('Invalid scale values {}.'.format(scale_values))
-                assert row[cleaned_data['feedback_column'] - 1]
-            contrib_csv.seek_file(cleaned_data)
-        except (ValueError, AssertionError):
-            raise forms.ValidationError(
-                'File: Unexpected format in line %(n_line)s.',
-                code='invalid',
-                params={'n_line': reader.line_num})
-        return cleaned_data
+    def check_upload_form(self, reader, cleaned_data):
+        for row in reader:
+            item_num = int(row[cleaned_data['item_number_column'] - 1])
+            item_cond = row[cleaned_data['item_condition_column'] - 1]
+            assert item_cond
+            item_exists = models.Item.objects.filter(
+                experiment=self.experiment,
+                number=item_num,
+                condition=item_cond,
+            ).exists()
+            if not item_exists:
+                raise forms.ValidationError('Item {}{} does not exist.'.format(item_num, item_cond))
+            question_num = int(row[cleaned_data['question_column'] - 1]) - 1
+            question = self.experiment.study.get_question(question_num)
+            if not question:
+                raise forms.ValidationError('Question {} does not exist.'.format(question_num))
+            scale_values = row[cleaned_data['scale_values_column'] - 1]
+            assert scale_values
+            if not all(question.is_valid_scale_value(scale_value) for scale_value in scale_values):
+                raise forms.ValidationError('Invalid scale values {}.'.format(scale_values))
+            assert row[cleaned_data['feedback_column'] - 1]
 
 
 class ItemListUploadForm(crispy_forms.CSVUploadForm):
@@ -363,28 +335,14 @@ class ItemListUploadForm(crispy_forms.CSVUploadForm):
             raise forms.ValidationError(error_msg)
         return items
 
-    def clean(self):
-        cleaned_data = super().clean()
-        data = contrib_csv.read_file(cleaned_data)
-        reader = csv.reader(
-            StringIO(data), delimiter=self.detected_csv['delimiter'], quoting=self.detected_csv['quoting'])
-        if self.detected_csv['has_header']:
-            next(reader)
-        try:
-            used_items = set()
-            for row in reader:
-                int(row[cleaned_data['list_column'] - 1])
-                items_string = row[cleaned_data['items_column'] -1]
-                used_items.update(self.read_items(self.experiment, items_string))
-            if not len(used_items) == models.Item.objects.filter(experiment=self.experiment).count():
-                raise forms.ValidationError('Not all items used in lists.')
-            contrib_csv.seek_file(cleaned_data)
-        except (ValueError, AssertionError):
-            raise forms.ValidationError(
-                'File: Unexpected format in line %(n_line)s.',
-                code='invalid',
-                params={'n_line': reader.line_num})
-        return cleaned_data
+    def check_upload_form(self, reader, cleaned_data):
+        used_items = set()
+        for row in reader:
+            int(row[cleaned_data['list_column'] - 1])
+            items_string = row[cleaned_data['items_column'] - 1]
+            used_items.update(self.read_items(self.experiment, items_string))
+        if not len(used_items) == models.Item.objects.filter(experiment=self.experiment).count():
+            raise forms.ValidationError('Not all items used in lists.')
 
 
 class ItemFeedbackForm(crispy_forms.OptionalLabelMixin, forms.ModelForm):

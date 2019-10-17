@@ -1,3 +1,5 @@
+import csv
+from io import StringIO
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 from django import forms
@@ -72,6 +74,9 @@ class CSVUploadForm(CrispyForm):
     validator_int_columns = None
     detected_csv = None
 
+    def check_upload_form(self, reader, cleaned_data):
+        raise NotImplementedError
+
     def clean(self):
         cleaned_data = super().clean()
         data = contrib_csv.read_file(cleaned_data)
@@ -82,5 +87,18 @@ class CSVUploadForm(CrispyForm):
         )
         self.detected_csv = {'delimiter': delimiter, 'quoting': quoting, 'has_header': has_header}
         contrib_csv.seek_file(cleaned_data)
+        data = contrib_csv.read_file(cleaned_data)
+        reader = csv.reader(
+            StringIO(data), delimiter=self.detected_csv['delimiter'], quoting=self.detected_csv['quoting'])
+        if self.detected_csv['has_header']:
+            next(reader)
+        try:
+            self.check_upload_form(reader, cleaned_data)
+            contrib_csv.seek_file(cleaned_data)
+        except (ValueError, AssertionError):
+            raise forms.ValidationError(
+                'File: Unexpected format in line %(n_line)s.',
+                code='invalid',
+                params={'n_line': reader.line_num})
         return cleaned_data
 

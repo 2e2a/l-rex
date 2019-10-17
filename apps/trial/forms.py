@@ -173,33 +173,18 @@ class QuestionnaireUploadForm(crispy_forms.CSVUploadForm):
             raise forms.ValidationError(error_msg)
         return lists
 
-    def clean(self):
-        cleaned_data = super().clean()
-        data = contrib_csv.read_file(cleaned_data)
-        reader = csv.reader(
-            StringIO(data), delimiter=self.detected_csv['delimiter'], quoting=self.detected_csv['quoting']
-        )
-        if self.detected_csv['has_header']:
-            next(reader)
-        try:
-            used_items = set()
-            for row in reader:
-                int(row[cleaned_data['questionnaire_column'] - 1])
-                item_lists_col = cleaned_data['item_lists_column']
-                items_string = row[cleaned_data['items_column'] - 1]
-                used_items.update(self.read_items(self.study, items_string))
-                if item_lists_col > 0:
-                    item_lists_string = row[item_lists_col - 1]
-                    self.read_item_lists(self.study, item_lists_string)
-            contrib_csv.seek_file(cleaned_data)
-            if not len(used_items) == item_models.Item.objects.filter(experiment__study=self.study).count():
-                raise forms.ValidationError('Not all items used in questionnaires.')
-        except (ValueError, AssertionError):
-            raise forms.ValidationError(
-                'File: Unexpected format in line %(n_line)s.',
-                code='invalid',
-                params={'n_line': reader.line_num})
-        return cleaned_data
+    def check_upload_form(self, reader, cleaned_data):
+        used_items = set()
+        for row in reader:
+            int(row[cleaned_data['questionnaire_column'] - 1])
+            item_lists_col = cleaned_data['item_lists_column']
+            items_string = row[cleaned_data['items_column'] - 1]
+            used_items.update(self.read_items(self.study, items_string))
+            if item_lists_col > 0:
+                item_lists_string = row[item_lists_col - 1]
+                self.read_item_lists(self.study, item_lists_string)
+        if not len(used_items) == item_models.Item.objects.filter(experiment__study=self.study).count():
+            raise forms.ValidationError('Not all items used in questionnaires.')
 
 
 class TrialForm(crispy_forms.CrispyModelForm):
