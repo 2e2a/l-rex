@@ -864,8 +864,6 @@ class Study(models.Model):
         group = 'Publish'
         if self.is_allowed_publish and not self.is_published:
             self._append_step_info(next_steps, StudySteps.STEP_STD_PUBLISH, group)
-
-        print(next_steps)
         return next_steps
 
 
