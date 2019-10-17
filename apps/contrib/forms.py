@@ -95,10 +95,9 @@ class CSVUploadForm(CrispyForm):
         try:
             self.check_upload_form(reader, cleaned_data)
             contrib_csv.seek_file(cleaned_data)
+        except forms.ValidationError as error:
+            raise forms.ValidationError('Line {}: {}'.format(reader.line_num, str(error.message)), code='invalid')
         except (ValueError, AssertionError):
-            raise forms.ValidationError(
-                'File: Unexpected format in line %(n_line)s.',
-                code='invalid',
-                params={'n_line': reader.line_num})
+            raise forms.ValidationError('Line {}: unexpected format.', code='invalid')
         return cleaned_data
 

@@ -283,7 +283,7 @@ class ItemFeedbackUploadForm(crispy_forms.CSVUploadForm):
             scale_values = row[cleaned_data['scale_values_column'] - 1]
             assert scale_values
             if not all(question.is_valid_scale_value(scale_value) for scale_value in scale_values):
-                raise forms.ValidationError('Invalid scale values {}.'.format(scale_values))
+                raise forms.ValidationError('Invalid scale values: {}.'.format(scale_values))
             assert row[cleaned_data['feedback_column'] - 1]
 
 
