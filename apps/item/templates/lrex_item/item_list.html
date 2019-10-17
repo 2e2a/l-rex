@@ -13,13 +13,17 @@
     </form>
     <a href="{% url item_add_url_name experiment.slug %}" class="btn btn-secondary btn-sm mx-1">Add item </a>
     <a href="{% url 'items-pregenerate' experiment.slug %}" class="btn btn-secondary btn-sm mx-1">Pregenerate items</a>
-    <a href="{% url 'items-delete' experiment.slug %}" class="btn btn-danger btn-sm mx-1">Delete all</a>
+    {% if study.enable_item_rating_feedback %}
+    <a href="{% url 'items-upload-feedback' experiment.slug %}" class="btn btn-secondary btn-sm mx-1">Upload feedback</a>
+    {% endif %}
     {% else %}
     <a href="" class="btn btn-primary btn-sm mx-1 disabled">Upload CSV</a>
     <a href="" class="btn btn-primary btn-sm mx-1 disabled">Validate/generate lists</a>
     <a href="" class="btn btn-secondary btn-sm mx-1 disabled">Add item</a>
     <a href="" class="btn btn-secondary btn-sm mx-1 disabled">Pregenerate items</a>
-    <a href="" class="btn btn-danger btn-sm mx-1 disabled">Delete all</a>
+    {% if study.enable_item_rating_feedback %}
+    <a href="" class="btn btn-danger btn-sm mx-1 disabled">Upload feedback</a>
+    {% endif %}
     {% endif %}
     <a href="{% url 'items-download' experiment.slug %}" class="btn btn-secondary btn-sm mx-1">Download CSV</a>
 </div>

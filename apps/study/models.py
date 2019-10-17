@@ -259,6 +259,11 @@ class Study(models.Model):
     def question(self):
         return self.questions[0] if self.questions else None
 
+    def get_question(self, number):
+        for question in self.questions:
+            if question.number == number:
+                return question
+
     @cached_property
     def is_multi_question(self):
         return len(self.questions) > 1

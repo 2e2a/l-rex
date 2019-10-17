@@ -246,6 +246,75 @@ def itemquestion_formset_helper():
     return formset_helper
 
 
+class ItemFeedbackUploadForm(crispy_forms.CSVUploadForm):
+    file = forms.FileField(
+        help_text='The CSV file must contain a column for the item number, condition, question, scale-values and '
+                  'feedback. Valid column delimiters: colon, semicolon, comma, space, or tab.',
+    )
+    item_number_column = forms.IntegerField(
+        initial=1,
+        help_text='Specify which column contains the item number.',
+    )
+    item_condition_column = forms.IntegerField(
+        initial=2,
+        help_text='Specify which column contains the item condition.',
+    )
+    question_column = forms.IntegerField(
+        initial=3,
+        help_text='Specify which column contains the question number.',
+    )
+    scale_values_column = forms.IntegerField(
+        initial=4,
+        help_text='Specify which column contains the question scale values (comma-separated).',
+    )
+    feedback_column = forms.IntegerField(
+        initial=5,
+        help_text='Specify which column contains the feedback.',
+    )
+
+    validator_int_columns = ['item_number_column', 'question_column']
+
+    def __init__(self, *args, **kwargs):
+        self.experiment = kwargs.pop('experiment')
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        data = contrib_csv.read_file(cleaned_data)
+        reader = csv.reader(
+            StringIO(data), delimiter=self.detected_csv['delimiter'], quoting=self.detected_csv['quoting'])
+        if self.detected_csv['has_header']:
+            next(reader)
+        try:
+            for row in reader:
+                item_num = int(row[cleaned_data['item_number_column'] - 1])
+                item_cond = row[cleaned_data['item_condition_column'] - 1]
+                assert item_cond
+                item_exists = models.Item.objects.filter(
+                    experiment=self.experiment,
+                    number=item_num,
+                    condition=item_cond,
+                ).exists()
+                if not item_exists:
+                    raise forms.ValidationError('Item {}{} does not exist.'.format(item_num, item_cond))
+                question_num = int(row[cleaned_data['question_column'] - 1]) - 1
+                question = self.experiment.study.get_question(question_num)
+                if not question:
+                    raise forms.ValidationError('Question {} does not exist.'.format(question_num))
+                scale_values = row[cleaned_data['scale_values_column'] - 1]
+                assert scale_values
+                if not all(question.is_valid_scale_value(scale_value) for scale_value in scale_values):
+                    raise forms.ValidationError('Invalid scale values {}.'.format(scale_values))
+                assert row[cleaned_data['feedback_column'] - 1]
+            contrib_csv.seek_file(cleaned_data)
+        except (ValueError, AssertionError):
+            raise forms.ValidationError(
+                'File: Unexpected format in line %(n_line)s.',
+                code='invalid',
+                params={'n_line': reader.line_num})
+        return cleaned_data
+
+
 class ItemListUploadForm(crispy_forms.CSVUploadForm):
     file = forms.FileField(
         help_text='The CSV file must contain a column for the item list number, item number and condition.'

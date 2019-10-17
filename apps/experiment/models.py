@@ -107,6 +107,9 @@ class Experiment(models.Model):
         self.items_validated = valid
         self.save()
 
+    def delete_feedbacks(self):
+        item_models.ItemFeedback.objects.filter(item__in=self.items).delete()
+
     def delete_lists(self):
         self.study.delete_questionnaires()
         self.itemlist_set.all().delete()
@@ -433,6 +436,52 @@ class Experiment(models.Model):
             self.delete_lists()
         for item in items_to_delete:
             item.delete()
+
+    def item_feedbacks_csv_header(self, add_experiment_column=False):
+        csv_row = ['experiment'] if add_experiment_column else []
+        csv_row.extend(['item_number', 'item_condition', 'question', 'scale_values', 'feedback'])
+        return csv_row
+
+    def item_feedbacks_csv(self, fileobj, add_header=True, add_experiment_column=False):
+        writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
+        if add_header:
+            header = self.item_feedbacks_csv_header()
+            writer.writerow(header)
+        for item_feedback in item_models.ItemFeedback.objects.filter(item__in=self.items):
+            csv_row = [self.title] if add_experiment_column else []
+            csv_row.extend([
+                item_feedback.item.number,
+                item_feedback.item.condition,
+                item_feedback.question,
+                item_feedback.scale_values,
+                item_feedback.feedback
+            ])
+            writer.writerow(csv_row)
+
+    def item_feedbacks_csv_create(self, fileobj, has_experiment_column=False, user_columns=None, detected_csv=contrib_csv.DEFAULT_DIALECT):
+        self.delete_feedbacks()
+        reader = csv.reader(fileobj, delimiter=detected_csv['delimiter'], quoting=detected_csv['quoting'])
+        if detected_csv['has_header']:
+            next(reader)
+        columns = self._csv_columns(self.item_feedbacks_csv_header, add_experiment_column=has_experiment_column, user_columns=user_columns)
+        for row in reader:
+            if not row:
+                continue
+            if has_experiment_column and not row[columns['experiment']] == self.title:
+                continue
+            item_number = row[columns['item_number']]
+            item_condition = row[columns['item_condition']]
+            item = self.item_set.get(number=item_number, condition=item_condition)
+            question_num = int(row[columns['question']]) - 1
+            question = self.study.get_question(question_num)
+            scale_values = row[columns['scale_values']]
+            feedback = row[columns['feedback']]
+            item_models.ItemFeedback.objects.create(
+                item=item,
+                question=question,
+                scale_values=scale_values,
+                feedback=feedback
+            )
 
     def itemlists_csv_header(self, add_experiment_column=False):
         csv_row = ['experiment'] if add_experiment_column else []

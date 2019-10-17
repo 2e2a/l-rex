@@ -4,6 +4,7 @@ from . import views
 
 urlpatterns_experiment = [
     path('pregenerate/', views.ItemPregenerateView.as_view(), name='items-pregenerate'),
+    path('upload/feedback', views.ItemFeedbackUploadView.as_view(), name='items-upload-feedback'),
     path('upload/', views.ItemUploadView.as_view(), name='items-upload'),
     path('download/', views.ItemCSVDownloadView.as_view(), name='items-download'),
     path('delete-all/', views.ItemDeleteAllView.as_view(), name='items-delete'),

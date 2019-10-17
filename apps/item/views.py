@@ -608,6 +608,49 @@ class ItemFeedbackUpdateView(
         ]
 
 
+class ItemFeedbackUploadView(
+    experiment_views.ExperimentMixin,
+    study_views.CheckStudyCreatorMixin,
+    study_views.DisableFormIfStudyActiveMixin,
+    generic.FormView
+):
+    title = 'Upload item feedback'
+    form_class = forms.ItemFeedbackUploadForm
+    template_name = 'lrex_contrib/crispy_form.html'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['experiment'] = self.experiment
+        return kwargs
+
+    def form_valid(self, form):
+        result = super().form_valid(form)
+        columns = {
+            'item_number': form.cleaned_data['item_number_column'] - 1,
+            'item_condition': form.cleaned_data['item_condition_column'] - 1,
+            'question': form.cleaned_data['question_column'] - 1,
+            'scale_values': form.cleaned_data['scale_values_column'] - 1,
+            'feedback': form.cleaned_data['feedback_column'] - 1,
+        }
+        data = StringIO(contrib_csv.read_file(form.cleaned_data))
+        self.experiment.item_feedbacks_csv_create(data, has_experiment_column=False, user_columns=columns, detected_csv=form.detected_csv)
+        messages.success(self.request, 'Item lists uploaded.')
+        return result
+
+    def get_success_url(self):
+        return reverse('items', args=[self.experiment.slug])
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('experiments',reverse('experiments', args=[self.study.slug])),
+            (self.experiment.title, reverse('experiment', args=[self.experiment.slug])),
+            ('items', reverse('items', args=[self.experiment.slug])),
+            ('upload-feedback', ''),
+        ]
+
 class ItemCSVDownloadView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin, generic.View):
 
     def get(self, request, *args, **kwargs):
