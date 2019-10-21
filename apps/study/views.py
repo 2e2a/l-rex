@@ -119,7 +119,7 @@ class StudyListView(LoginRequiredMixin, generic.ListView):
     @property
     def breadcrumbs(self):
         return [
-            ('studies', reverse('studies')),
+            ('studies', ''),
         ]
 
 

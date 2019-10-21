@@ -1,4 +1,3 @@
-import csv
 from io import StringIO
 from string import ascii_lowercase
 from django.contrib import messages
@@ -122,7 +121,7 @@ class ItemListView(experiment_views.ExperimentMixin, study_views.CheckStudyCreat
         ]
 
 
-class ItemCreateMixin:
+class ItemCreateMixin(contrib_views.PaginationHelperMixin):
     title = 'Add item'
     template_name = 'lrex_contrib/crispy_form.html'
 
@@ -147,8 +146,8 @@ class ItemCreateMixin:
 
     def get_success_url(self):
         if 'save' in self.request.POST:
-            return self.object.get_absolute_url()
-        return reverse('items', args=[self.experiment.slug])
+            return self.url_paginated(self.object.get_absolute_url())
+        return self.reverse_paginated('items', args=[self.experiment.slug])
 
     @property
     def breadcrumbs(self):
@@ -157,16 +156,15 @@ class ItemCreateMixin:
             (self.study.title, reverse('study', args=[self.study.slug])),
             ('experiments',reverse('experiments', args=[self.study.slug])),
             (self.experiment.title, reverse('experiment', args=[self.experiment.slug])),
-            ('items', reverse('items', args=[self.experiment.slug])),
+            ('items', self.reverse_paginated('items', args=[self.experiment.slug])),
             ('create', '')
         ]
 
 
-class ItemUpdateMixin(contrib_views.LeaveWarningMixin):
+class ItemUpdateMixin(contrib_views.LeaveWarningMixin, contrib_views.PaginationHelperMixin):
     title = 'Edit item'
     template_name = 'lrex_contrib/crispy_form.html'
     success_message = 'Item successfully updated.'
-
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -183,8 +181,8 @@ class ItemUpdateMixin(contrib_views.LeaveWarningMixin):
 
     def get_success_url(self):
         if 'save' in self.request.POST:
-            return self.object.get_absolute_url()
-        return reverse('items', args=[self.experiment.slug])
+            return self.url_paginated(self.object.get_absolute_url())
+        return self.reverse_paginated('items', args=[self.experiment.slug])
 
     @property
     def breadcrumbs(self):
@@ -193,7 +191,7 @@ class ItemUpdateMixin(contrib_views.LeaveWarningMixin):
             (self.study.title, reverse('study', args=[self.study.slug])),
             ('experiments',reverse('experiments', args=[self.study.slug])),
             (self.experiment.title, reverse('experiment', args=[self.experiment.slug])),
-            ('items', reverse('items', args=[self.experiment.slug])),
+            ('items', self.reverse_paginated('items', args=[self.experiment.slug])),
             (self.item, ''),
         ]
 
@@ -271,6 +269,7 @@ class ItemDeleteView(
     ItemObjectMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
+    contrib_views.PaginationHelperMixin,
     contrib_views.DefaultDeleteView
 ):
     model = models.Item
@@ -282,7 +281,7 @@ class ItemDeleteView(
         return result
 
     def get_success_url(self):
-        return reverse('items', args=[self.experiment.slug])
+        return self.reverse_paginated('items', args=[self.experiment.slug])
 
     @property
     def breadcrumbs(self):
@@ -291,8 +290,8 @@ class ItemDeleteView(
             (self.study.title, reverse('study', args=[self.study.slug])),
             ('experiments',reverse('experiments', args=[self.study.slug])),
             (self.experiment.title, reverse('experiment', args=[self.experiment.slug])),
-            ('items', reverse('items', args=[self.experiment.slug])),
-            (self.item, reverse('text-item-update', args=[self.item.slug])),
+            ('items', self.reverse_paginated('items', args=[self.experiment.slug])),
+            (self.item, self.reverse_paginated('text-item-update', args=[self.item.slug])),
             ('delete','')
         ]
 
@@ -302,6 +301,7 @@ class ItemPregenerateView(
     study_views.CheckStudyCreatorMixin,
     SuccessMessageMixin,
     study_views.DisableFormIfStudyActiveMixin,
+    contrib_views.PaginationHelperMixin,
     generic.FormView
 ):
     title = 'Pregenerate items'
@@ -342,7 +342,7 @@ class ItemPregenerateView(
         return result
 
     def get_success_url(self):
-        return reverse('items', args=[self.experiment.slug])
+        return self.reverse_paginated('items', args=[self.experiment.slug])
 
     @property
     def breadcrumbs(self):
@@ -351,7 +351,7 @@ class ItemPregenerateView(
             (self.study.title, reverse('study', args=[self.study.slug])),
             ('experiments',reverse('experiments', args=[self.study.slug])),
             (self.experiment.title, reverse('experiment', args=[self.experiment.slug])),
-            ('items', reverse('items', args=[self.experiment.slug])),
+            ('items', self.reverse_paginated('items', args=[self.experiment.slug])),
             ('pregenerate', ''),
         ]
 
@@ -460,6 +460,7 @@ class ItemQuestionsUpdateView(
     study_views.NextStepsMixin,
     study_views.DisableFormIfStudyActiveMixin,
     contrib_views.LeaveWarningMixin,
+    contrib_views.PaginationHelperMixin,
     generic.TemplateView
 ):
     title = 'Customize item questions'
@@ -508,9 +509,9 @@ class ItemQuestionsUpdateView(
                     instance.save()
                 messages.success(request, 'Item questions saved.')
                 if 'submit' in request.POST:
-                    return redirect('items', experiment_slug=self.experiment.slug)
+                    return self.redirect_paginated('items', experiment_slug=self.experiment.slug)
                 else:  # save
-                    return redirect('item-questions', item_slug=self.item.slug)
+                    return self.redirect_paginated('item-questions', item_slug=self.item.slug)
         return super().get(request, *args, **kwargs)
 
     @property
@@ -520,8 +521,8 @@ class ItemQuestionsUpdateView(
             (self.study.title, reverse('study', args=[self.study.slug])),
             ('experiments',reverse('experiments', args=[self.study.slug])),
             (self.experiment.title, reverse('experiment', args=[self.experiment.slug])),
-            ('items', reverse('items', args=[self.experiment.slug])),
-            ('{}-questions'.format(self.item),'')
+            ('items', self.reverse_paginated('items', args=[self.experiment.slug])),
+            ('{}-questions'.format(self.item), '')
         ]
 
 
@@ -531,6 +532,7 @@ class ItemFeedbackUpdateView(
     study_views.NextStepsMixin,
     study_views.DisableFormIfStudyActiveMixin,
     contrib_views.LeaveWarningMixin,
+    contrib_views.PaginationHelperMixin,
     generic.TemplateView
 ):
     title = 'Customize item feedback'
@@ -575,11 +577,11 @@ class ItemFeedbackUpdateView(
             if 'submit' in request.POST:
                 if scale_values_valid:
                     messages.success(request, 'Feedback saved.')
-                    return redirect('items', experiment_slug=self.experiment.slug)
+                    return self.redirect_paginated('items', experiment_slug=self.experiment.slug)
             elif 'save' in request.POST:
                 if scale_values_valid:
                     messages.success(request, 'Feedback saved.')
-                    return redirect('item-feedback', item_slug=self.item.slug)
+                    return self.redirect_paginated('item-feedback', item_slug=self.item.slug)
             elif 'add' in request.POST:
                 self.formset = forms.itemfeedback_formset_factory(extra + 1)(
                     queryset=self.item.itemfeedback_set.all(),
@@ -603,7 +605,7 @@ class ItemFeedbackUpdateView(
             (self.study.title, reverse('study', args=[self.study.slug])),
             ('experiments',reverse('experiments', args=[self.study.slug])),
             (self.experiment.title, reverse('experiment', args=[self.experiment.slug])),
-            ('items', reverse('items', args=[self.experiment.slug])),
+            ('items', self.reverse_paginated('items', args=[self.experiment.slug])),
             ('{}-feedback'.format(self.item),'')
         ]
 
@@ -612,6 +614,7 @@ class ItemFeedbackUploadView(
     experiment_views.ExperimentMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
+    contrib_views.PaginationHelperMixin,
     generic.FormView
 ):
     title = 'Upload item feedback'
@@ -638,7 +641,7 @@ class ItemFeedbackUploadView(
         return result
 
     def get_success_url(self):
-        return reverse('items', args=[self.experiment.slug])
+        return self.reverse_paginated('items', args=[self.experiment.slug])
 
     @property
     def breadcrumbs(self):
@@ -647,7 +650,7 @@ class ItemFeedbackUploadView(
             (self.study.title, reverse('study', args=[self.study.slug])),
             ('experiments',reverse('experiments', args=[self.study.slug])),
             (self.experiment.title, reverse('experiment', args=[self.experiment.slug])),
-            ('items', reverse('items', args=[self.experiment.slug])),
+            ('items', self.reverse_paginated('items', args=[self.experiment.slug])),
             ('upload-feedback', ''),
         ]
 

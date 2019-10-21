@@ -1,4 +1,6 @@
 from django.contrib import messages
+from django.shortcuts import redirect
+from django.urls import reverse
 from django.views import generic
 
 
@@ -65,3 +67,23 @@ class DisableFormMixin:
                 for form in self.formset:
                     self._disbable_form(form)
         return  super().get(request, *args, **kwargs)
+
+
+class PaginationHelperMixin:
+
+    def url_paginated(self, url):
+        page = self.request.GET.get('page', None)
+        if page:
+            url += '?page={}'.format(page)
+        return url
+
+    def reverse_paginated(self, to, **kwargs):
+        if 'args' in kwargs:
+            url = reverse(to, args=kwargs['args'])
+        else:
+            url = reverse(to, kwargs=kwargs)
+        return self.url_paginated(url)
+
+    def redirect_paginated(self, to, *args, **kwargs):
+        url = self.reverse_paginated(to, **kwargs)
+        return redirect(url)
