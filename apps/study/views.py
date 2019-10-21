@@ -136,6 +136,9 @@ class StudyCreateView(LoginRequiredMixin, generic.CreateView):
                   'They will point you to steps that need to be completed while setting up your study. ' \
                   'For more detailed help, consult the <a href="https://github.com/2e2a/l-rex/wiki">Wiki</a>.'
         messages.info(self.request, mark_safe(message))
+        message = 'Consider the <a href="{}">advanced study settings</a>.'\
+                  .format(reverse('study-advanced', args=[self.object]))
+        messages.info(self.request, mark_safe(message))
         return response
 
     @property

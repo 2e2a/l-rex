@@ -15,11 +15,6 @@ class StudyForm(crispy_forms.CrispyModelForm):
         fields = [
             'title',
             'item_type',
-            'password',
-            'require_participant_id',
-            'generate_participation_code',
-            'end_date',
-            'trial_limit'
         ]
 
     def __init__(self, *args, **kwargs):
@@ -34,6 +29,11 @@ class StudyAdvancedForm(crispy_forms.CrispyModelForm):
     class Meta:
         model = models.Study
         fields = [
+            'password',
+            'require_participant_id',
+            'generate_participation_code',
+            'end_date',
+            'trial_limit',
             'use_blocks',
             'pseudo_randomize_question_order',
             'enable_item_rating_feedback',
