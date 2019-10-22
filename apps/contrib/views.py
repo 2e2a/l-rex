@@ -40,7 +40,7 @@ class DisableFormMixin:
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        data['disable_actions'] = self.is_disabled
+        data['is_disabled'] = self.is_disabled
         return data
 
     def _disbable_form(self, form):

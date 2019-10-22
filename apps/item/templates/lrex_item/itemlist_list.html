@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="text-center mb-2">
-    {% if allow_actions and not disable_actions %}
+    {% if allow_actions and not is_disabled %}
     <a href="{% url 'itemlist-upload' experiment.slug %}" class="btn btn-secondary btn-sm mx-1">Upload CSV</a>
     {% else %}
     <a href="" class="btn btn-secondary btn-sm mx-1 disabled">Upload CSV</a>

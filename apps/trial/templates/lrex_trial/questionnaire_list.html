@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="d-flex justify-content-end align-items-center mb-2">
-    {% if allow_actions and not disable_actions %}
+    {% if allow_actions and not is_disabled %}
     {% if study.use_blocks %}
     <a href="{% url 'questionnaire-generate' study.slug %}"
        class="btn btn-primary btn-sm mx-1">

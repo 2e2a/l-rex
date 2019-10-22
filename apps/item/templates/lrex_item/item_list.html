@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="text-center mb-2">
-    {% if not disable_actions %}
+    {% if not is_disabled %}
     <a href="{% url 'items-upload' experiment.slug %}?page={{ page_obj.number}}" class="btn btn-primary btn-sm mx-1">Upload CSV</a>
     <form method="post" class="d-inline">
         {% csrf_token %}
@@ -51,7 +51,7 @@
             {% endif %}
         </div>
         <div class="flex-shrink-0">
-            {% if not disable_actions %}
+            {% if not is_disabled %}
             <a href="{% url item_edit_url_name item_slug=item.slug %}?page={{ page_obj.number}}" class="btn btn-outline-primary btn-sm mx-1">Edit</a>
             <a href="{% url 'item-questions' item_slug=item.slug %}?page={{ page_obj.number}}" class="btn btn-outline-secondary btn-sm mx-1">Customize questions</a>
             {% if study.enable_item_rating_feedback %}
