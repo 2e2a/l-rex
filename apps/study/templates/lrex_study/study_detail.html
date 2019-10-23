@@ -96,7 +96,7 @@
                     <span><img src="{% static 'icons/cog.svg' %} " width="20"></span>
                 </div>
                 <p class="card-text">
-                    Set the general properties of the study. Share the study with other researchers.
+                    Set the general properties of the study. Translate particpant texts. Share the study with other researchers.
                 </p>
                 <div class="row small text-secondary">
                     <div class="col-sm-6">
@@ -112,14 +112,6 @@
                     </div>
                     <div class="col-sm-4">
                         {{ study.require_participant_id|yesno }}
-                    </div>
-                </div>
-                <div class="row small text-secondary">
-                    <div class="col-sm-6">
-                        Participation code:
-                    </div>
-                    <div class="col-sm-4">
-                        {{ study.generate_participation_code|yesno }}
                     </div>
                 </div>
                 <div class="row small text-secondary">
@@ -162,6 +154,7 @@
                 <hr>
                 <a  class="card-link" href="{% url 'study-update' study.slug %}">Settings</a>
                 <a  class="card-link" href="{% url 'study-advanced' study.slug %}">Advanced settings</a>
+                <a  class="card-link" href="{% url 'study-translate' study.slug %}">Translations</a>
                 <a  class="card-link" href="{% url 'study-share' study.slug %}">Share</a>
             </div>
         </div>

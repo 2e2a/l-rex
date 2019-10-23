@@ -820,7 +820,7 @@ class RatingsCreateView(RatingCreateMixin, TrialMixin, generic.TemplateView):
                 for instance in instances:
                     self.formset[instance.question].fields['scale_value'].initial = instance.scale_value.pk
                     self.formset[instance.question].fields['comment'].initial = instance.comment
-                messages.error(request, 'Please answer all questions.')
+                messages.error(request, self.study.answer_questions_message)
                 return response
             elif self.study.enable_item_rating_feedback:
                     show_feedback, feedbacks = self._handle_feedbacks(self.formset, instances)

@@ -37,13 +37,8 @@ class StudyAdvancedForm(crispy_forms.CrispyModelForm):
             'use_blocks',
             'pseudo_randomize_question_order',
             'enable_item_rating_feedback',
-            'feedback_message',
-            'continue_label',
-            'privacy_statement_label',
-            'contact_label',
             'link_instructions',
             'link_block_instructions',
-            'instructions_label'
         ]
 
     def __init__(self, *args, **kwargs):
@@ -57,6 +52,36 @@ class StudyAdvancedForm(crispy_forms.CrispyModelForm):
             crispy_forms.disable_form_field(self, 'use_blocks')
         if disable_feedback:
             crispy_forms.disable_form_field(self, 'enable_item_rating_feedback')
+
+
+class StudyTranslationsForm(crispy_forms.CrispyModelForm):
+
+    class Meta:
+        model = models.Study
+        fields = [
+            'continue_label',
+            'privacy_statement_label',
+            'contact_label',
+            'instructions_label',
+            'optional_label',
+            'comment_label',
+            'answer_question_message',
+            'answer_questions_message',
+            'feedback_message',
+        ]
+
+    def __init__(self, *args, **kwargs):
+        study = kwargs.pop('study')
+        super().__init__(*args, **kwargs)
+        if not study.has_question_rating_comments:
+            self.fields['optional_label'].widget = forms.HiddenInput()
+            self.fields['comment_label'].widget = forms.HiddenInput()
+        if not study.enable_item_rating_feedback:
+            self.fields['feedback_message'].widget = forms.HiddenInput()
+        if len(study.questions) > 1:
+            self.fields['answer_question_message'].widget = forms.HiddenInput()
+        else:
+            self.fields['answer_questions_message'].widget = forms.HiddenInput()
 
 
 class StudyFromArchiveForm(crispy_forms.CrispyForm):

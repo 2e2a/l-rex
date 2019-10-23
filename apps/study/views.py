@@ -136,9 +136,9 @@ class StudyCreateView(LoginRequiredMixin, generic.CreateView):
                   'They will point you to steps that need to be completed while setting up your study. ' \
                   'For more detailed help, consult the <a href="https://github.com/2e2a/l-rex/wiki">Wiki</a>.'
         messages.info(self.request, mark_safe(message))
-        message = 'Consider the <a href="{}">advanced study settings</a>.'\
-                  .format(reverse('study-advanced', args=[self.object]))
-        messages.info(self.request, mark_safe(message))
+        message = 'Consider the <a href="{}">advanced study settings</a> and <a href="{}">translations</a>.'\
+                  .format(reverse('study-advanced', args=[self.object]),reverse('study-translate', args=[self.object]))
+        messages.warning(self.request, mark_safe(message))
         return response
 
     @property
@@ -408,6 +408,48 @@ class StudyAdvancedUpdateView(
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
             ('advanced', ''),
+        ]
+
+
+class StudyTranslationsUpdateView(
+    StudyObjectMixin,
+    CheckStudyCreatorMixin,
+    SuccessMessageMixin,
+    contib_views.LeaveWarningMixin,
+    DisableFormIfStudyActiveMixin,
+    generic.UpdateView,
+):
+    model = models.Study
+    title = 'Translate elements shown to participants'
+    template_name = 'lrex_contrib/crispy_form.html'
+    form_class = forms.StudyTranslationsForm
+    success_message = 'Translations updated.'
+
+    def get(self, request, *args, **kwargs):
+        msg = 'Note: Translatable elements are not shown, when the respective feature is disabled via a study or ' \
+              'a question setting.'
+        messages.info(request, msg)
+        return super().get(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({
+            'study': self.study,
+            'add_save': True,
+        })
+        return kwargs
+
+    def get_success_url(self):
+        if 'save' in self.request.POST:
+            return reverse('study-translate', args=[self.object.slug])
+        return self.object.get_absolute_url()
+
+    @property
+    def breadcrumbs(self):
+        return [
+            ('studies', reverse('studies')),
+            (self.study.title, reverse('study', args=[self.study.slug])),
+            ('translations', ''),
         ]
 
 

@@ -98,26 +98,6 @@ class Study(models.Model):
         default=False,
         help_text='Generate a proof code for participation.',
     )
-    continue_label = models.CharField(
-        max_length=40,
-        default='Continue',
-        help_text='Label of the "Continue" button used during participation.',
-    )
-    feedback_message = models.CharField(
-        max_length=500,
-        default='Please note the following feedback.',
-        help_text='Message indicating that feedback is shown for some ratings (only if feedback feature is enabled).',
-    )
-    privacy_statement_label = models.CharField(
-        max_length=40,
-        default='Privacy statement',
-        help_text='Label for "Privacy statement" used during participation.',
-    )
-    contact_label = models.CharField(
-        max_length=40,
-        default='Contact',
-        help_text='Label for "Contact" used during participation.',
-    )
     link_instructions = models.BooleanField(
         default=False,
         help_text='Make a link to the instructions available at any time during participation.',
@@ -125,11 +105,6 @@ class Study(models.Model):
     link_block_instructions = models.BooleanField(
         default=False,
         help_text='Make the current block instructions available under the instructions link.',
-    )
-    instructions_label = models.CharField(
-        max_length=40,
-        default='Instructions',
-        help_text='Label of the "Instructions" link used during participation.',
     )
     end_date = DateField(
         blank=True,
@@ -192,6 +167,51 @@ class Study(models.Model):
         null=True,
         max_length=5000,
         help_text='This text will be presented to the participants on the last page.',
+    )
+    continue_label = models.CharField(
+        max_length=40,
+        default='Continue',
+        help_text='Label of the "Continue" button used during participation.',
+    )
+    privacy_statement_label = models.CharField(
+        max_length=40,
+        default='Privacy statement',
+        help_text='Label for "Privacy statement" used during participation.',
+    )
+    contact_label = models.CharField(
+        max_length=40,
+        default='Contact',
+        help_text='Label for "Contact" used during participation.',
+    )
+    instructions_label = models.CharField(
+        max_length=40,
+        default='Instructions',
+        help_text='Label of the "Instructions" link used during participation.',
+    )
+    optional_label = models.CharField(
+        max_length=40,
+        default='optional',
+        help_text='Label used for user input fields that can be optional, e.g. comment.',
+    )
+    comment_label = models.CharField(
+        max_length=40,
+        default='Comment',
+        help_text='Label used for the comment field.',
+    )
+    answer_question_message = models.CharField(
+        max_length=500,
+        default='Please answer this question.',
+        help_text='Error message shown to participant, if the question was not answered.',
+    )
+    answer_questions_message = models.CharField(
+        max_length=500,
+        default='Please answer all questions.',
+        help_text='Error message shown to participant, if a question was not answered.',
+    )
+    feedback_message = models.CharField(
+        max_length=500,
+        default='Please note the following feedback.',
+        help_text='Message indicating that feedback is shown for some ratings (only if feedback feature is enabled).',
     )
     is_published = models.BooleanField(
         default=False,

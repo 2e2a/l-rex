@@ -308,11 +308,6 @@ class RatingForm(RatingBaseForm):
     class Meta:
         model = models.Rating
         fields = ['scale_value', 'comment', 'feedback', 'feedbacks_given']
-        error_messages = {
-            'scale_value': {
-                'required': 'Please answer this question.',
-            },
-    }
 
     @property
     def custom_helper(self):
@@ -337,6 +332,7 @@ class RatingForm(RatingBaseForm):
         self.fields['scale_value'].label = question.question
         self.fields['scale_value'].help_text = question.legend
         self.fields['scale_value'].queryset = study_models.ScaleValue.objects.filter(question=question)
+        self.fields['scale_value'].error_messages['required'] = self.study.answer_question_message
         if item_question:
             if item_question.question: self.fields['scale_value'].label = item_question.question
             if item_question.legend: self.fields['scale_value'].help_text = item_question.legend
@@ -355,9 +351,10 @@ class RatingForm(RatingBaseForm):
         if question.rating_comment == question.RATING_COMMENT_NONE:
             self.fields['comment'].widget = forms.HiddenInput()
         elif question.rating_comment == question.RATING_COMMENT_REQUIRED:
+            self.fields['comment'].label = self.study.comment_label
             self.fields['comment'].required = True
         else:
-            self.fields['comment'].label = self.fields['comment'].label + ' (optional)'
+            self.fields['comment'].label = '{} ({})'.format(self.study.comment_label, self.study.optional_label)
 
 
 class RatingFormsetForm(RatingBaseForm):
