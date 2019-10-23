@@ -23,4 +23,5 @@ def bootstrap_alert_class(message_level):
 
 @register.filter
 def markdownify(text):
-    return mark_safe(markdownx_markdownify(text))
+    if text:
+        return mark_safe(markdownx_markdownify(text))
