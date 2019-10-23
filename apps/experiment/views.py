@@ -131,6 +131,7 @@ class ExperimentUpdateView(
     study_views.CheckStudyCreatorMixin,
     SuccessMessageMixin,
     contrib_views.LeaveWarningMixin,
+    study_views.DisableFormIfStudyActiveMixin,
     generic.UpdateView
 ):
     model = models.Experiment

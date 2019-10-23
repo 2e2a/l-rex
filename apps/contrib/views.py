@@ -26,9 +26,10 @@ class LeaveWarningMixin:
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context.update({
-            'leave_warning': True,
-        })
+        if not context.get('is_disabled', False):
+            context.update({
+                'leave_warning': True,
+            })
         return context
 
 

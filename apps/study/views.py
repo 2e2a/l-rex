@@ -220,8 +220,8 @@ class StudyUpdateView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
     SuccessMessageMixin,
-    DisableFormIfStudyActiveMixin,
     contib_views.LeaveWarningMixin,
+    DisableFormIfStudyActiveMixin,
     generic.UpdateView
 ):
     model = models.Study
@@ -369,8 +369,8 @@ class StudyAdvancedUpdateView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
     SuccessMessageMixin,
-    DisableFormIfStudyActiveMixin,
     contib_views.LeaveWarningMixin,
+    DisableFormIfStudyActiveMixin,
     generic.UpdateView,
 ):
     model = models.Study
@@ -415,8 +415,8 @@ class StudyInstructionsUpdateView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
     SuccessMessageMixin,
-    DisableFormIfStudyActiveMixin,
     contib_views.LeaveWarningMixin,
+    DisableFormIfStudyActiveMixin,
     generic.UpdateView,
 ):
     model = models.Study
@@ -450,8 +450,8 @@ class StudyIntroUpdateView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
     SuccessMessageMixin,
-    DisableFormIfStudyActiveMixin,
     contib_views.LeaveWarningMixin,
+    DisableFormIfStudyActiveMixin,
     generic.UpdateView,
 ):
     model = models.Study
@@ -484,8 +484,8 @@ class StudyIntroUpdateView(
 class QuestionUpdateView(
     StudyMixin,
     CheckStudyCreatorMixin,
-    DisableFormIfStudyActiveMixin,
     contib_views.LeaveWarningMixin,
+    DisableFormIfStudyActiveMixin,
     generic.DetailView,
 ):
     model = models.Study
@@ -619,8 +619,8 @@ class StudyContactUpdateView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
     SuccessMessageMixin,
-    DisableFormIfStudyActiveMixin,
     contib_views.LeaveWarningMixin,
+    DisableFormIfStudyActiveMixin,
     generic.UpdateView,
 ):
     model = models.Study
@@ -654,8 +654,8 @@ class StudyPrivacyUpdateView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
     SuccessMessageMixin,
-    DisableFormIfStudyActiveMixin,
     contib_views.LeaveWarningMixin,
+    DisableFormIfStudyActiveMixin,
     generic.UpdateView,
 ):
     model = models.Study
@@ -699,8 +699,8 @@ class StudyResultsCSVDownloadView(StudyObjectMixin, CheckStudyCreatorMixin, gene
 class DemographicsUpdateView(
     StudyMixin,
     CheckStudyCreatorMixin,
-    DisableFormIfStudyActiveMixin,
     contib_views.LeaveWarningMixin,
+    DisableFormIfStudyActiveMixin,
     generic.DetailView,
 ):
     model = models.Study

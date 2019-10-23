@@ -287,8 +287,8 @@ class QuestionnaireDeleteAllView(
 class QuestionnaireBlockInstructionsUpdateView(
     study_views.StudyMixin,
     study_views.CheckStudyCreatorMixin,
-    contrib_views.DisableFormMixin,
     contrib_views.LeaveWarningMixin,
+    contrib_views.DisableFormMixin,
     generic.TemplateView,
 ):
     title = 'Edit questionnaire block instructions'

@@ -211,8 +211,8 @@ class TextItemUpdateView(
     SuccessMessageMixin,
     ItemObjectMixin,
     study_views.CheckStudyCreatorMixin,
-    study_views.DisableFormIfStudyActiveMixin,
     ItemUpdateMixin,
+    study_views.DisableFormIfStudyActiveMixin,
     generic.UpdateView
 ):
     model = models.TextItem
@@ -458,8 +458,8 @@ class ItemQuestionsUpdateView(
     ItemMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.NextStepsMixin,
-    study_views.DisableFormIfStudyActiveMixin,
     contrib_views.LeaveWarningMixin,
+    study_views.DisableFormIfStudyActiveMixin,
     contrib_views.PaginationHelperMixin,
     generic.TemplateView
 ):
@@ -530,8 +530,8 @@ class ItemFeedbackUpdateView(
     ItemMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.NextStepsMixin,
-    study_views.DisableFormIfStudyActiveMixin,
     contrib_views.LeaveWarningMixin,
+    study_views.DisableFormIfStudyActiveMixin,
     contrib_views.PaginationHelperMixin,
     generic.TemplateView
 ):
