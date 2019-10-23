@@ -605,6 +605,10 @@ class TrialDeleteView(TrialObjectMixin, study_views.CheckStudyCreatorMixin, cont
         return reverse('trials', args=[self.study.slug])
 
 
+class TrialHomeView(study_views.StudyMixin, generic.TemplateView):
+    template_name = 'lrex_trial/trial_home.html'
+
+
 class TrialPrivacyStatementView(study_views.StudyMixin, generic.TemplateView):
     template_name = 'lrex_trial/trial_privacy.html'
 

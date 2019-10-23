@@ -22,6 +22,7 @@ urlpatterns_study = [
     path('participate/', views.TrialCreateView.as_view(), name='trial-create'),
     path('privacy/', views.TrialPrivacyStatementView.as_view(), name='trial-privacy'),
     path('contact/', views.TrialContactView.as_view(), name='trial-contact'),
+    path('home/', views.TrialHomeView.as_view(), name='trial-home'),
 ]
 
 urlpatterns = [

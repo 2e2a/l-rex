@@ -1,0 +1,19 @@
+{% extends "lrex_trial/trial_base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="card my-2">
+    <div class="card-body">
+        <div class="d-flex justify-content-between">
+            <h2 class="card-title">About</h2>
+            <span><img src="{% static 'icons/info-circle.svg' %} " width="20"></span>
+        </div>
+        <p class="card-text">
+            You are participating in an L-Rex experiment. L-REX is a free and open-source platform for linguistic rating experiments.
+        </p>
+        <p class="card-text">
+            Visit the <a href="/">Homepage</a> for further information or to run your oun expriments.
+        </p>
+    </div>
+</div>
+{% endblock %}

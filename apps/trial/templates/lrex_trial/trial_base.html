@@ -15,10 +15,10 @@
 
 <nav class="navbar navbar-expand-md navbar-light bg-white fixed-top grey-shadow">
     <div class="container">
-        <span class="navbar-brand">
+        <a class="navbar-brand" target="_blank" href="{% url 'trial-home' study.slug %}">
             <img src="{% static 'img/logo.svg' %}" width="30" height="30" alt="Logo">
             L-Rex
-        </span>
+        </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
