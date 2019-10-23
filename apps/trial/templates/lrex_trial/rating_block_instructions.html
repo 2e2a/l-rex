@@ -1,16 +1,9 @@
-{% extends "lrex_trial/trial_base.html" %}
+{% extends "lrex_trial/rating_base.html" %}
 
-{% block content %}
-<div class="my-2 p-4 border bg-white">
-    <p>
-        {{ block_instructions_rich }}
+{% block rating_content %}
+<p>
+    {{ block_instructions_rich }}
 
-        <a href="{% url 'rating-create' trial.slug num %}" class="btn btn-primary">{{ study.continue_label }}</a>
-    </p>
-    <div class="text-center my-2">
-        <div class="progress" style="height: 2px;">
-            <div class="progress-bar" role="progressbar" style="width: {{ progress }}%" aria-valuenow="{{ view.progress }}" aria-valuemin="0" aria-valuemax="100"></div>
-        </div>
-    </div>
-</div>
+    <a href="{% url 'rating-create' trial.slug num %}" class="btn btn-primary">{{ study.continue_label }}</a>
+</p>
 {% endblock %}

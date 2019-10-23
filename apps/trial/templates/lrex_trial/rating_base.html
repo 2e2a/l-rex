@@ -1,0 +1,17 @@
+{% extends "lrex_trial/trial_base.html" %}
+
+{% block content %}
+<div class="my-2 p-4 border bg-white">
+    {% block rating_content %}{% endblock %}
+</div>
+<div class="my-2 p-4 border bg-white">
+    <div class="text-center">
+        <div class="progress" style="height: 2px;">
+            <div class="progress-bar" role="progressbar" style="width: {{ progress }}%" aria-valuenow="{{ view.progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+        {% if progress_i and progress_count %}
+        <small>{{ progress_i }}/{{ progress_count }} </small>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
