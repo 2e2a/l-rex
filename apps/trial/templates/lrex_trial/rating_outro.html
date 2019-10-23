@@ -5,11 +5,11 @@
     <p>
         {{ outro_rich }}
     </p>
-    {% if study.generate_participation_code %}
+    {% if not study.require_participant_id %}
     <p>
-        If needed, save the following code as proof of your participation:
+        If needed, save the following subject ID as proof of your participation:
         <code>
-            {{ view.generated_rating_proof }}
+            {{ subject_id }}
         </code>
     </p>
     {% endif %}

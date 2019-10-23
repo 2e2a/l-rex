@@ -94,10 +94,6 @@ class Study(models.Model):
         help_text='Enable if you want participants to enter an ID before participation.',
         verbose_name='Participant ID required',
     )
-    generate_participation_code = models.BooleanField(
-        default=False,
-        help_text='Generate a proof code for participation.',
-    )
     link_instructions = models.BooleanField(
         default=False,
         help_text='Make a link to the instructions available at any time during participation.',
@@ -386,6 +382,15 @@ class Study(models.Model):
         from apps.trial.models import Trial
         Trial.objects.filter(questionnaire__study=self, is_test=True).delete()
 
+    @property
+    def has_subject_mapping(self):
+        from apps.trial.models import Trial, TrialStatus
+        return Trial.objects.filter(questionnaire__study=self).exclude(subject_id=None).exists()
+
+    def delete_subject_mapping(self):
+        from apps.trial.models import Trial, TrialStatus
+        Trial.objects.filter(questionnaire__study=self).update(subject_id=None)
+
     @cached_property
     def is_rating_possible(self):
         return self.status == StudyStatus.ACTIVE or self.status == StudyStatus.STARTED
@@ -531,22 +536,17 @@ class Study(models.Model):
             self.contact_email,
         )
 
-    def rating_proofs_csv(self, fileobj):
+    def subject_mapping_csv(self, fileobj):
         from apps.trial.models import Trial
         writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
         csv_row = [
             'Subject',
-            'Proof code'
+            'ID'
         ]
         writer.writerow(csv_row)
-        trials = Trial.objects.filter(
-            questionnaire__study=self
-        )
-        for trial in trials:
-            csv_row = [
-                trial.subject_id,
-                trial.rating_proof
-            ]
+        trials = Trial.objects.filter(questionnaire__study=self, is_test=False)
+        for i, trial in enumerate(trials, 1):
+            csv_row = [i, trial.subject_id]
             writer.writerow(csv_row)
 
     def settings_csv(self, fileobj):
@@ -558,7 +558,6 @@ class Study(models.Model):
         writer.writerow(['pseudo_randomize_question_order', self.pseudo_randomize_question_order])
         writer.writerow(['password', self.password])
         writer.writerow(['require_participant_id', self.require_participant_id])
-        writer.writerow(['generate_participation_code', self.generate_participation_code])
         writer.writerow(['end_date', self.end_date])
         writer.writerow(['trial_limit', self.trial_limit])
         writer.writerow(['questions', ','.join('"{}"'.format(question) for question in self.questions)])

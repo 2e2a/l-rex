@@ -31,7 +31,6 @@ class StudyAdvancedForm(crispy_forms.CrispyModelForm):
         fields = [
             'password',
             'require_participant_id',
-            'generate_participation_code',
             'end_date',
             'trial_limit',
             'use_blocks',

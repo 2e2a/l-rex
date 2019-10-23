@@ -239,7 +239,7 @@ class Experiment(models.Model):
             row = {}
             item = rating.questionnaire_item.item
             row['_trial'] = rating.trial
-            row['subject'] = rating.trial.subject_id
+            row['subject'] = rating.trial.number
             row['item'] = item.number
             row['condition'] = item.condition
             row['position'] = rating.questionnaire_item.number + 1

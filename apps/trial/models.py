@@ -373,6 +373,8 @@ class Trial(models.Model):
         max_length=200,
         help_text='Provide an identification number/name (as instructed by the experimenter).',
         verbose_name='ID',
+        blank=True,
+        null=True,
     )
     rating_proof = models.CharField(
         max_length=8,
@@ -388,15 +390,16 @@ class Trial(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.subject_id:
-            if Trial.objects.filter(questionnaire__study=self.questionnaire.study, is_test=False).exists():
-                last_trial = Trial.objects.filter(questionnaire__study=self.questionnaire.study, is_test=False).last()
-                try:
-                    self.subject_id = int(last_trial.subject_id) + 1
-                except ValueError:
-                    self.subject_id = 1
-            else:
-                self.subject_id = 1
+            self.subject_id = ''.join(
+                random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(8)
+            )
         return super().save(*args, **kwargs)
+
+    @cached_property
+    def number(self):
+        return Trial.objects.filter(
+            questionnaire__study=self.questionnaire.study, is_test=False, created__lte=self.created,
+        ).count()
 
     @cached_property
     def items(self):
@@ -445,17 +448,6 @@ class Trial(models.Model):
     def init(self, study):
         self.questionnaire = study.next_questionnaire(is_test=self.is_test)
         self.save()
-
-    def generate_rating_proof(self):
-        if self.rating_proof:
-            return self.rating_proof
-        if self.status == TrialStatus.FINISHED:
-            self.rating_proof = ''.join(
-                random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(8)
-            )
-            self.save()
-            return self.rating_proof
-        return None
 
     def get_absolute_url(self):
         return reverse('trial', args=[self.slug])

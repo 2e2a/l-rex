@@ -395,20 +395,30 @@ class TrialListView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, 
     title = 'Trials'
     paginate_by = 16
 
+    def get(self, request, *args, **kwargs):
+        if self.study.has_subject_mapping:
+            message = 'Please, remove the subject mapping, when not needed anymore, to reduce the stored personal data.'
+            messages.warning(request, message)
+        return super().get(request, *args, **kwargs)
+
     def post(self, request, *args, **kwargs):
         action = request.POST.get('action', None)
-        if action and action == 'download_proofs':
-            filename = '{}_PROOFS_{}.csv'.format(self.study.title.replace(' ', '_'), str(now().date()))
-            response = HttpResponse(content_type='text/csv')
-            response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
-            self.study.rating_proofs_csv(response)
-            return response
-        elif action and action == 'delete_tests':
-            self.study.delete_test_trials()
-            messages.success(request, 'All test trials deleted.')
-        elif action and action == 'delete_abandoned':
-            self.study.delete_abandoned_trials()
-            messages.success(request, 'All abandoned trials deleted.')
+        if action:
+            if action == 'download_subjects':
+                filename = '{}_SUBJECTS_{}.csv'.format(self.study.title.replace(' ', '_'), str(now().date()))
+                response = HttpResponse(content_type='text/csv')
+                response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
+                self.study.subject_mapping_csv(response)
+                return response
+            elif action == 'delete_subjects':
+                self.study.delete_subject_mapping()
+                messages.success(request, 'Subject mapping deleted.')
+            elif action == 'delete_tests':
+                self.study.delete_test_trials()
+                messages.success(request, 'All test trials deleted.')
+            elif action == 'delete_abandoned':
+                self.study.delete_abandoned_trials()
+                messages.success(request, 'All abandoned trials deleted.')
         return redirect('trials', study_slug=self.study.slug)
 
     def get_queryset(self):
@@ -861,8 +871,8 @@ class RatingOutroView(TrialMixin, TestWarningMixin, generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        if self.study.generate_participation_code:
-            data['generated_rating_proof'] = self.trial.generate_rating_proof()
+        if not self.study.require_participant_id:
+            data['subject_id'] = self.trial.subject_id
         data['outro_rich'] = mark_safe(markdownify(self.study.outro))
         return data
 
