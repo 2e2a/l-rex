@@ -1,0 +1,111 @@
+{% extends "lrex_home/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<div class="row">
+     <div class="col-md-3 order-md-2">
+         <div class="card my-2">
+             <div class="card-body">
+                 <div class="d-flex justify-content-between">
+                     <h2 class="card-title">Settings</h2>
+                     <span><img src="{% static 'icons/sliders-h.svg' %} " width="20"></span>
+                 </div>
+                 <div class="row small text-secondary">
+                     <div class="col-sm-5">
+                         Filler:
+                     </div>
+                     <div class="col-sm-5">
+                         {{ materials.is_filler|yesno }}
+                     </div>
+                 </div>
+                 {% if study.use_blocks %}
+                 <div class="row small text-secondary">
+                     <div class="col-sm-5">
+                         Example:
+                     </div>
+                     <div class="col-sm-5">
+                         {{ materials.is_example|yesno }}
+                     </div>
+                 </div>
+                 {% endif %}
+                 {% if materials.block > 0 %}
+                 <div class="row small text-secondary">
+                     <div class="col-sm-5">
+                         Block:
+                     </div>
+                     <div class="col-sm-5">
+                         {{ materials.block }}
+                     </div>
+                 </div>
+                 {% endif %}
+                 <hr>
+                 <a href="{% url 'materials-update' materials.slug %}" class="card-link">Settings</a>
+             </div>
+         </div>
+     </div>
+    <div class="col-md-8">
+        <div class="card my-2">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <h2 class="card-title">Items</h2>
+                    <span><img src="{% static 'icons/list-ul.svg' %} " width="20"></span>
+                </div>
+                <p class="card-text">
+                    Add items.
+                </p>
+                <div class="row small text-secondary">
+                    <div class="col-sm-4">
+                        Items created:
+                    </div>
+                    <div class="col-sm-6">
+                        {{ materials.items|length }}
+                    </div>
+                </div>
+                <div class="row small text-secondary">
+                    <div class="col-sm-4">
+                        Item conditions:
+                   </div>
+                    <div class="col-sm-6">
+                        {{ materials.conditions|length }}
+                    </div>
+                </div>
+                <div class="row small text-secondary">
+                    <div class="col-sm-4">
+                        Items validated:
+                    </div>
+                    <div class="col-sm-6">
+                        {% if items_validated %} yes {% else %} no {% endif %}
+                    </div>
+                </div>
+                <hr>
+                <a class="card-link" href="{% url 'items' materials.slug %}">
+                    Items
+                </a>
+            </div>
+        </div>
+
+        <div class="card my-2">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <h2 class="card-title">Lists</h2>
+                    <span><img src="{% static 'icons/list-ol.svg' %} " width="20"></span>
+                </div>
+                <p class="card-text">
+                    Choose how to distribute the items of the materials across participants.
+                </p>
+                <div class="row small text-secondary">
+                    <div class="col-md-3">
+                        Lists generated:
+                    </div>
+                    <div class="col-md-9">
+                        {{ materials.itemlist_set.count }}
+                    </div>
+                </div>
+                <hr>
+                <a class="card-link" href="{% url 'itemlists' materials.slug %}">Lists</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
