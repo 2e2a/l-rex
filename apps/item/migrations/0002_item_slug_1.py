@@ -6,7 +6,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('lrex_item', '0001_initial'),
-        ('lrex_experiment', '0003_update_slugs'),
     ]
 
     operations = [

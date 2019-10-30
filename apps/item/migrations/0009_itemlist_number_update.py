@@ -6,9 +6,9 @@ from django.utils.timezone import now
 
 
 def update(apps, schema_editor):
-    Experiment = apps.get_model('lrex_experiment', 'Experiment')
-    for experiment in Experiment.objects.all():
-        item_lists = experiment.itemlist_set.all().order_by('pk')
+    Materials = apps.get_model('lrex_materials', 'Materials')
+    for materials in Materials.objects.all():
+        item_lists = materials.itemlist_set.all().order_by('pk')
         for i, item_list in enumerate(item_lists):
             item_list.number = i
             item_list.save(update_fields=['number'])

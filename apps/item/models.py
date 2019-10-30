@@ -18,10 +18,6 @@ class Item(models.Model):
         max_length=8,
         help_text='Condition of the item (character limit: 8).',
     )
-    experiment = models.ForeignKey(
-        'lrex_experiment.Experiment',
-        on_delete=models.CASCADE,
-    )
     materials = models.ForeignKey(
         'lrex_materials.Materials',
         on_delete=models.CASCADE,
@@ -112,10 +108,6 @@ class AudioLinkItem(Item):
 
 
 class ItemList(models.Model):
-    experiment = models.ForeignKey(
-        'lrex_experiment.Experiment',
-        on_delete=models.CASCADE,
-    )
     materials = models.ForeignKey(
         'lrex_materials.Materials',
         on_delete=models.CASCADE,

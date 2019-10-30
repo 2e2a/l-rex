@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('lrex_experiment', '0001_initial'),
+        ('lrex_materials', '0001_initial'),
     ]
 
     operations = [
@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
             name='ItemList',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('experiment', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='lrex_experiment.Experiment')),
+                ('materials', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='lrex_materials.Materials')),
             ],
             options={
                 'ordering': ['pk'],
@@ -75,7 +75,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='item',
-            name='experiment',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='lrex_experiment.Experiment'),
+            name='materials',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='lrex_materials.Materials'),
         ),
     ]
