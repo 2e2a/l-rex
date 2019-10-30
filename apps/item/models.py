@@ -18,9 +18,14 @@ class Item(models.Model):
         max_length=8,
         help_text='Condition of the item (character limit: 8).',
     )
+    experiment = models.ForeignKey(
+        'lrex_experiment.Experiment',
+        on_delete=models.CASCADE,
+    )
     materials = models.ForeignKey(
         'lrex_materials.Materials',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        null=True,
     )
     block = models.IntegerField(
         help_text='Number of the questionnaire block in which the item will appear.',
@@ -107,9 +112,14 @@ class AudioLinkItem(Item):
 
 
 class ItemList(models.Model):
+    experiment = models.ForeignKey(
+        'lrex_experiment.Experiment',
+        on_delete=models.CASCADE,
+    )
     materials = models.ForeignKey(
         'lrex_materials.Materials',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        null=True,
     )
     number = models.IntegerField(
         default=0,
