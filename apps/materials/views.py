@@ -53,7 +53,7 @@ class MaterialsListView(
     generic.ListView
 ):
     model = models.Materials
-    title = 'Materialss'
+    title = 'Materials'
 
     def get_queryset(self):
         return super().get_queryset().filter(study=self.study)
@@ -63,7 +63,7 @@ class MaterialsListView(
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study',args=[self.study.slug])),
-            ('materials','')
+            ('materials', '')
         ]
 
 
