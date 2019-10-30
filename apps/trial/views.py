@@ -12,7 +12,7 @@ from django.views import generic
 
 from apps.contrib import csv as contrib_csv
 from apps.contrib import views as contrib_views
-from apps.experiment import views as experiment_views
+from apps.materials import views as materials_views
 from apps.study import views as study_views
 
 from . import forms
@@ -101,7 +101,7 @@ class QuestionnaireListView(
 
     def get(self, request, *args, **kwargs):
         if not self.study.is_allowed_pseudo_randomization:
-            messages.info(request, 'Note: Define filler experiments to use pseudo randomization.')
+            messages.info(request, 'Note: Define filler materials to use pseudo randomization.')
         if not self.study.use_blocks:
             randomization = self._get_prev_randomization()
             self.randomization_form = forms.RandomizationForm(randomization=randomization)
@@ -211,7 +211,7 @@ class QuestionnaireGenerateView(
         self.helper = forms.questionnaire_block_formset_helper(has_exmaple_block=self.study.has_exmaples)
         self.blocks = self.study.item_blocks
         if not self.study.is_allowed_pseudo_randomization:
-            messages.info(request, 'Note: Define filler experiments to use pseudo randomization.')
+            messages.info(request, 'Note: Define filler materials to use pseudo randomization.')
         return super().dispatch(request, *args, **kwargs)
 
     def _initialize_questionnaire_blocks(self):
@@ -305,7 +305,7 @@ class QuestionnaireBlockInstructionsUpdateView(
     def is_disabled(self):
         if self.study.is_active or not self.study.use_blocks:
             return True
-        if any(not experiment.items_validated for experiment in self.study.experiments):
+        if any(not materials.items_validated for materials in self.study.materials_list):
             return True
         return False
 
@@ -315,8 +315,8 @@ class QuestionnaireBlockInstructionsUpdateView(
         )
         if not self.study.use_blocks:
             messages.info(request, 'Blocks are disabled for this study.')
-        elif any(not experiment.items_validated for experiment in self.study.experiments):
-            messages.info(request, 'All experiment items need to be validated before creating block instructions.')
+        elif any(not materials.items_validated for materials in self.study.materials_list):
+            messages.info(request, 'All materials items need to be validated before creating block instructions.')
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -599,8 +599,8 @@ class TrialDeleteView(TrialObjectMixin, study_views.CheckStudyCreatorMixin, cont
 
     def delete(self, *args, **kwargs):
         results = super().delete(*args, **kwargs)
-        for experiment in self.study.experiments:
-            experiment_views.ExperimentResultsView.clear_cache(experiment)
+        for materials in self.study.materials_list:
+            materials_views.MaterialsResultsView.clear_cache(materials)
         return results
 
     @property
@@ -696,7 +696,7 @@ class RatingCreateMixin(ProgressMixin, TestWarningMixin):
         trial_items = self.trial.items
         if self.num < len(trial_items) - 1:
             if self.study.use_blocks and \
-                    trial_items[self.num].experiment_block != trial_items[self.num + 1].experiment_block:
+                    trial_items[self.num].materials_block != trial_items[self.num + 1].materials_block:
                 return reverse('rating-block-instructions', args=[self.trial.slug, self.num + 1])
             return reverse('rating-create', args=[self.trial.slug, self.num + 1])
         return reverse('rating-outro', args=[self.trial.slug])
@@ -776,8 +776,8 @@ class RatingCreateView(RatingCreateMixin, TrialMixin, generic.CreateView):
     def form_valid(self, form):
         form.instance.trial = self.trial
         form.instance.questionnaire_item = self.questionnaire_item
-        for experiment in self.study.experiments:
-            experiment_views.ExperimentResultsView.clear_cache(experiment)
+        for materials in self.study.materials_list:
+            materials_views.MaterialsResultsView.clear_cache(materials)
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -846,8 +846,8 @@ class RatingsCreateView(RatingCreateMixin, TrialMixin, generic.TemplateView):
                 instance.trial = self.trial
                 instance.questionnaire_item = self.questionnaire_item
                 instance.save()
-            for experiment in self.study.experiments:
-                experiment_views.ExperimentResultsView.clear_cache(experiment)
+            for materials in self.study.materials_list:
+                materials_views.MaterialsResultsView.clear_cache(materials)
             return redirect(self.get_next_url())
         return super().get(request, *args, **kwargs)
 

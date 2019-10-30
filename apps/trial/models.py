@@ -16,7 +16,7 @@ from django.urls import reverse
 from django.utils.functional import cached_property
 from django.utils import timezone
 
-from apps.experiment import models as experiment_models
+from apps.materials import models as materials_models
 from apps.item import models as item_models
 from apps.study import models as study_models
 
@@ -63,10 +63,10 @@ class Questionnaire(models.Model):
     def questionnaire_items_by_block(self):
         blocks = OrderedDict()
         for questionnaire_item in self.questionnaireitem_set.all():
-            if questionnaire_item.item.experiment_block in blocks:
-                blocks[questionnaire_item.item.experiment_block].append(questionnaire_item)
+            if questionnaire_item.item.materials_block in blocks:
+                blocks[questionnaire_item.item.materials_block].append(questionnaire_item)
             else:
-                blocks[questionnaire_item.item.experiment_block] = [questionnaire_item]
+                blocks[questionnaire_item.item.materials_block] = [questionnaire_item]
         return blocks
 
     def block_items(self, block):
@@ -96,9 +96,9 @@ class Questionnaire(models.Model):
 
     PSEUDO_RANDOMIZE_TRIES = 1000
 
-    def _experiment_items_with_alternating_conditions(self, experiment_items):
+    def _materials_items_with_alternating_conditions(self, materials_items):
         n_tries = self.PSEUDO_RANDOMIZE_TRIES
-        original_items = deque(experiment_items)
+        original_items = deque(materials_items)
         while n_tries:
             items = original_items.copy()
             pseudo_random_items = deque()
@@ -122,24 +122,24 @@ class Questionnaire(models.Model):
             n_tries -= 1
         raise RuntimeError('Unable to compute alternating conditions.')
 
-    def _pseudo_randomized_experiment_items(self, block_items, experiments):
-        items_by_experiment = {}
-        for id, experiment_items in groupby(block_items, lambda x: x.experiment_id):
-            items = list(experiment_items)
-            if experiments[id].is_filler or len(experiments[id].conditions) == 1:
+    def _pseudo_randomized_materials_items(self, block_items, materials_list):
+        items_by_materials = {}
+        for id, materials_items in groupby(block_items, lambda x: x.materials_id):
+            items = list(materials_items)
+            if materials_list[id].is_filler or len(materials_list[id].conditions) == 1:
                 random.SystemRandom().shuffle(items)
             else:
-                items = self._experiment_items_with_alternating_conditions(items)
-            items_by_experiment[id] = items
-        return items_by_experiment
+                items = self._materials_items_with_alternating_conditions(items)
+            items_by_materials[id] = items
+        return items_by_materials
 
-    def _generate_items_pseudo_random(self, block_items, block_offset, block_slots, experiments):
+    def _generate_items_pseudo_random(self, block_items, block_offset, block_slots, materials_list):
         questionnaire_items = []
         if len(block_slots) != len(block_items):
             raise RuntimeError('Block does not match master slots.')
-        items_by_experiment = self._pseudo_randomized_experiment_items(block_items, experiments)
-        for i, slot_experiment in enumerate(block_slots):
-            item = items_by_experiment[slot_experiment].pop()
+        items_by_materials = self._pseudo_randomized_materials_items(block_items, materials_list)
+        for i, slot_materials in enumerate(block_slots):
+            item = items_by_materials[slot_materials].pop()
             if not item:
                 raise RuntimeError('Block does not match master slots.')
             questionnaire_item = QuestionnaireItem(
@@ -152,8 +152,8 @@ class Questionnaire(models.Model):
 
     PSEUDO_RANDOMIZE_SLOT_TRIES = 1000
 
-    def _compute_block_slots(self, block_items, experiments):
-        filler = list([ id for id, experiment in experiments.items() if experiment.is_filler])
+    def _compute_block_slots(self, block_items, materials_list):
+        filler = list([ id for id, materials in materials_list.items() if materials.is_filler])
         n_tries = self.PSEUDO_RANDOMIZE_SLOT_TRIES
         while n_tries:
             slots = []
@@ -162,11 +162,11 @@ class Questionnaire(models.Model):
             colliding = []
             last_item = None
             for item in items:
-                if item.experiment_id in filler \
+                if item.materials_id in filler \
                         or not last_item \
-                        or last_item.experiment_id in filler \
-                        or last_item.experiment_id != item.experiment_id:
-                    slots.append(item.experiment_id)
+                        or last_item.materials_id in filler \
+                        or last_item.materials_id != item.materials_id:
+                    slots.append(item.materials_id)
                 else:
                     colliding.append(item)
                 last_item = item
@@ -176,8 +176,8 @@ class Questionnaire(models.Model):
                 n_insert_tries =  int(slot_size / 4)
                 while n_insert_tries:
                     pos = random.SystemRandom().randint(0, slot_size - 2)
-                    if item.experiment_id != slots[pos] and item.experiment_id != slots[pos + 1]:
-                        slots.insert(pos + 1, item.experiment_id)
+                    if item.materials_id != slots[pos] and item.materials_id != slots[pos + 1]:
+                        slots.insert(pos + 1, item.materials_id)
                         break
                     n_insert_tries -= 1
                 if not n_insert_tries:
@@ -194,18 +194,18 @@ class Questionnaire(models.Model):
         items = item_models.Item.objects.filter(
             itemlist__in=item_lists
         ).order_by(
-            'experiment_id', 'number', 'condition'
+            'materials_id', 'number', 'condition'
         )
-        items = sorted(items, key=lambda x: x.experiment_block)
+        items = sorted(items, key=lambda x: x.materials_block)
         return list(items)
 
-    def _compute_slots(self, experiments, block_randomization):
+    def _compute_slots(self, materials_list, block_randomization):
         slots = {}
-        items_by_block = groupby(self._item_list_items, lambda x: x.experiment_block)
+        items_by_block = groupby(self._item_list_items, lambda x: x.materials_block)
         for block, block_items in items_by_block:
             block_items = list(block_items)
             if block_randomization[block] == QuestionnaireBlock.RANDOMIZATION_PSEUDO:
-                slots[block] = self._compute_block_slots(block_items, experiments)
+                slots[block] = self._compute_block_slots(block_items, materials_list)
         return slots
 
     def _random_question_permutations(self, n_items):
@@ -244,12 +244,12 @@ class Questionnaire(models.Model):
                         scale_order=','.join(str(p) for p in permutation)
                     )
 
-    def generate_items(self, experiments=None):
-        if not experiments:
-            experiments = {e.id: e for e in experiment_models.Experiment.objects.filter(study=self.study)}
+    def generate_items(self, materials_list=None):
+        if not materials_list:
+            materials_list = {e.id: e for e in materials_models.Materials.objects.filter(study=self.study)}
         block_randomization = self._block_randomization()
-        slots = self._compute_slots(experiments, block_randomization)
-        items_by_block = groupby(self._item_list_items, lambda x: x.experiment_block)
+        slots = self._compute_slots(materials_list, block_randomization)
+        items_by_block = groupby(self._item_list_items, lambda x: x.materials_block)
         block_offset = 0
         questionnaire_items = []
         for block, block_items in items_by_block:
@@ -258,7 +258,7 @@ class Questionnaire(models.Model):
                 questionnaire_items.extend(self._generate_items_random(block_items, block_offset))
             elif block_randomization[block] == QuestionnaireBlock.RANDOMIZATION_PSEUDO:
                 questionnaire_items.extend(
-                    self._generate_items_pseudo_random(block_items, block_offset, slots[block], experiments)
+                    self._generate_items_pseudo_random(block_items, block_offset, slots[block], materials_list)
                 )
             else:
                 questionnaire_items.extend(self._generate_block_items(block_items, block_offset))
@@ -425,7 +425,7 @@ class Trial(models.Model):
         )
         questionnaire_block = QuestionnaireBlock.objects.get(
             study=self.questionnaire.study,
-            block=questionnaire_item.item.experiment_block
+            block=questionnaire_item.item.materials_block
         )
         return questionnaire_block
 

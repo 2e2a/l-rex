@@ -33,7 +33,7 @@
     {% for block, q_item, question_properties in questionnaire_items %}
     <tr>
         <td>{{ forloop.counter }}</td>
-        <td>{{ q_item.item.experiment }}-{{ q_item.item }}</td>
+        <td>{{ q_item.item.materials }}-{{ q_item.item }}</td>
         {% if study.use_blocks %}
         <td>{{ block }}</td>
         {% endif %}

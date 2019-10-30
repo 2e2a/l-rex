@@ -5,7 +5,7 @@
 <table class="table bg-white">
     <thead>
     <tr>
-        <th>Experiment</th>
+        <th>Materials</th>
         <th>Item</th>
         {% if study.pseudo_randomize_question_order %}<th>Question order</th>{% endif %}
         <th>Content</th>
@@ -23,7 +23,7 @@
     <tbody>
     {% for q_item, ratings in trial.questionnaire_item_ratings %}
     <tr>
-        <td>{{ q_item.item.experiment }}</td>
+        <td>{{ q_item.item.materials }}</td>
         <td>
             {{ q_item.item }}
         </td>

@@ -93,7 +93,7 @@ def questionnaire_block_update_formset_helper():
 
 class QuestionnaireUploadForm(crispy_forms.CSVUploadForm):
     file = forms.FileField(
-        help_text='The CSV file must contain a column for the questionnaire number, experiment title, item number and '
+        help_text='The CSV file must contain a column for the questionnaire number, materials title, item number and '
                   'condition. Valid column delimiters: colon, semicolon, comma, space, or tab.',
     )
     questionnaire_column = forms.IntegerField(
@@ -103,12 +103,12 @@ class QuestionnaireUploadForm(crispy_forms.CSVUploadForm):
     items_column = forms.IntegerField(
         initial=3,
         help_text='Specify which column contains the questionnaire items.'
-                  'Format: Comma separated list of <ExperimentTitle>-<Item>-<Condition> (e.g. Filler-1a,Exp-2b,...).'
+                  'Format: Comma separated list of <MaterialsTitle>-<Item>-<Condition> (e.g. Filler-1a,Exp-2b,...).'
     )
     item_lists_column = forms.IntegerField(
         initial=-1,
         help_text='Specify which column contains the questionnaire item lists.'
-                  'Format: Comma separated list of <ExperimentTitle>-<ListNumber> (e.g. Filler-0,Exp-1,...).'
+                  'Format: Comma separated list of <MaterialsTitle>-<ListNumber> (e.g. Filler-0,Exp-1,...).'
     )
 
     validator_int_columns = ['questionnaire_column']
@@ -128,13 +128,13 @@ class QuestionnaireUploadForm(crispy_forms.CSVUploadForm):
             if not match or len(match.groups()) != 3:
                 error_msg = 'Not a valid item format "{}".'.format(item_string)
                 break
-            experiment_title = match.group(1)
+            materials_title = match.group(1)
             item_num = match.group(2)
             item_cond = match.group(3)
             try:
                 item = item_models.Item.objects.get(
-                    experiment__study=study,
-                    experiment__title=experiment_title,
+                    materials__study=study,
+                    materials__title=materials_title,
                     number=item_num,
                     condition=item_cond,
                 )
@@ -157,12 +157,12 @@ class QuestionnaireUploadForm(crispy_forms.CSVUploadForm):
             if not match or len(match.groups()) != 2:
                 error_msg = 'Not a valid item list format "{}".'.format(list_string)
                 break
-            experiment_title = match.group(1)
+            materials_title = match.group(1)
             list_num = match.group(2)
             try:
                 item_list = item_models.ItemList.objects.get(
-                    experiment__study=study,
-                    experiment__title=experiment_title,
+                    materials__study=study,
+                    materials__title=materials_title,
                     number=list_num,
                 )
                 lists.append(item_list)
@@ -183,7 +183,7 @@ class QuestionnaireUploadForm(crispy_forms.CSVUploadForm):
             if item_lists_col > 0:
                 item_lists_string = row[item_lists_col - 1]
                 self.read_item_lists(self.study, item_lists_string)
-        if not len(used_items) == item_models.Item.objects.filter(experiment__study=self.study).count():
+        if not len(used_items) == item_models.Item.objects.filter(materials__study=self.study).count():
             raise forms.ValidationError('Not all items used in questionnaires.')
 
 
