@@ -202,10 +202,10 @@ class StudyDetailView(StudyObjectMixin, CheckStudyCreatorMixin, NextStepsMixin, 
         data['trial_count_finished'] = self.study.trial_count_finished
         data['trial_count_abandoned'] = self.study.trial_count_abandoned
         data['trial_count_test'] = self.study.trial_count_test
-        data['materials_list_ready'] = []
-        data['materials_list_draft'] = []
+        data['materials_ready'] = []
+        data['materials_draft'] = []
         for materials in self.study.materials_list:
-            data['materials_list_ready' if materials.is_complete else 'materials_list_draft'].append(materials)
+            data['materials_ready' if materials.is_complete else 'materials_draft'].append(materials)
         return data
 
     @property
