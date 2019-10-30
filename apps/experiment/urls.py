@@ -15,5 +15,5 @@ urlpatterns = [
     path('<slug:experiment_slug>/delete/', views.ExperimentDeleteView.as_view(), name='experiment-delete'),
     path('<slug:experiment_slug>/results/', views.ExperimentResultsView.as_view(), name='experiment-results'),
     path('<slug:experiment_slug>/results/csv/', views.ExperimentResultsCSVDownloadView.as_view(), name='experiment-results-csv'),
-    path('<slug:experiment_slug>/items/', include(item_urls.urlpatterns_experiment)),
+    path('<slug:experiment_slug>/items/', include(item_urls.urlpatterns_materials)),
 ]
