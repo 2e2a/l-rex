@@ -18,8 +18,8 @@ class Item(models.Model):
         max_length=8,
         help_text='Condition of the item (character limit: 8).',
     )
-    experiment = models.ForeignKey(
-        'lrex_experiment.Experiment',
+    materials = models.ForeignKey(
+        'lrex_materials.Materials',
         on_delete=models.CASCADE
     )
     block = models.IntegerField(
@@ -31,11 +31,11 @@ class Item(models.Model):
         ordering = ['number', 'condition']
 
     @property
-    def experiment_block(self):
-        if self.experiment.is_example:
+    def materials_block(self):
+        if self.materials.is_example:
             return 0
-        if self.experiment.block > 0:
-            return self.experiment.block
+        if self.materials.block > 0:
+            return self.materials.block
         return self.block
 
     @property
@@ -52,7 +52,7 @@ class Item(models.Model):
         return '{}{}'.format(self.number, self.condition)
 
     def save(self, *args, **kwargs):
-        slug = '{}--{}{}'.format(self.experiment.slug, self.number, self.condition)
+        slug = '{}--{}{}'.format(self.materials.slug, self.number, self.condition)
         new_slug = slugify_unique(slug, Item, self.id)
         if new_slug != self.slug:
             self.slug = slugify_unique(slug, Item, self.id)
@@ -107,8 +107,8 @@ class AudioLinkItem(Item):
 
 
 class ItemList(models.Model):
-    experiment = models.ForeignKey(
-        'lrex_experiment.Experiment',
+    materials = models.ForeignKey(
+        'lrex_materials.Materials',
         on_delete=models.CASCADE
     )
     number = models.IntegerField(
@@ -117,15 +117,15 @@ class ItemList(models.Model):
     items = models.ManyToManyField(Item)
 
     class Meta:
-        ordering = ['experiment', 'number']
+        ordering = ['materials', 'number']
 
     def __str__(self):
-        return '{} {}'.format(self.experiment, self.number)
+        return '{} {}'.format(self.materials, self.number)
 
     def next(self):
-        next_list =  self.experiment.itemlist_set.filter(pk__gt=self.pk).first()
+        next_list =  self.materials.itemlist_set.filter(pk__gt=self.pk).first()
         if not next_list:
-            next_list =  self.experiment.itemlist_set.first()
+            next_list =  self.materials.itemlist_set.first()
         return next_list
 
 

@@ -20,9 +20,9 @@ class ItemFormMixin:
         return self.cleaned_data['condition'].strip()
 
     def __init__(self, *args, **kwargs):
-        experiment = kwargs.pop('experiment')
+        materials = kwargs.pop('materials')
         super().__init__(*args, **kwargs)
-        if not experiment.study.use_blocks or experiment.is_example or experiment.block > 0:
+        if not materials.study.use_blocks or materials.is_example or materials.block > 0:
             self.fields['block'].widget = forms.HiddenInput()
 
 
@@ -104,8 +104,8 @@ class ItemUploadForm(crispy_forms.CSVUploadForm):
     validator_int_columns = ['number_column']
 
     def __init__(self, *args, **kwargs):
-        self.experiment = kwargs.pop('experiment')
-        self.study = self.experiment.study
+        self.materials = kwargs.pop('materials')
+        self.study = self.materials.study
         super().__init__(*args, **kwargs)
         if self.study.has_text_items:
             content_help_text = 'Specify which column contains the item text.'
@@ -124,7 +124,7 @@ class ItemUploadForm(crispy_forms.CSVUploadForm):
             )
 
         self.fields['content_column'].help_text = content_help_text
-        if not self.study.use_blocks or self.experiment.is_example or self.experiment.block > 0:
+        if not self.study.use_blocks or self.materials.is_example or self.materials.block > 0:
             self.fields['block_column'].widget = forms.HiddenInput()
         for question in self.study.questions:
             self.fields.update(
@@ -261,7 +261,7 @@ class ItemFeedbackUploadForm(crispy_forms.CSVUploadForm):
     validator_int_columns = ['item_number_column', 'question_column']
 
     def __init__(self, *args, **kwargs):
-        self.experiment = kwargs.pop('experiment')
+        self.materials = kwargs.pop('materials')
         super().__init__(*args, **kwargs)
 
     def check_upload_form(self, reader, cleaned_data):
@@ -270,14 +270,14 @@ class ItemFeedbackUploadForm(crispy_forms.CSVUploadForm):
             item_cond = row[cleaned_data['item_condition_column'] - 1]
             assert item_cond
             item_exists = models.Item.objects.filter(
-                experiment=self.experiment,
+                materials=self.materials,
                 number=item_num,
                 condition=item_cond,
             ).exists()
             if not item_exists:
                 raise forms.ValidationError('Item {}{} does not exist.'.format(item_num, item_cond))
             question_num = int(row[cleaned_data['question_column'] - 1]) - 1
-            question = self.experiment.study.get_question(question_num)
+            question = self.materials.study.get_question(question_num)
             if not question:
                 raise forms.ValidationError('Question {} does not exist.'.format(question_num))
             scale_values = row[cleaned_data['scale_values_column'] - 1]
@@ -298,18 +298,18 @@ class ItemListUploadForm(crispy_forms.CSVUploadForm):
     )
     items_column = forms.IntegerField(
         initial=2,
-        help_text='Specify which column contains the experiment items.'
+        help_text='Specify which column contains the materials items.'
                   'Format: comma-separated list of <Item>-<Condition> (e.g. Filler-1a,Exp-2b,...).'
     )
 
     validator_int_columns = ['list_column']
 
     def __init__(self, *args, **kwargs):
-        self.experiment = kwargs.pop('experiment')
+        self.materials = kwargs.pop('materials')
         super().__init__(*args, **kwargs)
 
     @staticmethod
-    def read_items(experiment, items_string):
+    def read_items(materials, items_string):
         items = []
         error_msg = None
         item_strings = items_string.split(',')
@@ -323,7 +323,7 @@ class ItemListUploadForm(crispy_forms.CSVUploadForm):
             item_cond = match.group(2)
             try:
                 item = models.Item.objects.get(
-                    experiment=experiment,
+                    materials=materials,
                     number=item_num,
                     condition=item_cond,
                 )
@@ -340,8 +340,8 @@ class ItemListUploadForm(crispy_forms.CSVUploadForm):
         for row in reader:
             int(row[cleaned_data['list_column'] - 1])
             items_string = row[cleaned_data['items_column'] - 1]
-            used_items.update(self.read_items(self.experiment, items_string))
-        if not len(used_items) == models.Item.objects.filter(experiment=self.experiment).count():
+            used_items.update(self.read_items(self.materials, items_string))
+        if not len(used_items) == models.Item.objects.filter(materials=self.materials).count():
             raise forms.ValidationError('Not all items used in lists.')
 
 

@@ -2,7 +2,7 @@ from django.urls import path
 
 from . import views
 
-urlpatterns_experiment = [
+urlpatterns_materials = [
     path('pregenerate/', views.ItemPregenerateView.as_view(), name='items-pregenerate'),
     path('upload/feedback', views.ItemFeedbackUploadView.as_view(), name='items-upload-feedback'),
     path('upload/', views.ItemUploadView.as_view(), name='items-upload'),

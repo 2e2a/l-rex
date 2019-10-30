@@ -12,7 +12,7 @@ from django.views import generic
 
 from apps.contrib import views as contrib_views
 from apps.contrib import csv as contrib_csv
-from apps.experiment import views as experiment_views
+from apps.materials import views as materials_views
 from apps.study import views as study_views
 
 from . import forms
@@ -25,11 +25,11 @@ class ItemMixin:
 
     @property
     def study(self):
-        return self.experiment.study
+        return self.materials.study
 
     @property
-    def experiment(self):
-        return  self.item.experiment
+    def materials(self):
+        return  self.item.materials
 
     @property
     def item(self):
@@ -41,7 +41,7 @@ class ItemMixin:
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         data['study'] = self.study
-        data['experiment'] = self.experiment
+        data['materials'] = self.materials
         data['item'] = self.item
         return data
 
@@ -59,11 +59,11 @@ class ItemsValidateMixin:
 
     def validate_items(self):
         try:
-            warnings = self.experiment.validate_items()
+            warnings = self.materials.validate_items()
             messages.success(self.request, 'Items seem valid')
             for warning in warnings:
                 messages.warning(self.request, '{}'.format(warning))
-            lists_url = reverse('itemlists', args=[self.experiment.slug])
+            lists_url = reverse('itemlists', args=[self.materials.slug])
             msg = 'Lists automatically generated. <a href="{}">Check lists.</a>'.format(lists_url)
             messages.success(self.request, mark_safe(msg))
             if self.study.has_questionnaires:
@@ -73,7 +73,7 @@ class ItemsValidateMixin:
             messages.error(self.request, str(e))
 
 
-class ItemListView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin, study_views.NextStepsMixin,
+class ItemListView(materials_views.MaterialsMixin, study_views.CheckStudyCreatorMixin, study_views.NextStepsMixin,
                    study_views.DisableFormIfStudyActiveMixin, ItemsValidateMixin, generic.ListView):
     model = models.Item
     title = 'Items'
@@ -83,10 +83,10 @@ class ItemListView(experiment_views.ExperimentMixin, study_views.CheckStudyCreat
         action = request.POST.get('action', None)
         if action and action == 'validate':
             self.validate_items()
-        return redirect('items', experiment_slug=self.experiment.slug)
+        return redirect('items', materials_slug=self.materials.slug)
 
     def get_queryset(self):
-        return super().get_queryset().filter(experiment=self.experiment).order_by('number','condition')
+        return super().get_queryset().filter(materials=self.materials).order_by('number','condition')
 
     def _item_add_url_name(self):
         if self.study.has_text_items:
@@ -115,8 +115,8 @@ class ItemListView(experiment_views.ExperimentMixin, study_views.CheckStudyCreat
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
-            ('experiments',reverse('experiments', args=[self.study.slug])),
-            (self.experiment.title, reverse('experiment', args=[self.experiment.slug])),
+            ('materials',reverse('materials-list', args=[self.study.slug])),
+            (self.materials.title, reverse('materials', args=[self.materials.slug])),
             ('items', ''),
         ]
 
@@ -129,17 +129,17 @@ class ItemCreateMixin(contrib_views.PaginationHelperMixin):
         kwargs = super().get_form_kwargs()
         kwargs.update({
             'add_save': True,
-            'experiment': self.experiment,
+            'materials': self.materials,
         })
         return kwargs
 
     def form_valid(self, form):
-        form.instance.experiment = self.experiment
+        form.instance.materials = self.materials
         result = super().form_valid(form)
         messages.success(self.request, 'Item created')
-        if self.experiment.is_complete:
-            self.experiment.set_items_validated(False)
-            self.experiment.delete_lists()
+        if self.materials.is_complete:
+            self.materials.set_items_validated(False)
+            self.materials.delete_lists()
             msg = 'Note: Items have changed. Deleting old lists and questionnaires.'
             messages.info(self.request, msg)
         return result
@@ -147,16 +147,16 @@ class ItemCreateMixin(contrib_views.PaginationHelperMixin):
     def get_success_url(self):
         if 'save' in self.request.POST:
             return self.url_paginated(self.object.get_absolute_url())
-        return self.reverse_paginated('items', args=[self.experiment.slug])
+        return self.reverse_paginated('items', args=[self.materials.slug])
 
     @property
     def breadcrumbs(self):
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
-            ('experiments',reverse('experiments', args=[self.study.slug])),
-            (self.experiment.title, reverse('experiment', args=[self.experiment.slug])),
-            ('items', self.reverse_paginated('items', args=[self.experiment.slug])),
+            ('materials',reverse('materials-list', args=[self.study.slug])),
+            (self.materials.title, reverse('materials', args=[self.materials.slug])),
+            ('items', self.reverse_paginated('items', args=[self.materials.slug])),
             ('create', '')
         ]
 
@@ -170,34 +170,34 @@ class ItemUpdateMixin(contrib_views.LeaveWarningMixin, contrib_views.PaginationH
         kwargs = super().get_form_kwargs()
         kwargs.update({
             'add_save': True,
-            'experiment': self.experiment,
+            'materials': self.materials,
         })
         return kwargs
 
     def form_valid(self, form):
         result =  super().form_valid(form)
-        self.experiment.set_items_validated(False)
+        self.materials.set_items_validated(False)
         return result
 
     def get_success_url(self):
         if 'save' in self.request.POST:
             return self.url_paginated(self.object.get_absolute_url())
-        return self.reverse_paginated('items', args=[self.experiment.slug])
+        return self.reverse_paginated('items', args=[self.materials.slug])
 
     @property
     def breadcrumbs(self):
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
-            ('experiments',reverse('experiments', args=[self.study.slug])),
-            (self.experiment.title, reverse('experiment', args=[self.experiment.slug])),
-            ('items', self.reverse_paginated('items', args=[self.experiment.slug])),
+            ('materials',reverse('materials-list', args=[self.study.slug])),
+            (self.materials.title, reverse('materials', args=[self.materials.slug])),
+            ('items', self.reverse_paginated('items', args=[self.materials.slug])),
             (self.item, ''),
         ]
 
 
 class TextItemCreateView(
-    experiment_views.ExperimentMixin,
+    materials_views.MaterialsMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
     ItemCreateMixin,
@@ -220,7 +220,7 @@ class TextItemUpdateView(
 
 
 class MarkdownItemCreateView(
-    experiment_views.ExperimentMixin,
+    materials_views.MaterialsMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
     ItemCreateMixin,
@@ -243,7 +243,7 @@ class MarkdownItemUpdateView(
 
 
 class AudioLinkItemCreateView(
-    experiment_views.ExperimentMixin,
+    materials_views.MaterialsMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
     ItemCreateMixin,
@@ -276,28 +276,28 @@ class ItemDeleteView(
 
     def delete(self, *args, **kwargs):
         result = super().delete(*args, **kwargs)
-        self.experiment.set_items_validated(False)
-        self.experiment.delete_lists()
+        self.materials.set_items_validated(False)
+        self.materials.delete_lists()
         return result
 
     def get_success_url(self):
-        return self.reverse_paginated('items', args=[self.experiment.slug])
+        return self.reverse_paginated('items', args=[self.materials.slug])
 
     @property
     def breadcrumbs(self):
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
-            ('experiments',reverse('experiments', args=[self.study.slug])),
-            (self.experiment.title, reverse('experiment', args=[self.experiment.slug])),
-            ('items', self.reverse_paginated('items', args=[self.experiment.slug])),
+            ('materials',reverse('materials-list', args=[self.study.slug])),
+            (self.materials.title, reverse('materials', args=[self.materials.slug])),
+            ('items', self.reverse_paginated('items', args=[self.materials.slug])),
             (self.item, self.reverse_paginated('text-item-update', args=[self.item.slug])),
             ('delete','')
         ]
 
 
 class ItemPregenerateView(
-    experiment_views.ExperimentMixin,
+    materials_views.MaterialsMixin,
     study_views.CheckStudyCreatorMixin,
     SuccessMessageMixin,
     study_views.DisableFormIfStudyActiveMixin,
@@ -316,48 +316,48 @@ class ItemPregenerateView(
                     models.TextItem.objects.create(
                         number=n_item,
                         condition=condition,
-                        experiment=self.experiment,
+                        materials=self.materials,
                     )
                 elif self.study.has_markdown_items:
                     models.TextItem.objects.create(
                         number=n_item,
                         condition=condition,
-                        experiment=self.experiment,
+                        materials=self.materials,
                     )
                 elif self.study.has_audiolink_items:
                     models.AudioLinkItem.objects.create(
                         number=n_item,
                         condition=condition,
-                        experiment=self.experiment,
+                        materials=self.materials,
                     )
 
     def form_valid(self, form):
         result =  super().form_valid(form)
         n_items = form.cleaned_data['num_items']
         n_conditions = form.cleaned_data['num_conditions']
-        models.Item.objects.filter(experiment=self.experiment).delete()
-        self.experiment.set_items_validated(False)
-        self.experiment.delete_lists()
+        models.Item.objects.filter(materials=self.materials).delete()
+        self.materials.set_items_validated(False)
+        self.materials.delete_lists()
         self._pregenerate_items(n_items, n_conditions)
         return result
 
     def get_success_url(self):
-        return self.reverse_paginated('items', args=[self.experiment.slug])
+        return self.reverse_paginated('items', args=[self.materials.slug])
 
     @property
     def breadcrumbs(self):
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
-            ('experiments',reverse('experiments', args=[self.study.slug])),
-            (self.experiment.title, reverse('experiment', args=[self.experiment.slug])),
-            ('items', self.reverse_paginated('items', args=[self.experiment.slug])),
+            ('materials',reverse('materials-list', args=[self.study.slug])),
+            (self.materials.title, reverse('materials', args=[self.materials.slug])),
+            ('items', self.reverse_paginated('items', args=[self.materials.slug])),
             ('pregenerate', ''),
         ]
 
 
 class ItemUploadView(
-    experiment_views.ExperimentMixin,
+    materials_views.MaterialsMixin,
     study_views.CheckStudyCreatorMixin,
     ItemsValidateMixin,
     study_views.DisableFormIfStudyActiveMixin,
@@ -377,7 +377,7 @@ class ItemUploadView(
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['experiment'] = self.experiment
+        kwargs['materials'] = self.materials
         return kwargs
 
     def form_valid(self, form):
@@ -402,28 +402,28 @@ class ItemUploadView(
             if form.cleaned_data[legend_column] > 0:
                 columns.update({'legend{}'.format(i): form.cleaned_data[legend_column] - 1})
         data = StringIO(contrib_csv.read_file(form.cleaned_data))
-        self.experiment.items_csv_create(data, has_experiment_column=False, user_columns=columns, detected_csv=form.detected_csv)
+        self.materials.items_csv_create(data, has_materials_column=False, user_columns=columns, detected_csv=form.detected_csv)
         messages.success(self.request, 'Items uploaded')
         self.validate_items()
         return result
 
     def get_success_url(self):
-        return reverse('items', args=[self.experiment.slug])
+        return reverse('items', args=[self.materials.slug])
 
     @property
     def breadcrumbs(self):
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
-            ('experiments',reverse('experiments', args=[self.study.slug])),
-            (self.experiment.title, reverse('experiment', args=[self.experiment.slug])),
-            ('items', reverse('items', args=[self.experiment.slug])),
+            ('materials',reverse('materials-list', args=[self.study.slug])),
+            (self.materials.title, reverse('materials', args=[self.materials.slug])),
+            ('items', reverse('items', args=[self.materials.slug])),
             ('upload', ''),
         ]
 
 
 class ItemDeleteAllView(
-    experiment_views.ExperimentMixin,
+    materials_views.MaterialsMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
     generic.TemplateView
@@ -433,9 +433,9 @@ class ItemDeleteAllView(
     message =  'Delete all items?'
 
     def post(self, request, *args, **kwargs):
-        models.Item.objects.filter(experiment=self.experiment).delete()
-        self.experiment.set_items_validated(False)
-        self.experiment.delete_lists()
+        models.Item.objects.filter(materials=self.materials).delete()
+        self.materials.set_items_validated(False)
+        self.materials.delete_lists()
         messages.success(self.request, 'All items deleted.')
         return redirect(self.get_success_url())
 
@@ -444,14 +444,14 @@ class ItemDeleteAllView(
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
-            ('experiments',reverse('experiments', args=[self.study.slug])),
-            (self.experiment.title, reverse('experiment', args=[self.experiment.slug])),
-            ('items', reverse('items', args=[self.experiment.slug])),
+            ('materials',reverse('materials-list', args=[self.study.slug])),
+            (self.materials.title, reverse('materials', args=[self.materials.slug])),
+            ('items', reverse('items', args=[self.materials.slug])),
             ('delete-all','')
         ]
 
     def get_success_url(self):
-        return reverse('items', args=[self.experiment.slug])
+        return reverse('items', args=[self.materials.slug])
 
 
 class ItemQuestionsUpdateView(
@@ -509,7 +509,7 @@ class ItemQuestionsUpdateView(
                     instance.save()
                 messages.success(request, 'Item questions saved.')
                 if 'submit' in request.POST:
-                    return self.redirect_paginated('items', experiment_slug=self.experiment.slug)
+                    return self.redirect_paginated('items', materials_slug=self.materials.slug)
                 else:  # save
                     return self.redirect_paginated('item-questions', item_slug=self.item.slug)
         return super().get(request, *args, **kwargs)
@@ -519,9 +519,9 @@ class ItemQuestionsUpdateView(
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
-            ('experiments',reverse('experiments', args=[self.study.slug])),
-            (self.experiment.title, reverse('experiment', args=[self.experiment.slug])),
-            ('items', self.reverse_paginated('items', args=[self.experiment.slug])),
+            ('materials',reverse('materials-list', args=[self.study.slug])),
+            (self.materials.title, reverse('materials', args=[self.materials.slug])),
+            ('items', self.reverse_paginated('items', args=[self.materials.slug])),
             ('{}-questions'.format(self.item), '')
         ]
 
@@ -577,7 +577,7 @@ class ItemFeedbackUpdateView(
             if 'submit' in request.POST:
                 if scale_values_valid:
                     messages.success(request, 'Feedback saved.')
-                    return self.redirect_paginated('items', experiment_slug=self.experiment.slug)
+                    return self.redirect_paginated('items', materials_slug=self.materials.slug)
             elif 'save' in request.POST:
                 if scale_values_valid:
                     messages.success(request, 'Feedback saved.')
@@ -603,15 +603,15 @@ class ItemFeedbackUpdateView(
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
-            ('experiments',reverse('experiments', args=[self.study.slug])),
-            (self.experiment.title, reverse('experiment', args=[self.experiment.slug])),
-            ('items', self.reverse_paginated('items', args=[self.experiment.slug])),
+            ('materials',reverse('materials-list', args=[self.study.slug])),
+            (self.materials.title, reverse('materials', args=[self.materials.slug])),
+            ('items', self.reverse_paginated('items', args=[self.materials.slug])),
             ('{}-feedback'.format(self.item),'')
         ]
 
 
 class ItemFeedbackUploadView(
-    experiment_views.ExperimentMixin,
+    materials_views.MaterialsMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
     contrib_views.PaginationHelperMixin,
@@ -623,7 +623,7 @@ class ItemFeedbackUploadView(
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['experiment'] = self.experiment
+        kwargs['materials'] = self.materials
         return kwargs
 
     def form_valid(self, form):
@@ -636,38 +636,38 @@ class ItemFeedbackUploadView(
             'feedback': form.cleaned_data['feedback_column'] - 1,
         }
         data = StringIO(contrib_csv.read_file(form.cleaned_data))
-        self.experiment.item_feedbacks_csv_create(data, has_experiment_column=False, user_columns=columns, detected_csv=form.detected_csv)
+        self.materials.item_feedbacks_csv_create(data, has_materials_column=False, user_columns=columns, detected_csv=form.detected_csv)
         messages.success(self.request, 'Item lists uploaded.')
         return result
 
     def get_success_url(self):
-        return self.reverse_paginated('items', args=[self.experiment.slug])
+        return self.reverse_paginated('items', args=[self.materials.slug])
 
     @property
     def breadcrumbs(self):
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
-            ('experiments',reverse('experiments', args=[self.study.slug])),
-            (self.experiment.title, reverse('experiment', args=[self.experiment.slug])),
-            ('items', self.reverse_paginated('items', args=[self.experiment.slug])),
+            ('materials',reverse('materials-list', args=[self.study.slug])),
+            (self.materials.title, reverse('materials', args=[self.materials.slug])),
+            ('items', self.reverse_paginated('items', args=[self.materials.slug])),
             ('upload-feedback', ''),
         ]
 
-class ItemCSVDownloadView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin, generic.View):
+class ItemCSVDownloadView(materials_views.MaterialsMixin, study_views.CheckStudyCreatorMixin, generic.View):
 
     def get(self, request, *args, **kwargs):
         filename = '{}_{}_ITEMS_{}.csv'.format(
-            self.study.title.replace(' ', '_'), self.experiment.title.replace(' ', '_'), str(now().date())
+            self.study.title.replace(' ', '_'), self.materials.title.replace(' ', '_'), str(now().date())
         )
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
-        self.experiment.items_csv(response)
+        self.materials.items_csv(response)
         return response
 
 
 class ItemListListView(
-    experiment_views.ExperimentMixin,
+    materials_views.MaterialsMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.NextStepsMixin,
     study_views.DisableFormIfStudyActiveMixin,
@@ -677,11 +677,11 @@ class ItemListListView(
     title = 'Item lists'
 
     def get_queryset(self):
-        return models.ItemList.objects.filter(experiment=self.experiment)
+        return models.ItemList.objects.filter(materials=self.materials)
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        data['allow_actions'] = self.experiment.items_validated
+        data['allow_actions'] = self.materials.items_validated
         return data
 
     @property
@@ -689,14 +689,14 @@ class ItemListListView(
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
-            ('experiments',reverse('experiments', args=[self.study.slug])),
-            (self.experiment.title, reverse('experiment', args=[self.experiment.slug])),
+            ('materials',reverse('materials-list', args=[self.study.slug])),
+            (self.materials.title, reverse('materials', args=[self.materials.slug])),
             ('itemlists', ''),
         ]
 
 
 class ItemListUploadView(
-    experiment_views.ExperimentMixin,
+    materials_views.MaterialsMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
     generic.FormView
@@ -707,43 +707,43 @@ class ItemListUploadView(
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['experiment'] = self.experiment
+        kwargs['materials'] = self.materials
         return kwargs
 
     def form_valid(self, form):
         result = super().form_valid(form)
-        self.experiment.itemlist_set.all().delete()
+        self.materials.itemlist_set.all().delete()
         columns = {
             'list': form.cleaned_data['list_column'] - 1,
             'items': form.cleaned_data['items_column'] - 1,
         }
         data = StringIO(contrib_csv.read_file(form.cleaned_data))
-        self.experiment.itemlists_csv_create(data, has_experiment_column=False, user_columns=columns, detected_csv=form.detected_csv)
+        self.materials.itemlists_csv_create(data, has_materials_column=False, user_columns=columns, detected_csv=form.detected_csv)
         messages.success(self.request, 'Item lists uploaded.')
         return result
 
     def get_success_url(self):
-        return reverse('itemlists', args=[self.experiment.slug])
+        return reverse('itemlists', args=[self.materials.slug])
 
     @property
     def breadcrumbs(self):
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
-            ('experiments',reverse('experiments', args=[self.study.slug])),
-            (self.experiment.title, reverse('experiment', args=[self.experiment.slug])),
-            ('itemlists', reverse('itemlists', args=[self.experiment.slug])),
+            ('materials',reverse('materials-list', args=[self.study.slug])),
+            (self.materials.title, reverse('materials', args=[self.materials.slug])),
+            ('itemlists', reverse('itemlists', args=[self.materials.slug])),
             ('upload', ''),
         ]
 
 
-class ItemListCSVDownloadView(experiment_views.ExperimentMixin, study_views.CheckStudyCreatorMixin, generic.View):
+class ItemListCSVDownloadView(materials_views.MaterialsMixin, study_views.CheckStudyCreatorMixin, generic.View):
 
     def get(self, request, *args, **kwargs):
         filename = '{}_{}_LISTS_{}.csv'.format(
-            self.study.title.replace(' ', '_'), self.experiment.title.replace(' ', '_'), str(now().date())
+            self.study.title.replace(' ', '_'), self.materials.title.replace(' ', '_'), str(now().date())
         )
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
-        self.experiment.itemlists_csv(response)
+        self.materials.itemlists_csv(response)
         return response

@@ -5,81 +5,81 @@ from . import models
 
 @admin.register(models.TextItem)
 class TextItemAdmin(admin.ModelAdmin):
-    date_hierarchy = 'experiment__study__created_date'
+    date_hierarchy = 'materials__study__created_date'
     list_display = (
         'item',
         'study',
-        'experiment',
+        'materials',
         'text',
     )
     list_per_page = 32
     search_fields = (
-        'experiment__study__title',
+        'materials__study__title',
     )
 
     def item(self, obj):
         return str(obj)
 
     def study(self, obj):
-        return obj.experiment.study
+        return obj.materials.study
 
 
 @admin.register(models.AudioLinkItem)
 class AudioLinkItemAdmin(admin.ModelAdmin):
-    date_hierarchy = 'experiment__study__created_date'
+    date_hierarchy = 'materials__study__created_date'
     list_display = (
         'item',
         'study',
-        'experiment',
+        'materials',
         'urls',
     )
     list_per_page = 32
     search_fields = (
-        'experiment__study__title',
+        'materials__study__title',
     )
 
     def item(self, obj):
         return str(obj)
 
     def study(self, obj):
-        return obj.experiment.study
+        return obj.materials.study
 
 
 @admin.register(models.ItemList)
 class ItemListAdmin(admin.ModelAdmin):
-    date_hierarchy = 'experiment__study__created_date'
+    date_hierarchy = 'materials__study__created_date'
     list_display = (
         'number',
         'study',
-        'experiment',
+        'materials',
     )
     list_per_page = 32
     search_fields = (
-        'experiment__study__title',
+        'materials__study__title',
     )
 
     def study(self, obj):
-        return obj.experiment.study
+        return obj.materials.study
 
 
 @admin.register(models.ItemQuestion)
 class ItemQuestionAdmin(admin.ModelAdmin):
-    date_hierarchy = 'item__experiment__study__created_date'
+    date_hierarchy = 'item__materials__study__created_date'
     list_display = (
         'item_question',
         'study',
-        'experiment',
+        'materials',
     )
     list_per_page = 32
     search_fields = (
-        'item__experiment__study__title',
+        'item__materials__study__title',
     )
 
     def item_question(self, obj):
         return '{}-{}'.format(str(obj.item), obj.number)
 
-    def experiment(self, obj):
-        return obj.item.experiment
+    def materials(self, obj):
+        return obj.item.materials
 
     def study(self, obj):
-        return self.experiment(obj).study
+        return self.materials(obj).study
