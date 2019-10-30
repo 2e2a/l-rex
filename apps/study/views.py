@@ -202,10 +202,10 @@ class StudyDetailView(StudyObjectMixin, CheckStudyCreatorMixin, NextStepsMixin, 
         data['trial_count_finished'] = self.study.trial_count_finished
         data['trial_count_abandoned'] = self.study.trial_count_abandoned
         data['trial_count_test'] = self.study.trial_count_test
-        data['experiments_ready'] = []
-        data['experiments_draft'] = []
-        for experiment in self.study.experiments:
-            data['experiments_ready' if experiment.is_complete else 'experiments_draft'].append(experiment)
+        data['materials_list_ready'] = []
+        data['materials_list_draft'] = []
+        for materials in self.study.materials_list:
+            data['materials_list_ready' if materials.is_complete else 'materials_list_draft'].append(materials)
         return data
 
     @property
@@ -233,7 +233,7 @@ class StudyUpdateView(
     def get(self, request, *args, **kwargs):
         if self.study.has_items:
             msg = 'Note: To change the "item type" setting you would need to first ' \
-                  '<a href="{}">remove old items</a> first.'.format(reverse('experiments', args=[self.study.slug]))
+                  '<a href="{}">remove old items</a> first.'.format(reverse('materials_list', args=[self.study.slug]))
             messages.info(request, mark_safe(msg))
         return super().get(request, *args, **kwargs)
 
@@ -557,9 +557,9 @@ class QuestionUpdateView(
         )
         return super().get(request, *args, **kwargs)
 
-    def _invalidate_experiment_items(self):
-        for experiment in self.study.experiments:
-            experiment.set_items_validated(False)
+    def _invalidate_materials_items(self):
+        for materials in self.study.materials_list:
+            materials.set_items_validated(False)
 
     def post(self, request, *args, **kwargs):
         self.formset = forms.question_formset_factory(self.n_questions)(request.POST, request.FILES)
@@ -583,7 +583,7 @@ class QuestionUpdateView(
                         else:
                             scale_values_old.remove(scale_value)
                 if scale_values_old or scale_values_new and self.study.has_item_questions:
-                    self._invalidate_experiment_items()
+                    self._invalidate_materials_items()
                 for scale_value in scale_values_old:
                     scale_value.delete()
             self.n_questions = self.study.question_set.count()
@@ -603,7 +603,7 @@ class QuestionUpdateView(
                 elif self.n_questions > 0:
                     self.study.question_set.last().delete()
                     if self.study.has_item_questions:
-                        self._invalidate_experiment_items()
+                        self._invalidate_materials_items()
                     self.n_questions -= 1
                 self.formset = forms.question_formset_factory(self.n_questions, extra)(
                     queryset=models.Question.objects.filter(study=self.study)

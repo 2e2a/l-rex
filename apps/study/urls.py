@@ -2,7 +2,7 @@ from django.urls import include, path
 
 from . import views
 
-from apps.experiment import urls as experiment_urls
+from apps.materials import urls as materials_urls
 from apps.trial import urls as trial_urls
 
 
@@ -18,7 +18,7 @@ urlpatterns = [
     path('<slug:study_slug>/instructions/', views.StudyInstructionsUpdateView.as_view(), name='study-instructions'),
     path('<slug:study_slug>/questions/', views.QuestionUpdateView.as_view(), name='study-questions'),
     path('<slug:study_slug>/share/', views.SharedWithView.as_view(), name='study-share'),
-    path('<slug:study_slug>/demigraphics/', views.DemographicsUpdateView.as_view(), name='study-demographics'),
+    path('<slug:study_slug>/demographics/', views.DemographicsUpdateView.as_view(), name='study-demographics'),
     path('<slug:study_slug>/contact/', views.StudyContactUpdateView.as_view(), name='study-contact'),
     path('<slug:study_slug>/privacy/', views.StudyPrivacyUpdateView.as_view(), name='study-privacy'),
     path('<slug:study_slug>/intro/', views.StudyIntroUpdateView.as_view(), name='study-intro'),
@@ -27,7 +27,7 @@ urlpatterns = [
     path('<slug:study_slug>/archive/download/', views.StudyArchiveDownloadView.as_view(), name='study-archive-download'),
     path('<slug:study_slug>/restore/', views.StudyRestoreFromArchiveView.as_view(), name='study-archive-restore'),
     path('<slug:study_slug>/copy/', views.StudyCreateCopyView.as_view(), name='study-copy'),
-    path('<slug:study_slug>/experiments/', include(experiment_urls.urlpatterns_study)),
+    path('<slug:study_slug>/materials/', include(materials_urls.urlpatterns_study)),
     path('<slug:study_slug>/questionnaires/', include(trial_urls.urlpatterns_questionnaires_study)),
     path('<slug:study_slug>/trials/', include(trial_urls.urlpatterns_study)),
 ]

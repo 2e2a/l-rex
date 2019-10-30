@@ -234,8 +234,8 @@ class Study(models.Model):
         new_slug = slugify_unique(self.title, Study, self.id)
         if self.slug != new_slug:
             self.slug = new_slug
-            for experiment in self.experiments:
-                experiment.save()
+            for materials in self.materials_list:
+                materials.save()
         return super().save(*args, **kwargs)
 
     def __str__(self):
@@ -245,8 +245,8 @@ class Study(models.Model):
         return reverse('study', args=[self.slug])
 
     @cached_property
-    def experiments(self):
-        return self.experiment_set.all()
+    def materials_list(self):
+        return self.materials_set.all()
 
     @cached_property
     def has_text_items(self):
@@ -263,8 +263,8 @@ class Study(models.Model):
     @cached_property
     def item_blocks(self):
         item_bocks = set()
-        for experiment in self.experiments:
-            item_bocks.update(experiment.item_blocks)
+        for materials in self.materials_list:
+            item_bocks.update(materials.item_blocks)
         return sorted(item_bocks)
 
     @cached_property
@@ -297,14 +297,14 @@ class Study(models.Model):
     @cached_property
     def has_items(self):
         from apps.item.models import Item
-        return Item.objects.filter(experiment__in=self.experiments).exists()
+        return Item.objects.filter(materials__in=self.materials_list).exists()
 
     @cached_property
     def has_item_questions(self):
         from apps.item.models import Item, ItemQuestion
         try:
-            experiment_items = Item.objects.filter(experiment__in=self.experiments).all()
-            return ItemQuestion.objects.filter(item__in=experiment_items).exists()
+            materials_items = Item.objects.filter(materials__in=self.materials_list).all()
+            return ItemQuestion.objects.filter(item__in=materials_items).exists()
         except Item.DoesNotExist:
             return False
 
@@ -319,7 +319,7 @@ class Study(models.Model):
 
     @cached_property
     def has_item_lists(self):
-        return any(experiment.has_lists for experiment in self.experiments)
+        return any(materials.has_lists for materials in self.materials_list)
 
     @cached_property
     def has_demographics(self):
@@ -397,17 +397,17 @@ class Study(models.Model):
 
     @cached_property
     def results_url(self):
-        if self.experiment_set.count() == 1:
-            experiment = self.experiment_set.first()
-            return reverse('experiment-results', args=[experiment.slug])
-        return reverse('experiment-result-list', args=[self.slug])
+        if self.materials_set.count() == 1:
+            materials = self.materials_set.first()
+            return reverse('materials-results', args=[materials.slug])
+        return reverse('materials-result-list', args=[self.slug])
 
     @cached_property
     def is_allowed_create_questionnaires(self):
-        if not self.experiments:
+        if not self.materials_list:
             return False
-        for experiment in self.experiments:
-            if not experiment.is_complete:
+        for materials in self.materials_list:
+            if not materials.is_complete:
                 return False
         return True
 
@@ -419,12 +419,12 @@ class Study(models.Model):
 
     @cached_property
     def is_allowed_pseudo_randomization(self):
-        return self.experiment_set.filter(is_filler=True).count() > 0
+        return self.materials_set.filter(is_filler=True).count() > 0
 
     @cached_property
     def items_validated(self):
-        for experiment in self.experiments:
-            if not experiment.items_validated:
+        for materials in self.materials_list:
+            if not materials.items_validated:
                 return False
         return True
 
@@ -438,7 +438,7 @@ class Study(models.Model):
 
     @cached_property
     def has_exmaples(self):
-        return any(experiment.is_example for experiment in self.experiments)
+        return any(materials.is_example for materials in self.materials_list)
 
     @cached_property
     def has_questionnaires(self):
@@ -465,15 +465,15 @@ class Study(models.Model):
 
     def _questionnaire_count(self):
         questionnaire_lcm = 1
-        for experiment in self.experiments:
-            condition_count = len(experiment.conditions)
+        for materials in self.materials_list:
+            condition_count = len(materials.conditions)
             questionnaire_lcm = math.lcm(questionnaire_lcm,  condition_count)
         return questionnaire_lcm
 
     def _init_questionnaire_lists(self):
         questionnaire_item_list = []
-        for experiment in self.experiments:
-            item_list = experiment.itemlist_set.first()
+        for materials in self.materials_list:
+            item_list = materials.itemlist_set.first()
             questionnaire_item_list.append(item_list)
         return questionnaire_item_list
 
@@ -496,7 +496,7 @@ class Study(models.Model):
             questionnaire.item_lists.add(item_list)
         return questionnaire
 
-    def _generate_questionnaire_permutations(self, experiments, permutations=4):
+    def _generate_questionnaire_permutations(self, materials_list, permutations=4):
         from apps.trial.models import Questionnaire
         if self.randomization_reqiured:
             questionnaires = list(self.questionnaire_set.all())
@@ -506,18 +506,18 @@ class Study(models.Model):
                     num = questionnaire_count * permutation + i + 1
                     questionnaire_permutation=Questionnaire.objects.create(study=self, number=num)
                     questionnaire_permutation.item_lists.set(questionnaire.item_lists.all())
-                    questionnaire_permutation.generate_items(experiments)
+                    questionnaire_permutation.generate_items(materials_list)
 
     def generate_questionnaires(self):
         self.questionnaire_set.all().delete()
-        experiments = {e.id: e for e in self.experiments}
+        materials_list = {e.id: e for e in self.materials_list}
         questionnaire_count = self._questionnaire_count()
         last_questionnaire = None
         for i in range(questionnaire_count):
             last_questionnaire = self._create_next_questionnaire(last_questionnaire, i + 1)
-            last_questionnaire.generate_items(experiments)
+            last_questionnaire.generate_items(materials_list)
         if self.randomization_reqiured:
-            self._generate_questionnaire_permutations(experiments)
+            self._generate_questionnaire_permutations(materials_list)
 
     def delete_questionnaires(self):
         from apps.trial.models import Trial
@@ -566,8 +566,8 @@ class Study(models.Model):
         writer.writerow(['instructions', self.instructions])
         writer.writerow(['outro', self.outro])
         writer.writerow(['continue_label', self.password])
-        writer.writerow(['experiments', ','.join('"{}"'.format(experiment.title) for experiment in self.experiments)])
-        writer.writerow(['filler', ','.join('"{}"'.format(experiment.title) for experiment in self.experiments if experiment.is_filler)])
+        writer.writerow(['materials_list', ','.join('"{}"'.format(materials.title) for materials in self.materials_list)])
+        writer.writerow(['filler', ','.join('"{}"'.format(materials.title) for materials in self.materials_list if materials.is_filler)])
 
     def _read_settings(self, reader):
         study_settings = {}
@@ -594,7 +594,7 @@ class Study(models.Model):
     ]
 
     def settings_csv_restore(self, fileobj):
-        from apps.experiment.models import Experiment
+        from apps.materials.models import Materials
         reader = csv.reader(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
         study_settings = self._read_settings(reader)
         if not self.is_archived:
@@ -621,13 +621,13 @@ class Study(models.Model):
                     question=question,
                     label=scale_value,
                 )
-        experiment_titles = re.findall('"([^"]+)"', study_settings['experiments'])
-        experiment_fillers = re.findall('"([^"]+)"', study_settings['filler'])
-        for experiment_title in experiment_titles:
-            Experiment.objects.create(
+        materials_titles = re.findall('"([^"]+)"', study_settings['materials_list'])
+        materials_fillers = re.findall('"([^"]+)"', study_settings['filler'])
+        for materials_title in materials_titles:
+            Materials.objects.create(
                 study=self,
-                title=experiment_title,
-                is_filler=experiment_title in experiment_fillers,
+                title=materials_title,
+                is_filler=materials_title in materials_fillers,
             )
         self.created_date = now().date()
         self.is_published = False
@@ -635,38 +635,38 @@ class Study(models.Model):
         self.save()
 
     def results_csv(self, fileobj):
-        for i, experiment in enumerate(self.experiments):
+        for i, materials in enumerate(self.materials_list):
             if i == 0:
                 writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
-                header = experiment.results_csv_header(add_experiment_column=True)
+                header = materials.results_csv_header(add_materials_column=True)
                 writer.writerow(header)
-            experiment.results_csv(fileobj, add_header=False, add_experiment_column=True)
+            materials.results_csv(fileobj, add_header=False, add_materials_column=True)
 
     def items_csv(self, fileobj):
-        for i, experiment in enumerate(self.experiments):
+        for i, materials in enumerate(self.materials_list):
             if i == 0:
                 writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
-                header = experiment.items_csv_header(add_experiment_column=True)
+                header = materials.items_csv_header(add_materials_column=True)
                 writer.writerow(header)
-            experiment.items_csv(fileobj, add_header=False, add_experiment_column=True)
+            materials.items_csv(fileobj, add_header=False, add_materials_column=True)
 
     def items_csv_restore(self, fileobj, **kwargs):
-        for experiment in self.experiment_set.all():
+        for materials in self.materials_set.all():
             fileobj.seek(0)
-            experiment.items_csv_create(fileobj, has_experiment_column=True)
+            materials.items_csv_create(fileobj, has_materials_column=True)
 
     def itemlists_csv(self, fileobj):
-        for i, experiment in enumerate(self.experiments):
+        for i, materials in enumerate(self.materials_list):
             if i == 0:
                 writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
-                header = experiment.itemlists_csv_header(add_experiment_column=True)
+                header = materials.itemlists_csv_header(add_materials_column=True)
                 writer.writerow(header)
-            experiment.itemlists_csv(fileobj, add_header=False, add_experiment_column=True)
+            materials.itemlists_csv(fileobj, add_header=False, add_materials_column=True)
 
     def itemlists_csv_restore(self, fileobj, **kwargs):
-        for experiment in self.experiment_set.all():
+        for materials in self.materials_set.all():
             fileobj.seek(0)
-            experiment.itemlists_csv_create(fileobj, has_experiment_column=True)
+            materials.itemlists_csv_create(fileobj, has_materials_column=True)
 
     def _csv_columns(self, header_func, user_columns=None):
         columns = {}
@@ -689,9 +689,9 @@ class Study(models.Model):
         for questionnaire in self.questionnaire_set.all():
             csv_row = [
                 questionnaire.number,
-                ','.join(['{}-{}'.format(item_list.experiment.title, item_list.number)
+                ','.join(['{}-{}'.format(item_list.materials.title, item_list.number)
                           for item_list in questionnaire.item_lists.all()]),
-                ','.join(['{}-{}'.format(item.experiment.title, item) for item in questionnaire.items]),
+                ','.join(['{}-{}'.format(item.materials.title, item) for item in questionnaire.items]),
             ]
             if self.pseudo_randomize_question_order:
                 csv_row.append(
@@ -787,8 +787,8 @@ class Study(models.Model):
 
     def archive(self):
         self.delete_questionnaires()
-        for experiment in self.experiments:
-            experiment.delete()
+        for materials in self.materials_list:
+            materials.delete()
         for question in self.questions:
             question.delete()
         self.is_archived = True
@@ -816,7 +816,7 @@ class Study(models.Model):
         StudySteps.STEP_STD_QUESTION_CREATE: 'create a question',
         StudySteps.STEP_STD_INSTRUCTIONS_EDIT: 'create instructions',
         StudySteps.STEP_STD_INTRO_EDIT: 'create intro/outro',
-        StudySteps.STEP_STD_EXP_CREATE: 'create an experiment',
+        StudySteps.STEP_STD_EXP_CREATE: 'create materials',
         StudySteps.STEP_STD_QUESTIONNAIRES_GENERATE: 'generate questionnaires',
         StudySteps.STEP_STD_BLOCK_INSTRUCTIONS_CREATE: 'define instructions for questionnaire blocks',
         StudySteps.STEP_STD_CONTACT_ADD: 'add contact information',
@@ -832,7 +832,7 @@ class Study(models.Model):
         elif step == StudySteps.STEP_STD_INTRO_EDIT:
             return reverse('study-intro', args=[self.slug])
         elif step == StudySteps.STEP_STD_EXP_CREATE:
-            return reverse('experiment-create', args=[self.slug])
+            return reverse('materials-create', args=[self.slug])
         elif step == StudySteps.STEP_STD_QUESTIONNAIRES_GENERATE:
             return reverse('questionnaires', args=[self.slug])
         elif step == StudySteps.STEP_STD_BLOCK_INSTRUCTIONS_CREATE:
@@ -860,12 +860,12 @@ class Study(models.Model):
         if not self.intro:
             self._append_step_info(next_steps, StudySteps.STEP_STD_INTRO_EDIT, group)
 
-        if not self.experiments:
-            group = 'Experiments'
+        if not self.materials_list:
+            group = 'Materials'
             self._append_step_info(next_steps, StudySteps.STEP_STD_EXP_CREATE, group)
         else:
-            for experiment in self.experiments:
-                next_exp_steps = experiment.next_steps()
+            for materials in self.materials_list:
+                next_exp_steps = materials.next_steps()
                 next_steps.update(next_exp_steps)
 
         group = 'Questionnaires'

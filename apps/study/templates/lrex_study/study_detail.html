@@ -231,7 +231,7 @@
         <div class="card my-2">
             <div class="card-body">
                 <div class="d-flex justify-content-between">
-                    <h2 class="card-title">Experiments</h2>
+                    <h2 class="card-title">Materials</h2>
                     <span><img src="{% static 'icons/file-upload.svg' %} " width="20"></span>
                 </div>
                 <p class="card-text">
@@ -240,12 +240,12 @@
                 </p>
                 <div class="row small text-secondary">
                     <div class="col-sm-3">
-                        Experiments ready:
+                        Materials ready:
                     </div>
                     <div class="col-sm-7">
 
-                        {% for experiment in experiments_ready %}
-                        {{ experiment }}{% if not forloop.last %}, {% endif %}
+                        {% for materials in materials_ready %}
+                        {{ materials }}{% if not forloop.last %}, {% endif %}
                         {% empty %}
                         --
                         {% endfor %}
@@ -254,12 +254,12 @@
                 </div>
                 <div class="row small text-secondary">
                     <div class="col-sm-3">
-                        Experiments in draft:
+                        Materials in draft:
                     </div>
                     <div class="col-sm-7">
 
-                        {% for experiment in experiments_draft %}
-                        {{ experiment }}{% if not forloop.last %}, {% endif %}
+                        {% for materials in materials_draft %}
+                        {{ materials }}{% if not forloop.last %}, {% endif %}
                         {% empty %}
                         --
                         {% endfor %}
@@ -267,7 +267,7 @@
                     </div>
                 </div>
                 <hr>
-                <a  class="card-link" href="{% url 'experiments' study.slug %}">Experiments</a>
+                <a  class="card-link" href="{% url 'materials-list' study.slug %}">Materials</a>
             </div>
         </div>
 
