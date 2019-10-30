@@ -1,0 +1,34 @@
+{% extends "lrex_home/base.html" %}
+
+{% block content %}
+<div class="text-center mb-2">
+    <a href="{% url 'experiment-create' study.slug %}"
+       class="btn btn-primary btn-sm mx-1">
+        New Experiment
+    </a>
+</div>
+<ul class="list-group">
+    {% for experiment in experiment_list %}
+    <li class="list-group-item d-flex">
+        <div class="flex-grow-1">
+            <strong>{{ experiment.title }}</strong>
+            {% if experiment.is_filler %}<span class="badge badge-primary">filler</span>{% endif %}
+            {% if experiment.is_example %}<span class="badge badge-secondary">example</span>{% endif %}
+            {% if experiment.block > 0 %}<span class="badge badge-secondary">block{{ experiment.block }}</span>{% endif %}
+        </div>
+        <div>
+            <a href="{% url 'experiment' experiment.slug %}"
+               class="btn btn-outline-primary btn-sm mx-1">
+                Edit
+            </a>
+            <a href="{% url 'experiment-delete' experiment.slug %}"
+               class="btn btn-outline-danger btn-sm mx-1">
+                Delete
+            </a>
+        </div>
+    </li>
+    {% empty %}
+    <li class="list-group-item">There are currently no experiments.</li>
+    {% endfor %}
+</ul>
+{% endblock %}
