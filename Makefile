@@ -68,7 +68,7 @@ run:
 
 .PHONY: backup
 backup:
-	$(VIRTUAL_ENV)/bin/python3 manage.py dumpdata --natural-foreign --exclude auth.permission --exclude contenttypes --indent 4 > fixtures/backup.json
+	$(VIRTUAL_ENV)/bin/python3 manage.py dumpdata auth.user account lrex_home lrex_study lrex_materials lrex_item lrex_trial --indent 4 > fixtures/backup.json
 
 .PHONY: restore
 restore:
