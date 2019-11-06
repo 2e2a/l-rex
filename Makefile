@@ -66,6 +66,15 @@ migrate:
 run:
 	$(VIRTUAL_ENV)/bin/python3 manage.py runserver 8000
 
+.PHONY: backup
+backup:
+	$(VIRTUAL_ENV)/bin/python3 manage.py dumpdata --natural-foreign --exclude auth.permission --exclude contenttypes --indent 4 > fixtures/backup.json
+
+.PHONY: restore
+restore:
+	$(VIRTUAL_ENV)/bin/python3 manage.py loaddata fixtures/backup.json
+
+
 .PHONY: demo-save
 demo-save:
 	$(VIRTUAL_ENV)/bin/python3 manage.py dumpdata --natural-foreign --exclude auth.permission --exclude contenttypes --indent 4 > fixtures/demo.json
