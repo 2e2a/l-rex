@@ -246,10 +246,7 @@ class MaterialsResultsView(MaterialsObjectMixin, study_views.CheckStudyCreatorMi
         return 'aggregate_by=' + ','.join(self.aggregate_by)
 
     def _aggregated_results(self):
-        results = cache.get(self._cache_key_results())
-        if not results:
-            results = self.object.aggregated_results(self.aggregate_by)
-            cache.set(self._cache_key_results(), results, 60*60*24)
+        results = self.object.aggregated_results(self.aggregate_by)
         paginator = Paginator(results, self.paginate_by)
         results_on_page = paginator.get_page(self.page)
         return results_on_page

@@ -48,8 +48,8 @@
     {% if 'item' not in view.aggregate_by %}<td>{{ row.item }}</td>{% endif %}
     {% if 'condition' not in view.aggregate_by %}<td>{{ row.condition }}</td>{% endif %}
     <td>{{ row.rating_count }}</td>
-    {% for rating in row.ratings %}
-    <td class="table-primary">{{ rating }}</td>
+    {% for rating in row.scale_ratings_flat %}
+    <td class="table-primary">{{ rating|floatformat:2 }}</td>
     {% endfor %}
 </tr>
 {% endfor %}

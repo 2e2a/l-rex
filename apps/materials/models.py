@@ -1,3 +1,4 @@
+import copy
 import csv
 from enum import Enum
 from itertools import groupby
@@ -228,89 +229,83 @@ class Materials(models.Model):
             item_list.items.add(*list(self.items))
 
     def results(self):
-        results = []
         ratings = trial_models.Rating.objects.filter(
             questionnaire_item__item__materials=self,
             trial__is_test=False,
         ).prefetch_related(
             'trial', 'questionnaire_item',
         )
+        results = {}
         for rating in ratings:
-            row = {}
             item = rating.questionnaire_item.item
-            row['_trial'] = rating.trial
-            row['subject'] = rating.trial.number
-            row['item'] = item.number
-            row['condition'] = item.condition
-            row['position'] = rating.questionnaire_item.number + 1
-            if self.study.pseudo_randomize_question_order:
-                row['question_order'] = rating.questionnaire_item.question_order_user
-            if self.study.has_question_with_random_scale:
-                row['random_scale'] = '\n'.join(
-                    q_property.question_scale_user for q_property in rating.questionnaire_item.question_properties
-                )
-            row['question'] = rating.question
-            row['rating'] = rating.scale_value.number
-            row['comment'] = rating.comment
-            row['label'] = rating.scale_value.label
-            row['content'] = item.content
-            results.append(row)
-        results_sorted = sorted(results, key=lambda r: (r['subject'], r['item'], r['condition']))
+            key = '{}-{:02d}{}'.format(rating.trial.number, item.number, item.condition)
+            if key in results:
+                row = results[key]
+                row['questions'].append(rating.question)
+                row['ratings'].append(rating.scale_value.number)
+                row['labels'].append(rating.scale_value.label)
+                row['comments'].append(rating.comment)
+            else:
+                row = {
+                    'subject': rating.trial.number,
+                    'item': item.number,
+                    'condition': item.condition,
+                    'position': rating.questionnaire_item.number + 1,
+                    'content': item.content,
+                    'questions': [rating.question],
+                    'ratings': [rating.scale_value.number],
+                    'labels': [rating.scale_value.label],
+                    'comments': [rating.comment],
+                }
+                if self.study.pseudo_randomize_question_order:
+                    row['question_order'] = rating.questionnaire_item.question_order_user
+                if self.study.has_question_with_random_scale:
+                    row['random_scale'] = '\n'.join(
+                        q_property.question_scale_user for q_property in rating.questionnaire_item.question_properties
+                    )
+                if self.study.has_demographics:
+                    row['demographics'] = [demographic_value.value for demographic_value
+                                           in rating.trial.demographicvalue_set.all()]
+                results[key] = row
+        results_sorted = [results[key] for key in sorted(results)]
         return results_sorted
 
-    def _aggregation_columns(self):
-        return ['subject', 'item', 'condition']
+    def _aggregated_by_subject(self, results):
+        results_by_item = {}
+        for item, results in groupby(results, lambda result: str(result['item']) + result['condition']):
+            if item in results_by_item:
+                results_by_item[item].extend(list(results))
+            else:
+                results_by_item[item] = list(results)
+        aggregated_results = []
+        for key in sorted(results_by_item):
+            results_for_item = results_by_item[key]
+            rating_count = len(results_for_item)
+            aggregated_result = copy.deepcopy(results_for_item[0])
+            aggregated_result['scale_count'] = [None] * len(self.study.questions)
+            for question in self.study.questions:
+                aggregated_result['scale_count'][question.number] = {scale_value.number: 0 for scale_value in question.scale_values}
+                for result in results_for_item:
+                    aggregated_result['scale_count'][question.number][result['ratings'][question.number]] +=1
 
-    def _matching_row(self, row, aggregated_results, columns):
-        match = -1
-        for i, result_row in enumerate(aggregated_results):
-            match = i
-            for col in columns:
-                if result_row[col] != row[col]:
-                    match = -1
-                    break
-            if match >= 0:
-                break
-        return match
+            aggregated_result['scale_ratings'] = {}
+            aggregated_result['scale_ratings_flat'] = []
+            for question_scale_count in aggregated_result['scale_count']:
+                for scale, count in question_scale_count.items():
+                    rating = count / rating_count
+                    aggregated_result['scale_ratings'].update({scale: rating})
+                    aggregated_result['scale_ratings_flat'].append(rating)
 
-    def _question_scale_offset(self):
-        question_scale_offset =  []
-        offset = 0
-        for question in self.study.questions:
-            question_scale_offset.append(offset)
-            offset += question.scalevalue_set.count()
-        return question_scale_offset
+            aggregated_result['rating_count'] = rating_count
+            aggregated_results.append(aggregated_result)
+        return aggregated_results
 
     def aggregated_results(self, columns):
         aggregated_results = []
         results = self.results()
-        scale_value_count = study_models.ScaleValue.objects.filter(question__study=self.study).count()
-        question_scale_offset = self._question_scale_offset()
-        columns_left = list(set(self._aggregation_columns())-set(columns))
-        for row in results:
-            matching_row = self._matching_row(row, aggregated_results, columns_left)
-            if matching_row >= 0:
-                aggregated_row = aggregated_results[matching_row]
-                aggregated_row['rating_count'] += 1
-                aggregated_row['ratings'][question_scale_offset[row['question']] + row['rating']] += 1
-            else:
-                for aggregated_column in columns:
-                    row[aggregated_column] = ''
-                row['rating_count'] = 1
-                row['ratings'] = [0.0] * scale_value_count
-                row['ratings'][question_scale_offset[row['question']] + row['rating']] = 1.0
-                aggregated_results.append(row)
-
-        num_questions = len(self.study.questions)
-        for aggregated_row in aggregated_results:
-            aggregated_row['rating_count'] = aggregated_row['rating_count'] / num_questions
-
-            aggregated_row['ratings'] = \
-                list(map(lambda x: round(x/aggregated_row['rating_count'], 2), aggregated_row['ratings']))
-
-        aggregated_results_sorted = sorted(aggregated_results, key=lambda r: (r['subject'], r['item'], r['condition']))
-
-        return aggregated_results_sorted
+        if columns == ['subject']:
+            aggregated_results = self._aggregated_by_subject(results)
+        return aggregated_results
 
     def items_csv_header(self, add_materials_column=False):
         csv_row = ['materials'] if add_materials_column else []
