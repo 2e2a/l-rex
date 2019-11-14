@@ -233,17 +233,6 @@ class MaterialsResultsView(MaterialsObjectMixin, study_views.CheckStudyCreatorMi
             self.aggregate_by = aggregate_by.split(',')
         return super().dispatch(request, *args, **kwargs)
 
-    def aggregate_by_subject_url_par(self):
-        return 'aggregate_by=subject'
-
-    def aggregate_by_subject_and_item_url_par(self):
-        return 'aggregate_by=subject,item'
-
-    def aggregate_by_label(self):
-        return '+'.join(self.aggregate_by)
-
-    def aggregate_by_url_par(self):
-        return 'aggregate_by=' + ','.join(self.aggregate_by)
 
     def _aggregated_results(self):
         results = self.object.aggregated_results(self.aggregate_by)
@@ -252,9 +241,17 @@ class MaterialsResultsView(MaterialsObjectMixin, study_views.CheckStudyCreatorMi
         return results_on_page
 
     def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-        data['results'] = self._aggregated_results()
-        return data
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'results': self._aggregated_results(),
+            'aggregate_by': self.aggregate_by,
+            'aggregate_by_subject_url_par': 'aggregate_by=subject',
+            'aggregate_by_item_url_par': 'aggregate_by=item',
+            'aggregate_by_subject_and_item_url_par':'aggregate_by=subject,item',
+            'aggregate_by_label': '+'.join(self.aggregate_by),
+            'aggregate_by_url_par': 'aggregate_by=' + ','.join(self.aggregate_by),
+        })
+        return context
 
     @property
     def breadcrumbs(self):

@@ -5,11 +5,12 @@
     <div class="dropdown d-inline">
         <button class="btn  btn-primary btn-sm mx-1 dropdown-toggle" type="button" id="dropdownAggregateBy" data-toggle="dropdown"
                 aria-haspopup="true" aria-expanded="false">
-            Aggregated by: {{ view.aggregate_by_label }}
+            Aggregated by: {{ aggregate_by_label }}
         </button>
         <div class="dropdown-menu" aria-labelledby="dropdownAggregateBy">
-            <a class="dropdown-item" href="?{{view.aggregate_by_subject_url_par }}">subject</a>
-            <a class="dropdown-item" href="?{{view.aggregate_by_subject_and_item_url_par }}">subject+item</a>
+            <a class="dropdown-item" href="?{{aggregate_by_subject_url_par }}">subject</a>
+            <a class="dropdown-item" href="?{{aggregate_by_item_url_par }}">item</a>
+            <a class="dropdown-item" href="?{{aggregate_by_subject_and_item_url_par }}">subject+item</a>
         </div>
     </div>
     <a href="{% url 'materials-results-csv' materials.slug %}"
@@ -30,9 +31,9 @@
 </tr>
 {% endif %}
 <tr>
-    {% if 'subject' not in view.aggregate_by %}<th scope="col">Subject</th>{% endif %}
-    {% if 'item' not in view.aggregate_by %}<th scope="col">Item</th>{% endif %}
-    {% if 'condition' not in view.aggregate_by %}<th scope="col">Condition</th>{% endif %}
+    {% if 'subject' not in aggregate_by %}<th scope="col">Subject</th>{% endif %}
+    {% if 'item' not in aggregate_by %}<th scope="col">Item</th>{% endif %}
+    {% if 'condition' not in aggregate_by %}<th scope="col">Condition</th>{% endif %}
     <th scope="col">N</th>
     {% for question in study.questions %}
         {% for scale_value in question.scalevalue_set.all %}
@@ -44,9 +45,9 @@
 <tbody>
 {% for row in results %}
 <tr>
-    {% if 'subject' not in view.aggregate_by %}<td>{{ row.subject }}</td>{% endif %}
-    {% if 'item' not in view.aggregate_by %}<td>{{ row.item }}</td>{% endif %}
-    {% if 'condition' not in view.aggregate_by %}<td>{{ row.condition }}</td>{% endif %}
+    {% if 'subject' not in aggregate_by %}<td>{{ row.subject }}</td>{% endif %}
+    {% if 'item' not in aggregate_by %}<td>{{ row.item }}</td>{% endif %}
+    {% if 'condition' not in aggregate_by %}<td>{{ row.condition }}</td>{% endif %}
     <td>{{ row.rating_count }}</td>
     {% for rating in row.scale_ratings_flat %}
     <td class="table-primary">{{ rating|floatformat:2 }}</td>
@@ -58,8 +59,8 @@
 <nav aria-label="Pagination">
     <ul class="pagination justify-content-center mt-2">
         {% if results.has_previous %}
-        <li class="page-item"><a class="page-link" href="?page=1&{{ view.aggregate_by_url_par }}">&laquo; first</a></li>
-        <li class="page-item"><a class="page-link" href="?page={{ results.previous_page_number }}&{{ view.aggregate_by_url_par }}">previous</a></li>
+        <li class="page-item"><a class="page-link" href="?page=1&{{ aggregate_by_url_par }}">&laquo; first</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ results.previous_page_number }}&{{ aggregate_by_url_par }}">previous</a></li>
         {% else %}
         <li class="page-item disabled"><a class="page-link">&laquo; first</a></li>
         <li class="page-item disabled"><a class="page-link">previous</a></li>
@@ -70,8 +71,8 @@
         </span>
 
         {% if results.has_next %}
-        <li class="page-item"><a class="page-link" href="?page={{ results.next_page_number }}&{{ view.aggregate_by_url_par }}">next</a></li>
-        <li class="page-item"><a class="page-link" href="?page={{ results.paginator.num_pages }}&{{ view.aggregate_by_url_par }}">last &raquo;</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ results.next_page_number }}&{{ aggregate_by_url_par }}">next</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ results.paginator.num_pages }}&{{ aggregate_by_url_par }}">last &raquo;</a></li>
         {% else %}
         <li class="page-item disabled"><a class="page-link">next</a></li>
         <li class="page-item disabled"><a class="page-link">last &raquo;</a></li>

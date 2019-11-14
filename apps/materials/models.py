@@ -270,16 +270,16 @@ class Materials(models.Model):
         results_sorted = [results[key] for key in sorted(results)]
         return results_sorted
 
-    def _aggregated_by_subject(self, results):
-        results_by_item = {}
-        for item, results in groupby(results, lambda result: str(result['item']) + result['condition']):
-            if item in results_by_item:
-                results_by_item[item].extend(list(results))
+    def _aggregated_results(self, results, group_function):
+        grouped_results = {}
+        for item, results in groupby(results, group_function):
+            if item in grouped_results:
+                grouped_results[item].extend(list(results))
             else:
-                results_by_item[item] = list(results)
+                grouped_results[item] = list(results)
         aggregated_results = []
-        for key in sorted(results_by_item):
-            results_for_item = results_by_item[key]
+        for key in sorted(grouped_results):
+            results_for_item = grouped_results[key]
             rating_count = len(results_for_item)
             aggregated_result = copy.deepcopy(results_for_item[0])
             aggregated_result['scale_count'] = [None] * len(self.study.questions)
@@ -304,7 +304,14 @@ class Materials(models.Model):
         aggregated_results = []
         results = self.results()
         if columns == ['subject']:
-            aggregated_results = self._aggregated_by_subject(results)
+            group_function = lambda result: str(result['item']) + result['condition']
+            aggregated_results = self._aggregated_results(results, group_function)
+        elif columns == ['item']:
+            group_function = lambda result: str(result['subject']) + result['condition']
+            aggregated_results = self._aggregated_results(results, group_function)
+        elif columns == ['subject', 'item']:
+            group_function = lambda result: result['condition']
+            aggregated_results = self._aggregated_results(results, group_function)
         return aggregated_results
 
     def items_csv_header(self, add_materials_column=False):
