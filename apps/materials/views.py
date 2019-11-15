@@ -1,6 +1,5 @@
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
-from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.urls import reverse
@@ -212,19 +211,6 @@ class MaterialsResultsView(MaterialsObjectMixin, study_views.CheckStudyCreatorMi
     aggregate_by = ['subject']
     page = 1
     paginate_by = 16
-
-    @staticmethod
-    def clear_cache(materials):
-        cache.delete_many([
-            '{}-results-subj'.format(materials.slug),
-            '{}-results-subj-item'.format(materials.slug),
-        ])
-
-    def _cache_key_results(self):
-        if self.aggregate_by == ['subject']:
-            return '{}-results-subj'.format(self.materials.slug)
-        else:
-            return '{}-results-subj-item'.format(self.materials.slug)
 
     def dispatch(self, request, *args, **kwargs):
         self.page = request.GET.get('page')

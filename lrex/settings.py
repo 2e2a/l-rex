@@ -97,13 +97,6 @@ DATABASES = {
     }
 }
 
-# Cache
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-    }
-}
-
 # Auth
 LOGIN_REDIRECT_URL = '/'
 
