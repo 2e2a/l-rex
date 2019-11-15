@@ -538,64 +538,27 @@ class Materials(models.Model):
             csv_row.append('demographic{}'.format(i))
         return csv_row
 
-    def _result_lists_for_questions(self, results):
-        aggregated_results = []
-        for row in results:
-            match = self._matching_row(row, aggregated_results, ['subject', 'item', 'condition'])
-            if match >= 0:
-                aggregated_results[match]['ratings'][row['question']] = row['label']
-                aggregated_results[match]['comments'][row['question']] = row['comment']
-            else:
-                new_row = {}
-                n_questions = len(self.study.questions)
-                # TODO: Fixme. Need to adjust for new fields
-                for col in ['_trial', 'subject', 'item', 'condition', 'position']:
-                    new_row[col] = row[col]
-                if 'question_order' in row:
-                    new_row['question_order'] = row['question_order']
-                if 'random_scale' in row:
-                    new_row['random_scale'] = row['random_scale']
-                if 'content' in row:
-                    new_row['content'] = row['content']
-                new_row['ratings'] = [-1] * n_questions
-                new_row['ratings'][row['question']] = row['label']
-                new_row['comments'] = [''] * n_questions
-                new_row['comments'][row['question']] = row['comment']
-                aggregated_results.append(new_row)
-        return aggregated_results
-
-    def _add_demographics(self, results):
-        for row in results:
-            trial = row['_trial']
-            row.update({
-                'demographics': [demographic_value.value for demographic_value in trial.demographicvalue_set.all()]
-            })
-
     def results_csv(self, fileobj, add_header=True, add_materials_column=False):
         writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
         if add_header:
             header = self.results_csv_header()
             writer.writerow(header)
         results = self.results()
-        results = self._result_lists_for_questions(results)
-        if self.study.has_demographics:
-            self._add_demographics(results)
-        for row in results:
+        for result in results:
             csv_row = [self.title] if add_materials_column else []
-            csv_row.extend([row['subject'], row['item'], row['condition'], row['position']])
+            csv_row.extend([result['subject'], result['item'], result['condition'], result['position']])
             if self.study.pseudo_randomize_question_order:
-                csv_row.append(row['question_order'])
+                csv_row.append(result['question_order'])
             if self.study.has_question_with_random_scale:
-                csv_row.append(row['random_scale'])
-            for rating in row['ratings']:
+                csv_row.append(result['random_scale'])
+            for rating in result['labels']:
                 csv_row.append(rating)
             if self.study.has_question_rating_comments:
-                for comment in row['comments']:
+                for comment in result['comments']:
                     csv_row.append(comment if comment else '')
-            csv_row.append(row['content'])
+            csv_row.append(result['content'])
             if self.study.has_demographics:
-                csv_row.extend(row['demographics'])
-
+                csv_row.extend(result['demographics'])
             writer.writerow(csv_row)
 
     STEP_DESCRIPTION = {
