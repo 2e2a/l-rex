@@ -233,7 +233,7 @@ class StudyUpdateView(
     def get(self, request, *args, **kwargs):
         if self.study.has_items:
             msg = 'Note: To change the "item type" setting you would need to first ' \
-                  '<a href="{}">remove old items</a> first.'.format(reverse('materials_list', args=[self.study.slug]))
+                  '<a href="{}">remove old items</a> first.'.format(reverse('materials-list', args=[self.study.slug]))
             messages.info(request, mark_safe(msg))
         return super().get(request, *args, **kwargs)
 
