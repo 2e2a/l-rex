@@ -7,13 +7,15 @@
     <li class="list-group-item d-flex">
         <div class="flex-grow-1">
             <a href="{% url 'study' study.slug %}"><strong>{{ study.title }}</strong></a>
-            <span class="badge badge-secondary">{{ study.status.name }}</span>
-            <span class="badge badge-secondary">{{ study.created_date|date:"SHORT_DATE_FORMAT" }}</span>
-            {% if study.creator != view.request.user %}
+            <div>
+                <span class="badge badge-secondary">{{ study.created_date|date:"SHORT_DATE_FORMAT" }}</span>
+                <span class="badge badge-secondary">{{ study.status.name }}</span>
+                {% if study.creator != view.request.user %}
                 <span class="badge badge-secondary">Shared</span>
-            {% endif %}
+                {% endif %}
+            </div>
         </div>
-        <div class="d-flex">
+        <div class="d-flex align-self-center">
             {% if not study.is_archived %}
             <a href="{% url 'study-archive' study.slug %}" class="btn btn-outline-secondary btn-sm mx-1">Archive</a>
             {% else %}
