@@ -49,6 +49,7 @@ class MaterialsListView(
     study_views.StudyMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.NextStepsMixin,
+    contrib_views.ActionsMixin,
     generic.ListView
 ):
     model = models.Materials
@@ -56,6 +57,12 @@ class MaterialsListView(
 
     def get_queryset(self):
         return super().get_queryset().filter(study=self.study)
+
+    @property
+    def actions(self):
+        return [
+            ('link', 'New Materials', reverse('materials-create', args=[self.study.slug]), 'btn-primary')
+        ]
 
     @property
     def breadcrumbs(self):
@@ -101,6 +108,7 @@ class MaterialsCreateView(
 class MaterialsDetailView(
     MaterialsObjectMixin,
     study_views.CheckStudyCreatorMixin,
+    contrib_views.ActionsMixin,
     study_views.NextStepsMixin,
     generic.DetailView
 ):
@@ -114,6 +122,12 @@ class MaterialsDetailView(
         data = super().get_context_data(**kwargs)
         data['items_validated'] = self.materials.items_validated
         return data
+
+    @property
+    def actions(self):
+        return [
+            ('link', 'Settings', reverse('materials-update', args=[self.materials.slug]), 'btn-primary')
+        ]
 
     @property
     def breadcrumbs(self):
@@ -204,11 +218,17 @@ class MaterialsResultListView(study_views.StudyMixin, study_views.CheckStudyCrea
         ]
 
 
-class MaterialsResultsView(MaterialsObjectMixin, study_views.CheckStudyCreatorMixin, generic.DetailView):
+class MaterialsResultsView(
+    MaterialsObjectMixin,
+    study_views.CheckStudyCreatorMixin,
+    contrib_views.ActionsMixin,
+    generic.DetailView
+):
     model = models.Materials
     title = 'Results'
     template_name = 'lrex_materials/materials_results.html'
     aggregate_by = ['subject']
+    aggregate_by_label = 'subject'
     page = 1
     paginate_by = 16
 
@@ -217,8 +237,8 @@ class MaterialsResultsView(MaterialsObjectMixin, study_views.CheckStudyCreatorMi
         aggregate_by = request.GET.get('aggregate_by')
         if aggregate_by:
             self.aggregate_by = aggregate_by.split(',')
+            self.aggregate_by_label = '+'.join(self.aggregate_by)
         return super().dispatch(request, *args, **kwargs)
-
 
     def _aggregated_results(self):
         results = self.object.aggregated_results(self.aggregate_by)
@@ -231,13 +251,28 @@ class MaterialsResultsView(MaterialsObjectMixin, study_views.CheckStudyCreatorMi
         context.update({
             'results': self._aggregated_results(),
             'aggregate_by': self.aggregate_by,
-            'aggregate_by_subject_url_par': 'aggregate_by=subject',
-            'aggregate_by_item_url_par': 'aggregate_by=item',
-            'aggregate_by_subject_and_item_url_par':'aggregate_by=subject,item',
-            'aggregate_by_label': '+'.join(self.aggregate_by),
+            'aggregate_by_label': self.aggregate_by_label,
             'aggregate_by_url_par': 'aggregate_by=' + ','.join(self.aggregate_by),
         })
         return context
+
+    @property
+    def actions(self):
+        aggregate_action = (
+            'dropdown',
+            'aggregateBy',
+            'Aggregated by: {}'.format(self.aggregate_by_label),
+            [
+                ('subject', '?aggregate_by=subject'),
+                ('item', '?aggregate_by=item'),
+                ('subject+item', '?aggregate_by=subject,item')
+            ],
+            'btn-primary'
+        )
+        return [
+            ('link', 'Download CSV', reverse('materials-results-csv', args=[self.materials.slug]), 'btn-secondary'),
+            aggregate_action,
+        ]
 
     @property
     def breadcrumbs(self):

@@ -1,25 +1,6 @@
 {% extends "lrex_home/base.html" %}
 
 {% block content %}
-<form method="post" class="d-inline">
-    {% csrf_token %}
-    <div class="text-center mb-2">
-        <button type="submit" name="action" value="download_subjects" class="btn btn-primary btn-sm mx-1">
-            Download subject ID mapping
-        </button>
-        <button type="submit" name="action" value="delete_subjects" class="btn btn-secondary btn-sm mx-1">
-            Delete subject ID mapping
-        </button>
-        <button type="submit" name="action" value="delete_tests" class="btn btn-secondary btn-sm mx-1">
-            Delete tests
-        </button>
-        <button type="submit" name="action" value="delete_abandoned" class="btn btn-warning btn-sm mx-1">
-            Delete adandoned
-        </button>
-        <a href="{% url 'trials-delete' study.slug %}" class="btn btn-danger btn-sm mx-1"> Delete all </a>
-    </div>
-</form>
-
 <ul class="list-group">
     {% for trial in trial_list %}
     <li class="list-group-item d-flex">

@@ -1,0 +1,20 @@
+{% load crispy_forms_tags %}
+{% if type == 'link' %}
+<a href="{{ url }}" class ="{{ css }}">{{ name }}</a>
+{% elif type == 'button' %}
+<button type="submit" name="action" value="{{ value }}" class="{{ css }}">{{ name }}</button>
+{% elif type == 'dropdown' %}
+<div class="dropdown d-inline">
+    <button class="btn  btn-sm mx-1 dropdown-toggle {{ css }}" type="button" id="{ id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        {{ name }}
+    </button>
+    <div class="dropdown-menu" aria-labelledby="{{ id }}">
+        {% for name, url in urls %}
+        <a class="dropdown-item" href="{{ url }}">{{ name }}</a>
+        {% endfor %}
+    </div>
+</div>
+{% elif type == 'form' %}
+<!-- TODO: fix layout (font size -> form-control-sm)-->
+{% crispy form helper %}
+{% endif %}

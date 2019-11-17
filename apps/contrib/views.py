@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.shortcuts import redirect
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.views import generic
 
@@ -34,6 +35,7 @@ class LeaveWarningMixin:
 
 
 class DisableFormMixin:
+    # TODO: check for new actions
 
     @property
     def is_disabled(self):
@@ -88,3 +90,65 @@ class PaginationHelperMixin:
     def redirect_paginated(self, to, *args, **kwargs):
         url = self.reverse_paginated(to, **kwargs)
         return redirect(url)
+
+
+class ActionsMixin:
+    actions = None
+    secondary_actions = None
+
+    ACTION_CSS_BUTTON_PRIMARY = 'btn btn-sm mx-1 btn-primary'
+    ACTION_CSS_BUTTON_SECONDARY = 'btn btn-sm mx-1 btn-seconary'
+
+    def _get_action_html(self, action_type, action):
+        action_context = {
+            'type': action_type,
+        }
+        if action_type == 'link':
+            name, url, ccs = action
+            action_context.update({
+                'name': name,
+                'url': url,
+                'css': ccs,
+            })
+        elif action_type == 'button':
+            name, value, ccs = action
+            action_context.update({
+                'name': name,
+                'value': value,
+                'css': ccs,
+            })
+        elif action_type == 'dropdown':
+            id, name, urls, ccs = action
+            action_context.update({
+                'name': name,
+                'id': id,
+                'urls': urls,
+                'css': ccs,
+            })
+        elif action_type == 'form':
+            form, helper = action
+            action_context.update({
+                'form': form,
+                'helper': helper,
+            })
+        return render_to_string('lrex_contrib/action.html', action_context)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.actions:
+            actions_html = []
+            for action in self.actions:
+                actions_html.append(self._get_action_html(action[0], action[1:]))
+            context.update({
+                'actions': actions_html,
+            })
+        if self.secondary_actions:
+            actions_html = []
+            for action in self.secondary_actions:
+                action += ('dropdown-item',)
+                actions_html.append(self._get_action_html(action[0], action[1:]))
+            context.update({
+                'secondary_actions': actions_html,
+            })
+
+        return context

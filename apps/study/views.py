@@ -105,7 +105,7 @@ class CheckStudyCreatorMixin(UserPassesTestMixin):
         return False
 
 
-class StudyListView(LoginRequiredMixin, generic.ListView):
+class StudyListView(LoginRequiredMixin, contib_views.ActionsMixin, generic.ListView):
     model = models.Study
     title = 'Studies'
     paginate_by = 16
@@ -119,13 +119,13 @@ class StudyListView(LoginRequiredMixin, generic.ListView):
     @property
     def actions(self):
         return [
-            ('New Study', reverse('study-create'), 'primary')
+            ('link', 'New Study', reverse('study-create'), 'btn-primary')
         ]
 
     @property
     def secondary_actions(self):
         return [
-            ('New study from archive', reverse('study-create-archive'))
+            ('link', 'New study from archive', reverse('study-create-archive'))
         ]
 
     @property
@@ -188,7 +188,13 @@ class StudyCreateFromArchiveView(LoginRequiredMixin,  SuccessMessageMixin, gener
         ]
 
 
-class StudyDetailView(StudyObjectMixin, CheckStudyCreatorMixin, NextStepsMixin, generic.DetailView):
+class StudyDetailView(
+    StudyObjectMixin,
+    CheckStudyCreatorMixin,
+    contib_views.ActionsMixin,
+    NextStepsMixin,
+    generic.DetailView,
+):
     model = models.Study
 
     @property
@@ -219,6 +225,28 @@ class StudyDetailView(StudyObjectMixin, CheckStudyCreatorMixin, NextStepsMixin, 
         for materials in self.study.materials_list:
             data['materials_ready' if materials.is_complete else 'materials_draft'].append(materials)
         return data
+
+    @property
+    def actions(self):
+        actions = []
+        if not self.study.is_allowed_publish:
+            actions.append(('button', 'Publish', '', 'btn btn-sm mx-1 btn-primary disabled'))
+        elif not self.study.is_published:
+            actions.append(('button', 'Publish', 'publish', 'btn btn-sm mx-1 btn-primary'))
+        else:
+            actions.append(('button', 'Unpublish', 'unpublish', 'btn btn-sm mx-1 btn-warning'))
+        return actions
+
+    @property
+    def secondary_actions(self):
+        return [
+            ('link', 'Settings', reverse('study-update', args=[self.study.slug])),
+            ('link', 'Advanced Settings', reverse('study-advanced', args=[self.study.slug])),
+            ('link', 'Translations', reverse('study-translate', args=[self.study.slug])),
+            ('link', 'Share', reverse('study-share', args=[self.study.slug])),
+            ('link', 'Archive', reverse('study-archive', args=[self.study.slug])),
+            ('link', 'Delete', reverse('study-delete', args=[self.study.slug])),
+        ]
 
     @property
     def breadcrumbs(self):

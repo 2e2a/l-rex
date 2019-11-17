@@ -73,8 +73,15 @@ class ItemsValidateMixin:
             messages.error(self.request, str(e))
 
 
-class ItemListView(materials_views.MaterialsMixin, study_views.CheckStudyCreatorMixin, study_views.NextStepsMixin,
-                   study_views.DisableFormIfStudyActiveMixin, ItemsValidateMixin, generic.ListView):
+class ItemListView(
+    materials_views.MaterialsMixin,
+    study_views.CheckStudyCreatorMixin,
+    study_views.NextStepsMixin,
+    contrib_views.ActionsMixin,
+    study_views.DisableFormIfStudyActiveMixin,
+    ItemsValidateMixin,
+    generic.ListView
+):
     model = models.Item
     title = 'Items'
     paginate_by = 16
@@ -88,6 +95,7 @@ class ItemListView(materials_views.MaterialsMixin, study_views.CheckStudyCreator
     def get_queryset(self):
         return super().get_queryset().filter(materials=self.materials).order_by('number','condition')
 
+    @property
     def _item_add_url_name(self):
         if self.study.has_text_items:
             return 'text-item-create'
@@ -106,9 +114,27 @@ class ItemListView(materials_views.MaterialsMixin, study_views.CheckStudyCreator
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        data['item_add_url_name'] = self._item_add_url_name()
         data['item_edit_url_name'] = self._item_edit_url_name()
         return data
+
+    @property
+    def actions(self):
+        return [
+            ('button', 'Validate / generate lists', 'validate', self.ACTION_CSS_BUTTON_SECONDARY),
+            ('link', 'Upload CSV', reverse('items-upload', args=[self.materials.slug]), self.ACTION_CSS_BUTTON_PRIMARY),
+        ]
+
+    @property
+    def secondary_actions(self):
+        # TODO: consider pagination, maybe in actions mixin
+        actions = [
+            ('link', 'Add item', reverse(self._item_add_url_name, args=[self.materials.slug])),
+            ('link', 'Pregenerate items', reverse('items-pregenerate', args=[self.materials.slug])),
+            ('link', 'Download CSV', reverse('items-download', args=[self.materials.slug])),
+        ]
+        if self.study.enable_item_rating_feedback:
+            actions.insert(2, ('Upload Feedback', reverse('items-upload-feedback', args=[self.materials.slug])))
+        return actions
 
     @property
     def breadcrumbs(self):
@@ -670,6 +696,7 @@ class ItemListListView(
     materials_views.MaterialsMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.NextStepsMixin,
+    contrib_views.ActionsMixin,
     study_views.DisableFormIfStudyActiveMixin,
     generic.ListView
 ):
@@ -683,6 +710,13 @@ class ItemListListView(
         data = super().get_context_data(**kwargs)
         data['allow_actions'] = self.materials.items_validated
         return data
+
+    @property
+    def secondary_actions(self):
+        return [
+            ('link', 'Upload CSV', reverse('itemlist-upload', args=[self.materials.slug]), self.ACTION_CSS_DROPDOWN_ITEM),
+            ('link', 'Download CSV', reverse('itemlist-download', args=[self.materials.slug]), ),
+        ]
 
     @property
     def breadcrumbs(self):

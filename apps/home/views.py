@@ -11,7 +11,7 @@ from . import models
 
 class HomeView(generic.TemplateView):
     template_name = 'lrex_home/home.html'
-    title = 'L-Rex: linguistic rating experiments'
+    title = 'Linguistic rating experiments'
 
     def get(self, request, *args, **kwargs):
         if self.request.user.is_authenticated and not hasattr(self.request.user, 'userprofile'):
@@ -27,6 +27,7 @@ class HomeView(generic.TemplateView):
 
     @property
     def breadcrumbs(self):
+        # TODO: add home everywhere
         return []
 
 
