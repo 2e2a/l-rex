@@ -117,6 +117,18 @@ class StudyListView(LoginRequiredMixin, generic.ListView):
         )
 
     @property
+    def actions(self):
+        return [
+            ('New Study', reverse('study-create'), 'primary')
+        ]
+
+    @property
+    def secondary_actions(self):
+        return [
+            ('New study from archive', reverse('study-create-archive'))
+        ]
+
+    @property
     def breadcrumbs(self):
         return [
             ('studies', ''),
