@@ -636,12 +636,6 @@ class TrialDetailView(TrialObjectMixin, study_views.CheckStudyCreatorMixin, gene
 class TrialDeleteView(TrialObjectMixin, study_views.CheckStudyCreatorMixin, contrib_views.DefaultDeleteView):
     model = models.Trial
 
-    def delete(self, *args, **kwargs):
-        results = super().delete(*args, **kwargs)
-        for materials in self.study.materials_list:
-            materials_views.MaterialsResultsView.clear_cache(materials)
-        return results
-
     @property
     def breadcrumbs(self):
         return [
@@ -885,8 +879,6 @@ class RatingsCreateView(RatingCreateMixin, TrialMixin, generic.TemplateView):
                 instance.trial = self.trial
                 instance.questionnaire_item = self.questionnaire_item
                 instance.save()
-            for materials in self.study.materials_list:
-                materials_views.MaterialsResultsView.clear_cache(materials)
             return redirect(self.get_next_url())
         return super().get(request, *args, **kwargs)
 
