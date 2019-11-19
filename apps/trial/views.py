@@ -770,8 +770,6 @@ class RatingCreateView(RatingCreateMixin, TrialMixin, generic.CreateView):
     def form_valid(self, form):
         form.instance.trial = self.trial
         form.instance.questionnaire_item = self.questionnaire_item
-        for materials in self.study.materials_list:
-            materials_views.MaterialsResultsView.clear_cache(materials)
         return super().form_valid(form)
 
     def get_success_url(self):
