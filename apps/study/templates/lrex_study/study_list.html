@@ -10,6 +10,7 @@
             <div><small>
                 created: <strong>{{ study.created_date|date:"SHORT_DATE_FORMAT" }}</strong>
                 {% if study.is_published %}
+                <!-- TODO: fix comma pos-->
                 , status: <mark><strong>{{ study.status.name }}</strong></mark>
                 {% else %}
                 , status: <strong>{{ study.status.name }}</strong>

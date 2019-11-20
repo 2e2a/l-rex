@@ -85,8 +85,8 @@ class QuestionnaireListView(
     study_views.StudyMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.NextStepsMixin,
-    contrib_views.ActionsMixin,
     study_views.DisableFormIfStudyActiveMixin,
+    contrib_views.ActionsMixin,
     generic.ListView
 ):
     model = models.Questionnaire
@@ -151,7 +151,12 @@ class QuestionnaireListView(
     @property
     def actions(self):
         if self.study.use_blocks:
-            return [('link', 'Generate questionnaires', reverse('questionnaire-generate', args=[self.study.slug]), 'btn-primary')]
+            return [(
+                'link',
+                'Generate questionnaires',
+                reverse('questionnaire-generate', args=[self.study.slug]),
+                self.ACTION_CSS_BUTTON_PRIMARY
+            )]
         else:
             return [('form', self.randomization_form, self.randomization_form.helper)]
 
@@ -163,6 +168,11 @@ class QuestionnaireListView(
             ('link', 'Download CSV', reverse('questionnaire-download', args=[self.study.slug])),
             ('link', 'Delete all', reverse('questionnaires-delete', args=[self.study.slug])),
         ]
+
+    @property
+    def disable_actions(self):
+        if self.is_disabled:
+            return [0, 1], [0, 2]
 
     @property
     def breadcrumbs(self):

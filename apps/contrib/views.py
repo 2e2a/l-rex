@@ -27,7 +27,7 @@ class LeaveWarningMixin:
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if not context.get('is_disabled', False):
+        if not context.get('disabled', False):
             context.update({
                 'leave_warning': True,
             })
@@ -35,7 +35,6 @@ class LeaveWarningMixin:
 
 
 class DisableFormMixin:
-    # TODO: check for new actions
 
     @property
     def is_disabled(self):
@@ -43,21 +42,33 @@ class DisableFormMixin:
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        data['is_disabled'] = self.is_disabled
+        data['disabled'] = self.is_disabled
         return data
 
-    def _disbable_form(self, form):
+    def _disable_form_inputs(self, element):
+        if hasattr(element, 'field_classes'):
+            element.field_classes += '  disabled'
+            element.flat_attrs += '  disabled=True'
+        if hasattr(element, 'inputs'):
+            for helper_input in element.inputs:
+                self._disable_form_inputs(helper_input)
+        if hasattr(element, 'fields'):
+            for helper_field in element.fields:
+                self._disable_form_inputs(helper_field)
+        if hasattr(element, 'layout') and hasattr(element.layout, 'fields'):
+            for helper_field in element.layout.fields:
+                self._disable_form_inputs(helper_field)
+
+    def disable_form(self, form):
         for field in form.fields.values():
             field.widget.attrs['readonly'] = True
             field.widget.attrs['disabled'] = True
+            self._disable_form_inputs(form.helper)
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class=form_class)
         if self.is_disabled:
-            self._disbable_form(form)
-            for helper_input in form.helper.inputs:
-                helper_input.field_classes += '  disabled'
-                helper_input.flat_attrs += '  disabled=True'
+            self.disable_form(form)
         return form
 
     def get(self, request, *args, **kwargs):
@@ -68,7 +79,7 @@ class DisableFormMixin:
                     helper_input.flat_attrs += '  disabled=True'
             if hasattr(self, 'formset'):
                 for form in self.formset:
-                    self._disbable_form(form)
+                    self.disable_form(form)
         return  super().get(request, *args, **kwargs)
 
 
@@ -95,13 +106,16 @@ class PaginationHelperMixin:
 class ActionsMixin:
     actions = None
     secondary_actions = None
+    disable_actions = ([], [])
 
     ACTION_CSS_BUTTON_PRIMARY = 'btn btn-sm mx-1 btn-primary'
-    ACTION_CSS_BUTTON_SECONDARY = 'btn btn-sm mx-1 btn-seconary'
+    ACTION_CSS_BUTTON_SECONDARY = 'btn btn-sm mx-1 btn-secondary'
+    ACTION_CSS_BUTTON_WARNING = 'btn btn-sm mx-1 btn-warning'
 
-    def _get_action_html(self, action_type, action):
+    def _get_action_html(self, action_type, action, disabled):
         action_context = {
             'type': action_type,
+            'disabled': disabled,
         }
         if action_type == 'link':
             name, url, ccs = action
@@ -127,6 +141,8 @@ class ActionsMixin:
             })
         elif action_type == 'form':
             form, helper = action
+            if disabled and hasattr(self, 'disable_form'):
+                self.disable_form(form)
             action_context.update({
                 'form': form,
                 'helper': helper,
@@ -137,16 +153,18 @@ class ActionsMixin:
         context = super().get_context_data(**kwargs)
         if self.actions:
             actions_html = []
-            for action in self.actions:
-                actions_html.append(self._get_action_html(action[0], action[1:]))
+            for i, action in enumerate(self.actions):
+                disabled = self.disable_actions and i in self.disable_actions[0]
+                actions_html.append(self._get_action_html(action[0], action[1:], disabled))
             context.update({
                 'actions': actions_html,
             })
         if self.secondary_actions:
             actions_html = []
-            for action in self.secondary_actions:
+            for i, action in enumerate(self.secondary_actions):
+                disabled = self.disable_actions and i in self.disable_actions[0]
                 action += ('dropdown-item',)
-                actions_html.append(self._get_action_html(action[0], action[1:]))
+                actions_html.append(self._get_action_html(action[0], action[1:], disabled))
             context.update({
                 'secondary_actions': actions_html,
             })

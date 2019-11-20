@@ -77,8 +77,8 @@ class ItemListView(
     materials_views.MaterialsMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.NextStepsMixin,
-    contrib_views.ActionsMixin,
     study_views.DisableFormIfStudyActiveMixin,
+    contrib_views.ActionsMixin,
     ItemsValidateMixin,
     generic.ListView
 ):
@@ -135,6 +135,11 @@ class ItemListView(
         if self.study.enable_item_rating_feedback:
             actions.insert(2, ('Upload Feedback', reverse('items-upload-feedback', args=[self.materials.slug])))
         return actions
+
+    @property
+    def disable_actions(self):
+        if self.is_disabled:
+            return [0, 1], [0, 1]
 
     @property
     def breadcrumbs(self):
@@ -696,12 +701,13 @@ class ItemListListView(
     materials_views.MaterialsMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.NextStepsMixin,
-    contrib_views.ActionsMixin,
     study_views.DisableFormIfStudyActiveMixin,
+    contrib_views.ActionsMixin,
     generic.ListView
 ):
     model = models.ItemList
     title = 'Item lists'
+    disable_actions = ([], [0])
 
     def get_queryset(self):
         return models.ItemList.objects.filter(materials=self.materials)
@@ -714,9 +720,14 @@ class ItemListListView(
     @property
     def secondary_actions(self):
         return [
-            ('link', 'Upload CSV', reverse('itemlist-upload', args=[self.materials.slug]), self.ACTION_CSS_DROPDOWN_ITEM),
-            ('link', 'Download CSV', reverse('itemlist-download', args=[self.materials.slug]), ),
+            ('link', 'Upload CSV', reverse('itemlist-upload', args=[self.materials.slug])),
+            ('link', 'Download CSV', reverse('itemlist-download', args=[self.materials.slug])),
         ]
+
+    @property
+    def disable_actions(self):
+        if self.is_disabled:
+            return [], [0]
 
     @property
     def breadcrumbs(self):

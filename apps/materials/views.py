@@ -49,6 +49,7 @@ class MaterialsListView(
     study_views.StudyMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.NextStepsMixin,
+    study_views.DisableFormIfStudyActiveMixin,
     contrib_views.ActionsMixin,
     generic.ListView
 ):
@@ -61,7 +62,7 @@ class MaterialsListView(
     @property
     def actions(self):
         return [
-            ('link', 'New Materials', reverse('materials-create', args=[self.study.slug]), 'btn-primary')
+            ('link', 'New Materials', reverse('materials-create', args=[self.study.slug]), self.ACTION_CSS_BUTTON_PRIMARY)
         ]
 
     @property
@@ -126,7 +127,7 @@ class MaterialsDetailView(
     @property
     def actions(self):
         return [
-            ('link', 'Settings', reverse('materials-update', args=[self.materials.slug]), 'btn-primary')
+            ('link', 'Settings', reverse('materials-update', args=[self.materials.slug]), self.ACTION_CSS_BUTTON_PRIMARY)
         ]
 
     @property
@@ -267,7 +268,7 @@ class MaterialsResultsView(
                 ('item', '?aggregate_by=item'),
                 ('subject+item', '?aggregate_by=subject,item')
             ],
-            'btn-primary'
+            self.ACTION_CSS_BUTTON_PRIMARY
         )
         return [
             ('link', 'Download CSV', reverse('materials-results-csv', args=[self.materials.slug]), 'btn-secondary'),

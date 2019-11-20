@@ -1,11 +1,11 @@
 {% load crispy_forms_tags %}
 {% if type == 'link' %}
-<a href="{{ url }}" class ="{{ css }}">{{ name }}</a>
+<a href="{{ url }}" class ="{{ css }}{% if disabled %} disabled{% endif %}">{{ name }}</a>
 {% elif type == 'button' %}
-<button type="submit" name="action" value="{{ value }}" class="{{ css }}">{{ name }}</button>
+<button type="submit" name="action" value="{{ value }}" class="{{ css }}{% if disabled %} disabled{% endif %}" {% if disabled %} disabled{% endif %}>{{ name }}</button>
 {% elif type == 'dropdown' %}
 <div class="dropdown d-inline">
-    <button class="btn  btn-sm mx-1 dropdown-toggle {{ css }}" type="button" id="{ id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <button class="dropdown-toggle {{ css }}" type="button" id="{ id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         {{ name }}
     </button>
     <div class="dropdown-menu" aria-labelledby="{{ id }}">
@@ -15,6 +15,5 @@
     </div>
 </div>
 {% elif type == 'form' %}
-<!-- TODO: fix layout (font size -> form-control-sm)-->
-{% crispy form helper %}
+{% crispy form form.helper %}
 {% endif %}

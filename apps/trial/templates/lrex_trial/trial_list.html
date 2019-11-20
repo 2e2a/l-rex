@@ -5,22 +5,18 @@
     {% for trial in trial_list %}
     <li class="list-group-item d-flex">
         <div class="flex-grow-1">
-            <strong>#{{ page_obj.start_index|add:forloop.counter0 }}</strong>
+            <a href="{% url 'trial' trial.slug %}"><strong>#{{ page_obj.start_index|add:forloop.counter0 }}</strong></a>
             {% if trial.subject_id %} Subject {{ trial.subject_id }} {% endif %}
-            {% if trial.is_test %}
-            <span class="badge badge-warning">Test</span>
-            {% endif %}
-            <span class="badge badge-secondary">{{ trial.created|date:"SHORT_DATETIME_FORMAT" }}</span>
-            <span class="badge badge-secondary">Questionnaire {{ trial.questionnaire.number }}</span>
-            <span class="badge badge-primary">{{ trial.status.name }}</span>
-            {% if trial.rating_proof %}
-            <span class="badge badge-light">Proof {{ trial.rating_proof }}</span>
-            {% endif %}
+            <div><small>
+                created: <strong>{{ trial.created|date:"SHORT_DATE_FORMAT" }}</strong>,
+                status: <strong>{{ trial.status.name }}</strong>,
+                questionnaire: <strong>Questionnaire {{ trial.questionnaire.number }}</strong>{% if trial.is_test %},
+                <mark><strong>TEST</strong></mark>
+                {% endif %}
+
+            </small></div>
         </div>
         <div>
-            <a href="{% url 'trial' trial.slug %}" class="btn btn-outline-primary btn-sm mx-1">
-                View
-            </a>
             <a href="{% url 'trial-delete' trial.slug %}" class="btn btn-outline-danger btn-sm mx-1">
                 Delete
             </a>

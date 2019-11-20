@@ -15,9 +15,12 @@
             </svg>
         </button>
         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
-            {% for action_html in secondary_actions %}
-            {{ action_html }}
-            {% endfor %}
+            <form class="form-inline" method="post">
+                {% csrf_token %}
+                {% for action_html in secondary_actions %}
+                {{ action_html }}
+                {% endfor %}
+            </form>
         </div>
     </div>
     {% endif %}

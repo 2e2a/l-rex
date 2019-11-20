@@ -25,7 +25,7 @@ class WarnUserIfStudyActiveMixin:
             if hasattr(self, 'form_valid') or hasattr(self, 'helper'):
                 msg = 'Note: Form is disabled. '
             else:
-                msg = 'Note: Actions are disabled. '
+                msg = 'Note: Some actions are disabled. '
             msg = msg + 'You cannot change an active study. Please <a href="{}">unpublish</a> ' \
                         'the study and save and <a href="{}">remove the results</a> first.'\
                         .format(
@@ -119,7 +119,7 @@ class StudyListView(LoginRequiredMixin, contib_views.ActionsMixin, generic.ListV
     @property
     def actions(self):
         return [
-            ('link', 'New Study', reverse('study-create'), 'btn-primary')
+            ('link', 'New Study', reverse('study-create'), self.ACTION_CSS_BUTTON_PRIMARY)
         ]
 
     @property
@@ -229,12 +229,10 @@ class StudyDetailView(
     @property
     def actions(self):
         actions = []
-        if not self.study.is_allowed_publish:
-            actions.append(('button', 'Publish', '', 'btn btn-sm mx-1 btn-primary disabled'))
-        elif not self.study.is_published:
-            actions.append(('button', 'Publish', 'publish', 'btn btn-sm mx-1 btn-primary'))
+        if not self.study.is_published:
+            actions.append(('button', 'Publish', 'publish', self.ACTION_CSS_BUTTON_PRIMARY))
         else:
-            actions.append(('button', 'Unpublish', 'unpublish', 'btn btn-sm mx-1 btn-warning'))
+            actions.append(('button', 'Unpublish', 'unpublish', self.ACTION_CSS_BUTTON_WARNING))
         return actions
 
     @property
@@ -247,6 +245,12 @@ class StudyDetailView(
             ('link', 'Archive', reverse('study-archive', args=[self.study.slug])),
             ('link', 'Delete', reverse('study-delete', args=[self.study.slug])),
         ]
+
+    @property
+    def disable_actions(self):
+        if not self.study.is_published and not self.study.is_allowed_publish:
+            return [0], []
+
 
     @property
     def breadcrumbs(self):

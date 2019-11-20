@@ -376,11 +376,6 @@ class Trial(models.Model):
         blank=True,
         null=True,
     )
-    rating_proof = models.CharField(
-        max_length=8,
-        blank=True,
-        null=True,
-    )
     is_test = models.BooleanField(
         default=False,
     )
