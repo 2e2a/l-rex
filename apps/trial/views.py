@@ -86,6 +86,7 @@ class QuestionnaireListView(
     study_views.CheckStudyCreatorMixin,
     study_views.NextStepsMixin,
     study_views.DisableFormIfStudyActiveMixin,
+    contrib_views.ActionsMixin,
     generic.ListView
 ):
     model = models.Questionnaire
@@ -146,6 +147,32 @@ class QuestionnaireListView(
     @property
     def pagination_offset(self):
         return (int(self.page) - 1) * int(self.paginate_by)
+
+    @property
+    def actions(self):
+        if self.study.use_blocks:
+            return [(
+                'link',
+                'Generate questionnaires',
+                reverse('questionnaire-generate', args=[self.study.slug]),
+                self.ACTION_CSS_BUTTON_PRIMARY
+            )]
+        else:
+            return [('form', self.randomization_form, self.randomization_form.helper)]
+
+
+    @property
+    def secondary_actions(self):
+        return [
+            ('link', 'Upload CSV', reverse('questionnaire-upload', args=[self.study.slug])),
+            ('link', 'Download CSV', reverse('questionnaire-download', args=[self.study.slug])),
+            ('link', 'Delete all', reverse('questionnaires-delete', args=[self.study.slug])),
+        ]
+
+    @property
+    def disable_actions(self):
+        if self.is_disabled:
+            return [0, 1], [0, 2]
 
     @property
     def breadcrumbs(self):
@@ -390,14 +417,19 @@ class QuestionnaireCSVDownloadView(study_views.StudyMixin, study_views.CheckStud
         return response
 
 
-class TrialListView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, generic.ListView):
+class TrialListView(
+    study_views.StudyMixin,
+    study_views.CheckStudyCreatorMixin,
+    contrib_views.ActionsMixin,
+    generic.ListView
+):
     model = models.Trial
     title = 'Trials'
     paginate_by = 16
 
     def get(self, request, *args, **kwargs):
         if self.study.has_subject_mapping:
-            message = 'Please, remove the subject mapping, when not needed anymore, to reduce the stored personal data.'
+            message = 'Please remove the subject mapping when not needed anymore to reduce the stored personal data.'
             messages.warning(request, message)
         return super().get(request, *args, **kwargs)
 
@@ -423,6 +455,23 @@ class TrialListView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, 
 
     def get_queryset(self):
         return super().get_queryset().filter(questionnaire__study=self.study)
+
+    @property
+    def actions(self):
+        if self.study.has_subject_mapping:
+            return [
+                ('button', 'Download subject ID mapping', 'download_subjects', 'btn btn-sm mx-1 btn-secondary'),
+                ('button', 'Delete subject ID mapping', 'delete_subjects', 'btn btn-sm mx-1 btn-primary'),
+            ]
+        return []
+
+    @property
+    def secondary_actions(self):
+        return [
+            ('button', 'Delete tests', 'delete_tests'),
+            ('button', 'Delete abandoned', 'delete_abandoned'),
+            ('link', 'Delete all', reverse('trials-delete', args=[self.study.slug])),
+        ]
 
     @property
     def breadcrumbs(self):

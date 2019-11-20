@@ -20,18 +20,7 @@ node:
 
 .PHONY: icons
 icons:
-	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/bullhorn.svg -P lrex/static/icons/
-	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/clipboard-list.svg -P lrex/static/icons/
-	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/clock.svg -P lrex/static/icons/
-	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/cog.svg -P lrex/static/icons/
-	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/envelope.svg -P lrex/static/icons/
-	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/file-upload.svg -P lrex/static/icons/
-	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/info-circle.svg -P lrex/static/icons/
-	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/lightbulb.svg -P lrex/static/icons/
-	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/list-ul.svg -P lrex/static/icons/
-	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/list-ol.svg -P lrex/static/icons/
-	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/poll.svg -P lrex/static/icons/
-	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/question-circle.svg -P lrex/static/icons/
+	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/webfonts/fa-solid-900.svg -P lrex/static/icons/
 
 .PHONY: install
 install: python node icons

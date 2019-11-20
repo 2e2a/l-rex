@@ -1,13 +1,10 @@
-import csv
 import re
-from io import StringIO
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Field, Fieldset, Layout, Submit, Button
 from crispy_forms.bootstrap import StrictButton, FieldWithButtons, InlineField, FormActions
 from django import forms
 
 from apps.contrib import forms as crispy_forms
-from apps.contrib import csv as contrib_csv
 from apps.item import models as item_models
 from apps.study import models as study_models
 
@@ -26,10 +23,9 @@ class RandomizationForm(crispy_forms.CrispyForm):
     def init_helper(self):
         self.helper = FormHelper()
         self.helper.form_class = 'form-inline'
-        self.helper.field_template = 'bootstrap4/layout/inline_field.html'
         self.helper.layout = Layout(
             FieldWithButtons(
-                'randomization',
+                Field('randomization', css_class='form-control-sm'),
                 Submit('generate', 'Generate', css_class='btn-primary btn-sm mx-1')
             )
         )

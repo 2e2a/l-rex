@@ -73,8 +73,15 @@ class ItemsValidateMixin:
             messages.error(self.request, str(e))
 
 
-class ItemListView(materials_views.MaterialsMixin, study_views.CheckStudyCreatorMixin, study_views.NextStepsMixin,
-                   study_views.DisableFormIfStudyActiveMixin, ItemsValidateMixin, generic.ListView):
+class ItemListView(
+    materials_views.MaterialsMixin,
+    study_views.CheckStudyCreatorMixin,
+    study_views.NextStepsMixin,
+    study_views.DisableFormIfStudyActiveMixin,
+    contrib_views.ActionsMixin,
+    ItemsValidateMixin,
+    generic.ListView
+):
     model = models.Item
     title = 'Items'
     paginate_by = 16
@@ -88,27 +95,63 @@ class ItemListView(materials_views.MaterialsMixin, study_views.CheckStudyCreator
     def get_queryset(self):
         return super().get_queryset().filter(materials=self.materials).order_by('number','condition')
 
-    def _item_add_url_name(self):
-        if self.study.has_text_items:
-            return 'text-item-create'
-        elif self.study.has_markdown_items:
-            return 'markdown-item-create'
-        else:
-            return 'audio-link-item-create'
+    def _add_page(self, url):
+        if 'page' in self.request.GET:
+            page = self.request.GET.get(self.page_kwarg)
+            url += '?page={}'.format(page)
+        return url
 
-    def _item_edit_url_name(self):
+    def _item_url(self, url_name):
+        url = reverse(url_name, args=[self.materials.slug])
+        url = self._add_page(url)
+        return url
+
+    @property
+    def _item_add_url(self):
         if self.study.has_text_items:
-            return 'text-item-update'
+            url_name = 'text-item-create'
         elif self.study.has_markdown_items:
-            return 'markdown-item-update'
+            url_name = 'markdown-item-create'
         else:
-            return 'audio-link-item-update'
+            url_name = 'audio-link-item-create'
+        return self._item_url(url_name)
+
+    def _item_edit_url(self):
+        if self.study.has_text_items:
+            url_name = 'text-item-update'
+        elif self.study.has_markdown_items:
+            url_name = 'markdown-item-update'
+        else:
+            url_name = 'audio-link-item-update'
+        return self._item_url(url_name)
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        data['item_add_url_name'] = self._item_add_url_name()
-        data['item_edit_url_name'] = self._item_edit_url_name()
+        data['item_edit_url'] = self._item_edit_url
         return data
+
+    @property
+    def actions(self):
+        return [
+            ('button', 'Validate / generate lists', 'validate', self.ACTION_CSS_BUTTON_SECONDARY),
+            ('link', 'Upload CSV', reverse('items-upload', args=[self.materials.slug]), self.ACTION_CSS_BUTTON_PRIMARY),
+        ]
+
+    @property
+    def secondary_actions(self):
+        actions = [
+            ('link', 'Add item', self._add_page(self._item_add_url)),
+            ('link', 'Pregenerate items', reverse('items-pregenerate', args=[self.materials.slug])),
+            ('link', 'Download CSV', reverse('items-download', args=[self.materials.slug])),
+        ]
+        if self.study.enable_item_rating_feedback:
+            actions.insert(2, ('Upload Feedback', reverse('items-upload-feedback', args=[self.materials.slug])))
+        return actions
+
+    @property
+    def disable_actions(self):
+        if self.is_disabled:
+            return [0, 1], [0, 1]
 
     @property
     def breadcrumbs(self):
@@ -671,10 +714,12 @@ class ItemListListView(
     study_views.CheckStudyCreatorMixin,
     study_views.NextStepsMixin,
     study_views.DisableFormIfStudyActiveMixin,
+    contrib_views.ActionsMixin,
     generic.ListView
 ):
     model = models.ItemList
     title = 'Item lists'
+    disable_actions = ([], [0])
 
     def get_queryset(self):
         return models.ItemList.objects.filter(materials=self.materials)
@@ -683,6 +728,18 @@ class ItemListListView(
         data = super().get_context_data(**kwargs)
         data['allow_actions'] = self.materials.items_validated
         return data
+
+    @property
+    def secondary_actions(self):
+        return [
+            ('link', 'Upload CSV', reverse('itemlist-upload', args=[self.materials.slug])),
+            ('link', 'Download CSV', reverse('itemlist-download', args=[self.materials.slug])),
+        ]
+
+    @property
+    def disable_actions(self):
+        if self.is_disabled:
+            return [], [0]
 
     @property
     def breadcrumbs(self):

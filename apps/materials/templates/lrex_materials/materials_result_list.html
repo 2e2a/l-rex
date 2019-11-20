@@ -4,15 +4,7 @@
 <ul class="list-group">
     {% for materials in materials_list %}
     <li class="list-group-item d-flex">
-        <div class="flex-grow-1">
-            {{ materials.title }}
-        </div>
-        <div>
-            <a href="{% url 'materials-results' materials.slug %}"
-               class="btn btn-outline-primary btn-sm mx-1">
-                Results
-            </a>
-        </div>
+        <a href="{% url 'materials-results' materials.slug %}"><strong>{{ materials.title }}</strong></a>
     </li>
     {% empty %}
     <li class="list-group-item">No materials yet.</li>

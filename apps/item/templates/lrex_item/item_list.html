@@ -1,37 +1,13 @@
 {% extends "lrex_home/base.html" %}
 {% load contrib_tags %}
+{% load static %}
 
 {% block content %}
-<div class="text-center mb-2">
-    {% if not is_disabled %}
-    <a href="{% url 'items-upload' materials.slug %}?page={{ page_obj.number}}" class="btn btn-primary btn-sm mx-1">Upload CSV</a>
-    <form method="post" class="d-inline">
-        {% csrf_token %}
-        <button type="submit" name="action" value="validate" class="btn btn-primary btn-sm mx-1">
-            Validate/generate lists
-        </button>
-    </form>
-    <a href="{% url item_add_url_name materials.slug %}?page={{ page_obj.number}}" class="btn btn-secondary btn-sm mx-1">Add item </a>
-    <a href="{% url 'items-pregenerate' materials.slug %}?page={{ page_obj.number}}" class="btn btn-secondary btn-sm mx-1">Pregenerate items</a>
-    {% if study.enable_item_rating_feedback %}
-    <a href="{% url 'items-upload-feedback' materials.slug %}?page={{ page_obj.number}}" class="btn btn-secondary btn-sm mx-1">Upload feedback</a>
-    {% endif %}
-    {% else %}
-    <a href="" class="btn btn-primary btn-sm mx-1 disabled">Upload CSV</a>
-    <a href="" class="btn btn-primary btn-sm mx-1 disabled">Validate/generate lists</a>
-    <a href="" class="btn btn-secondary btn-sm mx-1 disabled">Add item</a>
-    <a href="" class="btn btn-secondary btn-sm mx-1 disabled">Pregenerate items</a>
-    {% if study.enable_item_rating_feedback %}
-    <a href="" class="btn btn-danger btn-sm mx-1 disabled">Upload feedback</a>
-    {% endif %}
-    {% endif %}
-    <a href="{% url 'items-download' materials.slug %}" class="btn btn-secondary btn-sm mx-1">Download CSV</a>
-</div>
 <ul class="list-group">
     {% for item in item_list %}
     <li class="list-group-item d-flex flex-column flex-md-row">
         <div class="mr-4">
-            <strong>{{ item }}</strong>
+            <a href="{{ item_edit_url }}"><strong>{{ item }}</strong></a>
             {% if study.use_blocks %}<span class="badge badge-secondary">block {{ item.materials_block }}</span>{% endif %}
         </div>
         <div class="flex-grow-1 mr-4">
@@ -51,18 +27,21 @@
             {% endif %}
         </div>
         <div class="flex-shrink-0">
-            {% if not is_disabled %}
-            <a href="{% url item_edit_url_name item_slug=item.slug %}?page={{ page_obj.number}}" class="btn btn-outline-primary btn-sm mx-1">Edit</a>
-            <a href="{% url 'item-questions' item_slug=item.slug %}?page={{ page_obj.number}}" class="btn btn-outline-secondary btn-sm mx-1">Customize questions</a>
-            {% if study.enable_item_rating_feedback %}
-            <a href="{% url 'item-feedback' item_slug=item.slug %}?page={{ page_obj.number}}" class="btn btn-outline-secondary btn-sm mx-1">Feedback</a>
-            {% endif %}
-            <a href="{% url 'item-delete' item_slug=item.slug %}?page={{ page_obj.number}}" class="btn btn-outline-danger btn-sm mx-1">Delete</a>
-            {% else %}
-            <a href="" class="btn btn-outline-primary btn-sm mx-1 disabled">Edit</a>
-            <a href="" class="btn btn-outline-secondary btn-sm mx-1 disabled">Customize questions</a>
-            <a href="" class="btn btn-outline-danger btn-sm mx-1 disabled">Delete</a>
-            {% endif %}
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary btn-sm" type="button" id="dropdownStudyActionsButton"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                        <use xlink:href="{% static 'icons/fa-solid.svg' %}#ellipsis-h"></use>
+                    </svg>
+                </button>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                    <a href="{% url 'item-questions' item.slug %}?page={{ page_obj.number}}" class="dropdown-item {% if disabled %}disabled{% endif %}">Customize questions</a>
+                    {% if study.enable_item_rating_feedback %}
+                    <a href="{% url 'item-feedback' item.slug %}?page={{ page_obj.number}}" class="dropdown-item {% if disabled %}disabled{% endif %}">Feedback</a>
+                    {% endif %}
+                    <a href="{% url 'item-delete' item.slug %}?page={{ page_obj.number}}" class="dropdown-item {% if disabled %}disabled{% endif %}">Delete</a>
+                </div>
+            </div>
         </div>
     </li>
     {% empty %}

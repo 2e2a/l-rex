@@ -1,23 +1,6 @@
 {% extends "lrex_home/base.html" %}
 
 {% block content %}
-<div class="text-center mb-2">
-    <div class="dropdown d-inline">
-        <button class="btn  btn-primary btn-sm mx-1 dropdown-toggle" type="button" id="dropdownAggregateBy" data-toggle="dropdown"
-                aria-haspopup="true" aria-expanded="false">
-            Aggregated by: {{ aggregate_by_label }}
-        </button>
-        <div class="dropdown-menu" aria-labelledby="dropdownAggregateBy">
-            <a class="dropdown-item" href="?{{aggregate_by_subject_url_par }}">subject</a>
-            <a class="dropdown-item" href="?{{aggregate_by_item_url_par }}">item</a>
-            <a class="dropdown-item" href="?{{aggregate_by_subject_and_item_url_par }}">subject+item</a>
-        </div>
-    </div>
-    <a href="{% url 'materials-results-csv' materials.slug %}"
-       class="btn btn-primary btn-sm mx-1">
-        Download CSV
-    </a>
-</div>
 <table class="table bg-white">
 <thead>
 {% if study.is_multi_question %}
