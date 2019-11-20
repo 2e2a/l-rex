@@ -6,7 +6,7 @@
     <div class="card-body">
         <div class="d-flex justify-content-between">
             <h2 class="card-title">About</h2>
-            <span><img src="{% static 'icons/info-circle.svg' %} " width="20"></span>
+            <span>{% include "lrex_contrib/icon.html" with icon="info-circle" big=True %}</span>
         </div>
         <p class="card-text">
             You are participating in an L-Rex experiment. L-REX is a free and open-source platform for linguistic rating experiments.

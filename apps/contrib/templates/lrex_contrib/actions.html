@@ -1,4 +1,3 @@
-{% load static %}
 <div class="d-flex align-self-center">
     {% block actions %}{% endblock %}
     <form class="form-inline" method="post">
@@ -10,9 +9,7 @@
     {% if secondary_actions %}
     <div class="dropdown">
         <button class="btn btn-secondary btn-sm " type="button" id="dropdownActionsButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                <use xlink:href="{% static 'icons/fa-solid.svg' %}#ellipsis-h"></use>
-            </svg>
+            {% include "lrex_contrib/icon.html" with icon="ellipsis-h" %}
         </button>
         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
             <form class="form-inline" method="post">

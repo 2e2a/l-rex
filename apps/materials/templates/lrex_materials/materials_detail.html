@@ -9,7 +9,7 @@
              <div class="card-body">
                  <div class="d-flex justify-content-between">
                      <h2 class="card-title">Settings</h2>
-                     <span><img src="{% static 'icons/sliders-h.svg' %} " width="20"></span>
+                     <span>{% include "lrex_contrib/icon.html" with icon="sliders-h" big=True %}</span>
                  </div>
                  <div class="row small text-secondary">
                      <div class="col-sm-5">
@@ -47,7 +47,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <h2 class="card-title">Items</h2>
-                    <span><img src="{% static 'icons/list-ul.svg' %} " width="20"></span>
+                    <span>{% include "lrex_contrib/icon.html" with icon="list-ul" big=True %}</span>
                 </div>
                 <p class="card-text">
                     Add items.
@@ -87,7 +87,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <h2 class="card-title">Lists</h2>
-                    <span><img src="{% static 'icons/list-ol.svg' %} " width="20"></span>
+                    <span>{% include "lrex_contrib/icon.html" with icon="list-ol" big=True %}</span>
                 </div>
                 <p class="card-text">
                     Choose how to distribute the items of the materials across participants.

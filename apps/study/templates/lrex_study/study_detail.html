@@ -10,7 +10,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <h2 class="card-title">Status</h2>
-                    <span><img src="{% static 'icons/lightbulb.svg' %}" width="20"></span>
+                    <span>{% include "lrex_contrib/icon.html" with icon="lightbulb" big=True %}</span>
                 </div>
                 <div class="row small text-secondary">
                     <div class="col-sm-5">
@@ -78,7 +78,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <h2 class="card-title">Settings</h2>
-                    <span><img src="{% static 'icons/cog.svg' %} " width="20"></span>
+                    <span>{% include "lrex_contrib/icon.html" with icon="cog" big=True %}</span>
                 </div>
                 <p class="card-text">
                     Set the general properties of the study. Translate particpant texts. Share the study with other researchers.
@@ -144,7 +144,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <h2 class="card-title">Task and instructions</h2>
-                    <span><img src="{% static 'icons/question-circle.svg' %} " width="20"></span>
+                    <span>{% include "lrex_contrib/icon.html" with icon="question-circle" big=True %}</span>
                 </div>
                 <p class="card-text">
                     Specify one or more questions that the participants will be asked to answer.
@@ -212,7 +212,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <h2 class="card-title">Materials</h2>
-                    <span><img src="{% static 'icons/file-upload.svg' %} " width="20"></span>
+                    <span>{% include "lrex_contrib/icon.html" with icon="file-upload" big=True %}</span>
                 </div>
                 <p class="card-text">
                     Add materials that the participants will be asked to rate.
@@ -255,7 +255,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <h2 class="card-title">Questionnaires</h2>
-                    <span><img src="{% static 'icons/clipboard-list.svg' %} " width="20"></span>
+                    <span>{% include "lrex_contrib/icon.html" with icon="clipboard-list" big=True %}</span>
                 </div>
                 <p class="card-text">
                     Decide how the materials will be presented within a questionnaire
@@ -283,7 +283,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <h2 class="card-title">Contact and privacy</h2>
-                    <span><img src="{% static 'icons/envelope.svg' %} " width="20"></span>
+                    <span>{% include "lrex_contrib/icon.html" with icon="envelope" big=True %}</span>
                 </div>
                 <p class="card-text">
                     Provide information about your study for the participants: how can they contact you and how will
@@ -319,7 +319,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <h2 class="card-title">Results</h2>
-                    <span><img src="{% static 'icons/poll.svg' %} " width="20"></span>
+                    <span>{% include "lrex_contrib/icon.html" with icon="poll" big=True %}</span>
                 </div>
                 <p class="card-text">
                     View a summary of the current results or the completed individual questionnaires. Download all results.
