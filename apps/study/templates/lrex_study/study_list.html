@@ -8,16 +8,9 @@
         <div class="flex-grow-1">
             <a href="{% url 'study' study.slug %}"><strong>{{ study.title }}</strong></a>
             <div><small>
-                created: <strong>{{ study.created_date|date:"SHORT_DATE_FORMAT" }}</strong>
-                {% if study.is_published %}
-                <!-- TODO: fix comma pos-->
-                , status: <mark><strong>{{ study.status.name }}</strong></mark>
-                {% else %}
-                , status: <strong>{{ study.status.name }}</strong>
-                {% endif %}
-                {% if study.creator != view.request.user %}
-                , shared by:<strong>study.creator.username</strong>
-                {% endif %}
+                created: <strong>{{ study.created_date|date:"SHORT_DATE_FORMAT" }}</strong>,
+                status: {% if study.is_published %}<mark>{% endif %}<strong>{{ study.status.name }}</strong>{% if study.is_published %}</mark>{% endif %}{% if study.creator != view.request.user %},
+                shared by:<strong>study.creator.username</strong>{% endif %}
             </small></div>
         </div>
         <div class="d-flex align-self-center">
