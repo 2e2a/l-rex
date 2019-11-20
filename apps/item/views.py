@@ -95,26 +95,39 @@ class ItemListView(
     def get_queryset(self):
         return super().get_queryset().filter(materials=self.materials).order_by('number','condition')
 
-    @property
-    def _item_add_url_name(self):
-        if self.study.has_text_items:
-            return 'text-item-create'
-        elif self.study.has_markdown_items:
-            return 'markdown-item-create'
-        else:
-            return 'audio-link-item-create'
+    def _add_page(self, url):
+        if 'page' in self.request.GET:
+            page = self.request.GET.get(self.page_kwarg)
+            url += '?page={}'.format(page)
+        return url
 
-    def _item_edit_url_name(self):
+    def _item_url(self, url_name):
+        url = reverse(url_name, args=[self.materials.slug])
+        url = self._add_page(url)
+        return url
+
+    @property
+    def _item_add_url(self):
         if self.study.has_text_items:
-            return 'text-item-update'
+            url_name = 'text-item-create'
         elif self.study.has_markdown_items:
-            return 'markdown-item-update'
+            url_name = 'markdown-item-create'
         else:
-            return 'audio-link-item-update'
+            url_name = 'audio-link-item-create'
+        return self._item_url(url_name)
+
+    def _item_edit_url(self):
+        if self.study.has_text_items:
+            url_name = 'text-item-update'
+        elif self.study.has_markdown_items:
+            url_name = 'markdown-item-update'
+        else:
+            url_name = 'audio-link-item-update'
+        return self._item_url(url_name)
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        data['item_edit_url_name'] = self._item_edit_url_name()
+        data['item_edit_url'] = self._item_edit_url
         return data
 
     @property
@@ -126,9 +139,8 @@ class ItemListView(
 
     @property
     def secondary_actions(self):
-        # TODO: consider pagination, maybe in actions mixin
         actions = [
-            ('link', 'Add item', reverse(self._item_add_url_name, args=[self.materials.slug])),
+            ('link', 'Add item', self._add_page(self._item_add_url)),
             ('link', 'Pregenerate items', reverse('items-pregenerate', args=[self.materials.slug])),
             ('link', 'Download CSV', reverse('items-download', args=[self.materials.slug])),
         ]
