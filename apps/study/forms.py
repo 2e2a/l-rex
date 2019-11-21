@@ -1,5 +1,5 @@
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Fieldset, Layout, Submit
+from crispy_forms.layout import Fieldset, HTML, Layout, Submit
 from django import forms
 from django.contrib.auth.models import User
 
@@ -17,18 +17,14 @@ class StudyForm(crispy_forms.CrispyModelForm):
             'item_type',
         ]
 
-    def __init__(self, *args, **kwargs):
-        self.disable_itemtype = kwargs.pop('disable_itemtype', False)
-        super().__init__(*args, **kwargs)
-        if self.disable_itemtype:
-            crispy_forms.disable_form_field(self, 'item_type')
 
-
-class StudyAdvancedForm(crispy_forms.CrispyModelForm):
+class StudySettingsForm(crispy_forms.CrispyModelForm):
 
     class Meta:
         model = models.Study
         fields = [
+            'title',
+            'item_type',
             'password',
             'require_participant_id',
             'end_date',
@@ -41,6 +37,7 @@ class StudyAdvancedForm(crispy_forms.CrispyModelForm):
         ]
 
     def __init__(self, *args, **kwargs):
+        self.disable_itemtype = kwargs.pop('disable_itemtype', False)
         disable_question_order = kwargs.pop('disable_randomize_question_order', False)
         disable_use_blocks = kwargs.pop('disable_use_blocks', False)
         disable_feedback = kwargs.pop('disable_feedback', False)
@@ -51,6 +48,44 @@ class StudyAdvancedForm(crispy_forms.CrispyModelForm):
             crispy_forms.disable_form_field(self, 'use_blocks')
         if disable_feedback:
             crispy_forms.disable_form_field(self, 'enable_item_rating_feedback')
+        if self.disable_itemtype:
+            crispy_forms.disable_form_field(self, 'item_type')
+
+    @property
+    def custom_helper(self):
+        helper = FormHelper()
+        helper.add_layout(
+            Layout(
+                Fieldset(
+                    'Basic settings',
+                    'title',
+                    'item_type',
+                    HTML('<hr>'),
+                ),
+                Fieldset(
+                    'Restrictions on participation',
+                    'password',
+                    'require_participant_id',
+                    'end_date',
+                    'trial_limit',
+                    HTML('<hr>'),
+                ),
+                Fieldset(
+                    'Additional design features',
+                    'use_blocks',
+                    'pseudo_randomize_question_order',
+                    'enable_item_rating_feedback',
+                    HTML('<hr>'),
+                ),
+                Fieldset(
+                    'Availability of instructions during trial',
+                    'link_instructions',
+                    'link_block_instructions',
+                    HTML('<hr>'),
+                ),
+            )
+        )
+        return helper
 
 
 class StudyTranslationsForm(crispy_forms.CrispyModelForm):

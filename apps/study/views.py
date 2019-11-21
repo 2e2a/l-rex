@@ -148,8 +148,8 @@ class StudyCreateView(LoginRequiredMixin, generic.CreateView):
                   'They will point you to steps that need to be completed while setting up your study. ' \
                   'For more detailed help, consult the <a href="https://github.com/2e2a/l-rex/wiki">Wiki</a>.'
         messages.info(self.request, mark_safe(message))
-        message = 'Consider the <a href="{}">advanced study settings</a> and <a href="{}">translations</a>.'\
-                  .format(reverse('study-advanced', args=[self.object]),reverse('study-translate', args=[self.object]))
+        message = 'Consider the <a href="{}">study settings</a> and <a href="{}">translations</a>.'\
+                  .format(reverse('study-settings', args=[self.object]),reverse('study-translate', args=[self.object]))
         messages.warning(self.request, mark_safe(message))
         return response
 
@@ -238,8 +238,7 @@ class StudyDetailView(
     @property
     def secondary_actions(self):
         return [
-            ('link', 'Settings', reverse('study-update', args=[self.study.slug])),
-            ('link', 'Advanced Settings', reverse('study-advanced', args=[self.study.slug])),
+            ('link', 'Settings', reverse('study-settings', args=[self.study.slug])),
             ('link', 'Translations', reverse('study-translate', args=[self.study.slug])),
             ('link', 'Share', reverse('study-share', args=[self.study.slug])),
             ('link', 'Archive', reverse('study-archive', args=[self.study.slug])),
@@ -257,49 +256,6 @@ class StudyDetailView(
         return [
             ('studies', reverse('studies')),
             (self.study.title, ''),
-        ]
-
-
-class StudyUpdateView(
-    StudyObjectMixin,
-    CheckStudyCreatorMixin,
-    SuccessMessageMixin,
-    contib_views.LeaveWarningMixin,
-    DisableFormIfStudyActiveMixin,
-    generic.UpdateView
-):
-    model = models.Study
-    title = 'Edit basic study settings'
-    template_name = 'lrex_contrib/crispy_form.html'
-    form_class = forms.StudyForm
-    success_message = 'Study settings successfully updated.'
-
-    def get(self, request, *args, **kwargs):
-        if self.study.has_items:
-            msg = 'Note: To change the "item type" setting you would need to first ' \
-                  '<a href="{}">remove old items</a> first.'.format(reverse('materials-list', args=[self.study.slug]))
-            messages.info(request, mark_safe(msg))
-        return super().get(request, *args, **kwargs)
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs.update({
-            'add_save': True,
-            'disable_itemtype': self.study.has_items,
-        })
-        return kwargs
-
-    def get_success_url(self):
-        if 'save' in self.request.POST:
-            return reverse('study-update', args=[self.object.slug])
-        return self.object.get_absolute_url()
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            ('settings', ''),
         ]
 
 
@@ -409,7 +365,7 @@ class StudyCreateCopyView(StudyMixin, CheckStudyCreatorMixin, SuccessMessageMixi
         ]
 
 
-class StudyAdvancedUpdateView(
+class StudySettingsView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
     SuccessMessageMixin,
@@ -418,10 +374,10 @@ class StudyAdvancedUpdateView(
     generic.UpdateView,
 ):
     model = models.Study
-    title = 'Edit advanced study settings'
+    title = 'Edit study settings'
     template_name = 'lrex_contrib/crispy_form.html'
-    form_class = forms.StudyAdvancedForm
-    success_message = 'Advanced study settings updated.'
+    form_class = forms.StudySettingsForm
+    success_message = 'Study settings updated.'
 
     def get(self, request, *args, **kwargs):
         if self.study.has_questionnaires:
@@ -451,7 +407,7 @@ class StudyAdvancedUpdateView(
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
-            ('advanced', ''),
+            ('setttings', ''),
         ]
 
 
