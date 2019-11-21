@@ -162,7 +162,7 @@ class ActionsMixin:
         if self.secondary_actions:
             actions_html = []
             for i, action in enumerate(self.secondary_actions):
-                disabled = self.disable_actions and i in self.disable_actions[0]
+                disabled = self.disable_actions and i in self.disable_actions[1]
                 action += ('dropdown-item',)
                 actions_html.append(self._get_action_html(action[0], action[1:], disabled))
             context.update({

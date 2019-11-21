@@ -250,7 +250,6 @@ class StudyDetailView(
         if not self.study.is_published and not self.study.is_allowed_publish:
             return [0], []
 
-
     @property
     def breadcrumbs(self):
         return [
