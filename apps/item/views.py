@@ -116,18 +116,18 @@ class ItemListView(
             url_name = 'audio-link-item-create'
         return self._item_url(url_name)
 
-    def _item_edit_url(self):
+    @property
+    def _item_edit_url_name(self):
         if self.study.has_text_items:
-            url_name = 'text-item-update'
+            return 'text-item-update'
         elif self.study.has_markdown_items:
-            url_name = 'markdown-item-update'
+            return 'markdown-item-update'
         else:
-            url_name = 'audio-link-item-update'
-        return self._item_url(url_name)
+            return 'audio-link-item-update'
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        data['item_edit_url'] = self._item_edit_url
+        data['item_edit_url_name'] = self._item_edit_url_name
         return data
 
     @property

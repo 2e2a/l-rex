@@ -7,7 +7,7 @@
     {% for item in item_list %}
     <li class="list-group-item d-flex flex-column flex-md-row">
         <div class="mr-4">
-            <a href="{{ item_edit_url }}"><strong>{{ item }}</strong></a>
+            <a href="{% url item_edit_url_name item.slug %}?page={{ page_obj.number}}"><strong>{{ item }}</strong></a>
             {% if study.use_blocks %}<span class="badge badge-secondary">block {{ item.materials_block }}</span>{% endif %}
         </div>
         <div class="flex-grow-1 mr-4">
