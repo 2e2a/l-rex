@@ -166,11 +166,15 @@ class StudyIntroForm(crispy_forms.CrispyModelForm):
 
     def __init__(self, *args, **kwargs):
         instance = kwargs.get('instance', None)
-        if instance and not instance.intro:
-            kwargs['initial'].update({
-                'intro': 'Welcome to this study!',
-                'outro': 'Thank you for participating!',
-            })
+        if instance:
+            if not instance.intro:
+                kwargs['initial'].update({
+                    'intro': 'Welcome to this study!',
+                })
+            if not instance.outro:
+                kwargs['initial'].update({
+                    'outro': 'Thank you for participating!',
+                })
         super().__init__(*args, **kwargs)
 
 
