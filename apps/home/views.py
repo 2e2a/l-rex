@@ -38,7 +38,8 @@ class ImprintView(generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        data['imprint'] = settings.IMPRINT
+        data['contact_rich'] = mark_safe(markdownify(settings.LREX_CONTACT_MD))
+        data['privacy_rich'] = mark_safe(markdownify(settings.LREX_PRIVACY_MD))
         return data
 
     @property
