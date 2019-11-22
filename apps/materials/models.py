@@ -243,7 +243,7 @@ class Materials(models.Model):
         results = {}
         for rating in ratings:
             item = rating.questionnaire_item.item
-            key = '{}-{:02d}{}'.format(rating.trial.number, item.number, item.condition)
+            key = '{:03d}-{:02d}{}'.format(rating.trial.number, item.number, item.condition)
             if key in results:
                 row = results[key]
                 row['questions'].append(rating.question)
