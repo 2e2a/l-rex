@@ -691,7 +691,7 @@ class TrialInstructionsView(TrialMixin, generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        data['instructions_rich'] = mark_safe(self.study.instructions)
+        data['instructions_rich'] = mark_safe(markdownify(self.study.instructions))
         if self.study.use_blocks and self.study.link_block_instructions:
             questionnaire_block = self.trial.current_block
             data['block_instructions_rich'] = mark_safe(markdownify(questionnaire_block.instructions))

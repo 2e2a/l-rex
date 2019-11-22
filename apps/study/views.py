@@ -398,7 +398,7 @@ class StudySettingsView(
 
     def get_success_url(self):
         if 'save' in self.request.POST:
-            return reverse('study-advanced', args=[self.object.slug])
+            return reverse('study-settings', args=[self.object.slug])
         return self.object.get_absolute_url()
 
     @property
