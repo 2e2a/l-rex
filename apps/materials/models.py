@@ -233,6 +233,7 @@ class Materials(models.Model):
             item_list.items.add(*list(self.items))
 
     def results(self):
+        # TODO: broken for two questions
         ratings = trial_models.Rating.objects.filter(
             questionnaire_item__item__materials=self,
             trial__is_test=False,
@@ -282,8 +283,7 @@ class Materials(models.Model):
             else:
                 grouped_results[item] = list(results)
         aggregated_results = []
-        for key in sorted(grouped_results):
-            results_for_item = grouped_results[key]
+        for results_for_item in grouped_results.values():
             rating_count = len(results_for_item)
             aggregated_result = copy.deepcopy(results_for_item[0])
             aggregated_result['scale_count'] = [None] * len(self.study.questions)
