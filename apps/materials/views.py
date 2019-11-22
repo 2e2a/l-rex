@@ -271,7 +271,12 @@ class MaterialsResultsView(
             self.ACTION_CSS_BUTTON_PRIMARY
         )
         return [
-            ('link', 'Download CSV', reverse('materials-results-csv', args=[self.materials.slug]), 'btn-secondary'),
+            (
+                'link',
+                'Download CSV',
+                reverse('materials-results-csv', args=[self.materials.slug]),
+                self.ACTION_CSS_BUTTON_SECONDARY
+            ),
             aggregate_action,
         ]
 
