@@ -2,8 +2,12 @@ $primary: #00a333;
 
 @import './node_modules/bootstrap/scss/bootstrap';
 
-body {
+.lrex .body {
     padding-top: 160px;
+}
+
+.lrex .trial-body {
+    padding-top: 80px;
 }
 
 .lrex .nav-pills>li>a {
