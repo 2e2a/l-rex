@@ -85,8 +85,9 @@ class DisableFormMixin:
 
 class PaginationHelperMixin:
 
-    def url_paginated(self, url):
-        page = self.request.GET.get('page', None)
+    def url_paginated(self, url, page=None):
+        if page is None:
+            page = self.request.GET.get('page', None)
         if page:
             url += '?page={}'.format(page)
         return url
@@ -96,7 +97,7 @@ class PaginationHelperMixin:
             url = reverse(to, args=kwargs['args'])
         else:
             url = reverse(to, kwargs=kwargs)
-        return self.url_paginated(url)
+        return self.url_paginated(url, kwargs.get('page', None))
 
     def redirect_paginated(self, to, *args, **kwargs):
         url = self.reverse_paginated(to, **kwargs)

@@ -80,6 +80,10 @@ class Materials(models.Model):
         items = sorted(items, key=lambda x:x.materials_block)
         return items
 
+    def item_pos(self, item):
+        return self.item_set.filter(number__lt=item.number).count() \
+               + self.item_set.filter(number=item.number, condition__lte=item.condition).count()
+
     @cached_property
     def conditions(self):
         items = self.item_set.filter(number=1)

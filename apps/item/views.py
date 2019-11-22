@@ -60,7 +60,7 @@ class ItemsValidateMixin:
     def validate_items(self):
         try:
             warnings = self.materials.validate_items()
-            messages.success(self.request, 'Items seem valid')
+            messages.success(self.request, 'Items seem valid.')
             for warning in warnings:
                 messages.warning(self.request, '{}'.format(warning))
             lists_url = reverse('itemlists', args=[self.materials.slug])
@@ -95,15 +95,11 @@ class ItemListView(
     def get_queryset(self):
         return super().get_queryset().filter(materials=self.materials).order_by('number','condition')
 
-    def _add_page(self, url):
-        if 'page' in self.request.GET:
-            page = self.request.GET.get(self.page_kwarg)
+    def _add_page(self, url, page=None):
+        if not page:
+            page = self.request.GET.get(self.page_kwarg, None)
+        if page:
             url += '?page={}'.format(page)
-        return url
-
-    def _item_url(self, url_name):
-        url = reverse(url_name, args=[self.materials.slug])
-        url = self._add_page(url)
         return url
 
     @property
@@ -114,7 +110,8 @@ class ItemListView(
             url_name = 'markdown-item-create'
         else:
             url_name = 'audio-link-item-create'
-        return self._item_url(url_name)
+        url = reverse(url_name, args=[self.materials.slug])
+        return url
 
     @property
     def _item_edit_url_name(self):
@@ -143,10 +140,13 @@ class ItemListView(
             ('link', 'Add item', self._add_page(self._item_add_url)),
             ('link', 'Pregenerate items', reverse('items-pregenerate', args=[self.materials.slug])),
             ('link', 'Download CSV', reverse('items-download', args=[self.materials.slug])),
-            ('link', 'Delete', reverse('items-delete', args=[self.materials.slug])),
+            ('link', 'Delete all items', reverse('items-delete', args=[self.materials.slug])),
         ]
         if self.study.enable_item_rating_feedback:
-            actions.insert(2, ('Upload Feedback', reverse('items-upload-feedback', args=[self.materials.slug])))
+            actions.insert(
+                2,
+                ('Upload Feedback', self._add_page(reverse('items-upload-feedback', args=[self.materials.slug])))
+            )
         return actions
 
     @property
@@ -191,7 +191,9 @@ class ItemCreateMixin(contrib_views.PaginationHelperMixin):
     def get_success_url(self):
         if 'save' in self.request.POST:
             return self.url_paginated(self.object.get_absolute_url())
-        return self.reverse_paginated('items', args=[self.materials.slug])
+        item_pos = self.materials.item_pos(self.object)
+        item_page = int(item_pos / ItemListView.paginate_by) + 1
+        return self.reverse_paginated('items', args=[self.materials.slug], page=item_page)
 
     @property
     def breadcrumbs(self):
@@ -447,7 +449,7 @@ class ItemUploadView(
                 columns.update({'legend{}'.format(i): form.cleaned_data[legend_column] - 1})
         data = StringIO(contrib_csv.read_file(form.cleaned_data))
         self.materials.items_csv_create(data, has_materials_column=False, user_columns=columns, detected_csv=form.detected_csv)
-        messages.success(self.request, 'Items uploaded')
+        messages.success(self.request, 'Items uploaded.')
         self.validate_items()
         return result
 
