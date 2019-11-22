@@ -460,8 +460,8 @@ class TrialListView(
     def actions(self):
         if self.study.has_subject_mapping:
             return [
-                ('button', 'Download subject ID mapping', 'download_subjects', 'btn btn-sm mx-1 btn-secondary'),
-                ('button', 'Delete subject ID mapping', 'delete_subjects', 'btn btn-sm mx-1 btn-primary'),
+                ('button', 'Download subject ID mapping', 'download_subjects', self.ACTION_CSS_BUTTON_SECONDARY),
+                ('button', 'Delete subject ID mapping', 'delete_subjects', self.ACTION_CSS_BUTTON_PRIMARY),
             ]
         return []
 
