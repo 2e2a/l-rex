@@ -143,6 +143,7 @@ class ItemListView(
             ('link', 'Add item', self._add_page(self._item_add_url)),
             ('link', 'Pregenerate items', reverse('items-pregenerate', args=[self.materials.slug])),
             ('link', 'Download CSV', reverse('items-download', args=[self.materials.slug])),
+            ('link', 'Delete', reverse('items-delete', args=[self.materials.slug])),
         ]
         if self.study.enable_item_rating_feedback:
             actions.insert(2, ('Upload Feedback', reverse('items-upload-feedback', args=[self.materials.slug])))
