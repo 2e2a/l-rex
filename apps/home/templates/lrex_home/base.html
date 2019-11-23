@@ -92,7 +92,7 @@
                 </ol>
             </nav>
             <div class="d-flex justify-content-between">
-                {% if view.title %}<h1>{{ view.title }}</h1>{% endif %}
+                <h1>{% block header-title %}{% if view.title %}{{ view.title }}{% endif %}{% endblock %}</h1>
                 {% include 'lrex_contrib/actions.html' %}
             </div>
         </div>
