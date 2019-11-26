@@ -10,23 +10,18 @@
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
     {% if leave_warning %}
     <script type="text/javascript">
+        var warn = false;
         $(document).ready(function(){
-            var wasFormFlag = false;
-            window.addEventListener('beforeunload', function (e) {
-                if (wasFormFlag) return;
-                var msg = "Make sure to submit any changes.";
-                (e || window.event).returnValue = msg;
-                return msg;
-            });
             document.querySelectorAll('form').forEach(function (form) {
-                form.addEventListener('submit', function () {
-                    wasFormFlag = true;
-                })
+                $(form).data('serialize', $(form).serialize());
+            });
+            $(window).bind('beforeunload', function(e) {
+                document.querySelectorAll('form').forEach(function (form) {
+                    if($(form).serialize()!=$(form).data('serialize')) warn = true;
+                });
+                if(warn) return true;
             });
         });
-
-
-
     </script>
     {% endif %}
     <link rel="stylesheet" href="{% static 'css/lrex.css' %}">
