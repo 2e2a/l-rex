@@ -9,20 +9,7 @@
     <script src="{% static 'js/popper.min.js' %}"></script>
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
     {% if leave_warning %}
-    <script type="text/javascript">
-        var warn = false;
-        $(document).ready(function(){
-            document.querySelectorAll('form').forEach(function (form) {
-                $(form).data('serialize', $(form).serialize());
-            });
-            $(window).bind('beforeunload', function(e) {
-                document.querySelectorAll('form').forEach(function (form) {
-                    if($(form).serialize()!=$(form).data('serialize')) warn = true;
-                });
-                if(warn) return true;
-            });
-        });
-    </script>
+    <script src="{% static 'js/leave_warning.js' %}"></script>
     {% endif %}
     <link rel="stylesheet" href="{% static 'css/lrex.css' %}">
     <link rel="shortcut icon" type="image/sgv" href="{% static 'img/favicon.svg' %}"/>
