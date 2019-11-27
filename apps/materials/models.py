@@ -232,8 +232,8 @@ class Materials(models.Model):
             item_list = item_models.ItemList.objects.create(materials=self)
             item_list.items.add(*list(self.items))
 
+
     def results(self):
-        # TODO: broken for two questions
         ratings = trial_models.Rating.objects.filter(
             questionnaire_item__item__materials=self,
             trial__is_test=False,
@@ -275,14 +275,14 @@ class Materials(models.Model):
         results_sorted = [results[key] for key in sorted(results)]
         return results_sorted
 
-    def _aggregated_results(self, results, group_function):
+    def _aggregated_results(self, results, group_function, key_function):
         grouped_results = {}
         for item, results in groupby(results, group_function):
             if item in grouped_results:
                 grouped_results[item].extend(list(results))
             else:
                 grouped_results[item] = list(results)
-        aggregated_results = []
+        aggregated_results = {}
         for results_for_item in grouped_results.values():
             rating_count = len(results_for_item)
             aggregated_result = copy.deepcopy(results_for_item[0])
@@ -301,21 +301,25 @@ class Materials(models.Model):
                     aggregated_result['scale_ratings_flat'].append(rating)
 
             aggregated_result['rating_count'] = rating_count
-            aggregated_results.append(aggregated_result)
-        return aggregated_results
+            aggregated_results.update({key_function(aggregated_result): aggregated_result})
+        aggregated_results_sorted = [aggregated_results[key] for key in sorted(aggregated_results)]
+        return aggregated_results_sorted
 
     def aggregated_results(self, columns):
         aggregated_results = []
         results = self.results()
         if columns == ['subject']:
             group_function = lambda result: str(result['item']) + result['condition']
-            aggregated_results = self._aggregated_results(results, group_function)
+            key_function = lambda result: '{:02d}{}'.format(result['item'], result['condition'])
+            aggregated_results = self._aggregated_results(results, group_function, key_function)
         elif columns == ['item']:
             group_function = lambda result: str(result['subject']) + result['condition']
-            aggregated_results = self._aggregated_results(results, group_function)
+            key_function = lambda result: '{:03d}-{}'.format(result['subject'], result['condition'])
+            aggregated_results = self._aggregated_results(results, group_function, key_function)
         elif columns == ['subject', 'item']:
             group_function = lambda result: result['condition']
-            aggregated_results = self._aggregated_results(results, group_function)
+            key_function = lambda result: '{:03d}-{:02d}'.format(result['subject'], result['item'])
+            aggregated_results = self._aggregated_results(results, group_function, key_function)
         return aggregated_results
 
     def items_csv_header(self, add_materials_column=False):
