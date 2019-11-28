@@ -5,7 +5,6 @@ $(document).ready(function(){
         $(form).data('serialize', $(form).serialize());
         form.addEventListener('submit', function () {
             isSubmit = true;
-            console.log('TEST')
         })
     });
     $(window).bind('beforeunload', function(e) {
