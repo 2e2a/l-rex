@@ -851,8 +851,10 @@ class RatingsCreateView(RatingCreateMixin, TrialMixin, generic.TemplateView):
             queryset=models.Rating.objects.none()
         )
         forms.ratingformset_init(
-            self.formset, self.study.questions, self.item_questions, self.questionnaire_item,
-            self.study.pseudo_randomize_question_order
+            self.formset,
+            self.study,
+            self.item_questions,
+            self.questionnaire_item,
         )
         return super().get(request, *args, **kwargs)
 
@@ -861,8 +863,10 @@ class RatingsCreateView(RatingCreateMixin, TrialMixin, generic.TemplateView):
             return redirect(self.get_next_url())
         self.formset = forms.ratingformset_factory(self.n_questions)(request.POST, request.FILES)
         forms.ratingformset_init(
-            self.formset, self.study.questions, self.item_questions, self.questionnaire_item,
-            self.study.pseudo_randomize_question_order
+            self.formset,
+            self.study,
+            self.item_questions,
+            self.questionnaire_item,
         )
         if self.formset.is_valid():
             instances = self.formset.save(commit=False)

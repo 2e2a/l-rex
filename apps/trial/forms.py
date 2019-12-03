@@ -285,6 +285,15 @@ class RatingBaseForm(crispy_forms.CrispyModelForm):
         widget=forms.HiddenInput(),
     )
 
+    def init_form(self, study, question):
+        if question.rating_comment == question.RATING_COMMENT_NONE:
+            self.fields['comment'].widget = forms.HiddenInput()
+        elif question.rating_comment == question.RATING_COMMENT_REQUIRED:
+            self.fields['comment'].label = study.comment_label
+            self.fields['comment'].required = True
+        else:
+            self.fields['comment'].label = '{} ({})'.format(study.comment_label, study.optional_label)
+
     def handle_feedbacks(self, feedbacks_given, feedback=None):
         if feedback:
             feedbacks_given.append(feedback.pk)
@@ -324,6 +333,7 @@ class RatingForm(RatingBaseForm):
         questionnaire_item = kwargs.pop('questionnaire_item')
         item_question = kwargs.pop('item_question', None)
         super().__init__(*args, **kwargs)
+        self.init_form(self.study, question)
         self.fields['scale_value'].empty_label = None
         self.fields['scale_value'].label = question.question
         self.fields['scale_value'].help_text = question.legend
@@ -344,17 +354,11 @@ class RatingForm(RatingBaseForm):
             for scale_num in questionnaire_item.question_property(question.number).scale_order.split(','):
                 custom_choices.append(initial_choices[int(scale_num)])
             self.fields['scale_value'].choices = custom_choices
-        if question.rating_comment == question.RATING_COMMENT_NONE:
-            self.fields['comment'].widget = forms.HiddenInput()
-        elif question.rating_comment == question.RATING_COMMENT_REQUIRED:
-            self.fields['comment'].label = self.study.comment_label
-            self.fields['comment'].required = True
-        else:
-            self.fields['comment'].label = '{} ({})'.format(self.study.comment_label, self.study.optional_label)
 
 
 class RatingFormsetForm(RatingBaseForm):
     optional_label_ignore_fields = ['comment', 'feedback']
+
     class Meta:
         model = models.Rating
         fields = ['question', 'scale_value', 'feedback', 'comment', 'feedbacks_given']
@@ -380,8 +384,7 @@ def ratingformset_factory(n_questions=1):
     )
 
 
-def ratingformset_init(ratingformset, questions, item_questions, questionnaire_item,
-                       pseudo_randomize_question_order=False):
+def ratingformset_init(ratingformset, study, item_questions, questionnaire_item):
 
     def _get_item_question(num, item_questions):
         for item_question in item_questions:
@@ -394,12 +397,13 @@ def ratingformset_init(ratingformset, questions, item_questions, questionnaire_i
             reordered_questions.append(questions[int(question_num)])
         return reordered_questions
 
-    if pseudo_randomize_question_order:
-        ordered_questions = _get_reordered_questions_random(questions, questionnaire_item.question_order)
+    if study.pseudo_randomize_question_order:
+        ordered_questions = _get_reordered_questions_random(study.questions, questionnaire_item.question_order)
     else:
-        ordered_questions = questions
+        ordered_questions = study.questions
     for question, form in zip(ordered_questions, ratingformset):
         item_question = _get_item_question(question.number, item_questions)
+        form.init_form(study, question)
         form.fields['question'].initial = question.number
         scale_value = form.fields.get('scale_value')
         scale_value.queryset = scale_value.queryset.filter(question=question)
@@ -410,14 +414,6 @@ def ratingformset_init(ratingformset, questions, item_questions, questionnaire_i
             for (pk, _ ), custom_label in zip(scale_value.choices, item_question.scale_labels.split(',')):
                 custom_choices.append((pk, custom_label))
             scale_value.choices = custom_choices
-
-        if question.rating_comment == question.RATING_COMMENT_NONE:
-            form.fields['comment'].widget = forms.HiddenInput()
-        elif question.rating_comment == question.RATING_COMMENT_REQUIRED:
-            form.fields['comment'].required = True
-        else:
-            form.fields['comment'].label = form.fields['comment'].label + ' (optional)'
-
         form.fields['feedback'].widget = forms.HiddenInput()
         form.fields['feedbacks_given'].widget = forms.HiddenInput()
 
