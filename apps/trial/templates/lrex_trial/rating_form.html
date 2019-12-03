@@ -15,7 +15,7 @@
     <div class="text-center my-2">
         {% for item_url in item.audiolinkitem.urls_list %}
         <div>
-            <audio controls="controls" {% if not item.audiolinkitem.has_multiple_urls %}autoplay="autoplay"{% endif %}>
+            <audio controls="controls">
                 <source src="{{ item_url }}">
                 Your browser does not support the <code>audio</code> element.
             </audio>
