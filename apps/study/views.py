@@ -275,6 +275,11 @@ class StudyDetailView(
     def title(self):
         return self.study.title
 
+    def get(self, request, *args, **kwargs):
+        if not hasattr(self.request.user, 'userprofile'):
+            return redirect('user-profile-create')
+        return super().get(request, *args, **kwargs)
+
     def post(self, request, *args, **kwargs):
         action = request.POST.get('action', None)
         if action == 'publish':
