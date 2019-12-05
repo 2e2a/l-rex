@@ -67,8 +67,8 @@
                 <ul class="list-group">
                     {% for news in news_list %}
                     <li class="list-group-item border-0 pt-0 pb-2">
-                        <small>{{ news.date|date:"SHORT_DATE_FORMAT" }}</small><br>
-                        <a href="{% url 'news' news.slug %}">{{ news.title }}</a>
+                        <div class="text-secondary small">{{ news.date|date:"SHORT_DATE_FORMAT" }}</div>
+                        <a href="{% url 'news' news.slug %}"><em>{{ news.title }}</em></a>
                     </li>
                     {% empty %}
                     <li class="list-group-item border-0">No news is good news.</li>
