@@ -9,26 +9,20 @@ from django.views import generic
 from . import models
 
 
-class HomeView(generic.TemplateView):
+class HomeView(generic.ListView):
+    model = models.News
     template_name = 'lrex_home/home.html'
     title = 'Linguistic rating experiments'
+    paginate_by = 2
 
     def get(self, request, *args, **kwargs):
         if self.request.user.is_authenticated and not hasattr(self.request.user, 'userprofile'):
             return redirect('user-profile-create')
         return super().get(request, *args, **kwargs)
 
-    def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-        data['news_list'] = models.News.objects.all()[:3]
-        if self.request.user.is_authenticated:
-            data['latest_studies'] = self.request.user.study_set.all()[:2]
-        return data
-
     @property
     def breadcrumbs(self):
         return []
-
 
 
 class ImprintView(generic.TemplateView):
