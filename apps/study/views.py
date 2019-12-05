@@ -465,7 +465,7 @@ class StudySettingsView(
     generic.UpdateView,
 ):
     model = models.Study
-    title = 'Edit study settings'
+    title = 'Study settings'
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.StudySettingsForm
     success_message = 'Study settings updated.'
@@ -520,7 +520,7 @@ class StudyTranslationsUpdateView(
     generic.UpdateView,
 ):
     model = models.Study
-    title = 'Translate elements shown to participants'
+    title = 'Translations'
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.StudyTranslationsForm
     success_message = 'Translations updated.'
@@ -580,7 +580,7 @@ class StudyInstructionsUpdateView(
     generic.UpdateView,
 ):
     model = models.Study
-    title ='Edit study instructions'
+    title ='Instructions'
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.StudyInstructionsForm
     success_message = 'Instructions saved.'
