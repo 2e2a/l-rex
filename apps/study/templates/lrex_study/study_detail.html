@@ -32,7 +32,7 @@
                     </div>
                     <div class="col-sm-6">
                         {% if allow_publish %}
-                        <a href="{% url 'trial-intro' study.slug %}?test=True">Link for testing</a>
+                        <a href="{% url 'trial-intro' study.slug %}?test=True" target="_blank">Link for testing&nearr;</a>
                         {% else %}
                         <a class="card-link text-muted">Link for testing</a>
                         {% endif %}
@@ -63,7 +63,7 @@
                     </div>
                     <div class="col-sm-6">
                         {% if study.is_published %}
-                        <a href="{% url 'trial-intro' study.slug %}">Link for participants</a>
+                        <a href="{% url 'trial-intro' study.slug %}" target="_blank">Link for participants&nearr;</a>
                         {% else %}
                         <a class="card-link text-muted">Link for participants</a>
                         {% endif %}
