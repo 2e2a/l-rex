@@ -96,19 +96,19 @@
         <div class="row">
             <div class="col-md-6 ">
                 <em>Required:</em>
-                <ul>
+                <ul class="list-group">
                     {% for next_step_html in next_steps_html %}
-                    <li>{{ next_step_html }}</li>
+                    <li class="list-group-item border-0" >{{ next_step_html }}</li>
                     {% empty %}
-                    <li>Nothing to do</li>
+                    <li class="list-group-item border-0" >Nothing to do</li>
                     {% endfor %}
                 </ul>
             </div>
             <div class="col-md-6">
                 <em>Optional:</em>
-                <ul>
+                <ul class="list-group">
                     {% for optional_step_html in optional_steps_html %}
-                    <li>{{ optional_step_html }}</li>
+                    <li class="list-group-item border-0" >{{ optional_step_html }}</li>
                     {% endfor %}
                 </ul>
             </div>
