@@ -329,19 +329,22 @@ class Study(models.Model):
     def status(self):
         if self.is_archived:
             return StudyStatus.ARCHIVED
-        if not self.is_published:
-            return StudyStatus.DRAFT
         if self.end_date and self.end_date < timezone.now().date():
             return StudyStatus.FINISHED
-        if self.trial_limit  and self.trial_limit <= self.trial_count:
+        if self.trial_limit and self.trial_limit <= self.trial_count:
             return StudyStatus.FINISHED
-        if self.trial_count > 0:
-            return StudyStatus.ACTIVE
-        return StudyStatus.STARTED
+        if self.is_published:
+            return StudyStatus.ACTIVE if self.trial_count > 0 else StudyStatus.STARTED
+        else:
+            return StudyStatus.FINISHED if self.trial_count > 0 else StudyStatus.DRAFT
 
     @cached_property
     def is_active(self):
         return self.is_published or self.trial_count > 0
+
+    @cached_property
+    def is_finished(self):
+        return self.status == StudyStatus.FINISHED
 
     @cached_property
     def trial_count(self):

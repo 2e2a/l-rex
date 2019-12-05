@@ -68,7 +68,7 @@ class NextStepsMixin:
                         reverse('study-settings', args=[self.study.slug]), 'Customize study settings'
                     ),
                     step_html_template.format(
-                        reverse('study-translate', args=[self.study.slug]), 'Translate elenents shown to participants'
+                        reverse('study-translate', args=[self.study.slug]), 'Translate build-in texts'
                     )
                 ]),
                 'Settings',

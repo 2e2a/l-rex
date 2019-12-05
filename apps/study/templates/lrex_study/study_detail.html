@@ -113,8 +113,10 @@
                 </ul>
             </div>
         </div>
+        {% elif study.is_finished %}
+        <em>Study has finished.</em> {# TODO: consider archiving #}
         {% else %}
-        <em>Your study is active.</em>
+        <em>Study is active.</em>
         {% endif %}
     </div>
 </div>
