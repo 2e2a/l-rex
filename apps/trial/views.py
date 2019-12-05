@@ -81,11 +81,24 @@ class TrialObjectMixin(TrialMixin):
         return self.trial_object
 
 
+class QuestionnaireNavMixin(study_views.StudyNavMixin):
+    nav_active = 4
+
+    @property
+    def secondary_nav(self):
+        if self.study.use_blocks:
+            return [
+                ('link', ('Questionnaires', reverse('questionnaires', args=[self.study.slug]))),
+                ('link', ('Block instructions', reverse('questionnaire-blocks', args=[self.study.slug]))),
+            ]
+        return []
+
+
 class QuestionnaireListView(
     study_views.StudyMixin,
     study_views.CheckStudyCreatorMixin,
-    study_views.NextStepsMixin,
     study_views.DisableFormIfStudyActiveMixin,
+    QuestionnaireNavMixin,
     contrib_views.ActionsMixin,
     generic.ListView
 ):
@@ -105,7 +118,10 @@ class QuestionnaireListView(
             messages.info(request, 'Note: Define filler materials to use pseudo randomization.')
         if not self.study.use_blocks:
             randomization = self._get_prev_randomization()
-            self.randomization_form = forms.RandomizationForm(randomization=randomization)
+            self.randomization_form = forms.RandomizationForm(
+                randomization=randomization,
+                allow_pseudo_random=self.study.is_allowed_pseudo_randomization
+            )
         return super().get(request, *args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
@@ -138,7 +154,7 @@ class QuestionnaireListView(
                 self.study.generate_questionnaires()
                 messages.success(request, 'Questionnaires generated.')
             except RuntimeError:
-                messages.error(request, 'Pseudo-randomization timed out. Retry or add more filler items.')
+                messages.error(request, 'Pseudo-randomization timed out. Retry or add more filler items and retry.')
         return redirect('questionnaires',study_slug=self.study.slug)
 
     def get_queryset(self):
@@ -159,7 +175,6 @@ class QuestionnaireListView(
             )]
         else:
             return [('form', self.randomization_form, self.randomization_form.helper)]
-
 
     @property
     def secondary_actions(self):
@@ -186,7 +201,7 @@ class QuestionnaireListView(
 class QuestionnaireDetailView(
     QuestionnaireObjectMixin,
     study_views.CheckStudyCreatorMixin,
-    study_views.NextStepsMixin,
+    QuestionnaireNavMixin,
     generic.DetailView
 ):
     model = models.Questionnaire
@@ -316,12 +331,14 @@ class QuestionnaireBlockInstructionsUpdateView(
     study_views.CheckStudyCreatorMixin,
     contrib_views.LeaveWarningMixin,
     contrib_views.DisableFormMixin,
+    QuestionnaireNavMixin,
     generic.TemplateView,
 ):
     title = 'Edit questionnaire block instructions'
     template_name = 'lrex_contrib/crispy_formset_form.html'
     formset = None
     helper = None
+    secondary_nav_active = 1
 
     def dispatch(self, *args, **kwargs):
         self.helper = forms.questionnaire_block_update_formset_helper()
@@ -421,6 +438,7 @@ class TrialListView(
     study_views.StudyMixin,
     study_views.CheckStudyCreatorMixin,
     contrib_views.ActionsMixin,
+    materials_views.ResultsNavMixin,
     generic.ListView
 ):
     model = models.Trial
@@ -460,6 +478,7 @@ class TrialListView(
     def actions(self):
         if self.study.has_subject_mapping:
             return [
+                ('link', 'Results CSV', reverse('study-results-csv', args=[self.study.slug]), self.ACTION_CSS_BUTTON_SECONDARY),
                 ('button', 'Download subject ID mapping', 'download_subjects', self.ACTION_CSS_BUTTON_SECONDARY),
                 ('button', 'Delete subject ID mapping', 'delete_subjects', self.ACTION_CSS_BUTTON_PRIMARY),
             ]
@@ -478,11 +497,17 @@ class TrialListView(
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
+            ('results', reverse('trials', args=[self.study.slug])),
             ('trials', ''),
         ]
 
 
-class TrialDeleteAllView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, generic.TemplateView):
+class TrialDeleteAllView(
+    study_views.StudyMixin,
+    study_views.CheckStudyCreatorMixin,
+    materials_views.ResultsNavMixin,
+    generic.TemplateView,
+):
     title = 'Confirm Delete'
     template_name = 'lrex_contrib/confirm_delete.html'
     message = 'Delete all trials?'
@@ -629,7 +654,12 @@ class DemographicsCreateView(TrialMixin, TestWarningMixin, generic.TemplateView)
         return super().get(request, *args, **kwargs)
 
 
-class TrialDetailView(TrialObjectMixin, study_views.CheckStudyCreatorMixin, generic.DetailView):
+class TrialDetailView(
+    TrialObjectMixin,
+    study_views.CheckStudyCreatorMixin,
+    materials_views.ResultsNavMixin,
+    generic.DetailView,
+):
     model = models.Trial
     title = 'Trial overview'
 
@@ -643,7 +673,12 @@ class TrialDetailView(TrialObjectMixin, study_views.CheckStudyCreatorMixin, gene
         ]
 
 
-class TrialDeleteView(TrialObjectMixin, study_views.CheckStudyCreatorMixin, contrib_views.DefaultDeleteView):
+class TrialDeleteView(
+    TrialObjectMixin,
+    study_views.CheckStudyCreatorMixin,
+    materials_views.ResultsNavMixin,
+    contrib_views.DefaultDeleteView,
+):
     model = models.Trial
 
     @property

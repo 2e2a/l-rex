@@ -8,7 +8,7 @@
             <a href="{% url 'trial' trial.slug %}"><strong>#{{ page_obj.start_index|add:forloop.counter0 }}</strong></a>
             {% if trial.subject_id %} Subject {{ trial.subject_id }} {% endif %}
             <div><small>
-                created: <strong>{{ trial.created|date:"SHORT_DATE_FORMAT" }}</strong>,
+                created: <strong>{{ trial.created|date:"SHORT_DATETIME_FORMAT" }}</strong>,
                 status: <strong>{{ trial.status.name }}</strong>,
                 questionnaire: <strong>Questionnaire {{ trial.questionnaire.number }}</strong>{% if trial.is_test %},
                 <mark><strong>TEST</strong></mark>

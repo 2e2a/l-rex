@@ -4,7 +4,6 @@
 {% block header-title %}Log in{% endblock %}
 
 {% block account_content %}
-{# TODO: redesign header #}
 <form class="login" method="POST" action="{% url 'account_login' %}">
     {% csrf_token %}
     {{ form|crispy }}

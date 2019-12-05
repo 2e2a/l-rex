@@ -64,6 +64,7 @@
         <div class="container">
             <nav aria-label="Breadcrumbs">
                 <ol class="breadcrumb bg-white px-0 py-0 my-0">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">home</a></li>
                     {% for name, link in view.breadcrumbs %}
                     {% if not forloop.last %}
                     <li class="breadcrumb-item"><a href="{{ link }}">{{ name }}</a></li>
@@ -80,14 +81,28 @@
         </div>
     </div>
 </nav>
-<div class="container">
-    {% for message in messages %}
-    <div class="alert {{ message.level_tag|bootstrap_alert_class }} grey-shadow" role="alert">
-        {{ message }}
-    </div>
-    {% endfor %}
-</div>
 <div class="container bg-white py-4">
+    {% block nav %}
+    {% if nav or secondary_nav %}
+    <ul class="nav nav-tabs mb-2">
+        {% for nav_html in nav %}
+        {{ nav_html }}
+        {% endfor %}
+    </ul>
+    <ul class="nav nav-pills mt-3 mb-4">
+        {% for nav_html in secondary_nav %}
+        {{ nav_html }}
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endblock %}
+    <div>
+        {% for message in messages %}
+        <div class="alert {{ message.level_tag|bootstrap_alert_class }} border" role="alert">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
     {% block content %}{% endblock %}
 </div>
 </body>

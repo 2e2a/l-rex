@@ -45,32 +45,19 @@ class MaterialsObjectMixin(MaterialsMixin):
         return self.materials_object
 
 
-class MaterialsListView(
-    study_views.StudyMixin,
-    study_views.CheckStudyCreatorMixin,
-    study_views.NextStepsMixin,
-    study_views.DisableFormIfStudyActiveMixin,
-    contrib_views.ActionsMixin,
-    generic.ListView
-):
-    model = models.Materials
-    title = 'Materials'
-
-    def get_queryset(self):
-        return super().get_queryset().filter(study=self.study)
+class MaterialsNavMixin(study_views.StudyNavMixin):
+    nav_active = 3
 
     @property
-    def actions(self):
-        return [
-            ('link', 'New Materials', reverse('materials-create', args=[self.study.slug]), self.ACTION_CSS_BUTTON_PRIMARY)
-        ]
+    def materials_nav(self):
+        return super().materials_nav
 
     @property
-    def breadcrumbs(self):
+    def secondary_nav(self):
         return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study',args=[self.study.slug])),
-            ('materials', '')
+            ('link', ('Items', reverse('items', args=[self.materials.slug]))),
+            ('link', ('Lists', reverse('itemlists', args=[self.materials.slug]))),
+            ('link', ('Settings', reverse('materials-update', args=[self.materials.slug]))),
         ]
 
 
@@ -78,6 +65,7 @@ class MaterialsCreateView(
     study_views.StudyMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
+    study_views.StudyNavMixin,
     generic.CreateView
 ):
     model = models.Materials
@@ -85,6 +73,7 @@ class MaterialsCreateView(
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.MaterialsForm
     success_message = 'Materials created.'
+    nav_active = 3
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -101,42 +90,7 @@ class MaterialsCreateView(
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
-            ('materials',reverse('materials-list', args=[self.study.slug])),
-            ('create','')
-        ]
-
-
-class MaterialsDetailView(
-    MaterialsObjectMixin,
-    study_views.CheckStudyCreatorMixin,
-    contrib_views.ActionsMixin,
-    study_views.NextStepsMixin,
-    generic.DetailView
-):
-    model = models.Materials
-
-    @property
-    def title(self):
-        return self.materials.title
-
-    def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-        data['items_validated'] = self.materials.items_validated
-        return data
-
-    @property
-    def actions(self):
-        return [
-            ('link', 'Settings', reverse('materials-update', args=[self.materials.slug]), self.ACTION_CSS_BUTTON_PRIMARY)
-        ]
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            ('materials',reverse('materials-list', args=[self.study.slug])),
-            (self.materials.title, '')
+            ('create materials','')
         ]
 
 
@@ -145,14 +99,20 @@ class MaterialsUpdateView(
     study_views.CheckStudyCreatorMixin,
     SuccessMessageMixin,
     contrib_views.LeaveWarningMixin,
+    contrib_views.ActionsMixin,
     study_views.DisableFormIfStudyActiveMixin,
+    MaterialsNavMixin,
     generic.UpdateView
 ):
     model = models.Materials
-    title = 'Edit Materials'
     template_name = 'lrex_contrib/crispy_form.html'
     form_class = forms.MaterialsUpdateForm
     success_message = 'Materials successfully updated.'
+    secondary_nav_active = 2
+
+    @property
+    def title(self):
+        return '{}: Settings'.format(self.materials.title)
 
     def get(self, request, *args, **kwargs):
         if self.study.has_questionnaires:
@@ -170,14 +130,25 @@ class MaterialsUpdateView(
         return kwargs
 
     @property
+    def actions(self):
+        return [
+            ('link', 'Delete materials', reverse('materials-delete', args=[self.materials.slug]), self.ACTION_CSS_BUTTON_DANGER)
+        ]
+
+    @property
     def breadcrumbs(self):
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
-            ('materials',reverse('materials-list', args=[self.study.slug])),
             (self.materials.title, reverse('materials', args=[self.object.slug])),
             ('edit','')
         ]
+
+
+class MaterialsView(MaterialsMixin, generic.RedirectView):
+
+    def get_redirect_url(self, *args, **kwargs):
+        return reverse('items', args=[self.materials.slug])
 
 
 class MaterialsDeleteView(
@@ -193,29 +164,29 @@ class MaterialsDeleteView(
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
-            ('materials',reverse('materials-list', args=[self.study.slug])),
             (self.materials.title, reverse('materials', args=[self.object.slug])),
             ('delete','')
         ]
 
     def get_success_url(self):
-        return reverse('materials-list', args=[self.study.slug])
+        return reverse('study', args=[self.study.slug])
 
 
-class MaterialsResultListView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, generic.ListView):
-    model = models.Materials
-    title = 'Results'
-    template_name = 'lrex_materials/materials_result_list.html'
-
-    def get_queryset(self):
-        return super().get_queryset().filter(study=self.study)
+class ResultsNavMixin(study_views.StudyNavMixin):
+    nav_active = 6
 
     @property
-    def breadcrumbs(self):
+    def materials_results_nav(self):
         return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study',args=[self.study.slug])),
-            ('results','')
+            (materials.title, reverse('materials-results', args=[materials.slug]))
+            for materials in self.study.materials_list
+        ]
+
+    @property
+    def secondary_nav(self):
+        return [
+            ('link', ('Trials', reverse('trials', args=[self.study.slug]))),
+            ('dropdown', ('Results', self.materials_results_nav)),
         ]
 
 
@@ -223,15 +194,20 @@ class MaterialsResultsView(
     MaterialsObjectMixin,
     study_views.CheckStudyCreatorMixin,
     contrib_views.ActionsMixin,
+    ResultsNavMixin,
     generic.DetailView
 ):
     model = models.Materials
-    title = 'Results'
     template_name = 'lrex_materials/materials_results.html'
     aggregate_by = ['subject']
     aggregate_by_label = 'subject'
     page = 1
     paginate_by = 16
+    secondary_nav_active = 1
+
+    @property
+    def title(self):
+        return 'Results: {}'.format(self.materials.title)
 
     def dispatch(self, request, *args, **kwargs):
         self.page = request.GET.get('page')
@@ -271,12 +247,7 @@ class MaterialsResultsView(
             self.ACTION_CSS_BUTTON_PRIMARY
         )
         return [
-            (
-                'link',
-                'Download CSV',
-                reverse('materials-results-csv', args=[self.materials.slug]),
-                self.ACTION_CSS_BUTTON_SECONDARY
-            ),
+            ('link', 'Results CSV', reverse('study-results-csv', args=[self.study.slug]), self.ACTION_CSS_BUTTON_SECONDARY),
             aggregate_action,
         ]
 
@@ -285,17 +256,6 @@ class MaterialsResultsView(
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study',args=[self.study.slug])),
-            ('results', reverse('materials-result-list',args=[self.study.slug])),
+            ('results', reverse('trials',args=[self.study.slug])),
             (self.materials.title,'')
         ]
-
-
-class MaterialsResultsCSVDownloadView(MaterialsObjectMixin, study_views.CheckStudyCreatorMixin, generic.DetailView):
-    model = models.Materials
-
-    def get(self, request, *args, **kwargs):
-        filename = '{}_RESULTS_{}.csv'.format(self.materials.title.replace(' ', '_'), str(now().date()))
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
-        self.materials.results_csv(response)
-        return response

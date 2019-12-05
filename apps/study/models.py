@@ -396,13 +396,6 @@ class Study(models.Model):
         return self.status == StudyStatus.ACTIVE or self.status == StudyStatus.STARTED
 
     @cached_property
-    def results_url(self):
-        if self.materials_set.count() == 1:
-            materials = self.materials_set.first()
-            return reverse('materials-results', args=[materials.slug])
-        return reverse('materials-result-list', args=[self.slug])
-
-    @cached_property
     def is_allowed_create_questionnaires(self):
         if not self.materials_list:
             return False
@@ -638,9 +631,9 @@ class Study(models.Model):
         for i, materials in enumerate(self.materials_list):
             if i == 0:
                 writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
-                header = materials.results_csv_header(add_materials_column=True)
+                header = materials.results_csv_header()
                 writer.writerow(header)
-            materials.results_csv(fileobj, add_header=False, add_materials_column=True)
+            materials.results_csv(fileobj)
 
     def items_csv(self, fileobj):
         for i, materials in enumerate(self.materials_list):

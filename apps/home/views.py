@@ -27,7 +27,6 @@ class HomeView(generic.TemplateView):
 
     @property
     def breadcrumbs(self):
-        # TODO: add home everywhere
         return []
 
 

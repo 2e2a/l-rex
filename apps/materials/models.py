@@ -196,7 +196,7 @@ class Materials(models.Model):
             for item, link in item_links:
                 if prev_item_link:
                     if link == prev_item_link[1]:
-                        if  item == prev_item_link[0]:
+                        if item == prev_item_link[0]:
                             warnings.append('Item {} uses the same URL multiple times.'.format(item))
                         else:
                             warnings.append('Items {} and {} have the same URL.'.format(prev_item_link[0], item))
@@ -529,9 +529,8 @@ class Materials(models.Model):
             itemlist = item_models.ItemList.objects.create(materials=self, number=list_num)
             itemlist.items.set(items)
 
-    def results_csv_header(self, add_materials_column=False):
-        csv_row = ['materials'] if add_materials_column else []
-        csv_row.extend(['subject', 'item', 'condition', 'position'])
+    def results_csv_header(self):
+        csv_row = ['materials', 'subject', 'item', 'condition', 'position']
         if self.study.pseudo_randomize_question_order:
             csv_row.append('question order')
         if self.study.has_question_with_random_scale:
@@ -546,15 +545,11 @@ class Materials(models.Model):
             csv_row.append('demographic{}'.format(i))
         return csv_row
 
-    def results_csv(self, fileobj, add_header=True, add_materials_column=False):
+    def results_csv(self, fileobj):
         writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
-        if add_header:
-            header = self.results_csv_header()
-            writer.writerow(header)
         results = self.results()
         for result in results:
-            csv_row = [self.title] if add_materials_column else []
-            csv_row.extend([result['subject'], result['item'], result['condition'], result['position']])
+            csv_row = [self.title, 'subject', result['item'], result['condition'], result['position']]
             if self.study.pseudo_randomize_question_order:
                 csv_row.append(result['question_order'])
             if self.study.has_question_with_random_scale:
@@ -584,8 +579,7 @@ class Materials(models.Model):
             return reverse('itemlists', args=[self.slug])
 
     def _append_step_info(self, steps, step):
-        description = '{} ({})'.format(self.STEP_DESCRIPTION[step], self.title)
-        steps.append((description, self.step_url(step)))
+        steps.append((self.STEP_DESCRIPTION[step], self.step_url(step)))
 
     def next_steps(self):
         next_steps = []
@@ -595,4 +589,4 @@ class Materials(models.Model):
             self._append_step_info(next_steps, MaterialsSteps.STEP_EXP_ITEMS_VALIDATE)
         if self.items_validated and not self.itemlist_set.exists():
             self._append_step_info(next_steps, MaterialsSteps.STEP_EXP_LISTS_GENERATE)
-        return  {self.title: next_steps}
+        return {'{} materials'.format(self.title): next_steps}

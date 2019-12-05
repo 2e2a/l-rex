@@ -63,12 +63,15 @@ class DisableFormMixin:
         for field in form.fields.values():
             field.widget.attrs['readonly'] = True
             field.widget.attrs['disabled'] = True
-            self._disable_form_inputs(form.helper)
+            if hasattr(form, 'helper'):
+                self._disable_form_inputs(form.helper)
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class=form_class)
         if self.is_disabled:
             self.disable_form(form)
+            if  hasattr(self, 'helper'):
+                self._disable_form_inputs(self.helper)
         return form
 
     def get(self, request, *args, **kwargs):
@@ -105,6 +108,7 @@ class PaginationHelperMixin:
 
 
 class ActionsMixin:
+    # TODO: Show form actions here?
     actions = None
     secondary_actions = None
     disable_actions = ([], [])
@@ -112,6 +116,7 @@ class ActionsMixin:
     ACTION_CSS_BUTTON_PRIMARY = 'btn btn-sm ml-1 mr-0 btn-primary'
     ACTION_CSS_BUTTON_SECONDARY = 'btn btn-sm ml-1 mr-0 btn-secondary'
     ACTION_CSS_BUTTON_WARNING = 'btn btn-sm ml-1 mr-0 btn-warning'
+    ACTION_CSS_BUTTON_DANGER = 'btn btn-sm ml-1 mr-0 btn-danger'
 
     def _get_action_html(self, action_type, action, disabled):
         action_context = {

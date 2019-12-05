@@ -76,15 +76,18 @@ class ItemsValidateMixin:
 class ItemListView(
     materials_views.MaterialsMixin,
     study_views.CheckStudyCreatorMixin,
-    study_views.NextStepsMixin,
     study_views.DisableFormIfStudyActiveMixin,
     contrib_views.ActionsMixin,
+    materials_views.MaterialsNavMixin,
     ItemsValidateMixin,
     generic.ListView
 ):
     model = models.Item
-    title = 'Items'
     paginate_by = 16
+
+    @property
+    def title(self):
+        return '{}: Items'.format(self.materials.title)
 
     def post(self, request, *args, **kwargs):
         action = request.POST.get('action', None)
@@ -130,8 +133,8 @@ class ItemListView(
     @property
     def actions(self):
         return [
-            ('button', 'Validate / generate lists', 'validate', self.ACTION_CSS_BUTTON_SECONDARY),
-            ('link', 'Upload CSV', reverse('items-upload', args=[self.materials.slug]), self.ACTION_CSS_BUTTON_PRIMARY),
+            ('link', 'Upload CSV', reverse('items-upload', args=[self.materials.slug]), self.ACTION_CSS_BUTTON_SECONDARY),
+            ('button', 'Validate / generate lists', 'validate', self.ACTION_CSS_BUTTON_PRIMARY),
         ]
 
     @property
@@ -141,6 +144,7 @@ class ItemListView(
             ('link', 'Pregenerate items', reverse('items-pregenerate', args=[self.materials.slug])),
             ('link', 'Download CSV', reverse('items-download', args=[self.materials.slug])),
             ('link', 'Delete all items', reverse('items-delete', args=[self.materials.slug])),
+            ('link', 'Delete materials', reverse('materials-delete', args=[self.materials.slug])),
         ]
         if self.study.enable_item_rating_feedback:
             actions.insert(
@@ -152,20 +156,19 @@ class ItemListView(
     @property
     def disable_actions(self):
         if self.is_disabled:
-            return [0, 1], [0, 1]
+            return [1, 2], [0, 1]
 
     @property
     def breadcrumbs(self):
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
-            ('materials',reverse('materials-list', args=[self.study.slug])),
             (self.materials.title, reverse('materials', args=[self.materials.slug])),
             ('items', ''),
         ]
 
 
-class ItemCreateMixin(contrib_views.PaginationHelperMixin):
+class ItemCreateMixin(contrib_views.PaginationHelperMixin, materials_views.MaterialsNavMixin):
     title = 'Add item'
     template_name = 'lrex_contrib/crispy_form.html'
 
@@ -200,14 +203,17 @@ class ItemCreateMixin(contrib_views.PaginationHelperMixin):
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
-            ('materials',reverse('materials-list', args=[self.study.slug])),
             (self.materials.title, reverse('materials', args=[self.materials.slug])),
             ('items', self.reverse_paginated('items', args=[self.materials.slug])),
             ('create', '')
         ]
 
 
-class ItemUpdateMixin(contrib_views.LeaveWarningMixin, contrib_views.PaginationHelperMixin):
+class ItemUpdateMixin(
+    contrib_views.LeaveWarningMixin,
+    contrib_views.PaginationHelperMixin,
+    materials_views.MaterialsNavMixin,
+):
     title = 'Edit item'
     template_name = 'lrex_contrib/crispy_form.html'
     success_message = 'Item successfully updated.'
@@ -235,7 +241,6 @@ class ItemUpdateMixin(contrib_views.LeaveWarningMixin, contrib_views.PaginationH
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
-            ('materials',reverse('materials-list', args=[self.study.slug])),
             (self.materials.title, reverse('materials', args=[self.materials.slug])),
             ('items', self.reverse_paginated('items', args=[self.materials.slug])),
             (self.item, ''),
@@ -316,6 +321,7 @@ class ItemDeleteView(
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
     contrib_views.PaginationHelperMixin,
+    materials_views.MaterialsNavMixin,
     contrib_views.DefaultDeleteView
 ):
     model = models.Item
@@ -334,7 +340,6 @@ class ItemDeleteView(
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
-            ('materials',reverse('materials-list', args=[self.study.slug])),
             (self.materials.title, reverse('materials', args=[self.materials.slug])),
             ('items', self.reverse_paginated('items', args=[self.materials.slug])),
             (self.item, self.reverse_paginated('text-item-update', args=[self.item.slug])),
@@ -348,6 +353,7 @@ class ItemPregenerateView(
     SuccessMessageMixin,
     study_views.DisableFormIfStudyActiveMixin,
     contrib_views.PaginationHelperMixin,
+    materials_views.MaterialsNavMixin,
     generic.FormView
 ):
     title = 'Pregenerate items'
@@ -395,7 +401,6 @@ class ItemPregenerateView(
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
-            ('materials',reverse('materials-list', args=[self.study.slug])),
             (self.materials.title, reverse('materials', args=[self.materials.slug])),
             ('items', self.reverse_paginated('items', args=[self.materials.slug])),
             ('pregenerate', ''),
@@ -461,7 +466,6 @@ class ItemUploadView(
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
-            ('materials',reverse('materials-list', args=[self.study.slug])),
             (self.materials.title, reverse('materials', args=[self.materials.slug])),
             ('items', reverse('items', args=[self.materials.slug])),
             ('upload', ''),
@@ -490,7 +494,6 @@ class ItemDeleteAllView(
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
-            ('materials',reverse('materials-list', args=[self.study.slug])),
             (self.materials.title, reverse('materials', args=[self.materials.slug])),
             ('items', reverse('items', args=[self.materials.slug])),
             ('delete-all','')
@@ -503,7 +506,6 @@ class ItemDeleteAllView(
 class ItemQuestionsUpdateView(
     ItemMixin,
     study_views.CheckStudyCreatorMixin,
-    study_views.NextStepsMixin,
     contrib_views.LeaveWarningMixin,
     study_views.DisableFormIfStudyActiveMixin,
     contrib_views.PaginationHelperMixin,
@@ -565,7 +567,6 @@ class ItemQuestionsUpdateView(
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
-            ('materials',reverse('materials-list', args=[self.study.slug])),
             (self.materials.title, reverse('materials', args=[self.materials.slug])),
             ('items', self.reverse_paginated('items', args=[self.materials.slug])),
             ('{}-questions'.format(self.item), '')
@@ -575,7 +576,6 @@ class ItemQuestionsUpdateView(
 class ItemFeedbackUpdateView(
     ItemMixin,
     study_views.CheckStudyCreatorMixin,
-    study_views.NextStepsMixin,
     contrib_views.LeaveWarningMixin,
     study_views.DisableFormIfStudyActiveMixin,
     contrib_views.PaginationHelperMixin,
@@ -649,7 +649,6 @@ class ItemFeedbackUpdateView(
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
-            ('materials',reverse('materials-list', args=[self.study.slug])),
             (self.materials.title, reverse('materials', args=[self.materials.slug])),
             ('items', self.reverse_paginated('items', args=[self.materials.slug])),
             ('{}-feedback'.format(self.item),'')
@@ -694,7 +693,6 @@ class ItemFeedbackUploadView(
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
-            ('materials',reverse('materials-list', args=[self.study.slug])),
             (self.materials.title, reverse('materials', args=[self.materials.slug])),
             ('items', self.reverse_paginated('items', args=[self.materials.slug])),
             ('upload-feedback', ''),
@@ -715,14 +713,17 @@ class ItemCSVDownloadView(materials_views.MaterialsMixin, study_views.CheckStudy
 class ItemListListView(
     materials_views.MaterialsMixin,
     study_views.CheckStudyCreatorMixin,
-    study_views.NextStepsMixin,
     study_views.DisableFormIfStudyActiveMixin,
     contrib_views.ActionsMixin,
+    materials_views.MaterialsNavMixin,
     generic.ListView
 ):
     model = models.ItemList
-    title = 'Item lists'
-    disable_actions = ([], [0])
+    secondary_nav_active = 1
+
+    @property
+    def title(self):
+        return '{}: Item lists'.format(self.materials.title)
 
     def get_queryset(self):
         return models.ItemList.objects.filter(materials=self.materials)
@@ -733,23 +734,29 @@ class ItemListListView(
         return data
 
     @property
+    def actions(self):
+        return [
+            ('button', 'Validate / generate lists', 'validate', self.ACTION_CSS_BUTTON_PRIMARY),
+        ]
+
+    @property
     def secondary_actions(self):
         return [
             ('link', 'Upload CSV', reverse('itemlist-upload', args=[self.materials.slug])),
             ('link', 'Download CSV', reverse('itemlist-download', args=[self.materials.slug])),
+            ('link', 'Delete materials', reverse('materials-delete', args=[self.materials.slug])),
         ]
 
     @property
     def disable_actions(self):
         if self.is_disabled:
-            return [], [0]
+            return [1], [0]
 
     @property
     def breadcrumbs(self):
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
-            ('materials',reverse('materials-list', args=[self.study.slug])),
             (self.materials.title, reverse('materials', args=[self.materials.slug])),
             ('itemlists', ''),
         ]
@@ -790,7 +797,6 @@ class ItemListUploadView(
         return [
             ('studies', reverse('studies')),
             (self.study.title, reverse('study', args=[self.study.slug])),
-            ('materials',reverse('materials-list', args=[self.study.slug])),
             (self.materials.title, reverse('materials', args=[self.materials.slug])),
             ('itemlists', reverse('itemlists', args=[self.materials.slug])),
             ('upload', ''),

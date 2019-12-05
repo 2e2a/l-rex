@@ -284,10 +284,13 @@ class QuestionnaireBlock(models.Model):
     RANDOMIZATION_PSEUDO = 'pseudo'
     RANDOMIZATION_NONE = 'none'
     RANDOMIZATION_TRUE = 'true'
+    RANDOMIZATION_BASE = (
+        (RANDOMIZATION_TRUE, 'Randomize'),
+        (RANDOMIZATION_NONE, 'Keep item order'),
+    )
     RANDOMIZATION_TYPE = (
         (RANDOMIZATION_PSEUDO, 'Pseudo-randomize'),
-        (RANDOMIZATION_NONE, 'Keep item order'),
-        (RANDOMIZATION_TRUE, 'Randomize'),
+        *RANDOMIZATION_BASE
     )
     randomization = models.CharField(
         max_length=8,

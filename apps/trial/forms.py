@@ -12,13 +12,24 @@ from . import models
 
 
 class RandomizationForm(crispy_forms.CrispyForm):
-    randomization = forms.ChoiceField(choices=models.QuestionnaireBlock.RANDOMIZATION_TYPE, label='')
+    randomization = forms.ChoiceField(
+        choices=models.QuestionnaireBlock.RANDOMIZATION_BASE,
+        initial=models.QuestionnaireBlock.RANDOMIZATION_TRUE,
+        label='',
+    )
 
     def __init__(self, *args, **kwargs):
         randomization = kwargs.pop('randomization', None)
+        allow_pseudo_random = kwargs.pop('allow_pseudo_random', False)
         super().__init__(*args, **kwargs)
+        if allow_pseudo_random:
+            self.fields['randomization'].choices = models.QuestionnaireBlock.RANDOMIZATION_TYPE
         if randomization:
             self.fields['randomization'].initial = randomization
+        elif allow_pseudo_random:
+            self.fields['randomization'].initial = models.QuestionnaireBlock.RANDOMIZATION_PSEUDO
+        else:
+            self.fields['randomization'].initial = models.QuestionnaireBlock.RANDOMIZATION_TRUE
 
     def init_helper(self):
         self.helper = FormHelper()

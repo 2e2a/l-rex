@@ -1,0 +1,20 @@
+{% if type == 'link' %}
+<li class="nav-item">
+    <a class="nav-link {% if active %}active{% endif %}" href="{{ url }}">{{ name }}</a>
+</li>
+{% elif type == 'dropdown' %}
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle {% if active %}active{% endif %}" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">{{ name }}</a>
+    <div class="dropdown-menu">
+        {% for name, url in urls %}
+        {% if name %}
+        <a class="dropdown-item {% if forloop.counter0 == dropdown_active %}active{% endif %}" href="{{ url }}">{{ name }}</a>
+        {% else %}
+        <div class="dropdown-divider"></div>
+        {% endif %}
+        {% empty %}
+        <span class="dropdown-item disabled"><em>None yet</em></spanc>
+        {% endfor %}
+    </div>
+</li>
+{% endif %}

@@ -2,69 +2,35 @@
 {% load contrib_tags %}
 {% load static %}
 
+{# Design: next-steps, status + results #}
 {% block content %}
 {% if not study.is_archived %}
-<div class="row">
-    <div class="col-md-4 order-md-2">
-        <div class="card my-2">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <h2 class="card-title">Status</h2>
-                    <span>{% include "lrex_contrib/icon.html" with icon="lightbulb" big=True %}</span>
-                </div>
-                <div class="row small text-secondary">
-                    <div class="col-sm-5">
+<div class="card">
+    <div class="card-body">
+        <h2 class="card-title">Status</h2>
+        <div class="row">
+            <div class="col-md-6 ">
+                <div class="row">
+                    <div class="col-sm-6 text-secondary">
                         Current status:
                     </div>
-                    <div class="col-sm-5">
+                    <div class="col-sm-6">
                         <span class="badge badge-primary">{{ study.status.name }}</span>
                     </div>
                 </div>
-                <div class="row small text-secondary">
-                    <div class="col-sm-5">
+                <div class="row">
+                    <div class="col-sm-6 text-secondary">
                         Created:
                     </div>
-                    <div class="col-sm-5">
+                    <div class="col-sm-6">
                         {{ study.created_date|date:"SHORT_DATE_FORMAT" }}
                     </div>
                 </div>
-                <div class="row small text-secondary">
-                    <div class="col-sm-5">
-                        Make your study available:
-                    </div>
-                    <div class="col-sm-5">
-                        {% if study.is_published %}
-                        <a href="{% url 'trial-intro' study.slug %}">Link for participants</a>
-                        {% else %}
-                        <a class="card-link text-muted">Link for participants</a>
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="row small text-secondary">
-                    <div class="col-sm-5">
-                        Password:
-                    </div>
-                    <div class="col-sm-5">
-                        {% if study.password %}
-                        {{ study.password }}
-                        {% else %}
-                        --
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="row small text-secondary">
-                    <div class="col-sm-5">
-                        Trials completed:
-                    </div>
-                    <div class="col-sm-5">
-                        {{ trial_count_finished }}
-                    </div>
-                </div>
-                <div class="row small text-secondary">
-                    <div class="col-sm-5">
+                <div class="row">
+                    <div class="col-sm-6 text-secondary">
                         Test your study:
                     </div>
-                    <div class="col-sm-5">
+                    <div class="col-sm-6">
                         {% if allow_publish %}
                         <a href="{% url 'trial-intro' study.slug %}?test=True">Link for testing</a>
                         {% else %}
@@ -72,296 +38,84 @@
                         {% endif %}
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="card  my-2">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <h2 class="card-title">Settings</h2>
-                    <span>{% include "lrex_contrib/icon.html" with icon="cog" big=True %}</span>
-                </div>
-                <p class="card-text">
-                    Set the general properties of the study. Translate particpant texts. Share the study with other researchers.
-                </p>
-                <div class="row small text-secondary">
-                    <div class="col-sm-6">
-                        Item Type:
+                <div class="row">
+                    {% if study.creator == request.user %}
+                    <div class="col-sm-6 text-secondary">
+                        Study shared with:
                     </div>
-                    <div class="col-sm-4">
-                        {{ study.get_item_type_display }}
-                    </div>
-                </div>
-                <div class="row small text-secondary">
-                    <div class="col-sm-6">
-                        Participant id:
-                    </div>
-                    <div class="col-sm-4">
-                        {{ study.require_participant_id|yesno }}
-                    </div>
-                </div>
-                <div class="row small text-secondary">
-                    <div class="col-sm-6">
-                        End date:
-                    </div>
-                    <div class="col-sm-4">
-                        {% if study.end_date %}
-                        {{ study.end_date|date:"SHORT_DATE_FORMAT" }}
-                        {% else %}
-                        --
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="row small text-secondary">
-                    <div class="col-sm-6">
-                        Trial limit:
-                    </div>
-                    <div class="col-sm-4">
-                        {{ study.trial_limit|default:"--" }}
-                    </div>
-                </div>
-                <div class="row small text-secondary">
-                    {% if study.creator == view.request.user %}
-                    <div class="col-sm-6">
-                        Shared with:
-                    </div>
-                    <div class="col-sm-4">
-                        {{ study.shared_with|default:"--" }}
+                    <div class="col-sm-6 col-md-6">
+                        {{ study.shared_with|default_if_none:"--" }}
                     </div>
                     {% else %}
-                    <div class="col-sm-6">
-                        Shared by:
+                    <div class="col-sm-6 text-secondary">
+                        Study shared by:
                     </div>
-                    <div class="col-sm-4">
-                        {{ study.creator.username }}
+                    <div class="col-sm-6">
+                        {{ study.creator }}
                     </div>
                     {% endif %}
                 </div>
             </div>
-        </div>
-    </div>
-    <div class="col-md-8">
-        <div class="card my-2">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <h2 class="card-title">Task and instructions</h2>
-                    <span>{% include "lrex_contrib/icon.html" with icon="question-circle" big=True %}</span>
-                </div>
-                <p class="card-text">
-                    Specify one or more questions that the participants will be asked to answer.
-                    Add instructions that will explain to your participants what you want them to do in your study.
-                </p>
-                <div class="row small text-secondary">
-                    <div class="col-sm-3">
-                        Questions:
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-sm-6 text-secondary">
+                        Make your study available:
                     </div>
-                    <div class="col-sm-7 text-truncate">
-
-                        {% for question in study.questions %}
-                        {{ question }}{% if not forloop.last %}, {% endif %}
-                        {% empty %}
-                        --
-                        {% endfor %}
-                    </div>
-                </div>
-                <div class="row small text-secondary">
-                    <div class="col-sm-3">
-                        Instructions:
-                    </div>
-                    <div class="col-sm-7 text-truncate">
-                        {{ study.instructions|default:"--" }}
-                    </div>
-                </div>
-                <div class="row small text-secondary">
-                    <div class="col-sm-3">
-                        Intro:
-                    </div>
-                    <div class="col-sm-7 text-truncate">
-                        {{ study.intro|default:"--" }}
-                    </div>
-                </div>
-                <div class="row small text-secondary">
-                    <div class="col-sm-3">
-                        Outro:
-                    </div>
-                    <div class="col-sm-7 text-truncate">
-                        {{ study.outro|default:"--" }}
-                    </div>
-                </div>
-                <div class="row small text-secondary">
-                    <div class="col-sm-3">
-                        Demographics:
-                    </div>
-                    <div class="col-sm-7 text-truncate">
-
-                        {% for demographic_field in study.demographicfield_set.all %}
-                        {{ demographic_field }}{% if not forloop.last %}, {% endif %}
-                        {% empty %}
-                        --
-                        {% endfor %}
-                    </div>
-                </div>
-                <hr>
-                <a class="card-link" href="{% url 'study-questions' study.slug %}">Questions</a>
-                <a class="card-link" href="{% url 'study-instructions' study.slug %}">Instructions</a>
-                <a class="card-link" href="{% url 'study-intro' study.slug %}">Intro/outro</a>
-                <a class="card-link" href="{% url 'study-demographics' study.slug %}">Demographics</a>
-            </div>
-        </div>
-
-        <div class="card my-2">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <h2 class="card-title">Materials</h2>
-                    <span>{% include "lrex_contrib/icon.html" with icon="file-upload" big=True %}</span>
-                </div>
-                <p class="card-text">
-                    Add materials that the participants will be asked to rate.
-                    Decide how the materials will be distributed among participants.
-                </p>
-                <div class="row small text-secondary">
-                    <div class="col-sm-3">
-                        Materials ready:
-                    </div>
-                    <div class="col-sm-7">
-
-                        {% for materials in materials_ready %}
-                        {{ materials }}{% if not forloop.last %}, {% endif %}
-                        {% empty %}
-                        --
-                        {% endfor %}
-
-                    </div>
-                </div>
-                <div class="row small text-secondary">
-                    <div class="col-sm-3">
-                        Materials in draft:
-                    </div>
-                    <div class="col-sm-7">
-
-                        {% for materials in materials_draft %}
-                        {{ materials }}{% if not forloop.last %}, {% endif %}
-                        {% empty %}
-                        --
-                        {% endfor %}
-
-                    </div>
-                </div>
-                <hr>
-                <a  class="card-link" href="{% url 'materials-list' study.slug %}">Materials</a>
-            </div>
-        </div>
-
-        <div class="card my-2">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <h2 class="card-title">Questionnaires</h2>
-                    <span>{% include "lrex_contrib/icon.html" with icon="clipboard-list" big=True %}</span>
-                </div>
-                <p class="card-text">
-                    Decide how the materials will be presented within a questionnaire
-                    (randomized or in a fixed order).
-                </p>
-                <div class="row small text-secondary">
-                    <div class="col-sm-3">
-                        Questionnaires created:
-                    </div>
-                    <div class="col-sm-7">
-                        {{ study.questionnaire_set.count }}
-                    </div>
-                </div>
-                <hr>
-                <a  class="card-link" href="{% url 'questionnaires' study.slug %}">Questionnaires</a>
-                {% if study.use_blocks %}
-                <a  class="card-link" href="{% url 'questionnaire-blocks' study.slug %}">
-                    Block instructions
-                </a>
-                {% endif %}
-            </div>
-        </div>
-
-        <div class="card my-2">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <h2 class="card-title">Contact and privacy</h2>
-                    <span>{% include "lrex_contrib/icon.html" with icon="envelope" big=True %}</span>
-                </div>
-                <p class="card-text">
-                    Provide information about your study for the participants: how can they contact you and how will
-                    their data be handled?
-                </p>
-                <div class="row small text-secondary">
-                    <div class="col-sm-3">
-                        Contact:
-                    </div>
-                    <div class="col-sm-7">
-                        {% if study.contact_name %}
-                        {{study.contact_name}} ({{study.contact_email}}, {{study.contact_affiliation}})
+                    <div class="col-sm-6">
+                        {% if study.is_published %}
+                        <a href="{% url 'trial-intro' study.slug %}">Link for participants</a>
                         {% else %}
-                        --
+                        <a class="card-link text-muted">Link for participants</a>
                         {% endif %}
                     </div>
                 </div>
-                <div class="row small text-secondary">
-                    <div class="col-sm-3">
-                        Privacy statement:
+                <div class="row">
+                    <div class="col-sm-6 text-secondary">
+                        Password:
                     </div>
-                    <div class="col-sm-7 text-truncate">
-                        {{ study.privacy_statement|default:"--" }}
-                    </div>
-                </div>
-                <hr>
-                <a  class="card-link" href="{% url 'study-contact' study.slug %}">Contact information</a>
-                <a  class="card-link" href="{% url 'study-privacy' study.slug %}">Privacy statement</a>
-            </div>
-        </div>
-
-        <div class="card my-2">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <h2 class="card-title">Results</h2>
-                    <span>{% include "lrex_contrib/icon.html" with icon="poll" big=True %}</span>
-                </div>
-                <p class="card-text">
-                    View a summary of the current results or the completed individual questionnaires. Download all results.
-                </p>
-                <div class="row small text-secondary small text-secondary">
-                    <div class="col-sm-3">
-                        Trials active:
-                    </div>
-                    <div class="col-sm-7">
-                        {{ trial_count_active }}
+                    <div class="col-sm-6 col-md-6">
+                        {{ study.password|default_if_none:"--" }}
                     </div>
                 </div>
-                <div class="row small text-secondary small text-secondary">
-                    <div class="col-sm-3">
+                <div class="row">
+                    <div class="col-sm-6 text-secondary">
                         Trials completed:
                     </div>
-                    <div class="col-sm-7">
+                    <div class="col-sm-6">
                         {{ trial_count_finished }}
                     </div>
                 </div>
-                <div class="row small text-secondary small text-secondary">
-                    <div class="col-sm-3">
-                        Trials abandoned:
-                    </div>
-                    <div class="col-sm-7">
-                        {{ trial_count_abandoned }}
-                    </div>
-                </div>
-                <div class="row small text-secondary small text-secondary">
-                    <div class="col-sm-3">
-                        Test trials:
-                    </div>
-                    <div class="col-sm-7">
-                        {{ trial_count_test }}
-                    </div>
-                </div>
-                <hr>
-                <a  class="card-link" href="{{ study.results_url }}">Summary of the results</a>
-                <a  class="card-link" href="{% url 'trials' study.slug %}">Individual user trials</a>
-                <a  class="card-link" href="{% url 'study-results-csv' study.slug %}">Download results</a>
             </div>
         </div>
+    </div>
+</div>
+<div class="card mt-4">
+    <div class="card-body">
+        <h2 class="card-title">To do</h2>
+        {% if not study.is_active %}
+        <div class="row">
+            <div class="col-md-6 ">
+                <em>Required:</em>
+                <ul>
+                    {% for next_step_html in next_steps_html %}
+                    <li>{{ next_step_html }}</li>
+                    {% empty %}
+                    <li>Nothing to do</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <em>Optional:</em>
+                <ul>
+                    {% for optional_step_html in optional_steps_html %}
+                    <li>{{ optional_step_html }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% else %}
+        <em>Your study is active.</em>
+        {% endif %}
     </div>
 </div>
 {% else %}

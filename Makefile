@@ -18,12 +18,8 @@ python:
 node:
 	npm install
 
-.PHONY: icons
-icons:
-	wget -nv -N https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/webfonts/fa-solid-900.svg -P lrex/static/icons/
-
 .PHONY: install
-install: python node icons
+install: python node
 
 .PHONY: update
 update:
