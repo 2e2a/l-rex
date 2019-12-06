@@ -9,7 +9,7 @@
             {% if trial.subject_id %} Subject {{ trial.subject_id }} {% endif %}
             <div><small>
                 created: <strong>{{ trial.created|date:"SHORT_DATETIME_FORMAT" }}</strong>,
-                status: <strong>{{ trial.status.name }}</strong>,
+                status: <strong>{{ trial.status.name }}</strong>{% if trial.ended %}<strong> on {{ trial.ended|date:"SHORT_DATETIME_FORMAT" }}{% endif %}</strong>,
                 questionnaire: <strong>Questionnaire {{ trial.questionnaire.number }}</strong>{% if trial.is_test %},
                 <mark><strong>TEST</strong></mark>
                 {% endif %}

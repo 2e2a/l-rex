@@ -770,9 +770,14 @@ class RatingCreateMixin(ProgressMixin, TestWarningMixin):
             pass
         return None
 
-    def get_next_url(self):
+    @property
+    def is_last(self):
         trial_items = self.trial.items
-        if self.num < len(trial_items) - 1:
+        return self.num == len(trial_items) - 1
+
+    def get_next_url(self):
+        if not self.is_last:
+            trial_items = self.trial.items
             if self.study.use_blocks and \
                     trial_items[self.num].materials_block != trial_items[self.num + 1].materials_block:
                 return reverse('rating-block-instructions', args=[self.trial.slug, self.num + 1])
@@ -835,6 +840,9 @@ class RatingCreateView(RatingCreateMixin, TrialMixin, generic.CreateView):
                 response.context_data['form'] = form
                 messages.error(request, self.study.feedback_message)
                 return response
+            if self.is_last:
+                self.trial.ended = now()
+                self.trial.save()
         return super().post(request, *args, **kwargs)
 
     def get_form_base_kwargs(self):
@@ -928,6 +936,9 @@ class RatingsCreateView(RatingCreateMixin, TrialMixin, generic.TemplateView):
                 instance.trial = self.trial
                 instance.questionnaire_item = self.questionnaire_item
                 instance.save()
+            if self.is_last:
+                self.trial.ended = now()
+                self.trial.save()
             return redirect(self.get_next_url())
         return super().get(request, *args, **kwargs)
 
