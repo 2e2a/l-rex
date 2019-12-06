@@ -26,41 +26,41 @@
 <div class="row">
     <div class="col-lg-3 col-md-6 d-flex align-items-stretch">
         <div class="card my-2 flex-fill">
-            <div class="card-body text-center">
+            <div class="card-body text-center d-flex justify-content-between flex-column">
                 <h3 class="card-title">Documentation</h3>
                 <p class="card-text">
                     The wiki provides a step-by-step guide to setting up experimental studies with L-Rex.
                 </p>
-                <a class="card-link" target="_blank" href="https://github.com/2e2a/l-rex/wiki">L-Rex Wiki on GitHub&nearr;</a>
+                <a class="card-link mt-auto" target="_blank" href="https://github.com/2e2a/l-rex/wiki">L-Rex Wiki on GitHub&nearr;</a>
             </div>
         </div>
     </div>
     <div class="col-lg-3 col-md-6 d-flex align-items-stretch">
         <div class="card my-2 flex-fill">
-            <div class="card-body text-center">
+            <div class="card-body text-center d-flex justify-content-between flex-column">
                 <h3 class="card-title">Support</h3>
                 <p class="card-text">
                     If you encounter any problems, submit an issue or feature request on GitHub
                     or contact us via e-mail.
                 </p>
-                <a class="card-link" target="_blank" href="https://github.com/2e2a/l-rex/issues">L-Rex Issues on GitHub&nearr;</a>
+                <a class="card-link mt-auto" target="_blank" href="https://github.com/2e2a/l-rex/issues">L-Rex Issues on GitHub&nearr;</a>
             </div>
         </div>
     </div>
     <div class="col-lg-3 col-md-6 d-flex align-items-stretch">
         <div class="card my-2 flex-fill">
-            <div class="card-body text-center">
+            <div class="card-body text-center d-flex justify-content-between flex-column">
                 <h3 class="card-title">Contribute</h3>
                 <p class="card-text">
                     L-Rex is open source. You can run your own instance or contribute to the software project.
                 </p>
-                <a class="card-link" target="_blank" href="https://github.com/2e2a/l-rex/">L-Rex on GitHub&nearr;</a>
+                <a class="card-link mt-auto" target="_blank" href="https://github.com/2e2a/l-rex/">L-Rex on GitHub&nearr;</a>
             </div>
         </div>
     </div>
     <div class="col-lg-3 col-md-6 d-flex align-items-stretch">
         <div class="card my-2 flex-fill">
-            <div class="card-body text-center">
+            <div class="card-body text-center d-flex justify-content-between flex-column">
                 <h3 class="card-title">News</h3>
                 <ul class="list-group">
                     {% for news in news_list %}
@@ -72,7 +72,7 @@
                     <li class="list-group-item border-0">No news is good news.</li>
                     {% endfor %}
                 </ul>
-                <nav aria-label="Pagination">
+                <nav class=" mt-auto" aria-label="Pagination">
                     <ul class="pagination justify-content-center mb-0 mt-1">
                         {% if page_obj.has_previous %}
                         <li class="page-item"><a class="page-link py-1" href="?page={{ page_obj.previous_page_number }}">&lsaquo; newer</a></li>
