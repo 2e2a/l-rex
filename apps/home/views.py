@@ -6,10 +6,11 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.views import generic
 
+from apps.contrib.views import ActionsMixin
 from . import models
 
 
-class HomeView(generic.ListView):
+class HomeView(ActionsMixin, generic.ListView):
     model = models.News
     template_name = 'lrex_home/home.html'
     title = 'Linguistic rating experiments'
@@ -19,6 +20,12 @@ class HomeView(generic.ListView):
         if self.request.user.is_authenticated and not hasattr(self.request.user, 'userprofile'):
             return redirect('user-profile-create')
         return super().get(request, *args, **kwargs)
+
+    @property
+    def actions(self):
+        return [
+            ('link', 'My studies', reverse('studies'), self.ACTION_CSS_BUTTON_PRIMARY)
+        ]
 
     @property
     def breadcrumbs(self):

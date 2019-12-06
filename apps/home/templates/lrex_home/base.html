@@ -82,7 +82,7 @@
         </div>
     </div>
 </nav>
-<div class="container bg-white py-4">
+<div class="container bg-white py-2 mt-3">
     {% block nav %}
     {% if nav or secondary_nav %}
     <ul class="nav nav-tabs mb-2">
@@ -90,7 +90,7 @@
         {{ nav_html }}
         {% endfor %}
     </ul>
-    <ul class="nav nav-pills mt-3 mb-4">
+    <ul class="nav nav-pills my-3">
         {% for nav_html in secondary_nav %}
         {{ nav_html }}
         {% endfor %}
