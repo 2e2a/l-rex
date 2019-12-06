@@ -186,7 +186,7 @@ class ResultsNavMixin(study_views.StudyNavMixin):
     def secondary_nav(self):
         return [
             ('link', ('Trials', reverse('trials', args=[self.study.slug]))),
-            ('dropdown', ('Summery', self.materials_results_nav)),
+            ('dropdown', ('Summary', self.materials_results_nav)),
         ]
 
 
