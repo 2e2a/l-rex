@@ -27,8 +27,8 @@ class WarnUserIfStudyActiveMixin:
                 msg = 'Note: Form is disabled. '
             else:
                 msg = 'Note: Some actions are disabled. '
-            msg = msg + 'You cannot change an active study. Please <a href="{}">unpublish</a> ' \
-                        'the study and save and <a href="{}">remove the results</a> first.'\
+            msg = msg + 'To edit the study, <a href="{}">unpublish</a> ' \
+                        'it and save and <a href="{}">remove the results</a> first.'\
                         .format(
                             reverse('study', args=[self.study.slug]),
                             reverse('trials', args=[self.study.slug])
@@ -527,7 +527,7 @@ class StudyTranslationsUpdateView(
     secondary_nav_active = 1
 
     def get(self, request, *args, **kwargs):
-        msg = 'Note: Translatable elements are not shown, when the respective feature is disabled via a study or ' \
+        msg = 'Note: Translatable elements are not shown when the respective feature is disabled via a study or ' \
               'a question setting.'
         messages.info(request, msg)
         return super().get(request, *args, **kwargs)

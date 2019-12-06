@@ -197,17 +197,17 @@ class Study(models.Model):
     answer_question_message = models.CharField(
         max_length=500,
         default='Please answer this question.',
-        help_text='Error message shown to participant, if the question was not answered.',
+        help_text='Error message shown to participant if the question was not answered.',
     )
     answer_questions_message = models.CharField(
         max_length=500,
         default='Please answer all questions.',
-        help_text='Error message shown to participant, if a question was not answered.',
+        help_text='Error message shown to participant if a question was not answered.',
     )
     feedback_message = models.CharField(
         max_length=500,
         default='Please note the following feedback.',
-        help_text='Message indicating that feedback is shown for some ratings (only if feedback feature is enabled).',
+        help_text='Message indicating that feedback is shown for some ratings.',
     )
     is_published = models.BooleanField(
         default=False,
