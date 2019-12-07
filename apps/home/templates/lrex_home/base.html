@@ -34,7 +34,8 @@
                             <a class="nav-link" href="{% url 'studies' %}">My studies</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" target="_blank" href="https://github.com/2e2a/l-rex/wiki">Help&nearr;</a>
+                            <a class="nav-link" target="_blank"
+                               href="https://github.com/2e2a/l-rex/wiki">Help&nearr;</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'imprint' %}">Contact and privacy</a>
@@ -97,13 +98,11 @@
     </ul>
     {% endif %}
     {% endblock %}
-    <div>
-        {% for message in messages %}
-        <div class="alert {{ message.level_tag|bootstrap_alert_class }} border" role="alert">
-            {{ message }}
-        </div>
-        {% endfor %}
+    {% for message in messages %}
+    <div class="alert {{ message.level_tag|bootstrap_alert_class }} border" role="alert">
+        {{ message }}
     </div>
+    {% endfor %}
     {% block content %}{% endblock %}
 </div>
 </body>
