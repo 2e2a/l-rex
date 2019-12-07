@@ -149,7 +149,10 @@ class QuestionnaireListView(
     def post(self, request, *args, **kwargs):
         if self.study.use_blocks:
             return redirect('questionnaire-generate',study_slug=self.study.slug)
-        self.randomization_form = forms.RandomizationForm(request.POST, request.FILES)
+        self.randomization_form = forms.RandomizationForm(
+            request.POST, request.FILES,
+            allow_pseudo_random = self.study.is_allowed_pseudo_randomization
+        )
         if self.randomization_form.is_valid():
             randomization = self.randomization_form['randomization'].value()
             self._update_default_questionnaire_block(randomization)
