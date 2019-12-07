@@ -47,6 +47,10 @@ build: js scss
 migrate:
 	$(VIRTUAL_ENV)/bin/python3 manage.py migrate
 
+.PHONY: makemigrations
+makemigrations:
+	$(VIRTUAL_ENV)/bin/python3 manage.py makemigrations
+
 .PHONY: run
 run:
 	$(VIRTUAL_ENV)/bin/python3 manage.py runserver 8000
