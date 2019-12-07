@@ -770,7 +770,7 @@ class RatingCreateMixin(ProgressMixin, TestWarningMixin):
             pass
         return None
 
-    @property
+    @cached_property
     def is_last(self):
         trial_items = self.trial.items
         return self.num == len(trial_items) - 1
