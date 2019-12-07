@@ -99,7 +99,6 @@ class Materials(models.Model):
         item_bocks = set([item.block for item in self.items])
         return sorted(item_bocks)
 
-
     @cached_property
     def has_lists(self):
         return self.itemlist_set.exists()

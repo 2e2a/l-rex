@@ -128,9 +128,12 @@ class QuestionnaireListView(
         self.page = request.GET.get('page', 1)
         return super().dispatch(request, *args, **kwargs)
 
+    @property
+    def is_disabled(self):
+        return self.study.is_active or not self.study.is_allowed_create_questionnaires
+
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        data['allow_actions'] = self.study.is_allowed_create_questionnaires
         if not self.study.use_blocks:
             data['generate_form'] = self.randomization_form
         return data

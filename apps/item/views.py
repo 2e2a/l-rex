@@ -728,10 +728,9 @@ class ItemListListView(
     def get_queryset(self):
         return models.ItemList.objects.filter(materials=self.materials)
 
-    def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-        data['allow_actions'] = self.materials.items_validated
-        return data
+    @property
+    def is_disabled(self):
+        return self.materials.items_validated
 
     @property
     def actions(self):
