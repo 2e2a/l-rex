@@ -9,7 +9,7 @@ class StudyAdmin(admin.ModelAdmin):
     list_display = (
         'title',
         'created_date',
-        'status',
+        'is_published',
     )
     list_per_page = 32
 

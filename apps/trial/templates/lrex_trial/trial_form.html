@@ -3,13 +3,15 @@
 
 {% block content %}
 <div class="my-2 p-4 border bg-white">
-    {% if study.is_rating_possible or is_test %}
-    <p>
-        {{ instructions_rich }}
-    </p>
-    {% crispy form form.helper %}
-    {% elif study.status.name == 'DRAFT' %}
-    <p>Experiment is not yet published.</p>
+    {% if not study.is_limit_reached or is_test %}
+        {% if study.is_published or is_test %}
+        <p>
+            {{ instructions_rich }}
+        </p>
+        {% crispy form form.helper %}
+        {% else %}
+        <p>Experiment is not yet published.</p>
+        {% endif %}
     {% else %}
     <p>Experiment has ended.</p>
     {% endif %}

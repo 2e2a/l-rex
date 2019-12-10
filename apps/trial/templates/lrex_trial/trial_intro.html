@@ -1,26 +1,28 @@
 {% extends "lrex_trial/trial_base.html" %}
 
 {% block content %}
-{% if study.is_rating_possible or is_test %}
-<div class="my-2 p-4 border bg-white">
-    <p>{{ intro_rich }}</p>
-    <h2>{{ study.contact_label }}</h2>
-    <p>
-        {{ contact }}
-    </p>
-    {% if contact_details_rich %}
-    {{ contact_details_rich }}
+{% if not study.is_imit_reached or is_test %}
+    {% if study.is_published or is_test %}
+    <div class="my-2 p-4 border bg-white">
+        <p>{{ intro_rich }}</p>
+        <h2>{{ study.contact_label }}</h2>
+        <p>
+            {{ contact }}
+        </p>
+        {% if contact_details_rich %}
+        {{ contact_details_rich }}
+        {% endif %}
+        <h2>{{ study.privacy_statement_label }}</h2>
+        <p>
+            {{ privacy_statement_rich }}
+        </p>
+        <a href="{% url 'trial-create' study.slug %}{% if is_test %}?test=True{% endif %}" class="btn btn-primary">{{ study.continue_label }}</a>
+    </div>
+    {% else %}
+    <div class="my-2 p-4 border bg-white">
+        <p>Experiment is not yet published.</p>
+    </div>
     {% endif %}
-    <h2>{{ study.privacy_statement_label }}</h2>
-    <p>
-        {{ privacy_statement_rich }}
-    </p>
-    <a href="{% url 'trial-create' study.slug %}{% if is_test %}?test=True{% endif %}" class="btn btn-primary">{{ study.continue_label }}</a>
-</div>
-{% elif study.status.name == 'DRAFT' %}
-<div class="my-2 p-4 border bg-white">
-    <p>Experiment is not yet published.</p>
-</div>
 {% else %}
 <div class="my-2 p-4 border bg-white">
     <p>Experiment has ended.</p>

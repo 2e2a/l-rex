@@ -325,26 +325,21 @@ class Study(models.Model):
     def has_demographics(self):
         return self.demographicfield_set.exists()
 
-    @property
-    def status(self):
-        if self.is_archived:
-            return StudyStatus.ARCHIVED
-        if self.end_date and self.end_date < timezone.now().date():
-            return StudyStatus.FINISHED
-        if self.trial_limit and self.trial_limit <= self.trial_count:
-            return StudyStatus.FINISHED
-        if self.is_published:
-            return StudyStatus.ACTIVE if self.trial_count > 0 else StudyStatus.STARTED
-        else:
-            return StudyStatus.FINISHED if self.trial_count > 0 else StudyStatus.DRAFT
-
     @cached_property
     def is_active(self):
         return self.is_published or self.trial_count > 0
 
     @cached_property
-    def is_finished(self):
-        return self.status == StudyStatus.FINISHED
+    def is_time_limit_reached(self):
+        return self.end_date and self.end_date < timezone.now().date()
+
+    @cached_property
+    def is_trial_limit_reached(self):
+        return self.trial_limit and self.trial_limit <= self.trial_count
+
+    @cached_property
+    def is_limit_reached(self):
+        return self.is_time_limit_reached or self.is_trial_limit_reached
 
     @cached_property
     def trial_count(self):

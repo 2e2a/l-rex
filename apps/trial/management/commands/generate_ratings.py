@@ -19,8 +19,6 @@ class Command(BaseCommand):
         study = study_models.Study.objects.get(slug=study_slug)
         if not study:
             raise CommandError('Study does not exist.')
-        if not study.is_rating_possible:
-            raise CommandError('Study does not allow rating.')
         questions_scale_values = []
         for question in study.questions:
             questions_scale_values.append((question.number, question.scalevalue_set.all()))

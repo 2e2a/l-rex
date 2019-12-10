@@ -7,11 +7,22 @@
     <li class="list-group-item d-flex">
         <div class="flex-grow-1">
             <a href="{% url 'study' study.slug %}"><strong>{{ study.title }}</strong></a>
-            <div><small>
-                created: <strong>{{ study.created_date|date:"SHORT_DATE_FORMAT" }}</strong>,
-                status: {% if study.is_published %}<mark>{% endif %}<strong>{{ study.status.name }}</strong>{% if study.is_published %}</mark>{% endif %}{% if study.creator != view.request.user %},
-                shared by: <strong>{{ study.creator.username }}</strong>{% endif %}
-            </small></div>
+            {% if study.is_published %}
+            <span class="badge badge-secondary">Published</span>
+            {% endif %}
+            {% if study.is_time_limit_reached %}
+            <span class="badge badge-secondary">Time limit reached</span>
+            {% endif %}
+            {% if study.is_trial_limit_reached %}
+            <span class="badge badge-secondary">Trial limit reached</span>
+            {% endif %}
+            <div class="small mt-1">
+                <span class="pr-2">created: <strong>{{ study.created_date|date:"SHORT_DATE_FORMAT" }}</strong></span>
+                <span class="pr-2">completed trials: <strong>{{ study.trial_count }}</strong></span>
+                {% if study.creator != view.request.user %}
+                <span class="pr-2">shared by: <strong>{{ study.creator.username }}</strong></span>
+                {% endif %}
+            </div>
         </div>
         <div class="d-flex align-self-center">
             <div class="dropdown">
