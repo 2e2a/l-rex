@@ -7,14 +7,21 @@
         <div class="flex-grow-1">
             <a href="{% url 'trial' trial.slug %}"><strong>#{{ page_obj.start_index|add:forloop.counter0 }}</strong></a>
             {% if trial.subject_id %} Subject {{ trial.subject_id }} {% endif %}
-            <div><small>
-                created: <strong>{{ trial.created|date:"SHORT_DATETIME_FORMAT" }}</strong>,
-                status: <strong>{{ trial.status.name }}</strong>{% if trial.ended %}<strong> on {{ trial.ended|date:"SHORT_DATETIME_FORMAT" }}{% endif %}</strong>,
-                questionnaire: <strong>Questionnaire {{ trial.questionnaire.number }}</strong>{% if trial.is_test %},
-                <mark><strong>TEST</strong></mark>
+            {% if trial.is_test %}
+            <span class="badge badge-secondary">Test</span>
+            {% endif %}
+            {% if trial.is_abandoned %}
+            <span class="badge badge-warning">Abandoned</span>
+            {% endif %}
+            <div class="small mt-1">
+                <span class="pr-2">created: <strong>{{ trial.created|date:"SHORT_DATETIME_FORMAT" }}</strong></span>
+                <span class="pr-2">questionnaire: <strong>Questionnaire {{ trial.questionnaire.number }}</strong></span>
+                {% if trial.ended %}
+                <span class="pr-2">ended on: <strong>{{ trial.ended|date:"SHORT_DATETIME_FORMAT" }}</strong></span>
+                {% else %}
+                <span class="pr-2">ratings: <strong>{{ trial.ratings_completed }}/{{ trial.ratings_count }}</strong></span>
                 {% endif %}
-
-            </small></div>
+            </div>
         </div>
         <div>
             <a href="{% url 'trial-delete' trial.slug %}" class="btn btn-outline-danger btn-sm mx-1">

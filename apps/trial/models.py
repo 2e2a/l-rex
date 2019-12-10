@@ -354,13 +354,6 @@ class QuestionProperty(models.Model):
         return ','.join(scale)
 
 
-class TrialStatus(Enum):
-    CREATED = 1
-    STARTED = 2
-    FINISHED = 3
-    ABANDONED = 4
-
-
 class Trial(models.Model):
     slug = models.UUIDField(
         primary_key=True,
@@ -420,6 +413,10 @@ class Trial(models.Model):
         return Rating.objects.filter(trial=self, question=0).count()
 
     @cached_property
+    def ratings_count(self):
+        return len(self.items)
+
+    @cached_property
     def current_block(self):
         questionnaire_item = QuestionnaireItem.objects.get(
             questionnaire=self.questionnaire,
@@ -431,21 +428,15 @@ class Trial(models.Model):
         )
         return questionnaire_block
 
+    @property
+    def is_finished(self):
+        return self.ended is not None
+
     ABANDONED_AFTER_HRS = 1
 
     @property
-    def status(self):
-        if self.ratings_completed > 0:
-            n_items = len(self.items)
-            if self.ratings_completed == n_items:
-                return TrialStatus.FINISHED
-            if self.created + timedelta(hours=self.ABANDONED_AFTER_HRS) < timezone.now():
-                return TrialStatus.ABANDONED
-            return TrialStatus.STARTED
-        else:
-            if self.created + timedelta(hours=self.ABANDONED_AFTER_HRS) < timezone.now():
-                return TrialStatus.ABANDONED
-        return TrialStatus.CREATED
+    def is_abandoned(self):
+        return not self.is_finished and self.created + timedelta(hours=self.ABANDONED_AFTER_HRS) < timezone.now()
 
     def init(self, study):
         self.questionnaire = study.next_questionnaire(is_test=self.is_test)

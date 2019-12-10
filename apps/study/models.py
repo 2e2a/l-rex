@@ -342,9 +342,13 @@ class Study(models.Model):
         return self.is_time_limit_reached or self.is_trial_limit_reached
 
     @cached_property
-    def trial_count(self):
+    def trials(self):
         from apps.trial.models import Trial
-        return Trial.objects.filter(questionnaire__study=self, is_test=False).count()
+        return Trial.objects.filter(questionnaire__study=self, is_test=False)
+
+    @cached_property
+    def trial_count(self):
+        return self.trials.count()
 
     @cached_property
     def trial_count_test(self):
@@ -353,28 +357,19 @@ class Study(models.Model):
 
     @cached_property
     def trial_count_active(self):
-        from apps.trial.models import Trial, TrialStatus
-        trials = Trial.objects.filter(questionnaire__study=self, is_test=False)
-        return len([trial for trial in trials if trial.status in [TrialStatus.CREATED, TrialStatus.STARTED]])
+        return len([trial for trial in self.trials if not trial.is_finished and not trial.is_abandoned])
 
     @cached_property
     def trial_count_finished(self):
-        from apps.trial.models import Trial, TrialStatus
-        trials = Trial.objects.filter(questionnaire__study=self, is_test=False)
-        return len([trial for trial in trials if trial.status == TrialStatus.FINISHED])
+        return len([trial for trial in self.trials if trial.is_finished])
 
     @cached_property
     def trial_count_abandoned(self):
-        from apps.trial.models import Trial, TrialStatus
-        trials = Trial.objects.filter(questionnaire__study=self, is_test=False)
-        return len([trial for trial in trials if trial.status == TrialStatus.ABANDONED])
+        return len([trial for trial in self.trials if trial.is_abandoned])
 
     def delete_abandoned_trials(self):
-        from apps.trial.models import Trial, TrialStatus
-        trials = Trial.objects.filter(questionnaire__study=self, is_test=False)
-        for trial in trials:
-            if trial.status == TrialStatus.ABANDONED:
-                trial.delete()
+        trials_abandoned = [trial for trial in self.trials if trial.is_abandoned]
+        map(lambda trial: trial.delete(), trials_abandoned)
 
     def delete_test_trials(self):
         from apps.trial.models import Trial
@@ -382,11 +377,11 @@ class Study(models.Model):
 
     @property
     def has_subject_mapping(self):
-        from apps.trial.models import Trial, TrialStatus
+        from apps.trial.models import Trial
         return Trial.objects.filter(questionnaire__study=self).exclude(subject_id=None).exists()
 
     def delete_subject_mapping(self):
-        from apps.trial.models import Trial, TrialStatus
+        from apps.trial.models import Trial
         Trial.objects.filter(questionnaire__study=self).update(subject_id=None)
 
     @cached_property
