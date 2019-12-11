@@ -430,7 +430,7 @@ class Trial(models.Model):
 
     @property
     def is_finished(self):
-        return self.ended is not None
+        return self.ratings_completed == self.ratings_count
 
     ABANDONED_AFTER_HRS = 1
 
