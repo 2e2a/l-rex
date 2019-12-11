@@ -63,14 +63,14 @@ class ItemsValidateMixin:
             messages.success(self.request, 'Items seem valid.')
             for warning in warnings:
                 messages.warning(self.request, '{}'.format(warning))
-            lists_url = reverse('itemlists', args=[self.materials.slug])
-            msg = 'Lists automatically generated. <a href="{}">Check lists.</a>'.format(lists_url)
-            messages.success(self.request, mark_safe(msg))
+            messages.success(self.request,'Lists automatically generated.')
             if self.study.has_questionnaires:
                 self.study.delete_questionnaires()
                 messages.info(self.request, 'Old questionnaires deleted.')
+            return True
         except AssertionError as e:
             messages.error(self.request, str(e))
+        return False
 
 
 class ItemListView(
@@ -92,7 +92,8 @@ class ItemListView(
     def post(self, request, *args, **kwargs):
         action = request.POST.get('action', None)
         if action and action == 'validate':
-            self.validate_items()
+            if self.validate_items():
+                return redirect('itemlists', materials_slug=self.materials.slug)
         return redirect('items', materials_slug=self.materials.slug)
 
     def get_queryset(self):
@@ -714,6 +715,7 @@ class ItemListListView(
     materials_views.MaterialsMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
+    ItemsValidateMixin,
     contrib_views.ActionsMixin,
     materials_views.MaterialsNavMixin,
     generic.ListView
@@ -724,6 +726,12 @@ class ItemListListView(
     @property
     def title(self):
         return '{}: Item lists'.format(self.materials.title)
+
+    def post(self, request, *args, **kwargs):
+        action = request.POST.get('action', None)
+        if action and action == 'validate':
+            self.validate_items()
+        return redirect('itemslists', materials_slug=self.materials.slug)
 
     def get_queryset(self):
         return models.ItemList.objects.filter(materials=self.materials)
