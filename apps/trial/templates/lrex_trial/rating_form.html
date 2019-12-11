@@ -29,11 +29,6 @@
 </div>
 
 <div class="my-2 p-4 border bg-white">
-    {% block rating_form %}
-    <div class="my-2">
-        {% crispy form form.helper %}
-    </div>
-    {% endblock %}
+    {% crispy view.formset view.helper %}
 </div>
-
 {% endblock %}

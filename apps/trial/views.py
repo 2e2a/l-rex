@@ -605,7 +605,7 @@ class TrialCreateView(study_views.StudyMixin, TestTrialMixin, generic.CreateView
     def form_valid(self, form):
         active_trial = self._trial_by_id(form.instance.subject_id)
         if active_trial:
-            active_trial_url = reverse('rating-create', args=[active_trial.slug, 0])
+            active_trial_url = reverse('ratings-create', args=[active_trial.slug, 0])
             return redirect(active_trial_url)
         if self.is_test_trial:
             if not form.instance.subject_id:
@@ -619,7 +619,7 @@ class TrialCreateView(study_views.StudyMixin, TestTrialMixin, generic.CreateView
             return reverse('trial-demographics', args=[self.object.slug])
         if self.study.use_blocks:
             return reverse('rating-block-instructions', args=[self.object.slug, 0])
-        return reverse('rating-create', args=[self.object.slug, 0])
+        return reverse('ratings-create', args=[self.object.slug, 0])
 
 
 class DemographicsCreateView(TrialMixin, TestWarningMixin, generic.TemplateView):
@@ -631,7 +631,7 @@ class DemographicsCreateView(TrialMixin, TestWarningMixin, generic.TemplateView)
 
     def dispatch(self, request, *args, **kwargs):
         if self.trial.demographicvalue_set.exists():
-            return redirect(reverse('rating-create', args=[self.trial.slug, 0]))
+            return redirect(reverse('ratings-create', args=[self.trial.slug, 0]))
         self.fields_qs = self.study.demographicfield_set
         self.n_fields = self.fields_qs.count()
         self.helper = forms.demographics_formset_helper(self.study.continue_label)
@@ -647,7 +647,7 @@ class DemographicsCreateView(TrialMixin, TestWarningMixin, generic.TemplateView)
     def get_success_url(self):
         if self.study.use_blocks:
             return reverse('rating-block-instructions', args=[self.object.slug, 0])
-        return reverse('rating-create', args=[self.trial.slug, 0])
+        return reverse('ratings-create', args=[self.trial.slug, 0])
 
     def post(self, request, *args, **kwargs):
         self.formset = forms.demographics_formset_factory(self.n_fields)(request.POST, request.FILES)
@@ -752,131 +752,9 @@ class ProgressMixin:
         return data
 
 
-class RatingCreateMixin(ProgressMixin, TestWarningMixin):
-
-    def get_context_data(self, **kwargs):
-        kwargs.update(
-            {
-                'n_trial_items': len(self.trial.items), 'num': self.num,
-                'item': self.questionnaire_item.item
-            }
-        )
-        return super().get_context_data(**kwargs)
-
-    def _redirect_to_correct_num(self, num):
-        if self.trial.is_test:
-            return None
-        if self.trial.is_finished:
-            return reverse('rating-taken', args=[self.trial.slug])
-        try:
-            n_ratings = models.Rating.objects.filter(trial=self.trial, question=0).count()
-            if n_ratings != num:
-                return reverse('rating-create', args=[self.trial.slug, n_ratings])
-        except models.Rating.DoesNotExist:
-            pass
-        return None
-
-    @cached_property
-    def is_last(self):
-        trial_items = self.trial.items
-        return self.num == len(trial_items) - 1
-
-    def get_next_url(self):
-        if not self.is_last:
-            trial_items = self.trial.items
-            if self.study.use_blocks and \
-                    trial_items[self.num].materials_block != trial_items[self.num + 1].materials_block:
-                return reverse('rating-block-instructions', args=[self.trial.slug, self.num + 1])
-            return reverse('rating-create', args=[self.trial.slug, self.num + 1])
-        return reverse('rating-outro', args=[self.trial.slug])
-
-    def _handle_feedbacks(self, ratingforms, instances):
-        feedbacks = []
-        reload_form_with_feedback = False
-        feedbacks_qs = self.questionnaire_item.item.itemfeedback_set
-        if feedbacks_qs.count() > 0:
-            for i, instance in enumerate(instances):
-                question_feedbacks = feedbacks_qs.filter(question=instance.scale_value.question)
-                feedbacks_given = ratingforms[i]['feedbacks_given'].value()
-                feedbacks_given = [int(f) for f in feedbacks_given.split(',')] if feedbacks_given else []
-                show_feedback = None
-                for feedback in question_feedbacks:
-                    if feedback.pk not in feedbacks_given and feedback.show_feedback(instance.scale_value):
-                        reload_form_with_feedback = True
-                        show_feedback = feedback
-                    feedbacks.append(
-                        (i, feedbacks_given, show_feedback)
-                    )
-        return reload_form_with_feedback, feedbacks
-
-
-class RatingCreateView(RatingCreateMixin, TrialMixin, generic.CreateView):
+class RatingsCreateView(ProgressMixin, TestWarningMixin, TrialMixin, generic.TemplateView):
     model = models.Rating
-    form_class = forms.RatingForm
-
-    def dispatch(self, *args, **kwargs):
-        self.num = int(self.kwargs['num'])
-        redirect_link = self._redirect_to_correct_num(self.num)
-        if not redirect_link and self.study.is_multi_question:
-            redirect_link = reverse('ratings-create', args=[self.trial.slug, self.num])
-        if redirect_link:
-            return redirect(redirect_link)
-        self.questionnaire_item = models.QuestionnaireItem.objects.get(
-            questionnaire=self.trial.questionnaire,
-            number=self.num
-        )
-        self.item_questions = self.questionnaire_item.item.itemquestion_set.all()
-        return super().dispatch(*args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        if self.questionnaire_item.rating_set.filter(trial=self.trial).exists():
-            return redirect(self.get_next_url())
-        form = self.get_form()
-        if form.is_valid():
-            show_feedback, feedbacks = self._handle_feedbacks([form], [form.instance])
-            if show_feedback:
-                rating = form.save(commit=False)
-                response = super().get(request)
-                form_kwargs = self.get_form_base_kwargs()
-                form = self.get_form_class()(**form_kwargs)
-                form.fields['scale_value'].initial = rating.scale_value.id
-                form.fields['comment'].initial = rating.comment
-                for _, feedbacks_given, feedback in feedbacks:
-                    form.handle_feedbacks(feedbacks_given, feedback=feedback)
-                response.context_data['form'] = form
-                messages.error(request, self.study.feedback_message)
-                return response
-            if self.is_last:
-                self.trial.ended = now()
-                self.trial.save()
-        return super().post(request, *args, **kwargs)
-
-    def get_form_base_kwargs(self):
-        kwargs = dict()
-        kwargs['study'] = self.study
-        kwargs['question'] = self.study.question
-        kwargs['questionnaire_item'] = self.questionnaire_item
-        if self.item_questions:
-            kwargs['item_question'] = self.item_questions[0]
-        return kwargs
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs.update(**self.get_form_base_kwargs())
-        return kwargs
-
-    def form_valid(self, form):
-        form.instance.trial = self.trial
-        form.instance.questionnaire_item = self.questionnaire_item
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return self.get_next_url()
-
-
-class RatingsCreateView(RatingCreateMixin, TrialMixin, generic.TemplateView):
-    model = models.Rating
-    template_name = 'lrex_trial/ratings_form.html'
+    template_name = 'lrex_trial/rating_form.html'
 
     formset = None
     helper = None
@@ -947,6 +825,61 @@ class RatingsCreateView(RatingCreateMixin, TrialMixin, generic.TemplateView):
                 self.trial.save()
             return redirect(self.get_next_url())
         return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        kwargs.update(
+            {
+                'n_trial_items': len(self.trial.items), 'num': self.num,
+                'item': self.questionnaire_item.item
+            }
+        )
+        return super().get_context_data(**kwargs)
+
+    def _redirect_to_correct_num(self, num):
+        if self.trial.is_test:
+            return None
+        if self.trial.is_finished:
+            return reverse('rating-taken', args=[self.trial.slug])
+        try:
+            n_ratings = models.Rating.objects.filter(trial=self.trial, question=0).count()
+            if n_ratings != num:
+                return reverse('ratings-create', args=[self.trial.slug, n_ratings])
+        except models.Rating.DoesNotExist:
+            pass
+        return None
+
+    @cached_property
+    def is_last(self):
+        trial_items = self.trial.items
+        return self.num == len(trial_items) - 1
+
+    def get_next_url(self):
+        if not self.is_last:
+            trial_items = self.trial.items
+            if self.study.use_blocks and \
+                    trial_items[self.num].materials_block != trial_items[self.num + 1].materials_block:
+                return reverse('rating-block-instructions', args=[self.trial.slug, self.num + 1])
+            return reverse('ratings-create', args=[self.trial.slug, self.num + 1])
+        return reverse('rating-outro', args=[self.trial.slug])
+
+    def _handle_feedbacks(self, ratingforms, instances):
+        feedbacks = []
+        reload_form_with_feedback = False
+        feedbacks_qs = self.questionnaire_item.item.itemfeedback_set
+        if feedbacks_qs.count() > 0:
+            for i, instance in enumerate(instances):
+                question_feedbacks = feedbacks_qs.filter(question=instance.scale_value.question)
+                feedbacks_given = ratingforms[i]['feedbacks_given'].value()
+                feedbacks_given = [int(f) for f in feedbacks_given.split(',')] if feedbacks_given else []
+                show_feedback = None
+                for feedback in question_feedbacks:
+                    if feedback.pk not in feedbacks_given and feedback.show_feedback(instance.scale_value):
+                        reload_form_with_feedback = True
+                        show_feedback = feedback
+                    feedbacks.append(
+                        (i, feedbacks_given, show_feedback)
+                    )
+        return reload_form_with_feedback, feedbacks
 
 
 class RatingBlockInstructionsView(ProgressMixin, TestWarningMixin, TrialMixin, generic.TemplateView):

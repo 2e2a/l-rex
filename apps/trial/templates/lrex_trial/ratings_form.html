@@ -1,9 +1,0 @@
-{% extends "lrex_trial/rating_form.html" %}
-{% load crispy_forms_tags %}
-{% load contrib_tags %}
-
-{% block rating_form %}
-<div class="my-2">
-    {% crispy view.formset view.helper %}
-</div>
-{% endblock %}

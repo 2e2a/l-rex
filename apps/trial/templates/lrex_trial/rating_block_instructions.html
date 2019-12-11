@@ -4,6 +4,6 @@
 <p>
     {{ block_instructions_rich }}
 
-    <a href="{% url 'rating-create' trial.slug num %}" class="btn btn-primary">{{ study.continue_label }}</a>
+    <a href="{% url 'ratings-create' trial.slug num %}" class="btn btn-primary">{{ study.continue_label }}</a>
 </p>
 {% endblock %}
