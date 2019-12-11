@@ -44,7 +44,9 @@ class ImprintView(generic.TemplateView):
 
     @property
     def breadcrumbs(self):
-        return []
+        return [
+            ('contact', '')
+        ]
 
 
 class NewsView(generic.DetailView):
@@ -62,6 +64,5 @@ class NewsView(generic.DetailView):
     @property
     def breadcrumbs(self):
         return [
-            ('home', reverse('home')),
             ('news', '')
         ]
