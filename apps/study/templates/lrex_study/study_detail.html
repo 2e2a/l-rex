@@ -97,7 +97,6 @@
 <div class="card mt-4">
     <div class="card-body">
         <h2 class="card-title">To do</h2>
-        {% if not study.is_active %}
         <div class="row">
             <div class="col-md-6 ">
                 <em>Required:</em>
@@ -118,11 +117,6 @@
                 </ul>
             </div>
         </div>
-        {% elif study.is_finished %}
-        <em>Study has finished.</em> {# TODO: consider archiving #}
-        {% else %}
-        <em>Study is active.</em>
-        {% endif %}
     </div>
 </div>
 {% else %}

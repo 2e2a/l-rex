@@ -38,6 +38,10 @@ class StudySteps(Enum):
     STEP_STD_CONTACT_ADD = 7
     STEP_STD_PRIVACY_ADD = 8
     STEP_STD_PUBLISH = 9
+    STEP_STD_UNPUBLISH = 10
+    STEP_STD_RESULTS = 11
+    STEP_STD_ANONYMIZE = 12
+    STEP_STD_ARCHIVE = 13
 
 
 class Study(models.Model):
@@ -812,6 +816,10 @@ class Study(models.Model):
         StudySteps.STEP_STD_CONTACT_ADD: 'add contact information',
         StudySteps.STEP_STD_PRIVACY_ADD: 'add a privacy statement',
         StudySteps.STEP_STD_PUBLISH: 'publish the study',
+        StudySteps.STEP_STD_UNPUBLISH: 'unpublish the study when finished',
+        StudySteps.STEP_STD_RESULTS: 'download results',
+        StudySteps.STEP_STD_ANONYMIZE: 'remove subject mapping',
+        StudySteps.STEP_STD_ARCHIVE: 'archive the study',
     }
 
     def step_url(self, step):
@@ -832,6 +840,14 @@ class Study(models.Model):
         elif step == StudySteps.STEP_STD_PRIVACY_ADD:
             return reverse('study-privacy', args=[self.slug])
         elif step == StudySteps.STEP_STD_PUBLISH:
+            return reverse('study', args=[self.slug])
+        elif step == StudySteps.STEP_STD_UNPUBLISH:
+            return reverse('study', args=[self.slug])
+        elif step == StudySteps.STEP_STD_RESULTS:
+            return reverse('trials', args=[self.slug])
+        elif step == StudySteps.STEP_STD_ANONYMIZE:
+            return reverse('trials', args=[self.slug])
+        elif step == StudySteps.STEP_STD_ARCHIVE:
             return reverse('study', args=[self.slug])
 
     def _append_step_info(self, steps, step, group):
@@ -870,9 +886,20 @@ class Study(models.Model):
         if not self.privacy_statement:
             self._append_step_info(next_steps, StudySteps.STEP_STD_PRIVACY_ADD, group)
 
-        group = 'Publish'
-        if self.is_allowed_publish and not self.is_published:
-            self._append_step_info(next_steps, StudySteps.STEP_STD_PUBLISH, group)
+        group = 'Study'
+        if self.is_published:
+            self._append_step_info(next_steps, StudySteps.STEP_STD_UNPUBLISH, group)
+        else:
+            if self.is_allowed_publish:
+                self._append_step_info(next_steps, StudySteps.STEP_STD_PUBLISH, group)
+        if self.trial_count_finished > 0:
+            self._append_step_info(next_steps, StudySteps.STEP_STD_RESULTS, group)
+        if self.has_subject_mapping:
+            self._append_step_info(next_steps, StudySteps.STEP_STD_ANONYMIZE, group)
+
+        # TODO: add archive
+
+
         return next_steps
 
 

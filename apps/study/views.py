@@ -49,8 +49,10 @@ class NextStepsMixin:
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         next_steps_html = []
+        study_url = self.study.get_absolute_url()
         next_steps = self.study.next_steps()
         step_html_template = '<a href="{}">{}</a>'
+        step_html_disabled_template = '<a class="text-muted">{}</a>'
         steps_html_template = '<div class="d-flex justify-content-between">\n' \
                               '    <span>{}</span>\n' \
                               '    <span class="text-right text-secondary"><small><em>{}</em></small></span>\n' \
@@ -58,7 +60,12 @@ class NextStepsMixin:
         for group, group_steps in next_steps.items():
             if not group_steps:
                 continue
-            steps = [step_html_template.format(url, description) for description, url in group_steps]
+            steps = []
+            for description, url in group_steps:
+                if url != study_url:
+                    steps.append(step_html_template.format(url, description))
+                else:
+                    steps.append(step_html_disabled_template.format(description))
             step_html = steps_html_template.format('<br/>'.join(steps), group)
             next_steps_html.append(mark_safe(step_html))
         optional_steps_html = [
