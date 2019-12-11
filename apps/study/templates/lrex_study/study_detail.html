@@ -16,8 +16,10 @@
                     <div class="col-sm-6">
                         {% if study.is_published %}
                         <span class="badge badge-warning">published</span>
-                        {% else %}
+                        {% elif study.is_allowed_publish %}
                         <span class="badge badge-primary">unpublished</span>
+                        {% else %}
+                        <span class="badge badge-light">draft</span>
                         {% endif %}
                     </div>
                 </div>
