@@ -14,13 +14,15 @@
                         Status:
                     </div>
                     <div class="col-sm-6">
+                        <span class="badge badge-secondary">
                         {% if study.is_published %}
-                        <span class="badge badge-warning">published</span>
+                            published
                         {% elif study.is_allowed_publish %}
-                        <span class="badge badge-primary">unpublished</span>
+                            unpublished
                         {% else %}
-                        <span class="badge badge-light">draft</span>
+                            draft
                         {% endif %}
+                        </span>
                     </div>
                 </div>
                 <div class="row">
