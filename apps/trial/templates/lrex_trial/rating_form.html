@@ -9,9 +9,11 @@
     {% elif item.markdownitem %}
     <div class="item-content">{{ item.markdownitem.text|markdownify }}</div>
     {% else %}
+    {% if item.audiolinkitem.description %}
     <p>
         {{ item.audiolinkitem.description|markdownify }}
     </p>
+    {% endif %}
     <div class="text-center my-2">
         {% for item_url in item.audiolinkitem.urls_list %}
         <div>
