@@ -333,7 +333,6 @@ class Materials(models.Model):
         return csv_row
 
     def items_csv(self, fileobj, add_header=True, add_materials_column=False):
-        # TODO: write audio description
         writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
         if add_header:
             header = self.items_csv_header(add_materials_column=add_materials_column)
@@ -415,7 +414,7 @@ class Materials(models.Model):
 
             if created:
                 new_items.append(item)
-            else:
+            elif item.item_ptr in items_to_delete:
                 items_to_delete.remove(item.item_ptr)
 
             custom_question_column = any(

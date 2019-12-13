@@ -71,8 +71,8 @@ def detect_dialect(data, form_cleaned_data, int_column_names=None, user_delimite
             except StopIteration:
                 pass
             rows_valid = True
-            if len(rows) == 0:
-                raise forms.ValidationError('File not big enogh to detect format.')
+            if len(rows) == 0 and not user_delimiter:
+                raise forms.ValidationError('File not big enough to detect format.')
             for row in rows:
                 if not _is_row_valid(row, int_columns, min_columns):
                     rows_valid = False
