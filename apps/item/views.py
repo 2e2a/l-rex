@@ -732,7 +732,7 @@ class ItemListListView(
         action = request.POST.get('action', None)
         if action and action == 'validate':
             self.validate_items()
-        return redirect('itemslists', materials_slug=self.materials.slug)
+        return redirect('itemlists', materials_slug=self.materials.slug)
 
     def get_queryset(self):
         return models.ItemList.objects.filter(materials=self.materials)
