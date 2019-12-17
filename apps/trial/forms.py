@@ -36,8 +36,8 @@ class RandomizationForm(crispy_forms.CrispyForm):
         self.helper.form_class = 'form-inline'
         self.helper.layout = Layout(
             FieldWithButtons(
-                Field('randomization', css_class='form-control-sm'),
-                Submit('generate', 'Generate', css_class='btn-primary btn-sm mx-1')
+                Field('randomization', css_class='form-control-sm mt-1'),
+                Submit('generate', 'Generate', css_class='btn-primary btn-sm mx-1 mt-1')
             )
         )
 

@@ -898,10 +898,18 @@ class Study(models.Model):
             self._append_step_info(next_steps, StudySteps.STEP_STD_ANONYMIZE, group)
 
         # TODO: add archive
-
-
         return next_steps
 
+    def optional_steps(self):
+        if self.is_published:
+            return {}
+        return {
+            'Settings':
+                [
+                    ('customize study settings', reverse('study-settings', args=[self.slug])),
+                    ('translate build-in texts', reverse('study-translate', args=[self.slug])),
+                ]
+        }
 
 class Question(models.Model):
     study = models.ForeignKey(

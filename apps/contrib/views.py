@@ -113,10 +113,10 @@ class ActionsMixin:
     secondary_actions = None
     disable_actions = ([], [])
 
-    ACTION_CSS_BUTTON_PRIMARY = 'btn btn-sm ml-1 mr-0 btn-primary'
-    ACTION_CSS_BUTTON_SECONDARY = 'btn btn-sm ml-1 mr-0 btn-secondary'
-    ACTION_CSS_BUTTON_WARNING = 'btn btn-sm ml-1 mr-0 btn-warning'
-    ACTION_CSS_BUTTON_DANGER = 'btn btn-sm ml-1 mr-0 btn-danger'
+    ACTION_CSS_BUTTON_PRIMARY = 'btn btn-sm ml-0 mr-1 mt-1 btn-primary'
+    ACTION_CSS_BUTTON_SECONDARY = 'btn btn-sm ml-0 mr-1 mt-1 btn-secondary'
+    ACTION_CSS_BUTTON_WARNING = 'btn btn-sm ml-0 mr-1 mt-1 btn-warning'
+    ACTION_CSS_BUTTON_DANGER = 'btn btn-sm ml-0 mr-1 mt-1 btn-danger'
 
     def _get_action_html(self, action_type, action, disabled):
         action_context = {

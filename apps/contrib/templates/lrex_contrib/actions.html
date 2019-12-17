@@ -1,4 +1,4 @@
-<div class="d-flex align-self-center">
+<div class="d-flex align-self-center justify-content-end">
     {% block actions %}{% endblock %}
     <form class="form-inline" method="post">
         {% csrf_token %}
@@ -7,7 +7,7 @@
         {% endfor %}
     </form>
     {% if secondary_actions %}
-    <div class="dropdown ml-2 mr-0">
+    <div class="dropdown ml-1 mr-0 mt-1">
         <button class="btn btn-secondary btn-sm " type="button" id="dropdownActionsButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             &hellip;
         </button>

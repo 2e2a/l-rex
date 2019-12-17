@@ -46,41 +46,27 @@ class DisableFormIfStudyActiveMixin(WarnUserIfStudyActiveMixin, contib_views.Dis
 
 class NextStepsMixin:
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        next_steps_html = []
-        study_url = self.study.get_absolute_url()
-        next_steps = self.study.next_steps()
-        step_html_template = '<a href="{}">{}</a>'
-        step_html_disabled_template = '<a class="text-muted">{}</a>'
-        steps_html_template = '<div class="d-flex justify-content-between">\n' \
-                              '    <span>{}</span>\n' \
-                              '    <span class="text-right text-secondary"><small><em>{}</em></small></span>\n' \
-                              '</div>'
-        for group, group_steps in next_steps.items():
+    def _steps_html(self, steps, study_url):
+        for group, group_steps in steps.items():
             if not group_steps:
                 continue
             steps = []
             for description, url in group_steps:
-                if url != study_url:
-                    steps.append(step_html_template.format(url, description))
-                else:
-                    steps.append(step_html_disabled_template.format(description))
-            step_html = steps_html_template.format('<br/>'.join(steps), group)
-            next_steps_html.append(mark_safe(step_html))
-        optional_steps_html = [
-            mark_safe(steps_html_template.format(
-                '<br/>'.join([
-                    step_html_template.format(
-                        reverse('study-settings', args=[self.study.slug]), 'Customize study settings'
-                    ),
-                    step_html_template.format(
-                        reverse('study-translate', args=[self.study.slug]), 'Translate build-in texts'
-                    )
-                ]),
-                'Settings',
-            )),
-        ] if not self.study.is_published else []
+                steps.append((url, description, url == study_url))
+            group_steps_context = {
+                'group': group,
+                'group_steps': steps,
+            }
+            step_html = render_to_string('lrex_study/study_steps.html', group_steps_context)
+            yield mark_safe(step_html)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        study_url = self.study.get_absolute_url()
+        next_steps = self.study.next_steps()
+        next_steps_html = self._steps_html(next_steps, study_url)
+        optional_steps = self.study.optional_steps()
+        optional_steps_html = self._steps_html(optional_steps, study_url)
         context.update({
             'next_steps_html': next_steps_html,
             'optional_steps_html': optional_steps_html,
