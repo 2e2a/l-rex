@@ -1,5 +1,6 @@
 import copy
 import csv
+from collections import Counter
 from enum import Enum
 from itertools import groupby
 from django.db import models
@@ -189,17 +190,18 @@ class Materials(models.Model):
         elif self.study.has_audiolink_items:
             item_links = []
             for item in items:
-                item_links.extend([(item, url) for url in item.audiolinkitem.urls_list])
-            item_links = sorted(item_links, key=lambda x: x[1])
-            prev_item_link = ()
-            for item, link in item_links:
-                if prev_item_link:
-                    if link == prev_item_link[1]:
-                        if item == prev_item_link[0]:
-                            warnings.append('Item {} uses the same URL multiple times.'.format(item))
-                        else:
-                            warnings.append('Items {} and {} have the same URL.'.format(prev_item_link[0], item))
-                prev_item_link = (item, link)
+                item_links.extend([(url, item) for url in item.audiolinkitem.urls_list])
+            items_by_link = groupby(item_links, lambda x: x[0])
+            for _, items_with_same_link in items_by_link:
+                item_list = [item_link[1] for item_link in items_with_same_link]
+                if item_list:
+                    items = set(item_list)
+                    if len(items) > 1:
+                        warnings.append('Items {} have the same URL.'.format(', '.join([str(item) for item in items])))
+                    item_counter = Counter(item_list)
+                    duplicate_items = [item for item in item_counter if item_counter[item] > 1]
+                    if duplicate_items:
+                        warnings.append('Items {} use the same URL multiple times.'.format(', '.join([str(item) for item in duplicate_items])))
         msg = 'Detected {} items with following conditions: {} (sum: {} stimuli).'.format(
             item_number,
             ', '.join('"{}"'.format(condition) for condition in conditions),
