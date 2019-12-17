@@ -46,29 +46,6 @@
     <li class="list-group-item">There are currently no studies.</li>
     {% endfor %}
 </ul>
-
-<nav aria-label="Pagination">
-    <ul class="pagination justify-content-center mt-2">
-        {% if page_obj.has_previous %}
-        <li class="page-item"><a class="page-link" href="?page=1">&laquo; first</a></li>
-        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">&lsaquo; previous</a></li>
-        {% else %}
-        <li class="page-item disabled"><a class="page-link">&laquo; first</a></li>
-        <li class="page-item disabled"><a class="page-link">&lsaquo; previous</a></li>
-        {% endif %}
-
-        <span class="my-2 mx-2">
-                {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
-            </span>
-
-        {% if page_obj.has_next %}
-        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">next &rsaquo;</a></li>
-        <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a></li>
-        {% else %}
-        <li class="page-item disabled"><a class="page-link">next &rsaquo;</a></li>
-        <li class="page-item disabled"><a class="page-link">last &raquo;</a></li>
-        {% endif %}
-    </ul>
-</nav>
+{% include 'lrex_contrib/pagination.html' %}
 {% endblock %}
 
