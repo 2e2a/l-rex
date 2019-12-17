@@ -2,6 +2,12 @@ $primary: #00a333;
 
 @import './node_modules/bootstrap/scss/bootstrap';
 
+@media (max-width: 480px) {
+    .lrex .title {
+        font-size: 140%;
+    }
+}
+
 .lrex .breadcrumb {
     min-height: 24px;
 }

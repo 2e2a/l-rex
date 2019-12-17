@@ -76,8 +76,8 @@
                     {% endfor %}
                 </ol>
             </nav>
-            <div class="d-flex justify-content-between">
-                <h1>{% block header-title %}{% if view.title %}{{ view.title }}{% endif %}{% endblock %}</h1>
+            <div class="d-sm-flex justify-content-between">
+                <h1 class="title">{% block header-title %}{% if view.title %}{{ view.title }}{% endif %}{% endblock %}</h1>
                 {% include 'lrex_contrib/actions.html' %}
             </div>
         </div>
