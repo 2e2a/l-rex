@@ -125,6 +125,13 @@ class Materials(models.Model):
     def get_absolute_url(self):
         return reverse('materials', args=[self.slug])
 
+    def _warn_items_string(self, items):
+        WARN_ITEMS_MAX = 10
+        items_string = ', '.join([str(item) for item in list(items)[:WARN_ITEMS_MAX]])
+        if len(items) > WARN_ITEMS_MAX:
+            items_string += ",..."
+        return items_string
+
     def validate_items(self):
         warnings = []
         conditions = []
@@ -186,7 +193,7 @@ class Materials(models.Model):
             for _, items_with_same_text in items_by_text:
                 items = list(items_with_same_text)
                 if len(items) > 1:
-                    warnings.append('Items {} have the same text.'.format(', '.join([str(item) for item in items])))
+                    warnings.append('Items {} have the same text.'.format(self._warn_items_string(items)))
         elif self.study.has_audiolink_items:
             item_links = []
             for item in items:
@@ -197,11 +204,11 @@ class Materials(models.Model):
                 if item_list:
                     items = set(item_list)
                     if len(items) > 1:
-                        warnings.append('Items {} have the same URL.'.format(', '.join([str(item) for item in items])))
+                        warnings.append('Items {} have the same URL.'.format(self._warn_items_string(items)))
                     item_counter = Counter(item_list)
                     duplicate_items = [item for item in item_counter if item_counter[item] > 1]
                     if duplicate_items:
-                        warnings.append('Items {} use the same URL multiple times.'.format(', '.join([str(item) for item in duplicate_items])))
+                        warnings.append('Items {} use the same URL multiple times.'.format(self._warn_items_string(duplicate_items)))
         msg = 'Detected {} items with following conditions: {} (sum: {} stimuli).'.format(
             item_number,
             ', '.join('"{}"'.format(condition) for condition in conditions),
