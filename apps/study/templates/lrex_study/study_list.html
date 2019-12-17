@@ -8,13 +8,13 @@
         <div class="flex-grow-1">
             <a href="{% url 'study' study.slug %}"><strong>{{ study.title }}</strong></a>
             {% if study.is_published %}
-            <span class="badge badge-secondary">Published</span>
+            <div class="badge badge-secondary">Published</div>
             {% endif %}
             {% if study.is_time_limit_reached %}
-            <span class="badge badge-secondary">Time limit reached</span>
+            <div class="badge badge-secondary">Time limit reached</div>
             {% endif %}
             {% if study.is_trial_limit_reached %}
-            <span class="badge badge-secondary">Trial limit reached</span>
+            <div class="badge badge-secondary">Trial limit reached</div>
             {% endif %}
             <div class="small mt-1">
                 <span class="pr-2">created: <strong>{{ study.created_date|date:"SHORT_DATE_FORMAT" }}</strong></span>
