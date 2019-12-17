@@ -16,73 +16,68 @@
     <link rel="shortcut icon" type="image/sgv" href="{% static 'img/favicon.svg' %}"/>
 </head>
 <body class="bg-light">
-<nav class="navbar navbar-expand-md navbar-light bg-white static-top pb-1 grey-shadow">
-    <div class="container d-flex flex-column">
-        <div class="container d-flex flex-row justify-content-between mb-2">
-            <a class="navbar-brand" href="/">
-                <img src="{% static 'img/logo.svg' %}" width="30" height="30" alt="Logo">
-                L-Rex
-            </a>
-            <div>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
-                        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ml-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'studies' %}">My studies</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" target="_blank"
-                               href="https://github.com/2e2a/l-rex/wiki">Help&nearr;</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'imprint' %}">Contact and privacy</a>
-                        </li>
-                        {% if user.is_authenticated %}
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                               data-toggle="dropdown"
-                               aria-haspopup="true" aria-expanded="false">
-                                {{ user.username }}
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                                <a class="dropdown-item" href="{% url 'account_change_password' %}">Change password</a>
-                                <a class="dropdown-item" href="{% url 'user-profile-update' %}">User settings</a>
-                                <a class="dropdown-item" href="{% url 'account_logout' %}">Log out</a>
-                            </div>
-                        </li>
-                        {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'account_login' %}">Log in</a>
-                        </li>
-                        {% endif %}
-                    </ul>
+<nav class="navbar navbar-expand-md navbar-light bg-white static-top pb-1">
+    <a class="navbar-brand" href="/">
+        <img src="{% static 'img/logo.svg' %}" width="30" height="30" alt="Logo">
+        L-Rex
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'studies' %}">My studies</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" target="_blank"
+                   href="https://github.com/2e2a/l-rex/wiki">Help&nearr;</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'imprint' %}">Contact and privacy</a>
+            </li>
+            {% if user.is_authenticated %}
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                   data-toggle="dropdown"
+                   aria-haspopup="true" aria-expanded="false">
+                    {{ user.username }}
+                </a>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="{% url 'account_change_password' %}">Change password</a>
+                    <a class="dropdown-item" href="{% url 'user-profile-update' %}">User settings</a>
+                    <a class="dropdown-item" href="{% url 'account_logout' %}">Log out</a>
                 </div>
-
-            </div>
-        </div>
-        <div class="container">
-            <nav aria-label="Breadcrumbs">
-                <ol class="breadcrumb bg-white px-0 py-0 my-0">
-                    <li class="breadcrumb-item"><a href="{% url 'home' %}">home</a></li>
-                    {% for name, link in view.breadcrumbs %}
-                    {% if not forloop.last %}
-                    <li class="breadcrumb-item"><a href="{{ link }}">{{ name }}</a></li>
-                    {% else %}
-                    <li class="breadcrumb-item active">{{ name }}</li>
-                    {% endif %}
-                    {% endfor %}
-                </ol>
-            </nav>
-            <div class="d-sm-flex justify-content-between">
-                <h1 class="title">{% block header-title %}{% if view.title %}{{ view.title }}{% endif %}{% endblock %}</h1>
-                {% include 'lrex_contrib/actions.html' %}
-            </div>
-        </div>
+            </li>
+            {% else %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'account_login' %}">Log in</a>
+            </li>
+            {% endif %}
+        </ul>
     </div>
 </nav>
+<div class="bg-white grey-shadow">
+    <div class="container bg-white">
+        <nav aria-label="Breadcrumbs">
+            <ol class="breadcrumb bg-white px-0 py-0 my-0">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}">home</a></li>
+                {% for name, link in view.breadcrumbs %}
+                {% if not forloop.last %}
+                <li class="breadcrumb-item"><a href="{{ link }}">{{ name }}</a></li>
+                {% else %}
+                <li class="breadcrumb-item active">{{ name }}</li>
+                {% endif %}
+                {% endfor %}
+            </ol>
+        </nav>
+        <div class="d-sm-flex justify-content-between">
+            <h1 class="title">{% block header-title %}{% if view.title %}{{ view.title }}{% endif %}{% endblock %}</h1>
+            {% include 'lrex_contrib/actions.html' %}
+        </div>
+    </div>
+</div>
 <div class="container bg-white py-2 mt-3">
     {% block nav %}
     {% if nav or secondary_nav %}
