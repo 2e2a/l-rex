@@ -1,9 +1,9 @@
-from apps.contrib import forms as crispy_forms
+from apps.contrib import forms as contrib_forms
 
 from . import models
 
 
-class ProfileForm(crispy_forms.CrispyModelForm):
+class ProfileForm(contrib_forms.CrispyModelForm):
 
     class Meta:
         model = models.UserProfile

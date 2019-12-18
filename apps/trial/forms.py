@@ -4,14 +4,14 @@ from crispy_forms.layout import Field, Fieldset, Layout, Submit, Button
 from crispy_forms.bootstrap import StrictButton, FieldWithButtons, InlineField, FormActions
 from django import forms
 
-from apps.contrib import forms as crispy_forms
+from apps.contrib import forms as contrib_forms
+from apps.contrib.utils import split_list_string
 from apps.item import models as item_models
-from apps.study import models as study_models
 
 from . import models
 
 
-class RandomizationForm(crispy_forms.CrispyForm):
+class RandomizationForm(contrib_forms.CrispyForm):
     randomization = forms.ChoiceField(
         choices=models.QuestionnaireBlock.RANDOMIZATION_BASE,
         initial=models.QuestionnaireBlock.RANDOMIZATION_TRUE,
@@ -98,7 +98,7 @@ def questionnaire_block_update_formset_helper():
     return formset_helper
 
 
-class QuestionnaireUploadForm(crispy_forms.CSVUploadForm):
+class QuestionnaireUploadForm(contrib_forms.CSVUploadForm):
     file = forms.FileField(
         help_text='The CSV file must contain a column for the questionnaire number, materials title, item number and '
                   'condition. Valid column delimiters: colon, semicolon, comma, space, or tab.',
@@ -194,7 +194,7 @@ class QuestionnaireUploadForm(crispy_forms.CSVUploadForm):
             raise forms.ValidationError('Not all items used in questionnaires.')
 
 
-class TrialForm(crispy_forms.CrispyModelForm):
+class TrialForm(contrib_forms.CrispyModelForm):
     password = forms.CharField(
         max_length=200,
         widget=forms.PasswordInput,
@@ -243,7 +243,7 @@ class TrialForm(crispy_forms.CrispyModelForm):
         return password
 
 
-class DemographicsFormsetForm(crispy_forms.CrispyModelForm):
+class DemographicsFormsetForm(contrib_forms.CrispyModelForm):
 
     class Meta:
         model = models.DemographicValue
@@ -284,7 +284,7 @@ def demographics_formset_helper(submit_label='Continue'):
     return formset_helper
 
 
-class RatingForm(crispy_forms.CrispyModelForm):
+class RatingForm(contrib_forms.CrispyModelForm):
     feedback = forms.CharField(
         max_length=5000,
         required=False,

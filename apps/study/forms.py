@@ -3,12 +3,12 @@ from crispy_forms.layout import Fieldset, HTML, Layout, Submit
 from django import forms
 from django.contrib.auth.models import User
 
-from apps.contrib import forms as crispy_forms
+from apps.contrib import forms as contrib_forms
 
 from . import models
 
 
-class StudyForm(crispy_forms.CrispyModelForm):
+class StudyForm(contrib_forms.CrispyModelForm):
 
     class Meta:
         model = models.Study
@@ -18,7 +18,7 @@ class StudyForm(crispy_forms.CrispyModelForm):
         ]
 
 
-class StudySettingsForm(crispy_forms.CrispyModelForm):
+class StudySettingsForm(contrib_forms.CrispyModelForm):
 
     class Meta:
         model = models.Study
@@ -43,13 +43,13 @@ class StudySettingsForm(crispy_forms.CrispyModelForm):
         disable_feedback = kwargs.pop('disable_feedback', False)
         super().__init__(*args, **kwargs)
         if disable_question_order:
-            crispy_forms.disable_form_field(self, 'pseudo_randomize_question_order')
+            contrib_forms.disable_form_field(self, 'pseudo_randomize_question_order')
         if disable_use_blocks:
-            crispy_forms.disable_form_field(self, 'use_blocks')
+            contrib_forms.disable_form_field(self, 'use_blocks')
         if disable_feedback:
-            crispy_forms.disable_form_field(self, 'enable_item_rating_feedback')
+            contrib_forms.disable_form_field(self, 'enable_item_rating_feedback')
         if self.disable_itemtype:
-            crispy_forms.disable_form_field(self, 'item_type')
+            contrib_forms.disable_form_field(self, 'item_type')
 
     @property
     def custom_helper(self):
@@ -88,7 +88,7 @@ class StudySettingsForm(crispy_forms.CrispyModelForm):
         return helper
 
 
-class StudyTranslationsForm(crispy_forms.CrispyModelForm):
+class StudyTranslationsForm(contrib_forms.CrispyModelForm):
 
     class Meta:
         model = models.Study
@@ -118,20 +118,20 @@ class StudyTranslationsForm(crispy_forms.CrispyModelForm):
             self.fields['answer_questions_message'].widget = forms.HiddenInput()
 
 
-class StudyFromArchiveForm(crispy_forms.CrispyForm):
+class StudyFromArchiveForm(contrib_forms.CrispyForm):
     file = forms.FileField(
         help_text='An L-Rex archive file previously downloaded.'
     )
 
 
-class StudyCopyForm(crispy_forms.CrispyForm):
+class StudyCopyForm(contrib_forms.CrispyForm):
     title = forms.CharField(
         max_length=100,
         help_text='Title of the new study.'
     )
 
 
-class StudyInstructionsForm(crispy_forms.CrispyModelForm):
+class StudyInstructionsForm(contrib_forms.CrispyModelForm):
     optional_label_ignore_fields = [
         'instructions',
     ]
@@ -151,7 +151,7 @@ class StudyInstructionsForm(crispy_forms.CrispyModelForm):
         super().__init__(*args, **kwargs)
 
 
-class StudyIntroForm(crispy_forms.CrispyModelForm):
+class StudyIntroForm(contrib_forms.CrispyModelForm):
     optional_label_ignore_fields = [
         'intro',
         'outro',
@@ -178,12 +178,11 @@ class StudyIntroForm(crispy_forms.CrispyModelForm):
         super().__init__(*args, **kwargs)
 
 
-class ArchiveForm(crispy_forms.CrispyModelForm):
+class ArchiveForm(contrib_forms.CrispyModelForm):
     is_archived = forms.BooleanField(
         required=True,
         label='Please, confirm that you have successfully downloaded and checked the archive file and want to proceed.'
     )
-
 
     class Meta:
         model = models.Study
@@ -258,7 +257,7 @@ def question_formset_helper():
     return formset_helper
 
 
-class SharedWithForm(crispy_forms.CrispyModelForm):
+class SharedWithForm(contrib_forms.CrispyModelForm):
 
     class Meta:
         model = models.Study
@@ -275,7 +274,7 @@ class SharedWithForm(crispy_forms.CrispyModelForm):
         return shared_with
 
 
-class StudyContactForm(crispy_forms.CrispyModelForm):
+class StudyContactForm(contrib_forms.CrispyModelForm):
     optional_label_ignore_fields = [
         'contact_name',
         'contact_email',
@@ -296,7 +295,7 @@ class StudyContactForm(crispy_forms.CrispyModelForm):
             self.fields[field].required = True
 
 
-class StudyPrivacyForm(crispy_forms.CrispyModelForm):
+class StudyPrivacyForm(contrib_forms.CrispyModelForm):
     optional_label_ignore_fields = [
         'privacy_statement',
     ]
@@ -312,7 +311,7 @@ class StudyPrivacyForm(crispy_forms.CrispyModelForm):
         self.fields['privacy_statement'].required = True
 
 
-class DemographicFieldForm(crispy_forms.CrispyModelForm):
+class DemographicFieldForm(contrib_forms.CrispyModelForm):
 
     class Meta:
         model = models.DemographicField

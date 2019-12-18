@@ -1,6 +1,4 @@
-import csv
 import re
-from io import StringIO
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Fieldset, Layout, Submit
 from django import forms
@@ -9,7 +7,8 @@ from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory
 
 from apps.contrib import csv as contrib_csv
-from apps.contrib import forms as crispy_forms
+from apps.contrib import forms as contrib_forms
+from apps.contrib.utils import split_list_string
 
 from . import models
 
@@ -26,14 +25,14 @@ class ItemFormMixin:
             self.fields['block'].widget = forms.HiddenInput()
 
 
-class TextItemForm(ItemFormMixin, crispy_forms.CrispyModelForm):
+class TextItemForm(ItemFormMixin, contrib_forms.CrispyModelForm):
 
     class Meta:
         model = models.TextItem
         fields = ['number', 'condition', 'text', 'block']
 
 
-class MarkdownItemForm(ItemFormMixin, crispy_forms.CrispyModelForm):
+class MarkdownItemForm(ItemFormMixin, contrib_forms.CrispyModelForm):
 
     class Meta:
         model = models.MarkdownItem
@@ -56,7 +55,7 @@ def validate_urls(urls):
             )
 
 
-class AudioLinkItemForm(ItemFormMixin, crispy_forms.CrispyModelForm):
+class AudioLinkItemForm(ItemFormMixin, contrib_forms.CrispyModelForm):
 
     class Meta:
         model = models.AudioLinkItem
@@ -68,7 +67,7 @@ class AudioLinkItemForm(ItemFormMixin, crispy_forms.CrispyModelForm):
         return clean_url_list(urls)
 
 
-class PregenerateItemsForm(crispy_forms.CrispyForm):
+class PregenerateItemsForm(contrib_forms.CrispyForm):
     num_items = forms.IntegerField(
         label='number of items',
         help_text='Empty text fields will be pregenerated to accommodate this number of items.',
@@ -79,7 +78,7 @@ class PregenerateItemsForm(crispy_forms.CrispyForm):
     )
 
 
-class ItemUploadForm(crispy_forms.CSVUploadForm):
+class ItemUploadForm(contrib_forms.CSVUploadForm):
     file = forms.FileField(
         help_text='The CSV file must contain columns for item number, condition, and text/link to the audio file. '
                   'Valid column delimiters: colon, semicolon, comma, space, or tab.',
@@ -178,14 +177,15 @@ class ItemUploadForm(crispy_forms.CSVUploadForm):
                     assert row[cleaned_data['question_{}_question_column'.format(question.number + 1)] - 1]
                 if cleaned_data['question_{}_scale_column'.format(question.number + 1)] > 0:
                     assert row[cleaned_data['question_{}_scale_column'.format(question.number + 1)] - 1]
-                    assert len(
-                        row[cleaned_data['question_{}_scale_column'.format(question.number + 1)] - 1].split(',')) == \
-                           question.scalevalue_set.count()
+                    scale_values = split_list_string(
+                        row[cleaned_data['question_{}_scale_column'.format(question.number + 1)] - 1]
+                    )
+                    assert len(scale_values) == question.scalevalue_set.count()
                 if cleaned_data['question_{}_legend_column'.format(question.number + 1)] > 0:
                     assert row[cleaned_data['question_{}_legend_column'.format(question.number + 1)] - 1]
 
 
-class ItemQuestionForm(crispy_forms.OptionalLabelMixin, forms.ModelForm):
+class ItemQuestionForm(contrib_forms.OptionalLabelMixin, forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -194,6 +194,9 @@ class ItemQuestionForm(crispy_forms.OptionalLabelMixin, forms.ModelForm):
     class Meta:
         model = models.ItemQuestion
         fields = ['question', 'scale_labels', 'legend']
+        field_classes = {
+            'scale_labels': contrib_forms.ListField,
+        }
 
 
 def itemquestion_formset_factory(n_questions):
@@ -232,7 +235,7 @@ def itemquestion_formset_helper():
     return formset_helper
 
 
-class ItemFeedbackUploadForm(crispy_forms.CSVUploadForm):
+class ItemFeedbackUploadForm(contrib_forms.CSVUploadForm):
     file = forms.FileField(
         help_text='The CSV file must contain a column for the item number, condition, question, scale-values and '
                   'feedback. Valid column delimiters: colon, semicolon, comma, space, or tab.',
@@ -287,7 +290,7 @@ class ItemFeedbackUploadForm(crispy_forms.CSVUploadForm):
             assert row[cleaned_data['feedback_column'] - 1]
 
 
-class ItemListUploadForm(crispy_forms.CSVUploadForm):
+class ItemListUploadForm(contrib_forms.CSVUploadForm):
     file = forms.FileField(
         help_text='The CSV file must contain a column for the item list number, item number and condition.'
                   'Valid column delimiters: colon, semicolon, comma, space, or tab.',
@@ -345,7 +348,7 @@ class ItemListUploadForm(crispy_forms.CSVUploadForm):
             raise forms.ValidationError('Not all items used in lists.')
 
 
-class ItemFeedbackForm(crispy_forms.OptionalLabelMixin, forms.ModelForm):
+class ItemFeedbackForm(contrib_forms.OptionalLabelMixin, forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
