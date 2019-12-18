@@ -284,7 +284,7 @@ def demographics_formset_helper(submit_label='Continue'):
     return formset_helper
 
 
-class RatingBaseForm(crispy_forms.CrispyModelForm):
+class RatingForm(crispy_forms.CrispyModelForm):
     feedback = forms.CharField(
         max_length=5000,
         required=False,
@@ -295,80 +295,6 @@ class RatingBaseForm(crispy_forms.CrispyModelForm):
         required=False,
         widget=forms.HiddenInput(),
     )
-
-    def init_form(self, study, question):
-        if question.rating_comment == question.RATING_COMMENT_NONE:
-            self.fields['comment'].widget = forms.HiddenInput()
-        elif question.rating_comment == question.RATING_COMMENT_REQUIRED:
-            self.fields['comment'].label = study.comment_label
-            self.fields['comment'].required = True
-        else:
-            self.fields['comment'].label = '{} ({})'.format(study.comment_label, study.optional_label)
-
-    def handle_feedbacks(self, feedbacks_given, feedback=None):
-        if feedback:
-            feedbacks_given.append(feedback.pk)
-            self['feedback'].initial = feedback.feedback
-            self.fields['feedback'].widget = forms.Textarea()
-            self.fields['feedback'].widget.attrs['readonly'] = True
-        self['feedbacks_given'].initial = ','.join(str(f) for f in feedbacks_given)
-
-
-class RatingForm(RatingBaseForm):
-    optional_label_ignore_fields = ['comment', 'feedback']
-
-    @property
-    def submit_label(self):
-        return self.study.continue_label
-
-    class Meta:
-        model = models.Rating
-        fields = ['scale_value', 'comment', 'feedback', 'feedbacks_given']
-
-    @property
-    def custom_helper(self):
-        helper = FormHelper()
-        helper.add_layout(
-            Layout(
-                Field('scale_value', template='lrex_trial/ratings_scale_value_field.html'),
-                Field('comment'),
-                Field('feedback'),
-                Field('feedbacks_given'),
-            ),
-        )
-        return helper
-
-    def __init__(self, *args, **kwargs):
-        self.study = kwargs.pop('study')
-        question = kwargs.pop('question')
-        questionnaire_item = kwargs.pop('questionnaire_item')
-        item_question = kwargs.pop('item_question', None)
-        super().__init__(*args, **kwargs)
-        self.init_form(self.study, question)
-        self.fields['scale_value'].empty_label = None
-        self.fields['scale_value'].label = question.question
-        self.fields['scale_value'].help_text = question.legend
-        self.fields['scale_value'].queryset = study_models.ScaleValue.objects.filter(question=question)
-        self.fields['scale_value'].error_messages['required'] = self.study.answer_question_message
-        if item_question:
-            if item_question.question: self.fields['scale_value'].label = item_question.question
-            if item_question.legend: self.fields['scale_value'].help_text = item_question.legend
-            if item_question.scale_labels:
-                custom_choices = []
-                item_labels = item_question.scale_labels.split(',')
-                for (pk, _ ), custom_label in zip(self.fields['scale_value'].choices, item_labels):
-                    custom_choices.append((pk, custom_label))
-                self.fields['scale_value'].choices = custom_choices
-        if question.randomize_scale:
-            custom_choices = []
-            initial_choices = [(pk, label) for pk, label in self.fields['scale_value'].choices]
-            for scale_num in questionnaire_item.question_property(question.number).scale_order.split(','):
-                custom_choices.append(initial_choices[int(scale_num)])
-            self.fields['scale_value'].choices = custom_choices
-
-
-class RatingFormsetForm(RatingBaseForm):
-    optional_label_ignore_fields = ['comment', 'feedback']
 
     class Meta:
         model = models.Rating
@@ -383,11 +309,41 @@ class RatingFormsetForm(RatingBaseForm):
         self.fields['scale_value'].empty_label = None
         self.fields['scale_value'].required = False
 
+    def init_form(self, study, question, item_question=None):
+        if question.rating_comment == question.RATING_COMMENT_NONE:
+            self.fields['comment'].widget = forms.HiddenInput()
+        elif question.rating_comment == question.RATING_COMMENT_REQUIRED:
+            self.fields['comment'].label = study.comment_label
+            self.fields['comment'].required = True
+        else:
+            self.fields['comment'].label = '{} ({})'.format(study.comment_label, study.optional_label)
+        self.fields['question'].initial = question.number
+        scale_value = self.fields.get('scale_value')
+        scale_value.queryset = scale_value.queryset.filter(question=question)
+        scale_value.label = item_question.question if item_question else question.question
+        scale_value.help_text = item_question.legend if item_question and item_question.legend else question.legend
+        if item_question and item_question.scale_labels:
+            custom_choices = []
+            for (pk, _ ), custom_label in zip(scale_value.choices, split_list_string(item_question.scale_labels)):
+                custom_choices.append((pk, custom_label))
+            scale_value.choices = custom_choices
+        self.fields['feedback'].widget = forms.HiddenInput()
+        self.fields['feedbacks_given'].widget = forms.HiddenInput()
+
+    def handle_feedbacks(self, feedbacks_given, feedback=None):
+        if feedback:
+            feedbacks_given.append(feedback.pk)
+            self['feedback'].initial = feedback.feedback
+            self.fields['feedback'].widget = forms.Textarea()
+            self.fields['feedback'].widget.attrs['readonly'] = True
+        self['feedbacks_given'].initial = ','.join(str(f) for f in feedbacks_given)
+    optional_label_ignore_fields = ['comment', 'feedback']
+
 
 def ratingformset_factory(n_questions=1):
     return forms.modelformset_factory(
         models.Rating,
-        form=RatingFormsetForm,
+        form=RatingForm,
         min_num=n_questions,
         max_num=n_questions,
         extra=0,
@@ -396,37 +352,16 @@ def ratingformset_factory(n_questions=1):
 
 
 def ratingformset_init(ratingformset, study, item_questions, questionnaire_item):
-
-    def _get_item_question(num, item_questions):
-        for item_question in item_questions:
-            if item_question.number == num:
-                return item_question
-
-    def _get_reordered_questions_random(questions, question_order):
-        reordered_questions = []
-        for question_num in question_order.split(','):
-            reordered_questions.append(questions[int(question_num)])
-        return reordered_questions
-
     if study.pseudo_randomize_question_order:
-        ordered_questions = _get_reordered_questions_random(study.questions, questionnaire_item.question_order)
+        reordered_questions = []
+        for question_num in questionnaire_item.question_order.split(','):
+            reordered_questions.append(study.questions[int(question_num)])
+        ordered_questions = reordered_questions
     else:
         ordered_questions = study.questions
     for question, form in zip(ordered_questions, ratingformset):
-        item_question = _get_item_question(question.number, item_questions)
-        form.init_form(study, question)
-        form.fields['question'].initial = question.number
-        scale_value = form.fields.get('scale_value')
-        scale_value.queryset = scale_value.queryset.filter(question=question)
-        scale_value.label = item_question.question if item_question else question.question
-        scale_value.help_text = item_question.legend if item_question and item_question.legend else question.legend
-        if item_question and item_question.scale_labels:
-            custom_choices = []
-            for (pk, _ ), custom_label in zip(scale_value.choices, item_question.scale_labels.split(',')):
-                custom_choices.append((pk, custom_label))
-            scale_value.choices = custom_choices
-        form.fields['feedback'].widget = forms.HiddenInput()
-        form.fields['feedbacks_given'].widget = forms.HiddenInput()
+        item_question = item_questions.filter(number=question.number).first()
+        form.init_form(study, question, item_question)
 
 
 def ratingformset_handle_feedbacks(ratingformset, feedbacks):
