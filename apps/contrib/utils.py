@@ -9,3 +9,24 @@ def slugify_unique(value, model, self_id=None):
         unique_slug = '{}-{}'.format(slug, i)
         i += 1
     return unique_slug
+
+
+def split_list_string(value):
+    values = []
+    end = 0
+    while True:
+        end = value.find(',', end + 1)
+        if end > 0:
+            is_escaped = value[end - 1] == '\\' if end > 1 else False
+            if not is_escaped:
+                values.append(value[:end].replace('\\',''))
+                value = value[end + 1:]
+                end = 0
+        else:
+            values.append(value.strip().replace('\\',''))
+            break
+    return values
+
+
+def to_list_string(value_list):
+    return ','.join(value.replace(',', '\\,') for value in value_list)

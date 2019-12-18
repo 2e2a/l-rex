@@ -197,11 +197,12 @@ class ArchiveForm(contrib_forms.CrispyModelForm):
         return is_archived
 
 
-class QuestionForm(crispy_forms.CrispyModelForm):
-    scale_labels = forms.CharField(
+class QuestionForm(contrib_forms.CrispyModelForm):
+    scale_labels = contrib_forms.ListField(
         max_length=200,
         required=True,
-        help_text='Rating scale labels, separated by commas (e.g. "1,2,3,4,5")'
+        help_text='Rating scale labels, separated by commas (e.g. "1,2,3,4,5"). '
+                  'If a label contains a comma itself, escape it with "\\" (e.g. "A,B,Can\'t decide\\, I like both").'
     )
 
     class Meta:
@@ -213,12 +214,6 @@ class QuestionForm(crispy_forms.CrispyModelForm):
             'legend',
             'rating_comment',
         ]
-
-    def clean_scale_labels(self):
-        scale_labels = self.cleaned_data['scale_labels']
-        if scale_labels and len(scale_labels.split(','))<2:
-            raise forms.ValidationError('At least two scale values need to be defined')
-        return scale_labels
 
 
 def question_formset_factory(n_questions, extra=0):
@@ -232,7 +227,7 @@ def question_formset_factory(n_questions, extra=0):
 
 def initialize_with_questions(question_formset, questions):
     for question, form in zip(questions, question_formset):
-        form['scale_labels'].initial = ','.join([scale_value.label for scale_value in question.scalevalue_set.all()])
+        form['scale_labels'].initial = question.scale_labels
 
 
 def question_formset_disable_fields(question_formset, **kwargs):

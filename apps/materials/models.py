@@ -8,9 +8,8 @@ from django.urls import reverse
 from django.utils.functional import cached_property
 
 from apps.contrib import csv as contrib_csv
-from apps.contrib.utils import slugify_unique
+from apps.contrib.utils import slugify_unique, split_list_string
 from apps.item import models as item_models
-from apps.study import models as study_models
 from apps.trial import models as trial_models
 
 
@@ -147,14 +146,15 @@ class Materials(models.Model):
             else:
                 break
 
-        condition_count = len(conditions)
-        n_items= len(items)
-        if n_items % condition_count != 0:
-            msg = 'Number of stimuli is not a multiple of the number of conditions (stimuli: {}, conditions: {})'.format(
-                n_items,
-                ', '.join('"{}"'.format(condition) for condition in conditions)
-            )
-            raise AssertionError(msg)
+        if self.item_list_distribution == self.LIST_DISTRIBUTION_LATIN_SQUARE:
+            condition_count = len(conditions)
+            n_items = len(items)
+            if n_items % condition_count != 0:
+                msg = 'Number of stimuli is not a multiple of the number of conditions (stimuli: {}, conditions: {})'.format(
+                    n_items,
+                    ', '.join('"{}"'.format(condition) for condition in conditions)
+                )
+                raise AssertionError(msg)
 
         item_number = 0
         for i, item in enumerate(items):
@@ -179,7 +179,7 @@ class Materials(models.Model):
                 if item_question.number >= len(questions):
                     raise AssertionError('For item question validation the study question(s) must be defined first.')
                 if item_question.scale_labels and \
-                        len(item_question.scale_labels.split(',')) !=  \
+                        len(split_list_string(item_question.scale_labels)) !=  \
                         questions[item_question.number].scalevalue_set.count():
                     msg = 'Scale of the item question "{}" does not match the study question {} ' \
                           'scale.'.format(item, item_question.number + 1)

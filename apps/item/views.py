@@ -12,6 +12,7 @@ from django.views import generic
 
 from apps.contrib import views as contrib_views
 from apps.contrib import csv as contrib_csv
+from apps.contrib.utils import split_list_string
 from apps.materials import views as materials_views
 from apps.study import views as study_views
 
@@ -545,12 +546,13 @@ class ItemQuestionsUpdateView(
             scale_labels_valid = True
             for instance in instances:
                 question = next(question for question in self.study.questions if question.number == instance.number)
-                if instance.scale_labels \
-                        and len(instance.scale_labels.split(',')) != question.scalevalue_set.count():
-                    self.formset._errors[question.number]['scale_labels'] = \
-                        self.formset.error_class(ValidationError('Invalid scale labels').error_list)
-                    scale_labels_valid = False
-                    break
+                if instance.scale_labels:
+                    scale_labels = split_list_string(instance.scale_labels)
+                    if len(scale_labels) != question.scalevalue_set.count():
+                        self.formset._errors[question.number]['scale_labels'] = \
+                            self.formset.error_class(ValidationError('Invalid scale labels').error_list)
+                        scale_labels_valid = False
+                        break
                 instance.number = question.number
                 instance.item = self.item
 
@@ -609,7 +611,7 @@ class ItemFeedbackUpdateView(
             scale_values_valid = True
             n_instances = len(instances)
             for i, instance in enumerate(instances):
-                scale_values = instance.scale_values.split(',')
+                scale_values = split_list_string(instance.scale_values)
                 if not all(instance.question.is_valid_scale_value(scale_value) for scale_value in scale_values):
                     form_num = n_forms - n_instances
                     self.formset._errors[form_num]['scale_values'] = \

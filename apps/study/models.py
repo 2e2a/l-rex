@@ -18,6 +18,7 @@ from apps.contrib import csv as contrib_csv
 from apps.contrib import math
 from apps.contrib.utils import slugify_unique
 from apps.contrib.datefield import DateField
+from apps.contrib.utils import to_list_string
 
 
 class StudyStatus(Enum):
@@ -957,14 +958,14 @@ class Question(models.Model):
 
     @cached_property
     def scale_labels(self):
-        return ','.join([scale_value.label for scale_value in self.scalevalue_set.all()])
+        return to_list_string(scale_value.label for scale_value in self.scalevalue_set.all())
 
     @cached_property
     def has_rating_comment(self):
         return self.rating_comment != self.RATING_COMMENT_NONE
 
     def is_valid_scale_value(self, scale_value_label):
-        return any(scale_value.label == scale_value_label for scale_value in self.scalevalue_set.all())
+        return self.scalevalue_set.filter(label=scale_value_label).exists()
 
     def get_absolute_url(self):
         return reverse('study-question', args=[self.study.slug, self.pk])

@@ -3,7 +3,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils.functional import cached_property
 
-from apps.contrib.utils import slugify_unique
+from apps.contrib.utils import slugify_unique, split_list_string
 
 
 class Item(models.Model):
@@ -145,9 +145,10 @@ class ItemQuestion(models.Model):
     )
     scale_labels = models.CharField(
         max_length=500,
-        help_text='Individual rating scale labels for this item, separated by commas (e.g. "1,2,3,4,5"). Note that '
-                  'this will only overwrite the displayed labels, but the responses will be saved according to the '
-                  'general scale specified in the study settings.',
+        help_text='Individual rating scale labels for this item, separated by commas (e.g. "1,2,3,4,5"). '
+                  'If a label contains a comma itself, escape it with "\\" (e.g. "A,B,Can\'t decide\\, I like both").'
+                  'Note that this will only overwrite the displayed labels, but the responses will be saved according '
+                  'to the general scale specified in the study settings.',
         blank=True,
         null=True,
     )
@@ -178,8 +179,9 @@ class ItemFeedback(models.Model):
     )
     scale_values = models.CharField(
         max_length=500,
-        help_text='Scale values, separated by commas (e.g. "1,3"). The feedback will be shown to the '
-                  'participant if one of these ratings is selected.'
+        help_text='Scale values, separated by commas (e.g. "1,3"). '
+                  'If a label contains a comma itself, escape it with "\\" (e.g. "A,B,Can\'t decide\\, I like both").'
+                  'The feedback will be shown to the participant if one of these ratings is selected.'
     )
     feedback = models.TextField(
         max_length=5000,
@@ -190,4 +192,4 @@ class ItemFeedback(models.Model):
         ordering = ['item', 'question', 'pk']
 
     def show_feedback(self, scale_value):
-        return scale_value.label in self.scale_values.split(',')
+        return scale_value.label in split_list_string(self.scale_values)

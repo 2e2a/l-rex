@@ -14,6 +14,7 @@ from django.utils.timezone import now
 from django.views import generic
 
 from apps.contrib import views as contib_views
+from apps.contrib.utils import split_list_string
 
 from . import models
 from . import forms
@@ -688,7 +689,8 @@ class QuestionUpdateView(
                 instance.save()
                 scale_values_new = []
                 scale_values_old = list(instance.scalevalue_set.all())
-                for j, scale_label in enumerate(form.cleaned_data['scale_labels'].split(',')):
+                scale_labels = split_list_string(form.cleaned_data['scale_labels'])
+                for j, scale_label in enumerate(scale_labels):
                     if scale_label:
                         scale_value, created = models.ScaleValue.objects.get_or_create(
                             number=j,
