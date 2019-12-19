@@ -465,6 +465,9 @@ class StudySettingsView(
     success_message = 'Study settings updated.'
 
     def get(self, request, *args, **kwargs):
+        if self.study.has_items:
+            msg = 'Note: To change the "item type" setting you would need to remove items first.'
+            messages.info(request, msg)
         if self.study.has_questionnaires:
             msg = 'Note: To change the "Use blocks" and "Randomize question order" settings you would need to ' \
                   '<a href="{}">remove questionnaires </a> first.'.format(
@@ -476,6 +479,7 @@ class StudySettingsView(
         kwargs = super().get_form_kwargs()
         kwargs.update({
             'add_save': True,
+            'disable_itemtype': self.study.has_items,
             'disable_randomize_question_order': self.study.has_questionnaires,
             'disable_use_blocks': self.study.has_questionnaires,
             'disable_feedback': self.study.is_active,
