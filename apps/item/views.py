@@ -171,8 +171,11 @@ class ItemListView(
 
 
 class ItemCreateMixin(contrib_views.PaginationHelperMixin, materials_views.MaterialsNavMixin):
-    title = 'Add item'
     template_name = 'lrex_contrib/crispy_form.html'
+
+    @property
+    def title(self):
+        return '{}: add items'.format(self.materials.title)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -216,9 +219,12 @@ class ItemUpdateMixin(
     contrib_views.PaginationHelperMixin,
     materials_views.MaterialsNavMixin,
 ):
-    title = 'Edit item'
     template_name = 'lrex_contrib/crispy_form.html'
     success_message = 'Item successfully updated.'
+
+    @property
+    def title(self):
+        return '{}: edit items'.format(self.materials.title)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -358,10 +364,13 @@ class ItemPregenerateView(
     materials_views.MaterialsNavMixin,
     generic.FormView
 ):
-    title = 'Pregenerate items'
     form_class = forms.PregenerateItemsForm
     template_name = 'lrex_contrib/crispy_form.html'
     success_message = 'Items successfully generated.'
+
+    @property
+    def title(self):
+        return '{}: pregenerate items'.format(self.materials.title)
 
     def _pregenerate_items(self, n_items, n_conditions):
         for n_item in range(1, n_items + 1):
@@ -414,11 +423,16 @@ class ItemUploadView(
     study_views.CheckStudyCreatorMixin,
     ItemsValidateMixin,
     study_views.DisableFormIfStudyActiveMixin,
+    materials_views.MaterialsNavMixin,
     generic.FormView
 ):
-    title = 'Items'
     form_class = forms.ItemUploadForm
     template_name = 'lrex_contrib/crispy_form.html'
+
+
+    @property
+    def title(self):
+        return '{}: upload items'.format(self.materials.title)
 
     def dispatch(self, request, *args, **kwargs):
         if not self.study.questions:
@@ -479,11 +493,12 @@ class ItemDeleteAllView(
     materials_views.MaterialsMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
+    materials_views.MaterialsNavMixin,
     generic.TemplateView
 ):
     title = 'Confirm Delete'
     template_name = 'lrex_contrib/confirm_delete.html'
-    message =  'Delete all items?'
+    message = 'Delete all items?'
 
     def post(self, request, *args, **kwargs):
         models.Item.objects.filter(materials=self.materials).delete()
@@ -512,12 +527,16 @@ class ItemQuestionsUpdateView(
     contrib_views.LeaveWarningMixin,
     study_views.DisableFormIfStudyActiveMixin,
     contrib_views.PaginationHelperMixin,
+    materials_views.MaterialsNavMixin,
     generic.TemplateView
 ):
-    title = 'Customize item questions'
     template_name = 'lrex_contrib/crispy_formset_form.html'
     formset = None
     helper = None
+
+    @property
+    def title(self):
+        return '{}: customize item {} questions'.format(self.materials.title, self.item)
 
     def dispatch(self, request, *args, **kwargs):
         self.n_questions = len(self.study.questions)
@@ -583,12 +602,16 @@ class ItemFeedbackUpdateView(
     contrib_views.LeaveWarningMixin,
     study_views.DisableFormIfStudyActiveMixin,
     contrib_views.PaginationHelperMixin,
+    materials_views.MaterialsNavMixin,
     generic.TemplateView
 ):
-    title = 'Customize item feedback'
     template_name = 'lrex_contrib/crispy_formset_form.html'
     formset = None
     helper = None
+
+    @property
+    def title(self):
+        return '{}: define item {} feedback'.format(self.materials.title, self.item)
 
     def dispatch(self, request, *args, **kwargs):
         self.helper = forms.itemfeedback_formset_helper()
@@ -666,9 +689,12 @@ class ItemFeedbackUploadView(
     contrib_views.PaginationHelperMixin,
     generic.FormView
 ):
-    title = 'Upload item feedback'
     form_class = forms.ItemFeedbackUploadForm
     template_name = 'lrex_contrib/crispy_form.html'
+
+    @property
+    def title(self):
+        return '{}: upload item feedback'.format(self.materials.title)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -778,9 +804,12 @@ class ItemListUploadView(
     study_views.DisableFormIfStudyActiveMixin,
     generic.FormView
 ):
-    title = 'Upload custom item lists'
     form_class = forms.ItemListUploadForm
     template_name = 'lrex_contrib/crispy_form.html'
+
+    @property
+    def title(self):
+        return '{}: upload item lists'.format(self.materials.title)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()

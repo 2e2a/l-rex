@@ -155,6 +155,7 @@ class MaterialsDeleteView(
     MaterialsObjectMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
+    MaterialsNavMixin,
     contrib_views.DefaultDeleteView
 ):
     model = models.Materials
