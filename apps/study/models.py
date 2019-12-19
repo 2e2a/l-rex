@@ -908,7 +908,7 @@ class Study(models.Model):
             'Settings':
                 [
                     ('customize study settings', reverse('study-settings', args=[self.slug])),
-                    ('translate build-in texts', reverse('study-translate', args=[self.slug])),
+                    ('translate built-in texts', reverse('study-translate', args=[self.slug])),
                 ]
         }
 
