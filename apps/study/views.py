@@ -658,16 +658,27 @@ class QuestionUpdateView(
     formset = None
     helper = None
 
+    @property
+    def is_disabled(self):
+        if self.study.is_active:
+            return True
+        if self.study.has_item_questions:
+            return True
+        return False
+
     def dispatch(self, *args, **kwargs):
         self.helper = forms.question_formset_helper()
         self.n_questions = self.study.question_set.count()
         return super().dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
+        if self.study.has_item_questions:
+            msg = 'Note: To change questions you need to remove items with custom questions first.'
+            messages.info(request, mark_safe(msg))
         if self.study.has_questionnaires:
             msg = 'Note: To change the "randomize scale" settings you need to ' \
-                  '<a href="{}">remove questionnaires</a> first.'.format(reverse('questionnaires', args=[self.study.slug])
-            )
+                  '<a href="{}">remove questionnaires</a> first.'.format(
+                    reverse('questionnaires', args=[self.study.slug]))
             messages.info(request, mark_safe(msg))
         self.formset = forms.question_formset_factory(self.n_questions, 0 if self.n_questions > 0 else 1)(
             queryset=self.study.question_set.all()
