@@ -18,7 +18,7 @@
             {% endif %}
             <div class="small mt-1">
                 <span class="pr-2">created: <strong>{{ study.created_date|date:"SHORT_DATE_FORMAT" }}</strong></span>
-                <span class="pr-2">completed trials: <strong>{{ study.trial_count }}</strong></span>
+                <span class="pr-2">completed trials: <strong>{{ study.trial_count_finished }}</strong></span>
                 {% if study.creator != view.request.user %}
                 <span class="pr-2">shared by: <strong>{{ study.creator.username }}</strong></span>
                 {% endif %}
