@@ -596,4 +596,4 @@ class Materials(models.Model):
             self._append_step_info(next_steps, MaterialsSteps.STEP_EXP_ITEMS_VALIDATE)
         if self.items_validated and not self.itemlist_set.exists():
             self._append_step_info(next_steps, MaterialsSteps.STEP_EXP_LISTS_GENERATE)
-        return {'{} materials'.format(self.title): next_steps}
+        return {'Materials: {}'.format(self.title): next_steps}
