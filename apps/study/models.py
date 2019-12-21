@@ -808,18 +808,18 @@ class Study(models.Model):
         return study
 
     STEP_DESCRIPTION = {
-        StudySteps.STEP_STD_QUESTION_CREATE: 'create a question',
-        StudySteps.STEP_STD_INSTRUCTIONS_EDIT: 'create instructions',
+        StudySteps.STEP_STD_QUESTION_CREATE: 'define a question',
+        StudySteps.STEP_STD_INSTRUCTIONS_EDIT: 'write instructions',
         StudySteps.STEP_STD_INTRO_EDIT: 'create intro/outro',
         StudySteps.STEP_STD_EXP_CREATE: 'create materials',
         StudySteps.STEP_STD_QUESTIONNAIRES_GENERATE: 'generate questionnaires',
-        StudySteps.STEP_STD_BLOCK_INSTRUCTIONS_CREATE: 'define instructions for questionnaire blocks',
+        StudySteps.STEP_STD_BLOCK_INSTRUCTIONS_CREATE: 'write instructions for questionnaire blocks',
         StudySteps.STEP_STD_CONTACT_ADD: 'add contact information',
         StudySteps.STEP_STD_PRIVACY_ADD: 'add a privacy statement',
         StudySteps.STEP_STD_PUBLISH: 'publish the study',
         StudySteps.STEP_STD_UNPUBLISH: 'unpublish the study when finished',
         StudySteps.STEP_STD_RESULTS: 'download results',
-        StudySteps.STEP_STD_ANONYMIZE: 'remove subject mapping',
+        StudySteps.STEP_STD_ANONYMIZE: 'remove subject-ID mapping when not needed anymore',
         StudySteps.STEP_STD_ARCHIVE: 'archive the study',
     }
 
@@ -887,12 +887,14 @@ class Study(models.Model):
         if not self.privacy_statement:
             self._append_step_info(next_steps, StudySteps.STEP_STD_PRIVACY_ADD, group)
 
-        group = 'Study'
+        group = 'Dashboard'
         if self.is_published:
             self._append_step_info(next_steps, StudySteps.STEP_STD_UNPUBLISH, group)
         else:
             if self.is_allowed_publish:
                 self._append_step_info(next_steps, StudySteps.STEP_STD_PUBLISH, group)
+
+        group = 'Results'
         if self.trial_count_finished > 0:
             self._append_step_info(next_steps, StudySteps.STEP_STD_RESULTS, group)
         if self.has_subject_mapping:
