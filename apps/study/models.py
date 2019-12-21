@@ -911,6 +911,7 @@ class Study(models.Model):
                 [
                     ('customize study settings', reverse('study-settings', args=[self.slug])),
                     ('translate built-in texts', reverse('study-translate', args=[self.slug])),
+                    ('share study with other users', reverse('study-share', args=[self.slug])),
                 ]
         }
 

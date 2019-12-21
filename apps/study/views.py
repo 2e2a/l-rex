@@ -214,7 +214,7 @@ class StudyCreateView(LoginRequiredMixin, generic.CreateView):
     def form_valid(self, form):
         form.instance.creator = self.request.user
         response = super().form_valid(form)
-        message = 'Study successfully created. Below, on the dashboard you will see suggestions what to do next. ' \
+        message = 'Study successfully created. Below on the dashboard, you will see suggestions what to do next. ' \
                   'They will point you to steps that need to be completed while setting up your study. ' \
                   'For more detailed help, consult the <a href="https://github.com/2e2a/l-rex/wiki">Wiki</a>.'
         messages.info(self.request, mark_safe(message))
@@ -298,19 +298,6 @@ class StudyDetailView(
         for materials in self.study.materials_list:
             data['materials_ready' if materials.is_complete else 'materials_draft'].append(materials)
         return data
-
-    @property
-    def secondary_actions(self):
-        return [
-            ('link', 'Share', reverse('study-share', args=[self.study.slug])),
-            ('link', 'Archive', reverse('study-archive', args=[self.study.slug])),
-            ('link', 'Delete', reverse('study-delete', args=[self.study.slug])),
-        ]
-
-    @property
-    def disable_actions(self):
-        if not self.study.is_published and not self.study.is_allowed_publish:
-            return [0], []
 
     @property
     def breadcrumbs(self):
@@ -434,6 +421,7 @@ class StudySettingsNavMixin(StudyNavMixin):
         return [
             ('link', ('Settings', reverse('study-settings', args=[self.study.slug]))),
             ('link', ('Translations', reverse('study-translate', args=[self.study.slug]))),
+            ('link', ('Share', reverse('study-share', args=[self.study.slug]))),
         ]
 
 
@@ -752,12 +740,14 @@ class SharedWithView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
     contib_views.LeaveWarningMixin,
+    StudySettingsNavMixin,
     generic.UpdateView
 ):
     model = models.Study
     title = 'Share study'
     form_class = forms.SharedWithForm
     template_name = 'lrex_contrib/crispy_form.html'
+    secondary_nav_active = 2
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
