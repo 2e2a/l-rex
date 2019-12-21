@@ -53,7 +53,7 @@ class NextStepsMixin:
                 continue
             steps = []
             for description, url in group_steps:
-                steps.append((url, description, url == study_url))
+                steps.append((url, description))
             group_steps_context = {
                 'group': group,
                 'group_steps': steps,

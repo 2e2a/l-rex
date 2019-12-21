@@ -1,7 +1,7 @@
 <div class="d-flex justify-content-between flex-wrap">
     <div>
-        {% for url, description, disabled in group_steps %}
-        <a {% if not disabled %}href="{{ url }}"{% endif %} class="{% if disabled %}text-muted{% endif %}">
+        {% for url, description in group_steps %}
+        <a href="{{ url }}">
             {{ description }}
         </a>
         {% if not forloop.last %}<br/>{% endif %}
