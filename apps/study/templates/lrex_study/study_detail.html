@@ -79,21 +79,43 @@
         <div class="card flex-fill">
             <div class="card-body">
                 <h2 class="card-title">Overview</h2>
-                <div class="row">
-                    {% if study.creator == request.user %}
-                    <div class="col-sm-6 text-secondary">
-                        Study shared with:
-                    </div>
-                    <div class="col-sm-6 col-md-6">
-                        {{ study.shared_with|default_if_none:"--" }}
-                    </div>
+                {% if study.creator != request.user %}
+                <div>
+                    Study created by:
+                    {{ study.creator }}
+                </div>
+                {% endif %}
+                <div>
+                    {% if not study.question_set.exists %}
+                    No questions created yet.
                     {% else %}
-                    <div class="col-sm-6 text-secondary">
-                        Study shared by:
-                    </div>
-                    <div class="col-sm-6">
-                        {{ study.creator }}
-                    </div>
+                    {{ study.question_set.count }} question{% if study.question_set.count > 1 %}s{% endif %} created.
+                    {% endif %}
+                </div>
+                <div>
+                    {% if study.materials_list|length == 0 %}
+                    No materials created yet.
+                    {% else %}
+                    {{ study.materials_list|length }} set{% if study.materials_list|length > 1 %}s{% endif %} of materials created:
+                    <ul class="mb-0">
+                        {% for materials in study.materials_list %}
+                        <li>{{ materials }}
+                            {% if materials.items_validated %}
+                            (items: {{ materials.item_count }},
+                            conditions: {{ materials.conditions|length }},
+                            lists: {{ materials.itemlist_set.count }})
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+                <div>
+                    {% if not study.has_questionnaires %}
+                    No questionnaires generated yet.
+                    {% else %}
+                    Each questionnaire contains {{ study.questionnaire_length }}
+                    {% if study.questionnaire_length > 1 %}stimuli{% else %}stimulus{% endif %}.
                     {% endif %}
                 </div>
             </div>
@@ -103,7 +125,8 @@
 <div class="card">
     <div class="card-body">
         <h2 class="card-title">To do</h2>
-        <p class="card-text text-muted">The suggestions below point to required/optional steps while setting up your study.</p>
+        <p class="card-text text-muted">The suggestions below point to required/optional steps while setting up your
+            study.</p>
         <div class="row">
             <div class="col-md-6 ">
                 Required:

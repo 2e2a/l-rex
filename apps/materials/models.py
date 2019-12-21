@@ -80,6 +80,12 @@ class Materials(models.Model):
         items = sorted(items, key=lambda x:x.materials_block)
         return items
 
+    @cached_property
+    def item_count(self):
+        if self.items_validated:
+            return int(self.item_set.count() / len(self.conditions))
+        return 0
+
     def item_pos(self, item):
         return self.item_set.filter(number__lt=item.number).count() \
                + self.item_set.filter(number=item.number, condition__lte=item.condition).count()
@@ -96,8 +102,8 @@ class Materials(models.Model):
             return [0]
         if self.block > 0:
             return [self.block]
-        item_bocks = set([item.block for item in self.items])
-        return sorted(item_bocks)
+        item_blocks = set([item.block for item in self.items])
+        return sorted(item_blocks)
 
     @cached_property
     def has_lists(self):
@@ -239,7 +245,6 @@ class Materials(models.Model):
         elif self.item_list_distribution == self.LIST_DISTRIBUTION_ALL_TO_ALL:
             item_list = item_models.ItemList.objects.create(materials=self)
             item_list.items.add(*list(self.items))
-
 
     def results(self):
         ratings = trial_models.Rating.objects.filter(

@@ -435,6 +435,13 @@ class Study(models.Model):
     def has_questionnaires(self):
         return self.questionnaire_set.exists()
 
+    @cached_property
+    def questionnaire_length(self):
+        first_questionnaire = self.questionnaire_set.first()
+        if first_questionnaire:
+            return first_questionnaire.questionnaireitem_set.count()
+        return 0
+
     def _questionnaire_trial_count(self, is_test=False):
         from apps.trial.models import Trial
         questionnaires = self.questionnaire_set.all()
