@@ -4,33 +4,29 @@
 
 {% block content %}
 {% if not study.is_archived %}
-<div class="card">
-    <div class="card-body">
-        <h2 class="card-title">Status</h2>
-        <div class="row">
-            <div class="col-md-6 ">
+<div class="row">
+    <div class="col-lg-6 mb-4 d-flex flex-column">
+        <div class="card flex-fill">
+            <div class="card-body">
                 <div class="row">
-                    <div class="col-sm-6 text-secondary">
-                        Status:
+                    <div class="col-sm-6">
+                        <h2 class="card-title">Status</h2>
                     </div>
                     <div class="col-sm-6">
-                        <span class="badge badge-secondary">
-                        {% if study.is_published %}
-                            published
-                        {% elif study.is_allowed_publish %}
-                            unpublished
-                        {% else %}
-                            draft
-                        {% endif %}
-                        </span>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-6 text-secondary">
-                        Created:
-                    </div>
-                    <div class="col-sm-6">
-                        {{ study.created_date|date:"SHORT_DATE_FORMAT" }}
+                        <form class="form-inline" method="post">
+                            {% csrf_token %}
+                            <div class="btn-group" role="group" aria-label="publish">
+                                <button type="submit" name="action" value="unpublish" class="btn btn-sm
+                                        {% if not study.is_published %}btn-secondary active {% else %}btn-light{% endif %}">
+                                    unpublished
+                                </button>
+                                <button type="submit" name="action" value="publish" class="btn btn-sm
+                                        {% if study.is_published %}btn-secondary active {% else %}btn-light{% endif %}"
+                                        {% if not study.is_allowed_publish %}disabled{% endif %}>
+                                    published
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
                 <div class="row">
@@ -39,12 +35,50 @@
                     </div>
                     <div class="col-sm-6">
                         {% if allow_publish %}
-                        <a href="{% url 'trial-intro' study.slug %}?test=True" target="_blank">Link for testing&nearr;</a>
+                        <a href="{% url 'trial-intro' study.slug %}?test=True" target="_blank">Link for
+                            testing&nearr;</a>
                         {% else %}
-                        <a class="card-link text-muted">Link for testing</a>
+                        <a class="card-link text-muted">Link for testing&nearr;</a>
                         {% endif %}
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-sm-6 text-secondary">
+                        Make your study available:
+                    </div>
+                    <div class="col-sm-6">
+                        {% if study.is_published %}
+                        <a href="{% url 'trial-intro' study.slug %}" target="_blank">Link for participants&nearr;</a>
+                        {% else %}
+                        <a class="card-link text-muted">Link for participants&nearr;</a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if study.password %}
+                <div class="row">
+                    <div class="col-sm-6 text-secondary">
+                        Password:
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                        {{ study.password }}
+                    </div>
+                </div>
+                {% endif %}
+                <div class="row">
+                    <div class="col-sm-6 text-secondary">
+                        Trials completed:
+                    </div>
+                    <div class="col-sm-6">
+                        {{ trial_count_finished }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6 mb-4 d-flex flex-column">
+        <div class="card flex-fill">
+            <div class="card-body">
+                <h2 class="card-title">Overview</h2>
                 <div class="row">
                     {% if study.creator == request.user %}
                     <div class="col-sm-6 text-secondary">
@@ -63,58 +97,28 @@
                     {% endif %}
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="row">
-                    <div class="col-sm-6 text-secondary">
-                        Make your study available:
-                    </div>
-                    <div class="col-sm-6">
-                        {% if study.is_published %}
-                        <a href="{% url 'trial-intro' study.slug %}" target="_blank">Link for participants&nearr;</a>
-                        {% else %}
-                        <a class="card-link text-muted">Link for participants</a>
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-6 text-secondary">
-                        Password:
-                    </div>
-                    <div class="col-sm-6 col-md-6">
-                        {{ study.password|default_if_none:"--" }}
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-6 text-secondary">
-                        Trials completed:
-                    </div>
-                    <div class="col-sm-6">
-                        {{ trial_count_finished }}
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
-<div class="card mt-4">
+<div class="card">
     <div class="card-body">
         <h2 class="card-title">To do</h2>
         <div class="row">
             <div class="col-md-6 ">
                 <em>Required:</em>
-                <ul class="list-group">
+                <ul class="list-group list-group-flush mt-2">
                     {% for next_step_html in next_steps_html %}
-                    <li class="list-group-item border-0" >{{ next_step_html }}</li>
+                    <li class="list-group-item">{{ next_step_html }}</li>
                     {% empty %}
-                    <li class="list-group-item border-0" >Nothing to do</li>
+                    <li class="list-group-item">Nothing to do</li>
                     {% endfor %}
                 </ul>
             </div>
             <div class="col-md-6">
                 <em>Optional:</em>
-                <ul class="list-group">
+                <ul class="list-group list-group-flush mt-2">
                     {% for optional_step_html in optional_steps_html %}
-                    <li class="list-group-item border-0" >{{ optional_step_html }}</li>
+                    <li class="list-group-item">{{ optional_step_html }}</li>
                     {% endfor %}
                 </ul>
             </div>

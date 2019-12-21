@@ -404,7 +404,7 @@ class Study(models.Model):
 
     @cached_property
     def is_allowed_publish(self):
-        return self.questions and self.instructions \
+        return self.questions and self.instructions and self.intro and self.privacy_statement \
                and self.items_validated and self.questionnaire_set.exists() \
                and (not self.use_blocks or self.has_block_instructions)
 

@@ -300,19 +300,8 @@ class StudyDetailView(
         return data
 
     @property
-    def actions(self):
-        actions = []
-        if not self.study.is_published:
-            actions.append(('button', 'Publish', 'publish', self.ACTION_CSS_BUTTON_PRIMARY))
-        else:
-            actions.append(('button', 'Unpublish', 'unpublish', self.ACTION_CSS_BUTTON_WARNING))
-        return actions
-
-    @property
     def secondary_actions(self):
         return [
-            ('link', 'Settings', reverse('study-settings', args=[self.study.slug])),
-            ('link', 'Translations', reverse('study-translate', args=[self.study.slug])),
             ('link', 'Share', reverse('study-share', args=[self.study.slug])),
             ('link', 'Archive', reverse('study-archive', args=[self.study.slug])),
             ('link', 'Delete', reverse('study-delete', args=[self.study.slug])),
