@@ -17,45 +17,48 @@
 </head>
 <body class="bg-light">
 <nav class="navbar navbar-expand-md navbar-light bg-white static-top pb-1">
-    <a class="navbar-brand" href="/">
-        <img src="{% static 'img/logo.svg' %}" width="30" height="30" alt="Logo">
-        L-Rex
-    </a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
-            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ml-auto">
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'studies' %}">My studies</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" target="_blank"
-                   href="https://github.com/2e2a/l-rex/wiki">Help&nearr;</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'imprint' %}">Contact and privacy</a>
-            </li>
-            {% if user.is_authenticated %}
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                   data-toggle="dropdown"
-                   aria-haspopup="true" aria-expanded="false">
-                    {{ user.username }}
-                </a>
-                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                    <a class="dropdown-item" href="{% url 'account_change_password' %}">Change password</a>
-                    <a class="dropdown-item" href="{% url 'user-profile-update' %}">User settings</a>
-                    <a class="dropdown-item" href="{% url 'account_logout' %}">Log out</a>
-                </div>
-            </li>
-            {% else %}
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'account_login' %}">Log in</a>
-            </li>
-            {% endif %}
-        </ul>
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <img src="{% static 'img/logo.svg' %}" width="30" height="30" alt="Logo">
+            L-Rex
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'studies' %}">My studies</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" target="_blank"
+                       href="https://github.com/2e2a/l-rex/wiki">Help&nearr;</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'imprint' %}">Contact and privacy</a>
+                </li>
+                {% if user.is_authenticated %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                       data-toggle="dropdown"
+                       aria-haspopup="true" aria-expanded="false">
+                        {{ user.username }}
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="{% url 'account_change_password' %}">Change password</a>
+                        <a class="dropdown-item" href="{% url 'user-profile-update' %}">User settings</a>
+                        <a class="dropdown-item" href="{% url 'account_logout' %}">Log out</a>
+                    </div>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'account_login' %}">Log in</a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+
     </div>
 </nav>
 <div class="bg-white grey-shadow">
