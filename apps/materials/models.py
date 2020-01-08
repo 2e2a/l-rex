@@ -561,7 +561,7 @@ class Materials(models.Model):
         writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
         results = self.results()
         for result in results:
-            csv_row = [self.title, 'subject', result['item'], result['condition'], result['position']]
+            csv_row = [self.title, result['subject'], result['item'], result['condition'], result['position']]
             if self.study.pseudo_randomize_question_order:
                 csv_row.append(result['question_order'])
             if self.study.has_question_with_random_scale:
