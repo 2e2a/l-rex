@@ -115,11 +115,12 @@ class MaterialsUpdateView(
         return '{}: Settings'.format(self.materials.title)
 
     def get(self, request, *args, **kwargs):
-        if self.study.has_questionnaires:
-            msg = 'Note: To change the block related settings you would need ' \
-                  '<a href="{}">to remove questionnaires first</a>.'.format(
-                    reverse('questionnaires', args=[self.study.slug]))
-            messages.info(request, mark_safe(msg))
+        if not self.is_disabled:
+            if self.study.has_questionnaires:
+                msg = 'Note: To change the block related settings you would need ' \
+                      '<a href="{}">to remove questionnaires first</a>.'.format(
+                        reverse('questionnaires', args=[self.study.slug]))
+                messages.info(request, mark_safe(msg))
         return super().get(request, *args, **kwargs)
 
     def get_form_kwargs(self):

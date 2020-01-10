@@ -453,14 +453,15 @@ class StudySettingsView(
     success_message = 'Study settings updated.'
 
     def get(self, request, *args, **kwargs):
-        if self.study.has_items:
-            msg = 'Note: To change the "item type" setting you would need to remove items first.'
-            messages.info(request, msg)
-        if self.study.has_questionnaires:
-            msg = 'Note: To change the "Use blocks" and "Randomize question order" settings you would need to ' \
-                  '<a href="{}">remove questionnaires </a> first.'.format(
-                    reverse('questionnaires', args=[self.study.slug]))
-            messages.info(request, mark_safe(msg))
+        if not self.is_disabled:
+            if self.study.has_items:
+                msg = 'Note: To change the "item type" setting you would need to remove items first.'
+                messages.info(request, msg)
+            if self.study.has_questionnaires:
+                msg = 'Note: To change the "Use blocks" and "Randomize question order" settings you would need to ' \
+                      '<a href="{}">remove questionnaires </a> first.'.format(
+                        reverse('questionnaires', args=[self.study.slug]))
+                messages.info(request, mark_safe(msg))
         return super().get(request, *args, **kwargs)
 
     def get_form_kwargs(self):
@@ -660,14 +661,15 @@ class QuestionUpdateView(
         return super().dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
-        if self.study.has_item_questions:
-            msg = 'Note: To change questions you need to remove items with custom questions first.'
-            messages.info(request, mark_safe(msg))
-        if self.study.has_questionnaires:
-            msg = 'Note: To change the "randomize scale" settings you need to ' \
-                  '<a href="{}">remove questionnaires</a> first.'.format(
-                    reverse('questionnaires', args=[self.study.slug]))
-            messages.info(request, mark_safe(msg))
+        if not self.is_disabled:
+            if self.study.has_item_questions:
+                msg = 'Note: To change questions you need to remove items with custom questions first.'
+                messages.info(request, mark_safe(msg))
+            if self.study.has_questionnaires:
+                msg = 'Note: To change the "randomize scale" settings you need to ' \
+                      '<a href="{}">remove questionnaires</a> first.'.format(
+                        reverse('questionnaires', args=[self.study.slug]))
+                messages.info(request, mark_safe(msg))
         self.formset = forms.question_formset_factory(self.n_questions, 0 if self.n_questions > 0 else 1)(
             queryset=self.study.question_set.all()
         )
