@@ -146,7 +146,7 @@ class ItemQuestion(models.Model):
     scale_labels = models.CharField(
         max_length=500,
         help_text='Individual rating scale labels for this item, separated by commas (e.g. "1,2,3,4,5"). '
-                  'If a label contains a comma itself, escape it with "\\" (e.g. "A,B,Can\'t decide\\, I like both").'
+                  'If a label contains a comma itself, escape it with "\\" (e.g. "A,B,Can\'t decide\\, I like both"). '
                   'Note that this will only overwrite the displayed labels, but the responses will be saved according '
                   'to the general scale specified in the study settings.',
         blank=True,
@@ -180,7 +180,7 @@ class ItemFeedback(models.Model):
     scale_values = models.CharField(
         max_length=500,
         help_text='Scale values, separated by commas (e.g. "1,3"). '
-                  'If a label contains a comma itself, escape it with "\\" (e.g. "A,B,Can\'t decide\\, I like both").'
+                  'If a label contains a comma itself, escape it with "\\" (e.g. "A,B,Can\'t decide\\, I like both"). '
                   'The feedback will be shown to the participant if one of these ratings is selected.'
     )
     feedback = models.TextField(

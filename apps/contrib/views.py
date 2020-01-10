@@ -108,7 +108,6 @@ class PaginationHelperMixin:
 
 
 class ActionsMixin:
-    # TODO: Show form actions here?
     actions = None
     secondary_actions = None
     disable_actions = ([], [])
