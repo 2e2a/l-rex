@@ -237,7 +237,7 @@ class Study(models.Model):
     )
 
     class Meta:
-        ordering = ['-created_date']
+        ordering = ['-created_date', 'title']
 
     def save(self, *args, **kwargs):
         new_slug = slugify_unique(self.title, Study, self.id)
