@@ -39,7 +39,7 @@ class StudySteps(Enum):
     STEP_STD_CONTACT_ADD = 7
     STEP_STD_PRIVACY_ADD = 8
     STEP_STD_PUBLISH = 9
-    STEP_STD_UNPUBLISH = 10
+    STEP_STD_FINISH = 10
     STEP_STD_RESULTS = 11
     STEP_STD_ANONYMIZE = 12
     STEP_STD_ARCHIVE = 13
@@ -217,6 +217,10 @@ class Study(models.Model):
     is_published = models.BooleanField(
         default=False,
         help_text='Enable to publish your study. It will then be available for participation.',
+    )
+    is_finished = models.BooleanField(
+        default=False,
+        help_text='Enable to finish study participation.',
     )
     shared_with = models.CharField(
         null=True,
@@ -823,8 +827,8 @@ class Study(models.Model):
         StudySteps.STEP_STD_BLOCK_INSTRUCTIONS_CREATE: 'write instructions for questionnaire blocks',
         StudySteps.STEP_STD_CONTACT_ADD: 'add contact information',
         StudySteps.STEP_STD_PRIVACY_ADD: 'add a privacy statement',
-        StudySteps.STEP_STD_PUBLISH: 'publish the study',
-        StudySteps.STEP_STD_UNPUBLISH: 'unpublish the study when finished',
+        StudySteps.STEP_STD_PUBLISH: 'set study status to published to start collecting results',
+        StudySteps.STEP_STD_FINISH: 'set study status to finished when done',
         StudySteps.STEP_STD_RESULTS: 'download results',
         StudySteps.STEP_STD_ANONYMIZE: 'remove subject-ID mapping when not needed anymore',
         StudySteps.STEP_STD_ARCHIVE: 'archive the study',
@@ -849,7 +853,7 @@ class Study(models.Model):
             return reverse('study-privacy', args=[self.slug])
         elif step == StudySteps.STEP_STD_PUBLISH:
             return reverse('study', args=[self.slug])
-        elif step == StudySteps.STEP_STD_UNPUBLISH:
+        elif step == StudySteps.STEP_STD_FINISH:
             return reverse('study', args=[self.slug])
         elif step == StudySteps.STEP_STD_RESULTS:
             return reverse('trials', args=[self.slug])
@@ -896,31 +900,50 @@ class Study(models.Model):
 
         group = 'Dashboard'
         if self.is_published:
-            self._append_step_info(next_steps, StudySteps.STEP_STD_UNPUBLISH, group)
-        else:
+            self._append_step_info(next_steps, StudySteps.STEP_STD_FINISH, group)
+        elif not self.is_finished:
             if self.is_allowed_publish:
                 self._append_step_info(next_steps, StudySteps.STEP_STD_PUBLISH, group)
 
-        group = 'Results'
-        if self.trial_count_finished > 0:
-            self._append_step_info(next_steps, StudySteps.STEP_STD_RESULTS, group)
-        if self.has_subject_mapping:
-            self._append_step_info(next_steps, StudySteps.STEP_STD_ANONYMIZE, group)
+        if self.is_finished:
+            group = 'Results'
+            if self.trial_count_finished > 0:
+                self._append_step_info(next_steps, StudySteps.STEP_STD_RESULTS, group)
+            if self.has_subject_mapping:
+                self._append_step_info(next_steps, StudySteps.STEP_STD_ANONYMIZE, group)
 
         # TODO: add archive
         return next_steps
 
     def optional_steps(self):
+        steps = {}
         if self.is_published:
-            return {}
-        return {
-            'Settings':
-                [
-                    ('customize study settings', reverse('study-settings', args=[self.slug])),
-                    ('translate built-in texts', reverse('study-translate', args=[self.slug])),
-                    ('share study with other users', reverse('study-share', args=[self.slug])),
-                ]
-        }
+            steps = {
+                'Dashboard':
+                    [
+                        ('set study status to draft to make changes', reverse('study', args=[self.slug])),
+                    ]
+
+            }
+        elif self.is_finished:
+            steps = {
+                'Dashboard':
+                    [
+                        ('set study status to draft to make changes', reverse('study', args=[self.slug])),
+                        ('set study status to publish to resume collecting results', reverse('study', args=[self.slug])),
+                    ]
+
+            }
+        else:
+            steps = {
+                'Settings':
+                    [
+                        ('customize study settings', reverse('study-settings', args=[self.slug])),
+                        ('translate built-in texts', reverse('study-translate', args=[self.slug])),
+                        ('share study with other users', reverse('study-share', args=[self.slug])),
+                    ]
+            }
+        return steps
 
 class Question(models.Model):
     study = models.ForeignKey(

@@ -15,15 +15,20 @@
                     <div class="col-sm-6">
                         <form class="form-inline" method="post">
                             {% csrf_token %}
-                            <div class="btn-group" role="group" aria-label="publish">
-                                <button type="submit" name="action" value="unpublish" class="btn btn-sm
-                                        {% if not study.is_published %}btn-secondary active {% else %}btn-light{% endif %}">
-                                    unpublished
+                            <div class="btn-group" role="group" aria-label="status">
+                                <button type="submit" name="action" value="draft" class="btn btn-sm
+                                        {% if not study.is_published and not study.is_finished %}btn-secondary active {% else %}btn-light{% endif %}">
+                                    draft
                                 </button>
-                                <button type="submit" name="action" value="publish" class="btn btn-sm
+                                <button type="submit" name="action" value="published" class="btn btn-sm
                                         {% if study.is_published %}btn-secondary active {% else %}btn-light{% endif %}"
                                         {% if not study.is_allowed_publish %}disabled{% endif %}>
                                     published
+                                </button>
+                                <button type="submit" name="action" value="finished" class="btn btn-sm
+                                        {% if study.is_finished %}btn-secondary active {% else %}btn-light{% endif %}"
+                                        {% if not study.is_allowed_publish %}disabled{% endif %}>
+                                    finished
                                 </button>
                             </div>
                         </form>
@@ -128,7 +133,7 @@
         <p class="card-text text-secondary">The suggestions below point to required/optional steps while setting up your
             study.</p>
         <div class="row">
-            <div class="col-md-6 ">
+            <div class="col-md-6 border-right">
                 Required:
                 <ul class="list-group list-group-flush mt-2">
                     {% for next_step_html in next_steps_html %}

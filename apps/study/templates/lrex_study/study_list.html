@@ -8,7 +8,11 @@
         <div class="flex-grow-1">
             <a href="{% url 'study' study.slug %}"><strong>{{ study.title }}</strong></a>
             {% if study.is_published %}
-            <div class="badge badge-secondary">Published</div>
+            <div class="badge badge-primary">Published</div>
+            {% elif study.is_finished %}
+            <div class="badge badge-light">Finished</div>
+            {% else %}
+            <div class="badge badge-secondary">Draft</div>
             {% endif %}
             {% if study.is_time_limit_reached %}
             <div class="badge badge-secondary">Time limit reached</div>

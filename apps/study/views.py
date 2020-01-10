@@ -23,26 +23,32 @@ from . import forms
 class WarnUserIfStudyActiveMixin:
 
     def get(self, request, *args, **kwargs):
-        if self.study.is_active:
+        if self.study.is_active or self.study.is_finished:
             if hasattr(self, 'form_valid') or hasattr(self, 'helper'):
                 msg = 'Note: Form is disabled. '
             else:
                 msg = 'Note: Some actions are disabled. '
-            msg = msg + 'To edit the study, <a href="{}">unpublish</a> ' \
-                        'it and save and <a href="{}">remove the results</a> first.'\
-                        .format(
-                            reverse('study', args=[self.study.slug]),
-                            reverse('trials', args=[self.study.slug])
-                        )
+            msg += 'To enable editing, '
+            if self.study.is_published:
+                msg += '<a href="{}">set study status to draft</a>'\
+                    .format(
+                        reverse('study', args=[self.study.slug]),
+                    )
+                msg += ' and ' if self.study.trial_count > 0 else '.'
+            if self.study.trial_count > 0:
+                msg += '<a href="{}">save and remove the results</a>.'\
+                    .format(
+                        reverse('trials', args=[self.study.slug])
+                    )
             messages.info(request, mark_safe(msg))
-        return  super().get(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
 
 class DisableFormIfStudyActiveMixin(WarnUserIfStudyActiveMixin, contib_views.DisableFormMixin):
 
     @property
     def is_disabled(self):
-        return self.study.is_active
+        return self.study.is_active or self.study.is_finished
 
 
 class NextStepsMixin:
@@ -276,14 +282,19 @@ class StudyDetailView(
 
     def post(self, request, *args, **kwargs):
         action = request.POST.get('action', None)
-        if action == 'publish':
-            self.study.is_published = True
-            messages.success(request, 'Study published.')
-            self.study.save()
-        elif action == 'unpublish':
+        if action == 'draft':
             self.study.is_published = False
-            messages.success(request, 'Study unpublished.')
-            self.study.save()
+            self.study.is_finished = False
+            messages.success(request, 'Study status changed to draft.')
+        elif action == 'published':
+            self.study.is_published = True
+            self.study.is_finished = False
+            messages.success(request, 'Study status changed to published.')
+        elif action == 'finished':
+            self.study.is_published = False
+            self.study.is_finished = True
+            messages.success(request, 'Study status changed to finished.')
+        self.study.save()
         return redirect('study', study_slug=self.study.slug)
 
     def get_context_data(self, **kwargs):
