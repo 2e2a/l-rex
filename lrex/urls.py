@@ -1,9 +1,12 @@
 from allauth import urls as allauth_urls
 from django.conf import settings
+from django.conf.urls import handler404
+from django.conf.urls import handler500
 from django.contrib import admin
 from django.urls import include, path
 
 from apps.home import urls as home_urls
+from apps.home import views as home_views
 from apps.item import urls as item_urls
 from apps.materials import urls as materials_urls
 from apps.study import urls as study_urls
@@ -22,6 +25,10 @@ urlpatterns = [
     path('markdownx/', include('markdownx.urls')),
     path('', include(home_urls))
 ]
+
+
+handler500 = home_views.handler500
+
 
 if settings.DEBUG:
     import debug_toolbar

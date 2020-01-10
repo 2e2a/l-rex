@@ -1,13 +1,23 @@
 from markdownx.utils import markdownify
 
 from django.conf import settings
+from django.shortcuts import render_to_response
 from django.shortcuts import redirect
+from django.template.context import RequestContext
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.views import generic
+from django.views.decorators.csrf import requires_csrf_token
 
 from apps.contrib.views import ActionsMixin
 from . import models
+
+
+@requires_csrf_token
+def handler500(request):
+    response = render_to_response('lrex_home/error_500.html')
+    response.status_code = 500
+    return response
 
 
 class HomeView(ActionsMixin, generic.ListView):
