@@ -20,9 +20,6 @@ BASE_DIR = os.path.dirname(CONFIG_DIR)
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '&+b$6n1(x=h0($ww_d4^j&6r%rtv47$gacl!nazl71g7&siqa3'
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -105,14 +102,10 @@ AUTHENTICATION_BACKENDS = (
     'allauth.account.auth_backends.AuthenticationBackend',
 )
 
-SITE_ID = 1
-
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
 ACCOUNT_FORMS = {'signup': 'apps.home.forms.FixedAutofocusSignupForm'}
-
-DEFAULT_FROM_EMAIL = 'lrex@localhost'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
@@ -176,6 +169,14 @@ CSRF_COOKIE_SECURE = False
 SECURE_SSL_REDIRECT = False
 SECURE_HSTS_INCLUDE_SUBDOMAINS = False
 SECURE_HSTS_PRELOAD = False
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = '&+b$6n1(x=h0($ww_d4^j&6r%rtv47$gacl!nazl71g7&siqa3'
+
+# server settings
+SITE_ID = 1
+ADMINS = []
+DEFAULT_FROM_EMAIL = 'lrex@localhost'
+
 
 # deployment dependant static content
 LREX_CONTACT_MD = 'Please define contact as markdown in local.py'
@@ -186,4 +187,3 @@ try:
     from .local import *
 except ImportError:
     pass
-
