@@ -1,10 +1,8 @@
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.paginator import Paginator
-from django.http import HttpResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
-from django.utils.timezone import now
 from django.views import generic
 
 from apps.contrib import views as contrib_views
@@ -99,7 +97,6 @@ class MaterialsUpdateView(
     study_views.CheckStudyCreatorMixin,
     SuccessMessageMixin,
     contrib_views.LeaveWarningMixin,
-    contrib_views.ActionsMixin,
     study_views.DisableFormIfStudyActiveMixin,
     MaterialsNavMixin,
     generic.UpdateView
@@ -195,7 +192,6 @@ class ResultsNavMixin(study_views.StudyNavMixin):
 class MaterialsResultsView(
     MaterialsObjectMixin,
     study_views.CheckStudyCreatorMixin,
-    contrib_views.ActionsMixin,
     ResultsNavMixin,
     generic.DetailView
 ):

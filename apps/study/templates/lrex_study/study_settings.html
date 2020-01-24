@@ -1,0 +1,7 @@
+{% extends "lrex_contrib/crispy_form.html" %}
+
+{% block actions %}
+<a class="btn btn-outline-danger btn-sm ml-0 mr-2 mt-1" href="{% url 'study-create' %}">Delete study</a>
+<a class="btn btn-outline-secondary btn-sm ml-0 mr-0 mt-1" href="{% url 'study-create' %}">Archive study</a>
+{% endblock %}
+

@@ -78,7 +78,6 @@ class ItemListView(
     materials_views.MaterialsMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
-    contrib_views.ActionsMixin,
     materials_views.MaterialsNavMixin,
     ItemsValidateMixin,
     generic.ListView
@@ -99,66 +98,6 @@ class ItemListView(
 
     def get_queryset(self):
         return super().get_queryset().filter(materials=self.materials).order_by('number','condition')
-
-    def _add_page(self, url, page=None):
-        if not page:
-            page = self.request.GET.get(self.page_kwarg, None)
-        if page:
-            url += '?page={}'.format(page)
-        return url
-
-    @property
-    def _item_add_url(self):
-        if self.study.has_text_items:
-            url_name = 'text-item-create'
-        elif self.study.has_markdown_items:
-            url_name = 'markdown-item-create'
-        else:
-            url_name = 'audio-link-item-create'
-        url = reverse(url_name, args=[self.materials.slug])
-        return url
-
-    @property
-    def _item_edit_url_name(self):
-        if self.study.has_text_items:
-            return 'text-item-update'
-        elif self.study.has_markdown_items:
-            return 'markdown-item-update'
-        else:
-            return 'audio-link-item-update'
-
-    def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-        data['item_edit_url_name'] = self._item_edit_url_name
-        return data
-
-    @property
-    def actions(self):
-        return [
-            ('link', 'Upload CSV', reverse('items-upload', args=[self.materials.slug]), self.ACTION_CSS_BUTTON_SECONDARY),
-            ('button', 'Validate / generate lists', 'validate', self.ACTION_CSS_BUTTON_PRIMARY),
-        ]
-
-    @property
-    def secondary_actions(self):
-        actions = [
-            ('link', 'Add item', self._add_page(self._item_add_url)),
-            ('link', 'Pregenerate items', reverse('items-pregenerate', args=[self.materials.slug])),
-            ('link', 'Download CSV', reverse('items-download', args=[self.materials.slug])),
-            ('link', 'Delete all items', reverse('items-delete', args=[self.materials.slug])),
-            ('link', 'Delete materials', reverse('materials-delete', args=[self.materials.slug])),
-        ]
-        if self.study.enable_item_rating_feedback:
-            actions.insert(
-                2,
-                ('Upload Feedback', self._add_page(reverse('items-upload-feedback', args=[self.materials.slug])))
-            )
-        return actions
-
-    @property
-    def disable_actions(self):
-        if self.is_disabled:
-            return [1, 2], [0, 1]
 
     @property
     def breadcrumbs(self):
@@ -253,6 +192,44 @@ class ItemUpdateMixin(
             ('items', self.reverse_paginated('items', args=[self.materials.slug])),
             (self.item, ''),
         ]
+
+
+class ItemCreateView(
+    materials_views.MaterialsMixin,
+    study_views.CheckStudyCreatorMixin,
+    generic.base.RedirectView
+):
+
+    def get_redirect_url(self, *args, **kwargs):
+        if self.study.has_text_items:
+            url = reverse('text-item-create', args=[self.materials.slug])
+        elif self.study.has_markdown_items:
+            url = reverse('markdown-item-create', args=[self.materials.slug])
+        else:
+            url = reverse('audio-link-item-create', args=[self.materials.slug])
+        page = kwargs.get('page', None)
+        if page:
+            url += '?page={}'.format(page)
+        return url
+
+
+class ItemUpdateView(
+    materials_views.MaterialsMixin,
+    study_views.CheckStudyCreatorMixin,
+    generic.base.RedirectView
+):
+
+    def get_redirect_url(self, *args, **kwargs):
+        if self.study.has_text_items:
+            url = reverse('text-item-update', args=[self.materials.slug])
+        elif self.study.has_markdown_items:
+            url = reverse('markdown-item-update', args=[self.materials.slug])
+        else:
+            url = reverse('audio-link-item-update', args=[self.materials.slug])
+        page = kwargs.get('page', None)
+        if page:
+            url += '?page={}'.format(page)
+        return url
 
 
 class TextItemCreateView(
@@ -745,7 +722,6 @@ class ItemListListView(
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
     ItemsValidateMixin,
-    contrib_views.ActionsMixin,
     materials_views.MaterialsNavMixin,
     generic.ListView
 ):
@@ -766,10 +742,6 @@ class ItemListListView(
         return models.ItemList.objects.filter(materials=self.materials)
 
     @property
-    def is_disabled(self):
-        return self.materials.items_validated
-
-    @property
     def actions(self):
         return [
             ('button', 'Validate / generate lists', 'validate', self.ACTION_CSS_BUTTON_PRIMARY),
@@ -778,9 +750,9 @@ class ItemListListView(
     @property
     def secondary_actions(self):
         return [
-            ('link', 'Upload CSV', reverse('itemlist-upload', args=[self.materials.slug])),
-            ('link', 'Download CSV', reverse('itemlist-download', args=[self.materials.slug])),
-            ('link', 'Delete materials', reverse('materials-delete', args=[self.materials.slug])),
+            ('link', '', reverse('itemlist-upload', args=[self.materials.slug])),
+            ('link', '', reverse('itemlist-download', args=[self.materials.slug])),
+            ('link', '', reverse('materials-delete', args=[self.materials.slug])),
         ]
 
     @property

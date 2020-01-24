@@ -99,7 +99,6 @@ class QuestionnaireListView(
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
     QuestionnaireNavMixin,
-    contrib_views.ActionsMixin,
     generic.ListView
 ):
     model = models.Questionnaire
@@ -122,6 +121,8 @@ class QuestionnaireListView(
                 randomization=randomization,
                 allow_pseudo_random=self.study.is_allowed_pseudo_randomization
             )
+            if self.is_disabled:
+                self.disable_form(self.randomization_form)
         return super().get(request, *args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
@@ -169,31 +170,6 @@ class QuestionnaireListView(
     @property
     def pagination_offset(self):
         return (int(self.page) - 1) * int(self.paginate_by)
-
-    @property
-    def actions(self):
-        if self.study.use_blocks:
-            return [(
-                'link',
-                'Generate questionnaires',
-                reverse('questionnaire-generate', args=[self.study.slug]),
-                self.ACTION_CSS_BUTTON_PRIMARY
-            )]
-        else:
-            return [('form', self.randomization_form, self.randomization_form.helper)]
-
-    @property
-    def secondary_actions(self):
-        return [
-            ('link', 'Upload CSV', reverse('questionnaire-upload', args=[self.study.slug])),
-            ('link', 'Download CSV', reverse('questionnaire-download', args=[self.study.slug])),
-            ('link', 'Delete all', reverse('questionnaires-delete', args=[self.study.slug])),
-        ]
-
-    @property
-    def disable_actions(self):
-        if self.is_disabled:
-            return [0, 1], [0, 2]
 
     @property
     def breadcrumbs(self):
@@ -443,7 +419,6 @@ class QuestionnaireCSVDownloadView(study_views.StudyMixin, study_views.CheckStud
 class TrialListView(
     study_views.StudyMixin,
     study_views.CheckStudyCreatorMixin,
-    contrib_views.ActionsMixin,
     materials_views.ResultsNavMixin,
     generic.ListView
 ):

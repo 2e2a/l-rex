@@ -161,6 +161,7 @@ class StudyNavMixin(NavMixin):
 
     @property
     def materials_nav(self):
+        # TODO: Add empty label
         return [
             (materials.title, reverse('items', args=[materials.slug])) for materials in self.study.materials_list
         ] + [
@@ -181,7 +182,7 @@ class StudyNavMixin(NavMixin):
         ]
 
 
-class StudyListView(LoginRequiredMixin, contib_views.ActionsMixin, generic.ListView):
+class StudyListView(LoginRequiredMixin, generic.ListView):
     model = models.Study
     title = 'Studies'
     paginate_by = 16
@@ -191,18 +192,6 @@ class StudyListView(LoginRequiredMixin, contib_views.ActionsMixin, generic.ListV
             Q(creator=self.request.user) |
             Q(shared_with__contains=self.request.user.username)
         )
-
-    @property
-    def actions(self):
-        return [
-            ('link', 'New study', reverse('study-create'), self.ACTION_CSS_BUTTON_PRIMARY)
-        ]
-
-    @property
-    def secondary_actions(self):
-        return [
-            ('link', 'New study from archive', reverse('study-create-archive'))
-        ]
 
     @property
     def breadcrumbs(self):
@@ -264,7 +253,6 @@ class StudyCreateFromArchiveView(LoginRequiredMixin,  SuccessMessageMixin, gener
 class StudyDetailView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
-    contib_views.ActionsMixin,
     StudyNavMixin,
     NextStepsMixin,
     generic.DetailView,
@@ -441,14 +429,13 @@ class StudySettingsView(
     CheckStudyCreatorMixin,
     SuccessMessageMixin,
     contib_views.LeaveWarningMixin,
-    contib_views.ActionsMixin,
     DisableFormIfStudyActiveMixin,
     StudySettingsNavMixin,
     generic.UpdateView,
 ):
     model = models.Study
     title = 'Study settings'
-    template_name = 'lrex_contrib/crispy_form.html'
+    template_name = 'lrex_study/study_settings.html'
     form_class = forms.StudySettingsForm
     success_message = 'Study settings updated.'
 
@@ -479,13 +466,6 @@ class StudySettingsView(
         if 'save' in self.request.POST:
             return reverse('study-settings', args=[self.object.slug])
         return self.object.get_absolute_url()
-
-    @property
-    def actions(self):
-        return [
-            ('link', 'Delete study', reverse('study-delete', args=[self.study.slug]), self.ACTION_CSS_BUTTON_DANGER),
-            ('link', 'Archive study', reverse('study-archive', args=[self.study.slug]), self.ACTION_CSS_BUTTON_PRIMARY)
-        ]
 
     @property
     def breadcrumbs(self):

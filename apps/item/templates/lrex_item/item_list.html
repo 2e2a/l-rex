@@ -2,12 +2,41 @@
 {% load contrib_tags %}
 {% load static %}
 
+{% block actions %}
+<form method="post">
+    {% csrf_token %}
+    <a class="btn btn-outline-secondary btn-sm ml-0 mr-1 mt-1 {% if disabled %}disabled{% endif %}"
+       href="{% url 'items-upload' materials.slug %}">
+        Upload CSV
+    </a>
+    <button type="submit" name="action" value="validate"
+            class="btn btn-outline-secondary btn-sm ml-0 mr-1 mt-1 {% if disabled %}disabled{% endif %}"
+            {% if disabled %} disabled{% endif %}>
+        Validate / generate lists
+    </button>
+</form>
+<div class="dropdown ml-1 mr-0 my-1">
+    <button class="btn btn-outline-secondary btn-sm" type="button" id="dropdownActionsButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        &hellip;
+    </button>
+    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+        <a class="dropdown-item {% if disabled %}disabled{% endif %}" href="{% url 'item-create' materials.slug %}">Add item</a>
+        {% if study.enable_item_rating_feedback %}
+        <a class="dropdown-item {% if disabled %}disabled{% endif %}" href="{% url 'items-upload-feedback' materials.slug %}">Upload Feedback</a>
+        {% endif %}
+        <a class="dropdown-item {% if disabled %}disabled{% endif %}" href="{% url 'items-pregenerate' materials.slug %}">Pregenerate items</a>
+        <a class="dropdown-item" href="{% url 'items-download' materials.slug %}">Download CSV</a>
+        <a class="dropdown-item {% if disabled %}disabled{% endif %}" href="{% url 'items-delete' materials.slug %}">Delete all items</a>
+    </div>
+</div>
+{% endblock %}
+
 {% block content %}
 <ul class="list-group">
     {% for item in item_list %}
     <li class="list-group-item d-flex flex-column flex-md-row">
         <div class="mr-4">
-            <a href="{% url item_edit_url_name item.slug %}?page={{ page_obj.number}}"><strong>{{ item }}</strong></a>
+            <a href="{% url 'item-update' item.slug %}?page={{ page_obj.number}}"><strong>{{ item }}</strong></a>
             {% if study.use_blocks %}<span class="badge badge-secondary">block {{ item.materials_block }}</span>{% endif %}
         </div>
         <div class="flex-grow-1 mr-4">

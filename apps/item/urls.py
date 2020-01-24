@@ -11,6 +11,7 @@ urlpatterns_materials = [
     path('lists/', views.ItemListListView.as_view(), name='itemlists'),
     path('lists/upload/', views.ItemListUploadView.as_view(), name='itemlist-upload'),
     path('lists/download/', views.ItemListCSVDownloadView.as_view(), name='itemlist-download'),
+    path('create/', views.ItemCreateView.as_view(), name='item-create'),
     path('create/text/', views.TextItemCreateView.as_view(), name='text-item-create'),
     path('create/markdown/', views.MarkdownItemCreateView.as_view(), name='markdown-item-create'),
     path('create/audio-link/', views.AudioLinkItemCreateView.as_view(), name='audio-link-item-create'),
@@ -18,6 +19,7 @@ urlpatterns_materials = [
 ]
 
 urlpatterns = [
+    path('<slug:item_slug>/update/', views.ItemUpdateView.as_view(), name='item-update'),
     path('<slug:item_slug>/update/text/', views.TextItemUpdateView.as_view(), name='text-item-update'),
     path('<slug:item_slug>/update/markdown/', views.MarkdownItemUpdateView.as_view(), name='markdown-item-update'),
     path('<slug:item_slug>/update/audio-link/', views.AudioLinkItemUpdateView.as_view(), name='audio-link-item-update'),
