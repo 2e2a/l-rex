@@ -61,10 +61,9 @@ class ItemsValidateMixin:
     def validate_items(self):
         try:
             warnings = self.materials.validate_items()
-            messages.success(self.request, 'Items seem valid.')
             for warning in warnings:
-                messages.warning(self.request, '{}'.format(warning))
-            messages.success(self.request,'Lists automatically generated.')
+                messages.info(self.request, '{}'.format(warning))
+            messages.success(self.request, 'Items seem valid. Lists automatically generated.')
             if self.study.has_questionnaires:
                 self.study.delete_questionnaires()
                 messages.info(self.request, 'Old questionnaires deleted.')

@@ -14,11 +14,11 @@ def bootstrap_alert_class(message_level):
     if message_level == 'info':
         return 'alert-light'
     if message_level == 'success':
-        return 'alert-success'
+        return 'alert-light'
     if message_level == 'warning':
-        return 'alert-warning'
+        return 'alert-dark'
     if message_level == 'error':
-        return 'alert-danger'
+        return 'alert-dark'
 
 
 @register.filter
