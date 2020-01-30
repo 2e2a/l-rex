@@ -1,5 +1,9 @@
 {% extends "lrex_home/base.html" %}
 
+{% block nav %}
+    {% include 'lrex_trial/questionnaire_nav.html' with nav2_active=0 %}
+{% endblock %}
+
 {% block content %}
 <table class="table bg-white">
     <thead>

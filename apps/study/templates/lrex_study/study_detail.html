@@ -2,6 +2,10 @@
 {% load contrib_tags %}
 {% load static %}
 
+{% block nav %}
+    {% include 'lrex_study/study_nav.html' with nav_active=0 %}
+{% endblock %}
+
 {% block content %}
 {% if not study.is_archived %}
 <div class="row">

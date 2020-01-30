@@ -81,24 +81,10 @@ class TrialObjectMixin(TrialMixin):
         return self.trial_object
 
 
-class QuestionnaireNavMixin(study_views.StudyNavMixin):
-    nav_active = 4
-
-    @property
-    def secondary_nav(self):
-        if self.study.use_blocks:
-            return [
-                ('link', ('Questionnaires', reverse('questionnaires', args=[self.study.slug]))),
-                ('link', ('Block instructions', reverse('questionnaire-blocks', args=[self.study.slug]))),
-            ]
-        return []
-
-
 class QuestionnaireListView(
     study_views.StudyMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
-    QuestionnaireNavMixin,
     generic.ListView
 ):
     model = models.Questionnaire
@@ -183,11 +169,13 @@ class QuestionnaireListView(
 class QuestionnaireDetailView(
     QuestionnaireObjectMixin,
     study_views.CheckStudyCreatorMixin,
-    QuestionnaireNavMixin,
     generic.DetailView
 ):
     model = models.Questionnaire
-    title = 'Questionnaire'
+
+    @cached_property
+    def title(self):
+        return 'Questionnaire {}'.format(self.questionnaire.number)
 
     def _add_items_for_block(self, context_items, block, q_items):
         for q_item in q_items:
@@ -227,7 +215,7 @@ class QuestionnaireGenerateView(
     generic.TemplateView
 ):
     title = 'Generate questionnaires'
-    template_name = 'lrex_contrib/crispy_formset_form.html'
+    template_name = 'lrex_trial/questionnaire_formset_form.html'
     formset = None
     helper = None
 
@@ -287,7 +275,7 @@ class QuestionnaireDeleteAllView(
     generic.TemplateView
 ):
     title = 'Confirm Delete'
-    template_name = 'lrex_contrib/confirm_delete.html'
+    template_name = 'lrex_questionnaire/questionnaire_confirm_delete.html'
     message = 'Delete all questionnaires?'
 
     def post(self, request, *args, **kwargs):
@@ -313,14 +301,12 @@ class QuestionnaireBlockInstructionsUpdateView(
     study_views.CheckStudyCreatorMixin,
     contrib_views.LeaveWarningMixin,
     contrib_views.DisableFormMixin,
-    QuestionnaireNavMixin,
     generic.TemplateView,
 ):
     title = 'Edit questionnaire block instructions'
-    template_name = 'lrex_contrib/crispy_formset_form.html'
+    template_name = 'lrex_trial/questionnaire_formset_form.html'
     formset = None
     helper = None
-    secondary_nav_active = 1
 
     def dispatch(self, *args, **kwargs):
         self.helper = forms.questionnaire_block_update_formset_helper()
@@ -356,6 +342,13 @@ class QuestionnaireBlockInstructionsUpdateView(
                 return redirect('questionnaire-blocks', study_slug=self.study.slug)
         return super().get(request, *args, **kwargs)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'nav2_active': 1,
+        })
+        return context
+
     @property
     def breadcrumbs(self):
         return [
@@ -373,7 +366,7 @@ class QuestionnaireUploadView(
 ):
     title = 'Upload custom questionnaires'
     form_class = forms.QuestionnaireUploadForm
-    template_name = 'lrex_contrib/crispy_form.html'
+    template_name = 'lrex_trial/questionnaire_form.html'
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -419,7 +412,6 @@ class QuestionnaireCSVDownloadView(study_views.StudyMixin, study_views.CheckStud
 class TrialListView(
     study_views.StudyMixin,
     study_views.CheckStudyCreatorMixin,
-    materials_views.ResultsNavMixin,
     generic.ListView
 ):
     model = models.Trial
@@ -456,24 +448,6 @@ class TrialListView(
         return super().get_queryset().filter(questionnaire__study=self.study)
 
     @property
-    def actions(self):
-        if self.study.has_subject_mapping:
-            return [
-                ('link', 'Results CSV', reverse('study-results-csv', args=[self.study.slug]), self.ACTION_CSS_BUTTON_SECONDARY),
-                ('button', 'Download subject ID mapping', 'download_subjects', self.ACTION_CSS_BUTTON_SECONDARY),
-                ('button', 'Delete subject ID mapping', 'delete_subjects', self.ACTION_CSS_BUTTON_PRIMARY),
-            ]
-        return []
-
-    @property
-    def secondary_actions(self):
-        return [
-            ('button', 'Delete tests', 'delete_tests'),
-            ('button', 'Delete abandoned', 'delete_abandoned'),
-            ('link', 'Delete all', reverse('trials-delete', args=[self.study.slug])),
-        ]
-
-    @property
     def breadcrumbs(self):
         return [
             ('studies', reverse('studies')),
@@ -486,11 +460,10 @@ class TrialListView(
 class TrialDeleteAllView(
     study_views.StudyMixin,
     study_views.CheckStudyCreatorMixin,
-    materials_views.ResultsNavMixin,
     generic.TemplateView,
 ):
     title = 'Confirm Delete'
-    template_name = 'lrex_contrib/confirm_delete.html'
+    template_name = 'lrex_trial/results_confirm_delete.html'
     message = 'Delete all trials?'
 
     def get_success_url(self):
@@ -638,7 +611,6 @@ class DemographicsCreateView(TrialMixin, TestWarningMixin, generic.TemplateView)
 class TrialDetailView(
     TrialObjectMixin,
     study_views.CheckStudyCreatorMixin,
-    materials_views.ResultsNavMixin,
     generic.DetailView,
 ):
     model = models.Trial
@@ -657,10 +629,10 @@ class TrialDetailView(
 class TrialDeleteView(
     TrialObjectMixin,
     study_views.CheckStudyCreatorMixin,
-    materials_views.ResultsNavMixin,
     contrib_views.DefaultDeleteView,
 ):
     model = models.Trial
+    template_name = 'lrex_trial/results_confirm_delete.html'
 
     @property
     def breadcrumbs(self):

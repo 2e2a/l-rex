@@ -77,7 +77,6 @@ class ItemListView(
     materials_views.MaterialsMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
-    materials_views.MaterialsNavMixin,
     ItemsValidateMixin,
     generic.ListView
 ):
@@ -108,12 +107,12 @@ class ItemListView(
         ]
 
 
-class ItemCreateMixin(contrib_views.PaginationHelperMixin, materials_views.MaterialsNavMixin):
-    template_name = 'lrex_contrib/crispy_form.html'
+class ItemCreateMixin(contrib_views.PaginationHelperMixin):
+    template_name = 'lrex_materials/materials_form.html'
 
     @property
     def title(self):
-        return '{}: add items'.format(self.materials.title)
+        return '{}: add item'.format(self.materials.title)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -155,14 +154,13 @@ class ItemCreateMixin(contrib_views.PaginationHelperMixin, materials_views.Mater
 class ItemUpdateMixin(
     contrib_views.LeaveWarningMixin,
     contrib_views.PaginationHelperMixin,
-    materials_views.MaterialsNavMixin,
 ):
-    template_name = 'lrex_contrib/crispy_form.html'
+    template_name = 'lrex_materials/materials_form.html'
     success_message = 'Item successfully updated.'
 
     @property
     def title(self):
-        return '{}: edit items'.format(self.materials.title)
+        return '{}: edit item'.format(self.materials.title)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -213,18 +211,18 @@ class ItemCreateView(
 
 
 class ItemUpdateView(
-    materials_views.MaterialsMixin,
+    ItemMixin,
     study_views.CheckStudyCreatorMixin,
     generic.base.RedirectView
 ):
 
     def get_redirect_url(self, *args, **kwargs):
         if self.study.has_text_items:
-            url = reverse('text-item-update', args=[self.materials.slug])
+            url = reverse('text-item-update', args=[self.item.slug])
         elif self.study.has_markdown_items:
-            url = reverse('markdown-item-update', args=[self.materials.slug])
+            url = reverse('markdown-item-update', args=[self.item.slug])
         else:
-            url = reverse('audio-link-item-update', args=[self.materials.slug])
+            url = reverse('audio-link-item-update', args=[self.item.slug])
         page = kwargs.get('page', None)
         if page:
             url += '?page={}'.format(page)
@@ -305,10 +303,10 @@ class ItemDeleteView(
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
     contrib_views.PaginationHelperMixin,
-    materials_views.MaterialsNavMixin,
     contrib_views.DefaultDeleteView
 ):
     model = models.Item
+    template_name = 'lrex_materials/materials_confirm_delete.html'
 
     def delete(self, *args, **kwargs):
         result = super().delete(*args, **kwargs)
@@ -337,11 +335,10 @@ class ItemPregenerateView(
     SuccessMessageMixin,
     study_views.DisableFormIfStudyActiveMixin,
     contrib_views.PaginationHelperMixin,
-    materials_views.MaterialsNavMixin,
     generic.FormView
 ):
     form_class = forms.PregenerateItemsForm
-    template_name = 'lrex_contrib/crispy_form.html'
+    template_name = 'lrex_materials/materials_form.html'
     success_message = 'Items successfully generated.'
 
     @property
@@ -399,12 +396,10 @@ class ItemUploadView(
     study_views.CheckStudyCreatorMixin,
     ItemsValidateMixin,
     study_views.DisableFormIfStudyActiveMixin,
-    materials_views.MaterialsNavMixin,
     generic.FormView
 ):
     form_class = forms.ItemUploadForm
-    template_name = 'lrex_contrib/crispy_form.html'
-
+    template_name = 'lrex_materials/materials_form.html'
 
     @property
     def title(self):
@@ -469,11 +464,10 @@ class ItemDeleteAllView(
     materials_views.MaterialsMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
-    materials_views.MaterialsNavMixin,
     generic.TemplateView
 ):
     title = 'Confirm Delete'
-    template_name = 'lrex_contrib/confirm_delete.html'
+    template_name = 'lrex_materials/materials_confirm_delete.html'
     message = 'Delete all items?'
 
     def post(self, request, *args, **kwargs):
@@ -503,10 +497,9 @@ class ItemQuestionsUpdateView(
     contrib_views.LeaveWarningMixin,
     study_views.DisableFormIfStudyActiveMixin,
     contrib_views.PaginationHelperMixin,
-    materials_views.MaterialsNavMixin,
     generic.TemplateView
 ):
-    template_name = 'lrex_contrib/crispy_formset_form.html'
+    template_name = 'lrex_materials/materials_formset_form.html'
     formset = None
     helper = None
 
@@ -578,10 +571,9 @@ class ItemFeedbackUpdateView(
     contrib_views.LeaveWarningMixin,
     study_views.DisableFormIfStudyActiveMixin,
     contrib_views.PaginationHelperMixin,
-    materials_views.MaterialsNavMixin,
     generic.TemplateView
 ):
-    template_name = 'lrex_contrib/crispy_formset_form.html'
+    template_name = 'lrex_materials/materials_formset_form.html'
     formset = None
     helper = None
 
@@ -721,11 +713,9 @@ class ItemListListView(
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
     ItemsValidateMixin,
-    materials_views.MaterialsNavMixin,
     generic.ListView
 ):
     model = models.ItemList
-    secondary_nav_active = 1
 
     @property
     def title(self):
@@ -739,20 +729,6 @@ class ItemListListView(
 
     def get_queryset(self):
         return models.ItemList.objects.filter(materials=self.materials)
-
-    @property
-    def actions(self):
-        return [
-            ('button', 'Validate / generate lists', 'validate', self.ACTION_CSS_BUTTON_PRIMARY),
-        ]
-
-    @property
-    def secondary_actions(self):
-        return [
-            ('link', '', reverse('itemlist-upload', args=[self.materials.slug])),
-            ('link', '', reverse('itemlist-download', args=[self.materials.slug])),
-            ('link', '', reverse('materials-delete', args=[self.materials.slug])),
-        ]
 
     @property
     def disable_actions(self):
@@ -776,11 +752,18 @@ class ItemListUploadView(
     generic.FormView
 ):
     form_class = forms.ItemListUploadForm
-    template_name = 'lrex_contrib/crispy_form.html'
+    template_name = 'lrex_materials/materials_form.html'
 
     @property
     def title(self):
         return '{}: upload item lists'.format(self.materials.title)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'nav2_active': 1,
+        })
+        return context
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()

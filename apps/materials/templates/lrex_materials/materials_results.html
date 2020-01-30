@@ -1,5 +1,23 @@
 {% extends "lrex_home/base.html" %}
 
+{% block nav %}
+    {% include 'lrex_trial/results_nav.html' with nav2_active=1 active_materials=materials.pk %}
+{% endblock %}
+
+{% block actions %}
+<div class="dropdown">
+  <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="dropdownAggregate" data-toggle="dropdown"
+          aria-haspopup="true" aria-expanded="false">
+      Aggregated by: {{ aggregate_by_label }}
+  </button>
+  <div class="dropdown-menu" aria-labelledby="dropdownAggregate">
+      <a class="dropdown-item" href="?aggregate_by=subject">subject</a>
+      <a class="dropdown-item" href="?aggregate_by=item">item</a>
+      <a class="dropdown-item" href="?aggregate_by=subject,item">subject+item</a>
+  </div>
+</div>
+{% endblock %}
+
 {% block content %}
 <table class="table bg-white">
 <thead>

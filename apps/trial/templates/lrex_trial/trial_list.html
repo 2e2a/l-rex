@@ -1,5 +1,36 @@
 {% extends "lrex_home/base.html" %}
 
+{% block nav %}
+    {% include 'lrex_trial/results_nav.html' with nav2_active=0 %}
+{% endblock %}
+
+{% block actions %}
+<div><a class="btn btn-outline-secondary btn-sm ml-0 mr-1 mt-1" href="{% url 'study-results-csv' study.slug %}">Results CSV</a></div>
+<div class="dropdown ml-1 mr-0 my-1">
+    <button class="btn btn-outline-secondary btn-sm" type="button" id="dropdownActionsButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        &hellip;
+    </button>
+    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+        <form method="post">
+            {% csrf_token %}
+            <button class="dropdown-item" type="submit" name="action" value="download_subjects">
+                Download subject ID mapping
+            </button>
+            <button class="dropdown-item" type="submit" name="action" value="delete_subjects">
+                 Delete subject ID mapping
+            </button>
+            <button class="dropdown-item" type="submit" name="action" value="delete_tests">
+                 Delete tests
+            </button>
+            <button class="dropdown-item" type="submit" name="action" value="delete_abandoned">
+                 Delete abandoned
+            </button>
+            <a class="dropdown-item" href="{% url 'trials-delete' study.slug %}">Delete all trials</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
 {% block content %}
 <ul class="list-group">
     {% for trial in trial_list %}

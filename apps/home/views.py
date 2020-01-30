@@ -30,12 +30,6 @@ class HomeView(generic.ListView):
         return super().get(request, *args, **kwargs)
 
     @property
-    def actions(self):
-        return [
-            ('link', 'My studies', reverse('studies'), self.ACTION_CSS_BUTTON_PRIMARY)
-        ]
-
-    @property
     def breadcrumbs(self):
         return []
 

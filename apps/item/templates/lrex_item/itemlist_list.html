@@ -1,5 +1,9 @@
 {% extends "lrex_home/base.html" %}
 
+{% block nav %}
+    {% include 'lrex_materials/materials_nav.html' with nav2_active=1 %}
+{% endblock %}
+
 {% block actions %}
 <form method="post">
     {% csrf_token %}

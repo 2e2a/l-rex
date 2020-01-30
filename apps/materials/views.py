@@ -43,35 +43,17 @@ class MaterialsObjectMixin(MaterialsMixin):
         return self.materials_object
 
 
-class MaterialsNavMixin(study_views.StudyNavMixin):
-    nav_active = 3
-
-    @property
-    def materials_nav(self):
-        return super().materials_nav
-
-    @property
-    def secondary_nav(self):
-        return [
-            ('link', ('Items', reverse('items', args=[self.materials.slug]))),
-            ('link', ('Lists', reverse('itemlists', args=[self.materials.slug]))),
-            ('link', ('Settings', reverse('materials-update', args=[self.materials.slug]))),
-        ]
-
-
 class MaterialsCreateView(
     study_views.StudyMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
-    study_views.StudyNavMixin,
     generic.CreateView
 ):
     model = models.Materials
     title = 'Create materials'
-    template_name = 'lrex_contrib/crispy_form.html'
+    template_name = 'lrex_materials/materials_create_form.html'
     form_class = forms.MaterialsForm
     success_message = 'Materials created.'
-    nav_active = 3
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -98,14 +80,12 @@ class MaterialsUpdateView(
     SuccessMessageMixin,
     contrib_views.LeaveWarningMixin,
     study_views.DisableFormIfStudyActiveMixin,
-    MaterialsNavMixin,
     generic.UpdateView
 ):
     model = models.Materials
-    template_name = 'lrex_contrib/crispy_form.html'
+    template_name = 'lrex_materials/materials_settings.html'
     form_class = forms.MaterialsUpdateForm
     success_message = 'Materials successfully updated.'
-    secondary_nav_active = 2
 
     @property
     def title(self):
@@ -120,18 +100,22 @@ class MaterialsUpdateView(
                 messages.info(request, mark_safe(msg))
         return super().get(request, *args, **kwargs)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'nav2_active': 2,
+        })
+        return context
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['study'] = self.study
-        kwargs['disable_list_settings'] = self.study.has_questionnaires
-        kwargs['disable_block_settings'] = self.study.has_questionnaires
-        return kwargs
+        kwargs.update({
+            'study': self.study,
+            'disable_list_settings': self.study.has_questionnaires,
+            'disable_block_settings': self.study.has_questionnaires,
 
-    @property
-    def actions(self):
-        return [
-            ('link', 'Delete materials', reverse('materials-delete', args=[self.materials.slug]), self.ACTION_CSS_BUTTON_DANGER)
-        ]
+        })
+        return kwargs
 
     @property
     def breadcrumbs(self):
@@ -153,10 +137,17 @@ class MaterialsDeleteView(
     MaterialsObjectMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
-    MaterialsNavMixin,
     contrib_views.DefaultDeleteView
 ):
     model = models.Materials
+    template_name = 'lrex_materials/materials_confirm_delete.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'nav2_active': 2,
+        })
+        return context
 
     @property
     def breadcrumbs(self):
@@ -171,28 +162,9 @@ class MaterialsDeleteView(
         return reverse('study', args=[self.study.slug])
 
 
-class ResultsNavMixin(study_views.StudyNavMixin):
-    nav_active = 6
-
-    @property
-    def materials_results_nav(self):
-        return [
-            (materials.title, reverse('materials-results', args=[materials.slug]))
-            for materials in self.study.materials_list
-        ]
-
-    @property
-    def secondary_nav(self):
-        return [
-            ('link', ('Trials', reverse('trials', args=[self.study.slug]))),
-            ('dropdown', ('Summary', self.materials_results_nav)),
-        ]
-
-
 class MaterialsResultsView(
     MaterialsObjectMixin,
     study_views.CheckStudyCreatorMixin,
-    ResultsNavMixin,
     generic.DetailView
 ):
     model = models.Materials
@@ -201,7 +173,6 @@ class MaterialsResultsView(
     aggregate_by_label = 'subject'
     page = 1
     paginate_by = 16
-    secondary_nav_active = 1
 
     @property
     def title(self):
@@ -230,24 +201,6 @@ class MaterialsResultsView(
             'aggregate_by_url_par': 'aggregate_by=' + ','.join(self.aggregate_by),
         })
         return context
-
-    @property
-    def actions(self):
-        aggregate_action = (
-            'dropdown',
-            'aggregateBy',
-            'Aggregated by: {}'.format(self.aggregate_by_label),
-            [
-                ('subject', '?aggregate_by=subject'),
-                ('item', '?aggregate_by=item'),
-                ('subject+item', '?aggregate_by=subject,item')
-            ],
-            self.ACTION_CSS_BUTTON_PRIMARY
-        )
-        return [
-            ('link', 'Results CSV', reverse('study-results-csv', args=[self.study.slug]), self.ACTION_CSS_BUTTON_SECONDARY),
-            aggregate_action,
-        ]
 
     @property
     def breadcrumbs(self):

@@ -121,67 +121,6 @@ class CheckStudyCreatorMixin(UserPassesTestMixin):
         return False
 
 
-class NavMixin:
-    nav = []
-    nav_active = 0
-    secondary_nav = []
-    secondary_nav_active = 0
-
-    def _nav_html(self, nav_type, nav, is_active):
-        nav_context = {
-            'type': nav_type,
-            'active': is_active,
-        }
-        if nav_type == 'link':
-            name, url = nav
-            nav_context.update({
-                'name': name,
-                'url': url
-            })
-        elif nav_type == 'dropdown':
-            name, urls = nav
-            nav_context.update({
-                'name': name,
-                'urls': urls,
-            })
-        return render_to_string('lrex_study/study_nav.html', nav_context)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update({
-            'nav': [self._nav_html(nav_type, nav_item, i == self.nav_active)
-                    for i, (nav_type, nav_item) in enumerate(self.nav)],
-            'secondary_nav': [self._nav_html(nav_type, nav_item, i == self.secondary_nav_active)
-                        for i, (nav_type, nav_item) in enumerate(self.secondary_nav)],
-        })
-        return context
-
-
-class StudyNavMixin(NavMixin):
-
-    @property
-    def materials_nav(self):
-        # TODO: Add empty label
-        return [
-            (materials.title, reverse('items', args=[materials.slug])) for materials in self.study.materials_list
-        ] + [
-            (None, None),  # separator
-            ('New materials', reverse('materials-create', args=[self.study.slug])),
-        ]
-
-    @property
-    def nav(self):
-        return [
-            ('link', ('Dashboard', reverse('study', args=[self.study.slug]))),
-            ('link', ('Settings', reverse('study-settings', args=[self.study.slug]))),
-            ('link', ('Task and instructions', reverse('study-questions', args=[self.study.slug]))),
-            ('dropdown', ('Materials', self.materials_nav)),
-            ('link', ('Questionnaires', reverse('questionnaires', args=[self.study.slug]))),
-            ('link', ('Contact and privacy', reverse('study-contact', args=[self.study.slug]))),
-            ('link', ('Results', reverse('trials', args=[self.study.slug]))),
-        ]
-
-
 class StudyListView(LoginRequiredMixin, generic.ListView):
     model = models.Study
     title = 'Studies'
@@ -253,7 +192,6 @@ class StudyCreateFromArchiveView(LoginRequiredMixin,  SuccessMessageMixin, gener
 class StudyDetailView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
-    StudyNavMixin,
     NextStepsMixin,
     generic.DetailView,
 ):
@@ -287,13 +225,15 @@ class StudyDetailView(
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        data['allow_publish'] = self.study.is_allowed_publish
-        data['trial_count_active'] = self.study.trial_count_active
-        data['trial_count_finished'] = self.study.trial_count_finished
-        data['trial_count_abandoned'] = self.study.trial_count_abandoned
-        data['trial_count_test'] = self.study.trial_count_test
-        data['materials_ready'] = []
-        data['materials_draft'] = []
+        data.update({
+            'allow_publish': self.study.is_allowed_publish,
+            'trial_count_active': self.study.trial_count_active,
+            'trial_count_finished': self.study.trial_count_finished,
+            'trial_count_abandoned': self.study.trial_count_abandoned,
+            'trial_count_test': self.study.trial_count_test,
+            'materials_ready': [],
+            'materials_draft': [],
+        })
         for materials in self.study.materials_list:
             data['materials_ready' if materials.is_complete else 'materials_draft'].append(materials)
         return data
@@ -308,6 +248,7 @@ class StudyDetailView(
 
 class StudyDeleteView(StudyObjectMixin, CheckStudyCreatorMixin, contib_views.DefaultDeleteView):
     model = models.Study
+    template_name = 'lrex_study/settings_confirm_delete.html'
 
     @property
     def breadcrumbs(self):
@@ -412,25 +353,12 @@ class StudyCreateCopyView(StudyMixin, CheckStudyCreatorMixin, SuccessMessageMixi
         ]
 
 
-class StudySettingsNavMixin(StudyNavMixin):
-    nav_active = 1
-
-    @property
-    def secondary_nav(self):
-        return [
-            ('link', ('Settings', reverse('study-settings', args=[self.study.slug]))),
-            ('link', ('Translations', reverse('study-translate', args=[self.study.slug]))),
-            ('link', ('Share', reverse('study-share', args=[self.study.slug]))),
-        ]
-
-
 class StudySettingsView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
     SuccessMessageMixin,
     contib_views.LeaveWarningMixin,
     DisableFormIfStudyActiveMixin,
-    StudySettingsNavMixin,
     generic.UpdateView,
 ):
     model = models.Study
@@ -483,15 +411,13 @@ class StudyTranslationsUpdateView(
     SuccessMessageMixin,
     contib_views.LeaveWarningMixin,
     DisableFormIfStudyActiveMixin,
-    StudySettingsNavMixin,
     generic.UpdateView,
 ):
     model = models.Study
     title = 'Translations'
-    template_name = 'lrex_contrib/crispy_form.html'
+    template_name = 'lrex_study/settings_form.html'
     form_class = forms.StudyTranslationsForm
     success_message = 'Translations updated.'
-    secondary_nav_active = 1
 
     def get(self, request, *args, **kwargs):
         msg = 'Note: Translatable elements are not shown when the respective feature is disabled via a study or ' \
@@ -506,6 +432,13 @@ class StudyTranslationsUpdateView(
             'add_save': True,
         })
         return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'nav2_active': 1,
+        })
+        return context
 
     def get_success_url(self):
         if 'save' in self.request.POST:
@@ -522,36 +455,19 @@ class StudyTranslationsUpdateView(
         ]
 
 
-class TasksNavMixin(StudyNavMixin):
-    nav_active = 2
-
-    @property
-    def secondary_nav(self):
-        return [
-            ('link', ('Questions', reverse('study-questions', args=[self.study.slug]))),
-            ('link', ('Instructions', reverse('study-instructions', args=[self.study.slug]))),
-            ('link', ('Intro/outro', reverse('study-intro', args=[self.study.slug]))),
-            ('link', ('Demographics', reverse('study-demographics', args=[self.study.slug]))),
-        ]
-
-
-
-
 class StudyInstructionsUpdateView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
     SuccessMessageMixin,
     contib_views.LeaveWarningMixin,
-    TasksNavMixin,
     DisableFormIfStudyActiveMixin,
     generic.UpdateView,
 ):
     model = models.Study
     title ='Instructions'
-    template_name = 'lrex_contrib/crispy_form.html'
+    template_name = 'lrex_study/tasks_form.html'
     form_class = forms.StudyInstructionsForm
     success_message = 'Instructions saved.'
-    secondary_nav_active = 1
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -564,6 +480,13 @@ class StudyInstructionsUpdateView(
         if 'save' in self.request.POST:
             return reverse('study-instructions', args=[self.object.slug])
         return self.object.get_absolute_url()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'nav2_active': 1,
+        })
+        return context
 
     @property
     def breadcrumbs(self):
@@ -580,16 +503,14 @@ class StudyIntroUpdateView(
     CheckStudyCreatorMixin,
     SuccessMessageMixin,
     contib_views.LeaveWarningMixin,
-    TasksNavMixin,
     DisableFormIfStudyActiveMixin,
     generic.UpdateView,
 ):
     model = models.Study
     title ='Intro/outro'
-    template_name = 'lrex_contrib/crispy_form.html'
+    template_name = 'lrex_study/tasks_form.html'
     form_class = forms.StudyIntroForm
     success_message = 'Intro/outro saved.'
-    secondary_nav_active = 2
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -602,6 +523,13 @@ class StudyIntroUpdateView(
         if 'save' in self.request.POST:
             return reverse('study-intro', args=[self.object.slug])
         return self.object.get_absolute_url()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'nav2_active': 2,
+        })
+        return context
 
     @property
     def breadcrumbs(self):
@@ -617,13 +545,12 @@ class QuestionUpdateView(
     StudyMixin,
     CheckStudyCreatorMixin,
     contib_views.LeaveWarningMixin,
-    TasksNavMixin,
     DisableFormIfStudyActiveMixin,
     generic.DetailView,
 ):
     model = models.Study
     title = 'Questions'
-    template_name = 'lrex_contrib/crispy_formset_form.html'
+    template_name = 'lrex_study/tasks_formset_form.html'
     formset = None
     helper = None
 
@@ -729,18 +656,16 @@ class QuestionUpdateView(
         ]
 
 
-class SharedWithView(
+class StudyShareView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
     contib_views.LeaveWarningMixin,
-    StudySettingsNavMixin,
     generic.UpdateView
 ):
     model = models.Study
     title = 'Share study'
     form_class = forms.SharedWithForm
-    template_name = 'lrex_contrib/crispy_form.html'
-    secondary_nav_active = 2
+    template_name = 'lrex_study/settings_form.html'
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -748,6 +673,13 @@ class SharedWithView(
             'add_save': True,
         })
         return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'nav2_active': 2,
+        })
+        return context
 
     def get_success_url(self):
         if 'save' in self.request.POST:
@@ -763,29 +695,17 @@ class SharedWithView(
         ]
 
 
-class ContactNavMixin(StudyNavMixin):
-    nav_active = 5
-
-    @property
-    def secondary_nav(self):
-        return [
-            ('link', ('Contact information', reverse('study-contact', args=[self.study.slug]))),
-            ('link', ('Privacy statement', reverse('study-privacy', args=[self.study.slug]))),
-        ]
-
-
 class StudyContactUpdateView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
     SuccessMessageMixin,
     contib_views.LeaveWarningMixin,
     DisableFormIfStudyActiveMixin,
-    ContactNavMixin,
     generic.UpdateView,
 ):
     model = models.Study
     title ='Contact information'
-    template_name = 'lrex_contrib/crispy_form.html'
+    template_name = 'lrex_study/privacy_form.html'
     form_class = forms.StudyContactForm
     success_message = 'Contact information saved.'
 
@@ -817,15 +737,13 @@ class StudyPrivacyUpdateView(
     SuccessMessageMixin,
     contib_views.LeaveWarningMixin,
     DisableFormIfStudyActiveMixin,
-    ContactNavMixin,
     generic.UpdateView,
 ):
     model = models.Study
-    title ='Privacy statement'
-    template_name = 'lrex_contrib/crispy_form.html'
+    title = 'Privacy statement'
+    template_name = 'lrex_study/privacy_form.html'
     form_class = forms.StudyPrivacyForm
     success_message = 'Privacy statement saved.'
-    secondary_nav_active = 1
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -833,6 +751,13 @@ class StudyPrivacyUpdateView(
             'add_save': True,
         })
         return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'nav2_active': 1,
+        })
+        return context
 
     def get_success_url(self):
         if 'save' in self.request.POST:
@@ -864,16 +789,14 @@ class DemographicsUpdateView(
     StudyMixin,
     CheckStudyCreatorMixin,
     contib_views.LeaveWarningMixin,
-    TasksNavMixin,
     DisableFormIfStudyActiveMixin,
     generic.DetailView,
 ):
     model = models.Study
     title = 'Demographics'
-    template_name = 'lrex_contrib/crispy_formset_form.html'
+    template_name = 'lrex_study/tasks_formset_form.html'
     formset = None
     helper = None
-    secondary_nav_active = 3
 
     def dispatch(self, *args, **kwargs):
         self.helper = forms.demographic_formset_helper()
@@ -920,6 +843,13 @@ class DemographicsUpdateView(
                     queryset=self.study.demographicfield_set.all()
                 )
         return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'nav2_active': 3,
+        })
+        return context
 
     @property
     def breadcrumbs(self):
