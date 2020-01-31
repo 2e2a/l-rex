@@ -132,12 +132,6 @@ class StudyListView(LoginRequiredMixin, generic.ListView):
             Q(shared_with__contains=self.request.user.username)
         )
 
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', ''),
-        ]
-
 
 class StudyCreateView(LoginRequiredMixin, generic.CreateView):
     model = models.Study
@@ -153,13 +147,6 @@ class StudyCreateView(LoginRequiredMixin, generic.CreateView):
                   'For more detailed help, consult the <a href="https://github.com/2e2a/l-rex/wiki">Wiki</a>.'
         messages.info(self.request, mark_safe(message))
         return response
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            ('new', ''),
-        ]
 
 
 class StudyCreateFromArchiveView(LoginRequiredMixin,  SuccessMessageMixin, generic.FormView):
@@ -180,13 +167,6 @@ class StudyCreateFromArchiveView(LoginRequiredMixin,  SuccessMessageMixin, gener
 
     def get_success_url(self):
         return reverse('studies', args=[])
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            ('new from archive', ''),
-        ]
 
 
 class StudyDetailView(
@@ -238,25 +218,10 @@ class StudyDetailView(
             data['materials_ready' if materials.is_complete else 'materials_draft'].append(materials)
         return data
 
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, ''),
-        ]
-
 
 class StudyDeleteView(StudyObjectMixin, CheckStudyCreatorMixin, contib_views.DefaultDeleteView):
     model = models.Study
     template_name = 'lrex_study/settings_confirm_delete.html'
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            ('delete', ''),
-        ]
 
     def get_success_url(self):
         return reverse('studies')
@@ -272,14 +237,6 @@ class StudyArchiveView(StudyObjectMixin, CheckStudyCreatorMixin, generic.UpdateV
         response = super().form_valid(form)
         self.study.archive()
         return redirect('studies')
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            ('archive', ''),
-        ]
 
 
 class StudyArchiveDownloadView(StudyObjectMixin, CheckStudyCreatorMixin, generic.DetailView):
@@ -312,14 +269,6 @@ class StudyRestoreFromArchiveView(StudyMixin, CheckStudyCreatorMixin, SuccessMes
     def get_success_url(self):
         return reverse('study', args=[self.study.slug])
 
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            ('restore', ''),
-        ]
-
 
 class StudyCreateCopyView(StudyMixin, CheckStudyCreatorMixin, SuccessMessageMixin, generic.FormView):
     title = 'Create a copy of a study'
@@ -343,14 +292,6 @@ class StudyCreateCopyView(StudyMixin, CheckStudyCreatorMixin, SuccessMessageMixi
 
     def get_success_url(self):
         return reverse('studies', args=[])
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            ('copy', ''),
-        ]
 
 
 class StudySettingsView(
@@ -395,15 +336,6 @@ class StudySettingsView(
             return reverse('study-settings', args=[self.object.slug])
         return self.object.get_absolute_url()
 
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            ('settings', reverse('study-settings', args=[self.study.slug])),
-            ('settings', ''),
-        ]
-
 
 class StudyTranslationsUpdateView(
     StudyObjectMixin,
@@ -445,15 +377,6 @@ class StudyTranslationsUpdateView(
             return reverse('study-translate', args=[self.object.slug])
         return self.object.get_absolute_url()
 
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            ('settings', reverse('study-settings', args=[self.study.slug])),
-            ('translations', ''),
-        ]
-
 
 class StudyInstructionsUpdateView(
     StudyObjectMixin,
@@ -488,15 +411,6 @@ class StudyInstructionsUpdateView(
         })
         return context
 
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            ('tasks', reverse('study-questions', args=[self.study.slug])),
-            ('instructions', ''),
-        ]
-
 
 class StudyIntroUpdateView(
     StudyObjectMixin,
@@ -530,15 +444,6 @@ class StudyIntroUpdateView(
             'nav2_active': 2,
         })
         return context
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            ('tasks', reverse('study-questions', args=[self.study.slug])),
-            ('intro', ''),
-        ]
 
 
 class QuestionUpdateView(
@@ -646,15 +551,6 @@ class QuestionUpdateView(
             )
         return super().get(request, *args, **kwargs)
 
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            ('tasks', reverse('study-questions', args=[self.study.slug])),
-            ('questions', ''),
-        ]
-
 
 class StudyShareView(
     StudyObjectMixin,
@@ -686,14 +582,6 @@ class StudyShareView(
             return reverse('study-share', args=[self.object.slug])
         return self.object.get_absolute_url()
 
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            ('share', ''),
-        ]
-
 
 class StudyContactUpdateView(
     StudyObjectMixin,
@@ -720,15 +608,6 @@ class StudyContactUpdateView(
         if 'save' in self.request.POST:
             return reverse('study-contact', args=[self.object.slug])
         return self.object.get_absolute_url()
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            ('privacy', reverse('study-contact', args=[self.study.slug])),
-            ('contact', ''),
-        ]
 
 
 class StudyPrivacyUpdateView(
@@ -763,15 +642,6 @@ class StudyPrivacyUpdateView(
         if 'save' in self.request.POST:
             return reverse('study-privacy', args=[self.object.slug])
         return self.object.get_absolute_url()
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            ('privacy', reverse('study-contact', args=[self.study.slug])),
-            ('privacy', ''),
-        ]
 
 
 class StudyResultsCSVDownloadView(StudyObjectMixin, CheckStudyCreatorMixin, generic.DetailView):
@@ -850,14 +720,3 @@ class DemographicsUpdateView(
             'nav2_active': 3,
         })
         return context
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            ('tasks', reverse('study-questions', args=[self.study.slug])),
-            ('demographics', ''),
-        ]
-
-

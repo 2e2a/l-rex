@@ -12,7 +12,6 @@ from django.views import generic
 
 from apps.contrib import csv as contrib_csv
 from apps.contrib import views as contrib_views
-from apps.materials import views as materials_views
 from apps.study import views as study_views
 
 from . import forms
@@ -157,14 +156,6 @@ class QuestionnaireListView(
     def pagination_offset(self):
         return (int(self.page) - 1) * int(self.paginate_by)
 
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            ('questionnaires', ''),
-        ]
-
 
 class QuestionnaireDetailView(
     QuestionnaireObjectMixin,
@@ -197,15 +188,6 @@ class QuestionnaireDetailView(
         context = super().get_context_data(**kwargs)
         context['questionnaire_items'] = self._context_questionnaire_items()
         return context
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            ('questionnaires', reverse('questionnaires', args=[self.study.slug])),
-            (self.questionnaire.number, '')
-        ]
 
 
 class QuestionnaireGenerateView(
@@ -258,15 +240,6 @@ class QuestionnaireGenerateView(
                 return redirect('questionnaires', study_slug=self.study.slug)
         return super().get(request, *args, **kwargs)
 
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            ('questionnaires', reverse('questionnaires', args=[self.study.slug])),
-            ('generate', '')
-        ]
-
 
 class QuestionnaireDeleteAllView(
     study_views.StudyMixin,
@@ -282,15 +255,6 @@ class QuestionnaireDeleteAllView(
         self.study.delete_questionnaires()
         messages.success(self.request, 'All questionnaires deleted.')
         return redirect(self.get_success_url())
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            ('questionnaires', reverse('questionnaires', args=[self.study.slug])),
-            ('delete', '')
-        ]
 
     def get_success_url(self):
         return reverse('questionnaires', args=[self.study.slug])
@@ -349,14 +313,6 @@ class QuestionnaireBlockInstructionsUpdateView(
         })
         return context
 
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            ('block-instructions', '')
-        ]
-
 
 class QuestionnaireUploadView(
     study_views.StudyMixin,
@@ -388,15 +344,6 @@ class QuestionnaireUploadView(
 
     def get_success_url(self):
         return reverse('questionnaires', args=[self.study.slug])
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            ('questionnaires', reverse('questionnaires', args=[self.study.slug])),
-            ('upload', '')
-        ]
 
 
 class QuestionnaireCSVDownloadView(study_views.StudyMixin, study_views.CheckStudyCreatorMixin, generic.View):
@@ -447,15 +394,6 @@ class TrialListView(
     def get_queryset(self):
         return super().get_queryset().filter(questionnaire__study=self.study)
 
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            ('results', reverse('trials', args=[self.study.slug])),
-            ('trials', ''),
-        ]
-
 
 class TrialDeleteAllView(
     study_views.StudyMixin,
@@ -473,15 +411,6 @@ class TrialDeleteAllView(
         models.Trial.objects.filter(questionnaire__study=self.study).delete()
         messages.success(self.request, 'All trials deleted.')
         return redirect(self.get_success_url())
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            ('trials', reverse('trials', args=[self.study.slug])),
-            ('delete-all', ''),
-        ]
 
 
 class TestTrialMixin:
@@ -616,15 +545,6 @@ class TrialDetailView(
     model = models.Trial
     title = 'Trial overview'
 
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            ('trials', reverse('trials', args=[self.study.slug])),
-            (self.trial.subject_id, ''),
-        ]
-
 
 class TrialDeleteView(
     TrialObjectMixin,
@@ -633,14 +553,6 @@ class TrialDeleteView(
 ):
     model = models.Trial
     template_name = 'lrex_trial/results_confirm_delete.html'
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.object.slug, reverse('study', args=[self.object.slug])),
-            ('delete', ''),
-        ]
 
     def get_success_url(self):
         return reverse('trials', args=[self.study.slug])

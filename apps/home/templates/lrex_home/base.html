@@ -62,19 +62,7 @@
     </div>
 </nav>
 <div class="bg-white grey-shadow">
-    <div class="container bg-white">
-        <nav aria-label="Breadcrumbs">
-            <ol class="breadcrumb bg-white px-0 py-0 my-0">
-                <li class="breadcrumb-item"><a href="{% url 'home' %}">home</a></li>
-                {% for name, link in view.breadcrumbs %}
-                {% if not forloop.last %}
-                <li class="breadcrumb-item"><a href="{{ link }}">{{ name }}</a></li>
-                {% else %}
-                <li class="breadcrumb-item active">{{ name }}</li>
-                {% endif %}
-                {% endfor %}
-            </ol>
-        </nav>
+    <div class="container">
         <div class="row d-sm-flex justify-content-between align-items-center">
             <h1 class="title">{% block header-title %}{% if view.title %}{{ view.title }}{% endif %}{% endblock %}</h1>
             <div class="d-flex">

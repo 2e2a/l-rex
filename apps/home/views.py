@@ -3,7 +3,6 @@ from markdownx.utils import markdownify
 from django.conf import settings
 from django.shortcuts import render_to_response
 from django.shortcuts import redirect
-from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.views import generic
 from django.views.decorators.csrf import requires_csrf_token
@@ -29,10 +28,6 @@ class HomeView(generic.ListView):
             return redirect('user-profile-create')
         return super().get(request, *args, **kwargs)
 
-    @property
-    def breadcrumbs(self):
-        return []
-
 
 class ImprintView(generic.TemplateView):
     template_name = 'lrex_home/imprint.html'
@@ -43,12 +38,6 @@ class ImprintView(generic.TemplateView):
         data['contact_rich'] = mark_safe(markdownify(settings.LREX_CONTACT_MD))
         data['privacy_rich'] = mark_safe(markdownify(settings.LREX_PRIVACY_MD))
         return data
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('contact', '')
-        ]
 
 
 class NewsView(generic.DetailView):
@@ -62,9 +51,3 @@ class NewsView(generic.DetailView):
         data = super().get_context_data(**kwargs)
         data['news_rich'] = mark_safe(markdownify(self.get_object().text))
         return data
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('news', '')
-        ]

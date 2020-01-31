@@ -65,14 +65,6 @@ class MaterialsCreateView(
         response = super().form_valid(form)
         return response
 
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            ('create materials','')
-        ]
-
 
 class MaterialsUpdateView(
     MaterialsObjectMixin,
@@ -117,15 +109,6 @@ class MaterialsUpdateView(
         })
         return kwargs
 
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            (self.materials.title, reverse('materials', args=[self.object.slug])),
-            ('edit','')
-        ]
-
 
 class MaterialsView(MaterialsMixin, generic.RedirectView):
 
@@ -148,15 +131,6 @@ class MaterialsDeleteView(
             'nav2_active': 2,
         })
         return context
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            (self.materials.title, reverse('materials', args=[self.object.slug])),
-            ('delete','')
-        ]
 
     def get_success_url(self):
         return reverse('study', args=[self.study.slug])
@@ -201,12 +175,3 @@ class MaterialsResultsView(
             'aggregate_by_url_par': 'aggregate_by=' + ','.join(self.aggregate_by),
         })
         return context
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study',args=[self.study.slug])),
-            ('results', reverse('trials',args=[self.study.slug])),
-            (self.materials.title,'')
-        ]

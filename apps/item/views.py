@@ -97,15 +97,6 @@ class ItemListView(
     def get_queryset(self):
         return super().get_queryset().filter(materials=self.materials).order_by('number','condition')
 
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            (self.materials.title, reverse('materials', args=[self.materials.slug])),
-            ('items', ''),
-        ]
-
 
 class ItemCreateMixin(contrib_views.PaginationHelperMixin):
     template_name = 'lrex_materials/materials_form.html'
@@ -140,16 +131,6 @@ class ItemCreateMixin(contrib_views.PaginationHelperMixin):
         item_page = int(item_pos / ItemListView.paginate_by) + 1
         return self.reverse_paginated('items', args=[self.materials.slug], page=item_page)
 
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            (self.materials.title, reverse('materials', args=[self.materials.slug])),
-            ('items', self.reverse_paginated('items', args=[self.materials.slug])),
-            ('create', '')
-        ]
-
 
 class ItemUpdateMixin(
     contrib_views.LeaveWarningMixin,
@@ -179,16 +160,6 @@ class ItemUpdateMixin(
         if 'save' in self.request.POST:
             return self.url_paginated(self.object.get_absolute_url())
         return self.reverse_paginated('items', args=[self.materials.slug])
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            (self.materials.title, reverse('materials', args=[self.materials.slug])),
-            ('items', self.reverse_paginated('items', args=[self.materials.slug])),
-            (self.item, ''),
-        ]
 
 
 class ItemCreateView(
@@ -317,17 +288,6 @@ class ItemDeleteView(
     def get_success_url(self):
         return self.reverse_paginated('items', args=[self.materials.slug])
 
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            (self.materials.title, reverse('materials', args=[self.materials.slug])),
-            ('items', self.reverse_paginated('items', args=[self.materials.slug])),
-            (self.item, self.reverse_paginated('text-item-update', args=[self.item.slug])),
-            ('delete','')
-        ]
-
 
 class ItemPregenerateView(
     materials_views.MaterialsMixin,
@@ -379,16 +339,6 @@ class ItemPregenerateView(
 
     def get_success_url(self):
         return self.reverse_paginated('items', args=[self.materials.slug])
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            (self.materials.title, reverse('materials', args=[self.materials.slug])),
-            ('items', self.reverse_paginated('items', args=[self.materials.slug])),
-            ('pregenerate', ''),
-        ]
 
 
 class ItemUploadView(
@@ -449,16 +399,6 @@ class ItemUploadView(
     def get_success_url(self):
         return reverse('items', args=[self.materials.slug])
 
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            (self.materials.title, reverse('materials', args=[self.materials.slug])),
-            ('items', reverse('items', args=[self.materials.slug])),
-            ('upload', ''),
-        ]
-
 
 class ItemDeleteAllView(
     materials_views.MaterialsMixin,
@@ -476,16 +416,6 @@ class ItemDeleteAllView(
         self.materials.delete_lists()
         messages.success(self.request, 'All items deleted.')
         return redirect(self.get_success_url())
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            (self.materials.title, reverse('materials', args=[self.materials.slug])),
-            ('items', reverse('items', args=[self.materials.slug])),
-            ('delete-all','')
-        ]
 
     def get_success_url(self):
         return reverse('items', args=[self.materials.slug])
@@ -553,16 +483,6 @@ class ItemQuestionsUpdateView(
                 else:  # save
                     return self.redirect_paginated('item-questions', item_slug=self.item.slug)
         return super().get(request, *args, **kwargs)
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            (self.materials.title, reverse('materials', args=[self.materials.slug])),
-            ('items', self.reverse_paginated('items', args=[self.materials.slug])),
-            ('{}-questions'.format(self.item), '')
-        ]
 
 
 class ItemFeedbackUpdateView(
@@ -639,16 +559,6 @@ class ItemFeedbackUpdateView(
             forms.itemfeedback_init_formset(self.formset, self.study)
         return super().get(request, *args, **kwargs)
 
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            (self.materials.title, reverse('materials', args=[self.materials.slug])),
-            ('items', self.reverse_paginated('items', args=[self.materials.slug])),
-            ('{}-feedback'.format(self.item),'')
-        ]
-
 
 class ItemFeedbackUploadView(
     materials_views.MaterialsMixin,
@@ -686,15 +596,6 @@ class ItemFeedbackUploadView(
     def get_success_url(self):
         return self.reverse_paginated('items', args=[self.materials.slug])
 
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            (self.materials.title, reverse('materials', args=[self.materials.slug])),
-            ('items', self.reverse_paginated('items', args=[self.materials.slug])),
-            ('upload-feedback', ''),
-        ]
 
 class ItemCSVDownloadView(materials_views.MaterialsMixin, study_views.CheckStudyCreatorMixin, generic.View):
 
@@ -734,15 +635,6 @@ class ItemListListView(
     def disable_actions(self):
         if self.is_disabled:
             return [1], [0]
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            (self.materials.title, reverse('materials', args=[self.materials.slug])),
-            ('itemlists', ''),
-        ]
 
 
 class ItemListUploadView(
@@ -784,16 +676,6 @@ class ItemListUploadView(
 
     def get_success_url(self):
         return reverse('itemlists', args=[self.materials.slug])
-
-    @property
-    def breadcrumbs(self):
-        return [
-            ('studies', reverse('studies')),
-            (self.study.title, reverse('study', args=[self.study.slug])),
-            (self.materials.title, reverse('materials', args=[self.materials.slug])),
-            ('itemlists', reverse('itemlists', args=[self.materials.slug])),
-            ('upload', ''),
-        ]
 
 
 class ItemListCSVDownloadView(materials_views.MaterialsMixin, study_views.CheckStudyCreatorMixin, generic.View):
