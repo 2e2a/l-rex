@@ -176,10 +176,7 @@ class StudyDetailView(
     generic.DetailView,
 ):
     model = models.Study
-
-    @property
-    def title(self):
-        return self.study.title
+    template_name = 'lrex_study/study_dashboard.html'
 
     def get(self, request, *args, **kwargs):
         if not hasattr(self.request.user, 'userprofile'):
