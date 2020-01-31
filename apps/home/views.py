@@ -20,7 +20,6 @@ def handler500(request):
 class HomeView(generic.ListView):
     model = models.News
     template_name = 'lrex_home/home.html'
-    title = 'Linguistic rating experiments'
     paginate_by = 2
 
     def get(self, request, *args, **kwargs):
@@ -31,7 +30,6 @@ class HomeView(generic.ListView):
 
 class ImprintView(generic.TemplateView):
     template_name = 'lrex_home/imprint.html'
-    title = 'Imprint'
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)

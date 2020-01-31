@@ -16,7 +16,7 @@
     <link rel="shortcut icon" type="image/sgv" href="{% static 'img/favicon.svg' %}"/>
 </head>
 <body class="bg-light">
-<nav class="navbar navbar-expand-md navbar-light bg-white static-top pb-1">
+<nav class="navbar navbar-expand-md navbar-light bg-white static-top pb-1 grey-shadow">
     <div class="container">
         <a class="navbar-brand" href="/">
             <img src="{% static 'img/logo.svg' %}" width="30" height="30" alt="Logo">
@@ -61,31 +61,14 @@
 
     </div>
 </nav>
-<div class="bg-white grey-shadow">
-    <div class="container">
-        <div class="row d-sm-flex justify-content-between align-items-center">
-            <h1 class="title">{% block header-title %}{% if view.title %}{{ view.title }}{% endif %}{% endblock %}</h1>
-            <div class="d-flex">
+<div class="container bg-white py-2 mt-3 border">
+    {% block nav %}{% endblock %}
+    <div class="d-sm-flex justify-content-between align-items-center">
+        <h1 class="title">{% block header-title %}{% if view.title %}{{ view.title }}{% endif %}{% endblock %}</h1>
+        <div class="d-flex">
             {% block actions %}{% endblock %}
-            </div>
         </div>
     </div>
-</div>
-<div class="container bg-white py-2 mt-3">
-    {% block nav %}
-    {% if nav or secondary_nav %}
-    <ul class="nav nav-tabs mb-2">
-        {% for nav_html in nav %}
-        {{ nav_html }}
-        {% endfor %}
-    </ul>
-    <ul class="nav nav-pills my-3">
-        {% for nav_html in secondary_nav %}
-        {{ nav_html }}
-        {% endfor %}
-    </ul>
-    {% endif %}
-    {% endblock %}
     {% for message in messages %}
     <div class="alert {{ message.level_tag|bootstrap_alert_class }} border" role="alert">
         {{ message }}
