@@ -32,8 +32,6 @@ class StudySettingsForm(contrib_forms.CrispyModelForm):
             'use_blocks',
             'pseudo_randomize_question_order',
             'enable_item_rating_feedback',
-            'link_instructions',
-            'link_block_instructions',
         ]
 
     def __init__(self, *args, **kwargs):
@@ -75,12 +73,6 @@ class StudySettingsForm(contrib_forms.CrispyModelForm):
                     'use_blocks',
                     'pseudo_randomize_question_order',
                     'enable_item_rating_feedback',
-                    HTML('<hr>'),
-                ),
-                Fieldset(
-                    'Availability of instructions during trial',
-                    'link_instructions',
-                    'link_block_instructions',
                     HTML('<hr>'),
                 ),
             )
@@ -140,6 +132,7 @@ class StudyInstructionsForm(contrib_forms.CrispyModelForm):
         model = models.Study
         fields = [
             'instructions',
+            'short_instructions',
         ]
 
     def __init__(self, *args, **kwargs):

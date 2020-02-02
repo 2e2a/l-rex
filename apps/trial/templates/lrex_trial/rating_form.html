@@ -32,5 +32,17 @@
 
 <div class="my-2 p-4 border bg-white">
     {% crispy view.formset view.helper %}
+    {% if study.short_instructions %}
+    <div class="mt-3">
+        <a data-toggle="collapse" href="#collapseExample"  aria-expanded="false" aria-controls="collapseExample">
+            {{ study.instructions_label }}
+        </a>
+        <div class="collapse" id="collapseExample">
+            <p>
+                {{ short_instructions_rich }}
+            </p>
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

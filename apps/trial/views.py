@@ -586,18 +586,6 @@ class TrialContactView(study_views.StudyMixin, generic.TemplateView):
         return data
 
 
-class TrialInstructionsView(TrialMixin, generic.TemplateView):
-    template_name = 'lrex_trial/trial_instructions.html'
-
-    def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-        data['instructions_rich'] = mark_safe(markdownify(self.study.instructions))
-        if self.study.use_blocks and self.study.link_block_instructions:
-            questionnaire_block = self.trial.current_block
-            data['block_instructions_rich'] = mark_safe(markdownify(questionnaire_block.instructions))
-        return data
-
-
 class ProgressMixin:
 
     def get_context_data(self, **kwargs):
@@ -689,10 +677,13 @@ class RatingsCreateView(ProgressMixin, TestWarningMixin, TrialMixin, generic.Tem
         kwargs.update(
             {
                 'n_trial_items': len(self.trial.items), 'num': self.num,
-                'item': self.questionnaire_item.item
+                'item': self.questionnaire_item.item,
             }
         )
-        return super().get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
+        if self.study.short_instructions:
+            context['short_instructions_rich'] = mark_safe(markdownify(self.study.short_instructions))
+        return context
 
     def _redirect_to_correct_num(self, num):
         if self.trial.is_test:

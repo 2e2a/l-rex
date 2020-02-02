@@ -94,18 +94,17 @@ class Study(models.Model):
         max_length=5000,
         help_text='These instructions will be presented to the participant before the experiment begins.',
     )
+    short_instructions = MarkdownxField(
+        blank=True,
+        null=True,
+        max_length=3000,
+        help_text='You can optionally provide a shorter version of the instructions that the participant can access at '
+                  'any point during participation as a reminder of the task.'
+    )
     require_participant_id = models.BooleanField(
         default=False,
         help_text='Enable if you want participants to enter an ID before participation.',
         verbose_name='Participant ID required',
-    )
-    link_instructions = models.BooleanField(
-        default=False,
-        help_text='Make a link to the instructions available at any time during participation.',
-    )
-    link_block_instructions = models.BooleanField(
-        default=False,
-        help_text='Make the current block instructions available under the instructions link.',
     )
     end_date = DateField(
         blank=True,
@@ -186,8 +185,9 @@ class Study(models.Model):
     )
     instructions_label = models.CharField(
         max_length=40,
-        default='Instructions',
-        help_text='Label of the "Instructions" link used during participation.',
+        default='Show/hide short instructions',
+        help_text='Label of the link to the short instructions that the participant can access during participation '
+                  '(if defined).',
     )
     optional_label = models.CharField(
         max_length=40,

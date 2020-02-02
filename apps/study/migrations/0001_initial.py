@@ -44,8 +44,6 @@ class Migration(migrations.Migration):
                 ('password', models.CharField(blank=True, help_text='This password will be required to participate in the study.', max_length=200, null=True)),
                 ('instructions', markdownx.models.MarkdownxField(blank=True, help_text='These instructions will be presented to the participant before the experiment begins.', max_length=5000, null=True)),
                 ('require_participant_id', models.BooleanField(default=False, help_text='Enable if you want participants to enter an ID before participation.', verbose_name='Participant ID required')),
-                ('link_instructions', models.BooleanField(default=False, help_text='Make a link to the instructions available at any time during participation.')),
-                ('link_block_instructions', models.BooleanField(default=False, help_text='Make the current block instructions available under the instructions link.')),
                 ('end_date', apps.contrib.datefield.DateField(blank=True, help_text='Set a participation deadline.', null=True)),
                 ('trial_limit', models.IntegerField(blank=True, help_text='If you want to set a maximal number of participants, enter a number.', null=True, verbose_name='Maximal number of participants')),
                 ('contact_name', models.CharField(blank=True, help_text='This name will be shown to participants as part of the contact information before the study begins.', max_length=1000, null=True)),

@@ -29,7 +29,6 @@ urlpatterns = [
     path('<slug:trial_slug>/', views.TrialDetailView.as_view(), name='trial'),
     path('<slug:trial_slug>/delete/', views.TrialDeleteView.as_view(), name='trial-delete'),
     path('<slug:trial_slug>/demographics/', views.DemographicsCreateView.as_view(), name='trial-demographics'),
-    path('<slug:trial_slug>/instructions/', views.TrialInstructionsView.as_view(), name='trial-instructions'),
     path('<slug:trial_slug>/rating/<int:num>/', views.RatingsCreateView.as_view(), name='ratings-create'),
     path('<slug:trial_slug>/rating/outro/', views.RatingOutroView.as_view(), name='rating-outro'),
     path('<slug:trial_slug>/rating/taken/', views.RatingTakenView.as_view(), name='rating-taken'),
