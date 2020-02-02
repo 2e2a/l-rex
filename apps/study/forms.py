@@ -89,6 +89,7 @@ class StudyTranslationsForm(contrib_forms.CrispyModelForm):
             'privacy_statement_label',
             'contact_label',
             'instructions_label',
+            'block_instructions_label',
             'optional_label',
             'comment_label',
             'answer_question_message',

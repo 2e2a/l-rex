@@ -202,7 +202,7 @@ class QuestionnaireGenerateView(
     helper = None
 
     def dispatch(self, request, *args, **kwargs):
-        self.helper = forms.questionnaire_block_formset_helper(has_exmaple_block=self.study.has_exmaples)
+        self.helper = forms.questionnaire_block_formset_helper(has_example_block=self.study.has_exmaples)
         self.blocks = self.study.item_blocks
         if not self.study.is_allowed_pseudo_randomization:
             messages.info(request, 'Note: Define filler materials to use pseudo randomization.')
@@ -234,7 +234,7 @@ class QuestionnaireGenerateView(
                 self.formset.save(commit=True)
                 try:
                     self.study.generate_questionnaires()
-                    messages.success(request, 'Questionnaires generated')
+                    messages.success(request, 'Questionnaires generated.')
                 except RuntimeError:
                     messages.error(request, 'Pseudo-randomization timed out. Retry or add more filler items and retry.')
                 return redirect('questionnaires', study_slug=self.study.slug)
@@ -683,6 +683,8 @@ class RatingsCreateView(ProgressMixin, TestWarningMixin, TrialMixin, generic.Tem
         context = super().get_context_data(**kwargs)
         if self.study.short_instructions:
             context['short_instructions_rich'] = mark_safe(markdownify(self.study.short_instructions))
+        if self.study.use_blocks and self.trial.current_block.short_instructions:
+            context['short_block_instructions_rich'] = mark_safe(markdownify(self.trial.current_block.short_instructions))
         return context
 
     def _redirect_to_correct_num(self, num):

@@ -184,10 +184,16 @@ class Study(models.Model):
         help_text='Label for "Contact" used during participation.',
     )
     instructions_label = models.CharField(
-        max_length=40,
+        max_length=60,
         default='Show/hide short instructions',
         help_text='Label of the link to the short instructions that the participant can access during participation '
                   '(if defined).',
+    )
+    block_instructions_label = models.CharField(
+        max_length=60,
+        default='Show/hide short instructions for this block',
+        help_text='Label of the link to the short block instructions that the participant can access during  '
+                  'participation (if defined).',
     )
     optional_label = models.CharField(
         max_length=40,

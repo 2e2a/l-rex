@@ -66,19 +66,25 @@ def customize_randomization(questionnaireblock_formset, study):
                                      if k != models.QuestionnaireBlock.RANDOMIZATION_PSEUDO]
 
 
-def questionnaire_block_formset_helper(has_exmaple_block=False):
+def questionnaire_block_formset_helper(has_example_block=False):
     formset_helper = FormHelper()
-    label = 'Item block {{ forloop.counter0 }}' if has_exmaple_block else 'Item block {{ forloop.counter }}'
-    formset_helper.add_layout(Layout(Fieldset(label, None, 'instructions', 'randomization')))
+    label = 'Item block {{ forloop.counter0 }}' if has_example_block else 'Item block {{ forloop.counter }}'
+    formset_helper.add_layout(Layout(Fieldset(label, None, 'randomization')))
     formset_helper.add_input(Submit('submit', 'Submit'))
     return formset_helper
 
 
-class QuestionnaireBlockUpdateForm(forms.ModelForm):
+class QuestionnaireBlockUpdateForm(contrib_forms.CrispyModelForm):
+    optional_label_ignore_fields = [
+        'instructions',
+    ]
 
     class Meta:
         model = models.QuestionnaireBlock
-        fields = ['instructions']
+        fields = [
+            'instructions',
+            'short_instructions',
+        ]
 
 
 def questionnaire_block_update_factory(n_blocks):
@@ -92,7 +98,9 @@ def questionnaire_block_update_factory(n_blocks):
 
 def questionnaire_block_update_formset_helper():
     formset_helper = FormHelper()
-    formset_helper.add_layout(Layout(Fieldset('Item block {{ forloop.counter }}', None, 'instructions')))
+    formset_helper.add_layout(Layout(
+        Fieldset('Item block {{ forloop.counter }}', None, 'instructions', 'short_instructions')
+    ))
     formset_helper.add_input(Submit('submit', 'Submit'))
     formset_helper.add_input(Submit('save', 'Save', css_class='btn-secondary'))
     return formset_helper

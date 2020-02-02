@@ -276,8 +276,15 @@ class Questionnaire(models.Model):
 class QuestionnaireBlock(models.Model):
     block = models.IntegerField()
     instructions = MarkdownxField(
-        max_length=2000,
+        max_length=5000,
         help_text='These instructions will be presented to the participant before the questionnaire block begins.',
+        blank=True,
+        null=True,
+    )
+    short_instructions = MarkdownxField(
+        max_length=3000,
+        help_text='You can optionally provide a shorter version of the block instructions that the participant can '
+                  'access again during participation as a reminder of the task.',
         blank=True,
         null=True,
     )
