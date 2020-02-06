@@ -253,7 +253,7 @@ class QuestionnaireDeleteAllView(
     study_views.QuestionnaireNavMixin,
     generic.TemplateView
 ):
-    title = 'Confirm Delete'
+    title = 'Confirm deletion'
     template_name = 'lrex_questionnaire/questionnaire_confirm_delete.html'
     message = 'Delete all questionnaires?'
 
@@ -409,7 +409,7 @@ class TrialDeleteAllView(
     study_views.CheckStudyCreatorMixin,
     generic.TemplateView,
 ):
-    title = 'Confirm Delete'
+    title = 'Confirm deletion'
     template_name = 'lrex_dashboard/results_confirm_delete.html'
     message = 'Delete all trials?'
 

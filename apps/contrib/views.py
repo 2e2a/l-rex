@@ -6,7 +6,7 @@ from django.views import generic
 
 
 class DefaultDeleteView(generic.DeleteView):
-    title = 'Confirm Delete'
+    title = 'Confirm deletion'
     template_name = 'lrex_contrib/confirm_delete.html'
     success_message = 'Deletion successfull.'
 

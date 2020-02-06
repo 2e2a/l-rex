@@ -80,10 +80,7 @@ class MaterialsUpdateView(
     template_name = 'lrex_materials/materials_settings.html'
     form_class = forms.MaterialsUpdateForm
     success_message = 'Materials successfully updated.'
-
-    @property
-    def title(self):
-        return '{}: Settings'.format(self.materials.title)
+    title = 'Materials settings'
 
     def get(self, request, *args, **kwargs):
         if not self.is_disabled:
@@ -145,10 +142,7 @@ class MaterialsResultsView(
     aggregate_by_label = 'subject'
     page = 1
     paginate_by = 16
-
-    @property
-    def title(self):
-        return 'Results: {}'.format(self.materials.title)
+    title = 'Materials result summery'
 
     def dispatch(self, request, *args, **kwargs):
         self.page = request.GET.get('page')

@@ -85,10 +85,7 @@ class ItemListView(
 ):
     model = models.Item
     paginate_by = 16
-
-    @property
-    def title(self):
-        return '{}: Items'.format(self.materials.title)
+    title = 'Items'
 
     def post(self, request, *args, **kwargs):
         action = request.POST.get('action', None)
@@ -103,10 +100,7 @@ class ItemListView(
 
 class ItemCreateMixin(contrib_views.PaginationHelperMixin):
     template_name = 'lrex_dashboard/materials_form.html'
-
-    @property
-    def title(self):
-        return '{}: add item'.format(self.materials.title)
+    title = 'Add new item'
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -142,10 +136,7 @@ class ItemUpdateMixin(
 ):
     template_name = 'lrex_dashboard/materials_form.html'
     success_message = 'Item successfully updated.'
-
-    @property
-    def title(self):
-        return '{}: edit item'.format(self.materials.title)
+    title = 'Edit item'
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -305,10 +296,7 @@ class ItemPregenerateView(
     form_class = forms.PregenerateItemsForm
     template_name = 'lrex_dashboard/materials_form.html'
     success_message = 'Items successfully generated.'
-
-    @property
-    def title(self):
-        return '{}: pregenerate items'.format(self.materials.title)
+    title = 'Pregenerate items'
 
     def _pregenerate_items(self, n_items, n_conditions):
         for n_item in range(1, n_items + 1):
@@ -356,10 +344,7 @@ class ItemUploadView(
 ):
     form_class = forms.ItemUploadForm
     template_name = 'lrex_dashboard/materials_form.html'
-
-    @property
-    def title(self):
-        return '{}: upload items'.format(self.materials.title)
+    title = 'Upload items'
 
     def dispatch(self, request, *args, **kwargs):
         if not self.study.questions:
@@ -413,7 +398,7 @@ class ItemDeleteAllView(
     study_views.MaterialsNavMixin,
     generic.TemplateView
 ):
-    title = 'Confirm Delete'
+    title = 'Confirm deletion'
     template_name = 'lrex_dashboard/materials_confirm_delete.html'
     message = 'Delete all items?'
 
@@ -443,7 +428,7 @@ class ItemQuestionsUpdateView(
 
     @property
     def title(self):
-        return '{}: customize item {} questions'.format(self.materials.title, self.item)
+        return 'Customize item {} questions'.format(self.item)
 
     def dispatch(self, request, *args, **kwargs):
         self.n_questions = len(self.study.questions)
@@ -508,7 +493,7 @@ class ItemFeedbackUpdateView(
 
     @property
     def title(self):
-        return '{}: define item {} feedback'.format(self.materials.title, self.item)
+        return 'Define item {} feedback'.format(self.item)
 
     def dispatch(self, request, *args, **kwargs):
         self.helper = forms.itemfeedback_formset_helper()
@@ -579,10 +564,7 @@ class ItemFeedbackUploadView(
 ):
     form_class = forms.ItemFeedbackUploadForm
     template_name = 'lrex_dashboard/materials_form.html'
-
-    @property
-    def title(self):
-        return '{}: upload item feedback'.format(self.materials.title)
+    title = 'Upload item feedback'
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -628,10 +610,7 @@ class ItemListListView(
     generic.ListView
 ):
     model = models.ItemList
-
-    @property
-    def title(self):
-        return '{}: Item lists'.format(self.materials.title)
+    title = 'Item lists'
 
     def post(self, request, *args, **kwargs):
         action = request.POST.get('action', None)
@@ -659,10 +638,7 @@ class ItemListUploadView(
 ):
     form_class = forms.ItemListUploadForm
     template_name = 'lrex_dashboard/materials_form.html'
-
-    @property
-    def title(self):
-        return '{}: upload item lists'.format(self.materials.title)
+    title = 'Upload item lists'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

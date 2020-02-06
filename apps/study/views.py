@@ -457,7 +457,7 @@ class StudyShareView(
     generic.UpdateView
 ):
     model = models.Study
-    title = 'Share study'
+    title = 'Share the study'
     form_class = forms.SharedWithForm
     template_name = 'lrex_dashboard/settings_form.html'
 
