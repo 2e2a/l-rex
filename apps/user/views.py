@@ -10,7 +10,7 @@ from . import forms
 class UserProfileCreateView(LoginRequiredMixin, SuccessMessageMixin, generic.CreateView):
     model = models.UserProfile
     title = 'User settings'
-    template_name = 'lrex_contrib/crispy_form.html'
+    template_name = 'lrex_home/base_form.html'
     form_class = forms.ProfileForm
     success_message = 'User settings successfully updated.'
 
@@ -25,7 +25,7 @@ class UserProfileCreateView(LoginRequiredMixin, SuccessMessageMixin, generic.Cre
 class UserProfileUpdateView(LoginRequiredMixin, SuccessMessageMixin, generic.UpdateView):
     model = models.UserProfile
     title = 'User settings'
-    template_name = 'lrex_contrib/crispy_form.html'
+    template_name = 'lrex_home/base_form.html'
     form_class = forms.ProfileForm
     success_message = 'User settings successfully updated.'
 

@@ -1,8 +1,2 @@
-{% extends "lrex_home/base.html" %}
 {% load crispy_forms_tags %}
-
-{% block content %}
-<div class="p-4 border bg-white">
-    {% crispy view.formset view.helper %}
-</div>
-{% endblock %}
+{% crispy view.formset view.helper %}
