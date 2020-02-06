@@ -453,7 +453,7 @@ class Trial(models.Model):
         return reverse('trial', args=[self.slug])
 
     def __str__(self):
-        return '{} trial'.format(self.subject_id)
+        return self.subject_id
 
 
 class Rating(models.Model):
