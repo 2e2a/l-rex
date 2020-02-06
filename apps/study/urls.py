@@ -12,7 +12,7 @@ urlpatterns = [
     path('create/from-archive/', views.StudyCreateFromArchiveView.as_view(), name='study-create-archive'),
     path('<slug:study_slug>/', views.StudyDetailView.as_view(), name='study'),
     path('<slug:study_slug>/settings/', views.StudySettingsView.as_view(), name='study-settings'),
-    path('<slug:study_slug>/delete/', views.StudyDeleteView.as_view(), name='study-delete'),
+    path('<slug:study_slug>/settings/delete/', views.StudySettingsDeleteView.as_view(), name='study-settings-delete'),
     path('<slug:study_slug>/translate/', views.StudyTranslationsUpdateView.as_view(), name='study-translate'),
     path('<slug:study_slug>/instructions/', views.StudyInstructionsUpdateView.as_view(), name='study-instructions'),
     path('<slug:study_slug>/questions/', views.QuestionUpdateView.as_view(), name='study-questions'),
@@ -29,4 +29,5 @@ urlpatterns = [
     path('<slug:study_slug>/materials/', include(materials_urls.urlpatterns_study)),
     path('<slug:study_slug>/questionnaires/', include(trial_urls.urlpatterns_questionnaires_study)),
     path('<slug:study_slug>/trials/', include(trial_urls.urlpatterns_study)),
+    path('<slug:study_slug>/delete/', views.StudyDeleteView.as_view(), name='study-delete'),
 ]

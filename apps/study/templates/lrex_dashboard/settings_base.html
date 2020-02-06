@@ -1,5 +1,6 @@
-{% include 'lrex_study/study_nav.html' with nav_active=1 %}
-<ul class="nav nav-pills my-3">
+{% extends 'lrex_dashboard/base.html' %}
+{% block nav2 %}
+<ul class="nav nav-pills mb-2">
     <li class="nav-item">
         <a class="nav-link {% if not nav2_active or nav2_active == 0 %}active{% endif %}"
            href="{% url 'study-settings' study.slug %}">
@@ -15,3 +16,4 @@
         </a>
     </li>
 </ul>
+{% endblock %}

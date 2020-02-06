@@ -121,6 +121,56 @@ class CheckStudyCreatorMixin(UserPassesTestMixin):
         return False
 
 
+class SettingsNavMixin:
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['nav_active'] = 1
+        return context
+
+
+class TasksNavMixin:
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['nav_active'] = 2
+        return context
+
+
+class MaterialsNavMixin:
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['nav_active'] = 3
+        if hasattr(self, 'materials'):
+            context['active_materials'] = self.materials.pk
+        return context
+
+
+class QuestionnaireNavMixin:
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['nav_active'] = 4
+        return context
+
+
+class PrivacyNavMixin:
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['nav_active'] = 5
+        return context
+
+
+class ResultsNavMixin:
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['nav_active'] = 6
+        return context
+
+
 class StudyListView(LoginRequiredMixin, generic.ListView):
     model = models.Study
     title = 'Studies'
@@ -135,8 +185,8 @@ class StudyListView(LoginRequiredMixin, generic.ListView):
 
 class StudyCreateView(LoginRequiredMixin, generic.CreateView):
     model = models.Study
-    title = 'Create study'
-    template_name = 'lrex_contrib/crispy_form.html'
+    title = 'Create a new study'
+    template_name = 'lrex_home/base_form.html'
     form_class = forms.StudyForm
 
     def form_valid(self, form):
@@ -151,7 +201,7 @@ class StudyCreateView(LoginRequiredMixin, generic.CreateView):
 
 class StudyCreateFromArchiveView(LoginRequiredMixin,  SuccessMessageMixin, generic.FormView):
     title = 'Create a new study from archive'
-    template_name = 'lrex_contrib/crispy_form.html'
+    template_name = 'lrex_home/base_form.html'
     form_class = forms.StudyFromArchiveForm
     success_message = 'Study successfully created.'
 
@@ -216,15 +266,24 @@ class StudyDetailView(
         return data
 
 
-class StudyDeleteView(StudyObjectMixin, CheckStudyCreatorMixin, contib_views.DefaultDeleteView):
+class StudyDeleteView(
+    StudyObjectMixin,
+    CheckStudyCreatorMixin,
+    contib_views.DefaultDeleteView
+):
     model = models.Study
-    template_name = 'lrex_study/settings_confirm_delete.html'
+    template_name = 'lrex_home/base_confirm_delete.html'
 
     def get_success_url(self):
         return reverse('studies')
 
 
-class StudyArchiveView(StudyObjectMixin, CheckStudyCreatorMixin, generic.UpdateView):
+class StudyArchiveView(
+    StudyObjectMixin,
+    CheckStudyCreatorMixin,
+    generic.UpdateView
+):
+    # TODO: split as for delete
     model = models.Study
     template_name = 'lrex_study/study_archive.html'
     form_class = forms.ArchiveForm
@@ -249,7 +308,7 @@ class StudyArchiveDownloadView(StudyObjectMixin, CheckStudyCreatorMixin, generic
 
 class StudyRestoreFromArchiveView(StudyMixin, CheckStudyCreatorMixin, SuccessMessageMixin, generic.FormView):
     title = 'Restore study from archive'
-    template_name = 'lrex_contrib/crispy_form.html'
+    template_name = 'lrex_home/base_form.html'
     form_class = forms.StudyFromArchiveForm
     success_message = 'Study successfully restored.'
 
@@ -269,7 +328,7 @@ class StudyRestoreFromArchiveView(StudyMixin, CheckStudyCreatorMixin, SuccessMes
 
 class StudyCreateCopyView(StudyMixin, CheckStudyCreatorMixin, SuccessMessageMixin, generic.FormView):
     title = 'Create a copy of a study'
-    template_name = 'lrex_contrib/crispy_form.html'
+    template_name = 'lrex_home/base_form.html'
     form_class = forms.StudyCopyForm
     success_message = 'Study successfully created.'
 
@@ -297,6 +356,7 @@ class StudySettingsView(
     SuccessMessageMixin,
     contib_views.LeaveWarningMixin,
     DisableFormIfStudyActiveMixin,
+    SettingsNavMixin,
     generic.UpdateView,
 ):
     model = models.Study
@@ -334,17 +394,31 @@ class StudySettingsView(
         return self.object.get_absolute_url()
 
 
+class StudySettingsDeleteView(
+    StudyObjectMixin,
+    CheckStudyCreatorMixin,
+    SettingsNavMixin,
+    contib_views.DefaultDeleteView
+):
+    model = models.Study
+    template_name = 'lrex_dashboard/settings_confirm_delete.html'
+
+    def get_success_url(self):
+        return reverse('studies')
+
+
 class StudyTranslationsUpdateView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
     SuccessMessageMixin,
     contib_views.LeaveWarningMixin,
     DisableFormIfStudyActiveMixin,
+    SettingsNavMixin,
     generic.UpdateView,
 ):
     model = models.Study
     title = 'Translations'
-    template_name = 'lrex_study/settings_form.html'
+    template_name = 'lrex_dashboard/settings_form.html'
     form_class = forms.StudyTranslationsForm
     success_message = 'Translations updated.'
 
@@ -375,19 +449,17 @@ class StudyTranslationsUpdateView(
         return self.object.get_absolute_url()
 
 
-class StudyInstructionsUpdateView(
+class StudyShareView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
-    SuccessMessageMixin,
     contib_views.LeaveWarningMixin,
-    DisableFormIfStudyActiveMixin,
-    generic.UpdateView,
+    SettingsNavMixin,
+    generic.UpdateView
 ):
     model = models.Study
-    title ='Instructions'
-    template_name = 'lrex_study/tasks_form.html'
-    form_class = forms.StudyInstructionsForm
-    success_message = 'Instructions saved.'
+    title = 'Share study'
+    form_class = forms.SharedWithForm
+    template_name = 'lrex_dashboard/settings_form.html'
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -395,45 +467,6 @@ class StudyInstructionsUpdateView(
             'add_save': True,
         })
         return kwargs
-
-    def get_success_url(self):
-        if 'save' in self.request.POST:
-            return reverse('study-instructions', args=[self.object.slug])
-        return self.object.get_absolute_url()
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update({
-            'nav2_active': 1,
-        })
-        return context
-
-
-class StudyIntroUpdateView(
-    StudyObjectMixin,
-    CheckStudyCreatorMixin,
-    SuccessMessageMixin,
-    contib_views.LeaveWarningMixin,
-    DisableFormIfStudyActiveMixin,
-    generic.UpdateView,
-):
-    model = models.Study
-    title ='Intro/outro'
-    template_name = 'lrex_study/tasks_form.html'
-    form_class = forms.StudyIntroForm
-    success_message = 'Intro/outro saved.'
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs.update({
-            'add_save': True,
-        })
-        return kwargs
-
-    def get_success_url(self):
-        if 'save' in self.request.POST:
-            return reverse('study-intro', args=[self.object.slug])
-        return self.object.get_absolute_url()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -442,17 +475,23 @@ class StudyIntroUpdateView(
         })
         return context
 
+    def get_success_url(self):
+        if 'save' in self.request.POST:
+            return reverse('study-share', args=[self.object.slug])
+        return self.object.get_absolute_url()
+
 
 class QuestionUpdateView(
     StudyMixin,
     CheckStudyCreatorMixin,
     contib_views.LeaveWarningMixin,
     DisableFormIfStudyActiveMixin,
+    TasksNavMixin,
     generic.DetailView,
 ):
     model = models.Study
     title = 'Questions'
-    template_name = 'lrex_study/tasks_formset_form.html'
+    template_name = 'lrex_dashboard/tasks_formset_form.html'
     formset = None
     helper = None
 
@@ -477,7 +516,7 @@ class QuestionUpdateView(
             if self.study.has_questionnaires:
                 msg = 'Note: To change the "randomize scale" settings you need to ' \
                       '<a href="{}">remove questionnaires</a> first.'.format(
-                        reverse('questionnaires', args=[self.study.slug]))
+                    reverse('questionnaires', args=[self.study.slug]))
                 messages.info(request, mark_safe(msg))
         self.formset = forms.question_formset_factory(self.n_questions, 0 if self.n_questions > 0 else 1)(
             queryset=self.study.question_set.all()
@@ -549,50 +588,20 @@ class QuestionUpdateView(
         return super().get(request, *args, **kwargs)
 
 
-class StudyShareView(
-    StudyObjectMixin,
-    CheckStudyCreatorMixin,
-    contib_views.LeaveWarningMixin,
-    generic.UpdateView
-):
-    model = models.Study
-    title = 'Share study'
-    form_class = forms.SharedWithForm
-    template_name = 'lrex_study/settings_form.html'
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs.update({
-            'add_save': True,
-        })
-        return kwargs
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update({
-            'nav2_active': 2,
-        })
-        return context
-
-    def get_success_url(self):
-        if 'save' in self.request.POST:
-            return reverse('study-share', args=[self.object.slug])
-        return self.object.get_absolute_url()
-
-
-class StudyContactUpdateView(
+class StudyInstructionsUpdateView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
     SuccessMessageMixin,
     contib_views.LeaveWarningMixin,
     DisableFormIfStudyActiveMixin,
+    TasksNavMixin,
     generic.UpdateView,
 ):
     model = models.Study
-    title ='Contact information'
-    template_name = 'lrex_study/privacy_form.html'
-    form_class = forms.StudyContactForm
-    success_message = 'Contact information saved.'
+    title ='Instructions'
+    template_name = 'lrex_dashboard/tasks_form.html'
+    form_class = forms.StudyInstructionsForm
+    success_message = 'Instructions saved.'
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -603,30 +612,8 @@ class StudyContactUpdateView(
 
     def get_success_url(self):
         if 'save' in self.request.POST:
-            return reverse('study-contact', args=[self.object.slug])
+            return reverse('study-instructions', args=[self.object.slug])
         return self.object.get_absolute_url()
-
-
-class StudyPrivacyUpdateView(
-    StudyObjectMixin,
-    CheckStudyCreatorMixin,
-    SuccessMessageMixin,
-    contib_views.LeaveWarningMixin,
-    DisableFormIfStudyActiveMixin,
-    generic.UpdateView,
-):
-    model = models.Study
-    title = 'Privacy statement'
-    template_name = 'lrex_study/privacy_form.html'
-    form_class = forms.StudyPrivacyForm
-    success_message = 'Privacy statement saved.'
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs.update({
-            'add_save': True,
-        })
-        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -635,21 +622,40 @@ class StudyPrivacyUpdateView(
         })
         return context
 
+
+class StudyIntroUpdateView(
+    StudyObjectMixin,
+    CheckStudyCreatorMixin,
+    SuccessMessageMixin,
+    contib_views.LeaveWarningMixin,
+    DisableFormIfStudyActiveMixin,
+    TasksNavMixin,
+    generic.UpdateView,
+):
+    model = models.Study
+    title = 'Intro/outro'
+    template_name = 'lrex_dashboard/tasks_form.html'
+    form_class = forms.StudyIntroForm
+    success_message = 'Intro/outro saved.'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({
+            'add_save': True,
+        })
+        return kwargs
+
     def get_success_url(self):
         if 'save' in self.request.POST:
-            return reverse('study-privacy', args=[self.object.slug])
+            return reverse('study-intro', args=[self.object.slug])
         return self.object.get_absolute_url()
 
-
-class StudyResultsCSVDownloadView(StudyObjectMixin, CheckStudyCreatorMixin, generic.DetailView):
-    model = models.Study
-
-    def get(self, request, *args, **kwargs):
-        filename = '{}_RESULTS_{}.csv'.format(self.study.title.replace(' ', '_'), str(now().date()))
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
-        self.study.results_csv(response)
-        return response
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'nav2_active': 2,
+        })
+        return context
 
 
 class DemographicsUpdateView(
@@ -657,11 +663,12 @@ class DemographicsUpdateView(
     CheckStudyCreatorMixin,
     contib_views.LeaveWarningMixin,
     DisableFormIfStudyActiveMixin,
+    TasksNavMixin,
     generic.DetailView,
 ):
     model = models.Study
     title = 'Demographics'
-    template_name = 'lrex_study/tasks_formset_form.html'
+    template_name = 'lrex_dashboard/tasks_formset_form.html'
     formset = None
     helper = None
 
@@ -717,3 +724,78 @@ class DemographicsUpdateView(
             'nav2_active': 3,
         })
         return context
+
+
+class StudyContactUpdateView(
+    StudyObjectMixin,
+    CheckStudyCreatorMixin,
+    SuccessMessageMixin,
+    contib_views.LeaveWarningMixin,
+    DisableFormIfStudyActiveMixin,
+    PrivacyNavMixin,
+    generic.UpdateView,
+):
+    model = models.Study
+    title = 'Contact information'
+    template_name = 'lrex_dashboard/privacy_form.html'
+    form_class = forms.StudyContactForm
+    success_message = 'Contact information saved.'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({
+            'add_save': True,
+        })
+        return kwargs
+
+    def get_success_url(self):
+        if 'save' in self.request.POST:
+            return reverse('study-contact', args=[self.object.slug])
+        return self.object.get_absolute_url()
+
+
+class StudyPrivacyUpdateView(
+    StudyObjectMixin,
+    CheckStudyCreatorMixin,
+    SuccessMessageMixin,
+    contib_views.LeaveWarningMixin,
+    DisableFormIfStudyActiveMixin,
+    PrivacyNavMixin,
+    generic.UpdateView,
+):
+    model = models.Study
+    title = 'Privacy statement'
+    template_name = 'lrex_dashboard/privacy_form.html'
+    form_class = forms.StudyPrivacyForm
+    success_message = 'Privacy statement saved.'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({
+            'add_save': True,
+        })
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'nav2_active': 1,
+        })
+        return context
+
+    def get_success_url(self):
+        if 'save' in self.request.POST:
+            return reverse('study-privacy', args=[self.object.slug])
+        return self.object.get_absolute_url()
+
+
+class StudyResultsCSVDownloadView(StudyObjectMixin, CheckStudyCreatorMixin, generic.DetailView):
+    model = models.Study
+
+    def get(self, request, *args, **kwargs):
+        filename = '{}_RESULTS_{}.csv'.format(self.study.title.replace(' ', '_'), str(now().date()))
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
+        self.study.results_csv(response)
+        return response
+

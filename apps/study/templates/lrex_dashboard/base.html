@@ -1,3 +1,5 @@
+{% extends "lrex_home/base.html" %}
+{% block nav %}
 <ul class="nav nav-tabs mb-2">
     <li class="nav-item">
         <a class="nav-link {% if not nav_active or nav_active == 0 %}active{% endif %}" href="{% url 'study' study.slug %}">
@@ -18,7 +20,7 @@
         <div class="dropdown-menu">
             {% for materials in study.materials_list %}
             <a class="dropdown-item {% if materials.pk == active_materials %}active{% endif %}"
-               href="{% url 'materials' materials.slug %}">
+               href="{% url 'items' materials.slug %}">
                 {{ materials.title }}
             </a>
             {% empty %}
@@ -27,7 +29,6 @@
             <div class="dropdown-divider"></div>
             <a class="dropdown-item" href="{% url 'materials-create' study.slug %}">New materials</a>
         </div>
-    </li>
     </li><li class="nav-item">
         <a class="nav-link {% if nav_active == 4 %}active{% endif %}" href="{% url 'questionnaires' study.slug %}">
             Questionnaires
@@ -40,3 +41,17 @@
         <a class="nav-link {% if nav_active == 6 %}active{% endif %}" href="{% url 'trials' study.slug %}">Results</a>
     </li>
 </ul>
+<div class="d-sm-flex justify-content-between">
+    <div>
+        {% block nav2 %}{% endblock %}
+    </div>
+    {% block current_study %}
+    <div>
+        {% if materials %}
+        <span class="text-secondary">Materials: </span><span>{{ materials.title }}</span>
+        {% endif %}
+        <span class="text-secondary ml-2">Study: </span><span>{{ study.title }}</span>
+    </div>
+    {% endblock %}
+</div>
+{% endblock %}

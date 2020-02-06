@@ -1,8 +1,4 @@
-{% extends "lrex_home/base.html" %}
-
-{% block nav %}
-    {% include 'lrex_trial/results_nav.html' with nav2_active=1 active_materials=materials.pk %}
-{% endblock %}
+{% extends "lrex_dashboard/results_base.html" %}
 
 {% block actions %}
 <div class="dropdown">

@@ -1,9 +1,6 @@
 {% extends "lrex_home/base.html" %}
 
 {% block content %}
-<div class="p-4 border bg-white">
-    <h2 class="text-secondary">{{ object.date|date:"SHORT_DATE_FORMAT" }}</h2>
-    {{ news_rich }}
-</div>
-
+<div class="text-secondary mb-3">{{ object.date|date:"SHORT_DATE_FORMAT" }}</div>
+{{ news_rich }}
 {% endblock %}

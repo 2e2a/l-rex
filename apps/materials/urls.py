@@ -8,7 +8,6 @@ urlpatterns_study = [
 ]
 
 urlpatterns = [
-    path('<slug:materials_slug>/', views.MaterialsView.as_view(), name='materials'),
     path('<slug:materials_slug>/update/', views.MaterialsUpdateView.as_view(), name='materials-update'),
     path('<slug:materials_slug>/delete/', views.MaterialsDeleteView.as_view(), name='materials-delete'),
     path('<slug:materials_slug>/results/', views.MaterialsResultsView.as_view(), name='materials-results'),

@@ -1,6 +1,5 @@
 {% extends "lrex_home/base.html" %}
 
 {% block content %}
-    {{ contact_rich }}
-    {{ privacy_rich }}
+    {% include 'lrex_contrib/crispy_form.html' %}
 {% endblock %}

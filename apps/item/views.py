@@ -30,7 +30,7 @@ class ItemMixin:
 
     @property
     def materials(self):
-        return  self.item.materials
+        return self.item.materials
 
     @property
     def item(self):
@@ -40,11 +40,13 @@ class ItemMixin:
         return self.item_object
 
     def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-        data['study'] = self.study
-        data['materials'] = self.materials
-        data['item'] = self.item
-        return data
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'study': self.study,
+            'materials': self.materials,
+            'item': self.item,
+        })
+        return context
 
 
 class ItemObjectMixin(ItemMixin):
@@ -77,6 +79,7 @@ class ItemListView(
     materials_views.MaterialsMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
+    study_views.MaterialsNavMixin,
     ItemsValidateMixin,
     generic.ListView
 ):
@@ -99,7 +102,7 @@ class ItemListView(
 
 
 class ItemCreateMixin(contrib_views.PaginationHelperMixin):
-    template_name = 'lrex_materials/materials_form.html'
+    template_name = 'lrex_dashboard/materials_form.html'
 
     @property
     def title(self):
@@ -135,8 +138,9 @@ class ItemCreateMixin(contrib_views.PaginationHelperMixin):
 class ItemUpdateMixin(
     contrib_views.LeaveWarningMixin,
     contrib_views.PaginationHelperMixin,
+    study_views.MaterialsNavMixin,
 ):
-    template_name = 'lrex_materials/materials_form.html'
+    template_name = 'lrex_dashboard/materials_form.html'
     success_message = 'Item successfully updated.'
 
     @property
@@ -277,7 +281,7 @@ class ItemDeleteView(
     contrib_views.DefaultDeleteView
 ):
     model = models.Item
-    template_name = 'lrex_materials/materials_confirm_delete.html'
+    template_name = 'lrex_dashboard/materials_confirm_delete.html'
 
     def delete(self, *args, **kwargs):
         result = super().delete(*args, **kwargs)
@@ -295,10 +299,11 @@ class ItemPregenerateView(
     SuccessMessageMixin,
     study_views.DisableFormIfStudyActiveMixin,
     contrib_views.PaginationHelperMixin,
+    study_views.MaterialsNavMixin,
     generic.FormView
 ):
     form_class = forms.PregenerateItemsForm
-    template_name = 'lrex_materials/materials_form.html'
+    template_name = 'lrex_dashboard/materials_form.html'
     success_message = 'Items successfully generated.'
 
     @property
@@ -346,10 +351,11 @@ class ItemUploadView(
     study_views.CheckStudyCreatorMixin,
     ItemsValidateMixin,
     study_views.DisableFormIfStudyActiveMixin,
+    study_views.MaterialsNavMixin,
     generic.FormView
 ):
     form_class = forms.ItemUploadForm
-    template_name = 'lrex_materials/materials_form.html'
+    template_name = 'lrex_dashboard/materials_form.html'
 
     @property
     def title(self):
@@ -404,10 +410,11 @@ class ItemDeleteAllView(
     materials_views.MaterialsMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
+    study_views.MaterialsNavMixin,
     generic.TemplateView
 ):
     title = 'Confirm Delete'
-    template_name = 'lrex_materials/materials_confirm_delete.html'
+    template_name = 'lrex_dashboard/materials_confirm_delete.html'
     message = 'Delete all items?'
 
     def post(self, request, *args, **kwargs):
@@ -427,9 +434,10 @@ class ItemQuestionsUpdateView(
     contrib_views.LeaveWarningMixin,
     study_views.DisableFormIfStudyActiveMixin,
     contrib_views.PaginationHelperMixin,
+    study_views.MaterialsNavMixin,
     generic.TemplateView
 ):
-    template_name = 'lrex_materials/materials_formset_form.html'
+    template_name = 'lrex_dashboard/materials_formset_form.html'
     formset = None
     helper = None
 
@@ -491,9 +499,10 @@ class ItemFeedbackUpdateView(
     contrib_views.LeaveWarningMixin,
     study_views.DisableFormIfStudyActiveMixin,
     contrib_views.PaginationHelperMixin,
+    study_views.MaterialsNavMixin,
     generic.TemplateView
 ):
-    template_name = 'lrex_materials/materials_formset_form.html'
+    template_name = 'lrex_dashboard/materials_formset_form.html'
     formset = None
     helper = None
 
@@ -565,10 +574,11 @@ class ItemFeedbackUploadView(
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
     contrib_views.PaginationHelperMixin,
+    study_views.MaterialsNavMixin,
     generic.FormView
 ):
     form_class = forms.ItemFeedbackUploadForm
-    template_name = 'lrex_contrib/crispy_form.html'
+    template_name = 'lrex_dashboard/materials_form.html'
 
     @property
     def title(self):
@@ -614,6 +624,7 @@ class ItemListListView(
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
     ItemsValidateMixin,
+    study_views.MaterialsNavMixin,
     generic.ListView
 ):
     model = models.ItemList
@@ -631,20 +642,23 @@ class ItemListListView(
     def get_queryset(self):
         return models.ItemList.objects.filter(materials=self.materials)
 
-    @property
-    def disable_actions(self):
-        if self.is_disabled:
-            return [1], [0]
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'nav2_active': 1,
+        })
+        return context
 
 
 class ItemListUploadView(
     materials_views.MaterialsMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
+    study_views.MaterialsNavMixin,
     generic.FormView
 ):
     form_class = forms.ItemListUploadForm
-    template_name = 'lrex_materials/materials_form.html'
+    template_name = 'lrex_dashboard/materials_form.html'
 
     @property
     def title(self):

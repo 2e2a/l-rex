@@ -58,13 +58,12 @@
                 {% endif %}
             </ul>
         </div>
-
     </div>
 </nav>
 <div class="container bg-white py-2 mt-3 border">
     {% block nav %}{% endblock %}
     <div class="d-sm-flex justify-content-between align-items-center">
-        <h1 class="title">{% block header-title %}{% if view.title %}{{ view.title }}{% endif %}{% endblock %}</h1>
+        <h1 class="title">{% block title %}{% if view.title %}{{ view.title }}{% endif %}{% endblock %}</h1>
         <div class="d-flex">
             {% block actions %}{% endblock %}
         </div>

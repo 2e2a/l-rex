@@ -47,11 +47,12 @@ class MaterialsCreateView(
     study_views.StudyMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
+    study_views.MaterialsNavMixin,
     generic.CreateView
 ):
     model = models.Materials
     title = 'Create materials'
-    template_name = 'lrex_materials/materials_create_form.html'
+    template_name = 'lrex_dashboard/base_form.html'
     form_class = forms.MaterialsForm
     success_message = 'Materials created.'
 
@@ -72,6 +73,7 @@ class MaterialsUpdateView(
     SuccessMessageMixin,
     contrib_views.LeaveWarningMixin,
     study_views.DisableFormIfStudyActiveMixin,
+    study_views.MaterialsNavMixin,
     generic.UpdateView
 ):
     model = models.Materials
@@ -110,20 +112,15 @@ class MaterialsUpdateView(
         return kwargs
 
 
-class MaterialsView(MaterialsMixin, generic.RedirectView):
-
-    def get_redirect_url(self, *args, **kwargs):
-        return reverse('items', args=[self.materials.slug])
-
-
 class MaterialsDeleteView(
     MaterialsObjectMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
+    study_views.MaterialsNavMixin,
     contrib_views.DefaultDeleteView
 ):
     model = models.Materials
-    template_name = 'lrex_materials/materials_confirm_delete.html'
+    template_name = 'lrex_dashboard/materials_confirm_delete.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -139,6 +136,7 @@ class MaterialsDeleteView(
 class MaterialsResultsView(
     MaterialsObjectMixin,
     study_views.CheckStudyCreatorMixin,
+    study_views.ResultsNavMixin,
     generic.DetailView
 ):
     model = models.Materials
@@ -169,6 +167,8 @@ class MaterialsResultsView(
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({
+            'nav_active': 6,
+            'active_materials': self.materials.pk,
             'results': self._aggregated_results(),
             'aggregate_by': self.aggregate_by,
             'aggregate_by_label': self.aggregate_by_label,

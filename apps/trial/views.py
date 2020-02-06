@@ -65,10 +65,12 @@ class TrialMixin:
         return self.trial_object
 
     def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-        data['study'] = self.study
-        data['trial'] = self.trial
-        return data
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'study': self.study,
+            'trial': self.trial,
+        })
+        return context
 
 
 class TrialObjectMixin(TrialMixin):
@@ -84,6 +86,7 @@ class QuestionnaireListView(
     study_views.StudyMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
+    study_views.QuestionnaireNavMixin,
     generic.ListView
 ):
     model = models.Questionnaire
@@ -160,6 +163,7 @@ class QuestionnaireListView(
 class QuestionnaireDetailView(
     QuestionnaireObjectMixin,
     study_views.CheckStudyCreatorMixin,
+    study_views.QuestionnaireNavMixin,
     generic.DetailView
 ):
     model = models.Questionnaire
@@ -194,10 +198,11 @@ class QuestionnaireGenerateView(
     study_views.StudyMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
+    study_views.QuestionnaireNavMixin,
     generic.TemplateView
 ):
     title = 'Generate questionnaires'
-    template_name = 'lrex_trial/questionnaire_formset_form.html'
+    template_name = 'lrex_dashboard/questionnaire_formset_form.html'
     formset = None
     helper = None
 
@@ -245,6 +250,7 @@ class QuestionnaireDeleteAllView(
     study_views.StudyMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
+    study_views.QuestionnaireNavMixin,
     generic.TemplateView
 ):
     title = 'Confirm Delete'
@@ -265,10 +271,11 @@ class QuestionnaireBlockInstructionsUpdateView(
     study_views.CheckStudyCreatorMixin,
     contrib_views.LeaveWarningMixin,
     contrib_views.DisableFormMixin,
+    study_views.QuestionnaireNavMixin,
     generic.TemplateView,
 ):
     title = 'Edit questionnaire block instructions'
-    template_name = 'lrex_trial/questionnaire_formset_form.html'
+    template_name = 'lrex_dashboard/questionnaire_formset_form.html'
     formset = None
     helper = None
 
@@ -318,11 +325,12 @@ class QuestionnaireUploadView(
     study_views.StudyMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
+    study_views.QuestionnaireNavMixin,
     generic.FormView,
 ):
     title = 'Upload custom questionnaires'
     form_class = forms.QuestionnaireUploadForm
-    template_name = 'lrex_trial/questionnaire_form.html'
+    template_name = 'lrex_dashboard/questionnaire_form.html'
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -359,6 +367,7 @@ class QuestionnaireCSVDownloadView(study_views.StudyMixin, study_views.CheckStud
 class TrialListView(
     study_views.StudyMixin,
     study_views.CheckStudyCreatorMixin,
+    study_views.ResultsNavMixin,
     generic.ListView
 ):
     model = models.Trial
@@ -401,7 +410,7 @@ class TrialDeleteAllView(
     generic.TemplateView,
 ):
     title = 'Confirm Delete'
-    template_name = 'lrex_trial/results_confirm_delete.html'
+    template_name = 'lrex_dashboard/results_confirm_delete.html'
     message = 'Delete all trials?'
 
     def get_success_url(self):
@@ -552,7 +561,7 @@ class TrialDeleteView(
     contrib_views.DefaultDeleteView,
 ):
     model = models.Trial
-    template_name = 'lrex_trial/results_confirm_delete.html'
+    template_name = 'lrex_dashboard/results_confirm_delete.html'
 
     def get_success_url(self):
         return reverse('trials', args=[self.study.slug])
