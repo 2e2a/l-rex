@@ -1,7 +1,7 @@
 import re
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Field, Fieldset, Layout, Submit, Button
-from crispy_forms.bootstrap import StrictButton, FieldWithButtons, InlineField, FormActions
+from crispy_forms.layout import Div, Field, Fieldset, Layout, Submit
+from crispy_forms.bootstrap import FieldWithButtons
 from django import forms
 
 from apps.contrib import forms as contrib_forms
@@ -388,9 +388,10 @@ def rating_formset_helper(submit_label='Continue'):
             Field('feedback'),
             Field('comment'),
             Field('feedbacks_given'),
-        ),
-    )
-    formset_helper.add_input(
-        Submit('submit', submit_label),
+            Div(
+                Submit('submit', submit_label),
+                css_class='text-center'
+            )
+        )
     )
     return formset_helper
