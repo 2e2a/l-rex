@@ -626,7 +626,7 @@ class RatingsCreateView(ProgressMixin, TestWarningMixin, TrialMixin, generic.Tem
         )
         self.n_questions = len(self.study.questions)
         self.item_questions = self.questionnaire_item.item.itemquestion_set.all()
-        self.helper = forms.rating_formset_helper(self.study.continue_label)
+        self.helper = forms.rating_formset_helper()
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
@@ -685,6 +685,7 @@ class RatingsCreateView(ProgressMixin, TestWarningMixin, TrialMixin, generic.Tem
     def get_context_data(self, **kwargs):
         kwargs.update(
             {
+                'continue_label': self.study.continue_label,
                 'n_trial_items': len(self.trial.items), 'num': self.num,
                 'item': self.questionnaire_item.item,
             }

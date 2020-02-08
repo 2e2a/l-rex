@@ -380,7 +380,7 @@ def ratingformset_handle_feedbacks(ratingformset, feedbacks):
     return show_feedback
 
 
-def rating_formset_helper(submit_label='Continue'):
+def rating_formset_helper():
     formset_helper = FormHelper()
     formset_helper.add_layout(
         Layout(
@@ -390,7 +390,5 @@ def rating_formset_helper(submit_label='Continue'):
             Field('feedbacks_given'),
         ),
     )
-    formset_helper.add_input(
-        Submit('submit', submit_label),
-    )
+    formset_helper.form_tag = False
     return formset_helper
