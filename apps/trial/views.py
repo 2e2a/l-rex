@@ -444,13 +444,10 @@ class TestTrialMixin:
         data['is_test'] = self.is_test_trial
         return data
 
-
-class TestWarningMixin:
-
-    def get(self, request, *args, **kwargs):
-        if self.trial.is_test:
-            messages.warning(request, 'Note: This is a test trial.')
-        return super().get(request, *args, **kwargs)
+    def test_url(self, url):
+        if self.is_test_trial:
+            url += '?test=True'
+        return url
 
 
 class TrialIntroView(study_views.StudyMixin, TestTrialMixin, generic.TemplateView):
@@ -502,13 +499,16 @@ class TrialCreateView(study_views.StudyMixin, TestTrialMixin, generic.CreateView
 
     def get_success_url(self):
         if self.study.has_demographics:
-            return reverse('trial-demographics', args=[self.object.slug])
+            url = reverse('trial-demographics', args=[self.object.slug])
         if self.study.use_blocks:
-            return reverse('rating-block-instructions', args=[self.object.slug, 0])
-        return reverse('ratings-create', args=[self.object.slug, 0])
+            url = reverse('rating-block-instructions', args=[self.object.slug, 0])
+        else:
+            url = reverse('ratings-create', args=[self.object.slug, 0])
+        url = self.test_url(url)
+        return url
 
 
-class DemographicsCreateView(TrialMixin, TestWarningMixin, generic.TemplateView):
+class DemographicsCreateView(TrialMixin, TestTrialMixin, generic.TemplateView):
     model = models.Rating
     template_name = 'lrex_trial/trial_demographics.html'
 
@@ -532,8 +532,11 @@ class DemographicsCreateView(TrialMixin, TestWarningMixin, generic.TemplateView)
 
     def get_success_url(self):
         if self.study.use_blocks:
-            return reverse('rating-block-instructions', args=[self.object.slug, 0])
-        return reverse('ratings-create', args=[self.trial.slug, 0])
+            url = reverse('rating-block-instructions', args=[self.object.slug, 0])
+        else:
+            url = reverse('ratings-create', args=[self.trial.slug, 0])
+        url = self.test_url(url)
+        return url
 
     def post(self, request, *args, **kwargs):
         self.formset = forms.demographics_formset_factory(self.n_fields)(request.POST, request.FILES)
@@ -608,7 +611,7 @@ class ProgressMixin:
         return data
 
 
-class RatingsCreateView(ProgressMixin, TestWarningMixin, TrialMixin, generic.TemplateView):
+class RatingsCreateView(ProgressMixin, TestTrialMixin, TrialMixin, generic.TemplateView):
     model = models.Rating
     template_name = 'lrex_trial/rating_form.html'
 
@@ -720,9 +723,13 @@ class RatingsCreateView(ProgressMixin, TestWarningMixin, TrialMixin, generic.Tem
             trial_items = self.trial.items
             if self.study.use_blocks and \
                     trial_items[self.num].materials_block != trial_items[self.num + 1].materials_block:
-                return reverse('rating-block-instructions', args=[self.trial.slug, self.num + 1])
-            return reverse('ratings-create', args=[self.trial.slug, self.num + 1])
-        return reverse('rating-outro', args=[self.trial.slug])
+                url = reverse('rating-block-instructions', args=[self.trial.slug, self.num + 1])
+            else:
+                url = reverse('ratings-create', args=[self.trial.slug, self.num + 1])
+        else:
+            url = reverse('rating-outro', args=[self.trial.slug])
+        url = self.test_url(url)
+        return url
 
     def _handle_feedbacks(self, ratingforms, instances):
         feedbacks = []
@@ -744,7 +751,7 @@ class RatingsCreateView(ProgressMixin, TestWarningMixin, TrialMixin, generic.Tem
         return reload_form_with_feedback, feedbacks
 
 
-class RatingBlockInstructionsView(ProgressMixin, TestWarningMixin, TrialMixin, generic.TemplateView):
+class RatingBlockInstructionsView(ProgressMixin, TestTrialMixin, TrialMixin, generic.TemplateView):
     template_name = 'lrex_trial/rating_block_instructions.html'
 
     def get_context_data(self, **kwargs):
@@ -758,7 +765,7 @@ class RatingBlockInstructionsView(ProgressMixin, TestWarningMixin, TrialMixin, g
         return data
 
 
-class RatingOutroView(TrialMixin, TestWarningMixin, generic.TemplateView):
+class RatingOutroView(TrialMixin, TestTrialMixin, generic.TemplateView):
     template_name = 'lrex_trial/rating_outro.html'
 
     def get_context_data(self, **kwargs):
@@ -769,5 +776,5 @@ class RatingOutroView(TrialMixin, TestWarningMixin, generic.TemplateView):
         return data
 
 
-class RatingTakenView(TrialMixin, TestWarningMixin, generic.TemplateView):
+class RatingTakenView(TrialMixin, TestTrialMixin, generic.TemplateView):
     template_name = 'lrex_trial/rating_taken.html'
