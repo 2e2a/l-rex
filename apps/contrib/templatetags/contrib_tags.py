@@ -14,7 +14,7 @@ def bootstrap_alert_class(message_level):
     if message_level == 'info':
         return 'alert-light'
     if message_level == 'success':
-        return 'alert-light'
+        return 'alert-dark'
     if message_level == 'warning':
         return 'alert-dark'
     if message_level == 'error':
