@@ -127,9 +127,6 @@ class Materials(models.Model):
     def __str__(self):
         return self.title
 
-    def get_absolute_url(self):
-        return reverse('materials', args=[self.slug])
-
     def _warn_items_string(self, items):
         WARN_ITEMS_MAX = 10
         items_string = ', '.join([str(item) for item in list(items)[:WARN_ITEMS_MAX]])

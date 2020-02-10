@@ -66,6 +66,9 @@ class MaterialsCreateView(
         response = super().form_valid(form)
         return response
 
+    def get_success_url(self):
+        return reverse('items', args=[self.object.slug])
+
 
 class MaterialsUpdateView(
     MaterialsObjectMixin,
