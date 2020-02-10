@@ -113,7 +113,8 @@ class StudyTranslationsForm(contrib_forms.CrispyModelForm):
 
 class StudyFromArchiveForm(contrib_forms.CrispyForm):
     file = forms.FileField(
-        help_text='An L-Rex archive file previously downloaded.'
+        help_text='An L-Rex archive file previously downloaded.',
+        widget=forms.FileInput,
     )
 
 

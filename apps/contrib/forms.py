@@ -73,6 +73,7 @@ class CrispyModelForm(OptionalLabelMixin, HelperMixin, forms.ModelForm):
 class CSVUploadForm(CrispyForm):
     file = forms.FileField(
         help_text='The CSV file.',
+        widget=forms.FileInput,
     )
     delimiter = forms.CharField(
         label='CSV delimiter',

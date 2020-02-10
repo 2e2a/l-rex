@@ -82,6 +82,7 @@ class ItemUploadForm(contrib_forms.CSVUploadForm):
     file = forms.FileField(
         help_text='The CSV file must contain columns for item number, condition, and text/link to the audio file. '
                   'Valid column delimiters: colon, semicolon, comma, space, or tab.',
+        widget=forms.FileInput,
     )
     number_column = forms.IntegerField(
         initial=1,
@@ -239,6 +240,7 @@ class ItemFeedbackUploadForm(contrib_forms.CSVUploadForm):
     file = forms.FileField(
         help_text='The CSV file must contain a column for the item number, condition, question, scale-values and '
                   'feedback. Valid column delimiters: colon, semicolon, comma, space, or tab.',
+        widget=forms.FileInput,
     )
     item_number_column = forms.IntegerField(
         initial=1,
@@ -294,6 +296,7 @@ class ItemListUploadForm(contrib_forms.CSVUploadForm):
     file = forms.FileField(
         help_text='The CSV file must contain a column for the item list number, item number and condition.'
                   'Valid column delimiters: colon, semicolon, comma, space, or tab.',
+        widget=forms.FileInput,
     )
     list_column = forms.IntegerField(
         initial=1,

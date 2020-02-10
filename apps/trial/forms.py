@@ -110,6 +110,7 @@ class QuestionnaireUploadForm(contrib_forms.CSVUploadForm):
     file = forms.FileField(
         help_text='The CSV file must contain a column for the questionnaire number, materials title, item number and '
                   'condition. Valid column delimiters: colon, semicolon, comma, space, or tab.',
+        widget=forms.FileInput,
     )
     questionnaire_column = forms.IntegerField(
         initial=1,
