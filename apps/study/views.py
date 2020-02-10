@@ -176,6 +176,11 @@ class StudyListView(LoginRequiredMixin, generic.ListView):
     title = 'Studies'
     paginate_by = 16
 
+    def get(self, request, *args, **kwargs):
+        if not hasattr(self.request.user, 'userprofile'):
+            return redirect('user-profile-create')
+        return super().get(request, *args, **kwargs)
+
     def get_queryset(self):
         return super().get_queryset().filter(
             Q(creator=self.request.user) |
@@ -227,11 +232,6 @@ class StudyDetailView(
 ):
     model = models.Study
     template_name = 'lrex_study/study_dashboard.html'
-
-    def get(self, request, *args, **kwargs):
-        if not hasattr(self.request.user, 'userprofile'):
-            return redirect('user-profile-create')
-        return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         action = request.POST.get('action', None)
