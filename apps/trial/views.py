@@ -389,9 +389,6 @@ class TrialListView(
                 response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
                 self.study.subject_mapping_csv(response)
                 return response
-            elif action == 'delete_subjects':
-                self.study.delete_subject_mapping()
-                messages.success(request, 'Subject mapping deleted.')
             elif action == 'delete_tests':
                 self.study.delete_test_trials()
                 messages.success(request, 'All test trials deleted.')
@@ -402,6 +399,24 @@ class TrialListView(
 
     def get_queryset(self):
         return super().get_queryset().filter(questionnaire__study=self.study)
+
+
+class TrialDeleteSubjectsView(
+    study_views.StudyMixin,
+    study_views.CheckStudyCreatorMixin,
+    generic.TemplateView,
+):
+    title = 'Confirm deletion'
+    template_name = 'lrex_dashboard/results_confirm_delete.html'
+    message = 'Delete subject mapping?'
+
+    def get_success_url(self):
+        return reverse('trials', args=[self.study.slug])
+
+    def post(self, request, *args, **kwargs):
+        self.study.delete_subject_mapping()
+        messages.success(request, 'Subject mapping deleted.')
+        return redirect(self.get_success_url())
 
 
 class TrialDeleteAllView(

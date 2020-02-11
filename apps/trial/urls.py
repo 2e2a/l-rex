@@ -16,13 +16,14 @@ urlpatterns_questionnaires = [
 ]
 
 urlpatterns_study = [
-    path('', views.TrialListView.as_view(), name='trials'),
-    path('delete-all', views.TrialDeleteAllView.as_view(), name='trials-delete'),
     path('intro/', views.TrialIntroView.as_view(), name='trial-intro'),
     path('participate/', views.TrialCreateView.as_view(), name='trial-create'),
     path('privacy/', views.TrialPrivacyStatementView.as_view(), name='trial-privacy'),
     path('contact/', views.TrialContactView.as_view(), name='trial-contact'),
     path('home/', views.TrialHomeView.as_view(), name='trial-home'),
+    path('', views.TrialListView.as_view(), name='trials'),
+    path('delete-all', views.TrialDeleteAllView.as_view(), name='trials-delete'),
+    path('delete-subjects', views.TrialDeleteSubjectsView.as_view(), name='trials-subjects-delete'),
 ]
 
 urlpatterns = [

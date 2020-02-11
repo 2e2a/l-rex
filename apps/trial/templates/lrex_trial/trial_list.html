@@ -12,9 +12,9 @@
             <button class="dropdown-item" type="submit" name="action" value="download_subjects">
                 Download subject ID mapping
             </button>
-            <button class="dropdown-item" type="submit" name="action" value="delete_subjects">
-                 Delete subject ID mapping
-            </button>
+            <a class="dropdown-item" href="{% url 'trials-subjects-delete' study.slug %}">
+                Delete subject ID mapping
+            </a>
             <button class="dropdown-item" type="submit" name="action" value="delete_tests">
                  Delete tests
             </button>
