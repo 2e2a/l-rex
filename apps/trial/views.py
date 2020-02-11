@@ -133,14 +133,14 @@ class QuestionnaireListView(
             block.randomization = randomization
             block.save()
         else:
-            block = models.QuestionnaireBlock.objects.create(study=self.study, block=1, randomization=randomization)
+            models.QuestionnaireBlock.objects.create(study=self.study, block=1, randomization=randomization)
 
     def post(self, request, *args, **kwargs):
         if self.study.use_blocks:
             return redirect('questionnaire-generate',study_slug=self.study.slug)
         self.randomization_form = forms.RandomizationForm(
             request.POST, request.FILES,
-            allow_pseudo_random = self.study.is_allowed_pseudo_randomization
+            allow_pseudo_random=self.study.is_allowed_pseudo_randomization
         )
         if self.randomization_form.is_valid():
             randomization = self.randomization_form['randomization'].value()
