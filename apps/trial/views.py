@@ -383,13 +383,7 @@ class TrialListView(
     def post(self, request, *args, **kwargs):
         action = request.POST.get('action', None)
         if action:
-            if action == 'download_subjects':
-                filename = '{}_SUBJECTS_{}.csv'.format(self.study.title.replace(' ', '_'), str(now().date()))
-                response = HttpResponse(content_type='text/csv')
-                response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
-                self.study.subject_mapping_csv(response)
-                return response
-            elif action == 'delete_tests':
+            if action == 'delete_tests':
                 self.study.delete_test_trials()
                 messages.success(request, 'All test trials deleted.')
             elif action == 'delete_abandoned':
@@ -399,6 +393,20 @@ class TrialListView(
 
     def get_queryset(self):
         return super().get_queryset().filter(questionnaire__study=self.study)
+
+
+class TrialDownloadSubjectsView(
+    study_views.StudyMixin,
+    study_views.CheckStudyCreatorMixin,
+    generic.View,
+):
+
+    def get(self, request, *args, **kwargs):
+        filename = '{}_SUBJECTS_{}.csv'.format(self.study.title.replace(' ', '_'), str(now().date()))
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
+        self.study.subject_mapping_csv(response)
+        return response
 
 
 class TrialDeleteSubjectsView(
