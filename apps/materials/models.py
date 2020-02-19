@@ -3,6 +3,8 @@ import csv
 from collections import Counter
 from enum import Enum
 from itertools import groupby
+from string import ascii_lowercase
+
 from django.db import models
 from django.urls import reverse
 from django.utils.functional import cached_property
@@ -149,9 +151,9 @@ class Materials(models.Model):
             else:
                 break
 
+        condition_count = len(conditions)
+        n_items = len(items)
         if self.item_list_distribution == self.LIST_DISTRIBUTION_LATIN_SQUARE:
-            condition_count = len(conditions)
-            n_items = len(items)
             if n_items % condition_count != 0:
                 msg = 'Number of stimuli is not a multiple of the number of conditions (stimuli: {}, conditions: {})'.format(
                     n_items,
@@ -222,6 +224,25 @@ class Materials(models.Model):
         self.save()
         self.compute_item_lists()
         return warnings
+
+    def pregenerate_items(self, n_items, n_conditions):
+        from apps.item.models import AudioLinkItem, TextItem, MarkdownItem
+        self.set_items_validated(False)
+        self.delete_lists()
+        for n_item in range(1, n_items + 1):
+            for condition in ascii_lowercase[:n_conditions]:
+                item_cls = None
+                if self.study.has_text_items:
+                    item_cls = TextItem
+                elif self.study.has_markdown_items:
+                    item_cls = MarkdownItem
+                elif self.study.has_audiolink_items:
+                    item_cls = AudioLinkItem
+                item_cls.objects.create(
+                    number=n_item,
+                    condition=condition,
+                    materials=self,
+                )
 
     def compute_item_lists(self):
         self.itemlist_set.all().delete()
