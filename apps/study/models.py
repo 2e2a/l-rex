@@ -18,7 +18,7 @@ from apps.contrib import csv as contrib_csv
 from apps.contrib import math
 from apps.contrib.utils import slugify_unique
 from apps.contrib.datefield import DateField
-from apps.contrib.utils import to_list_string
+from apps.contrib.utils import split_list_string, to_list_string
 
 
 class StudyStatus(Enum):
@@ -88,19 +88,6 @@ class Study(models.Model):
         max_length=200,
         help_text='This password will be required to participate in the study.',
     )
-    instructions = MarkdownxField(
-        blank=True,
-        null=True,
-        max_length=5000,
-        help_text='These instructions will be presented to the participant before the experiment begins.',
-    )
-    short_instructions = MarkdownxField(
-        blank=True,
-        null=True,
-        max_length=3000,
-        help_text='You can optionally provide a shorter version of the instructions that the participant can access at '
-                  'any point during participation as a reminder of the task.'
-    )
     require_participant_id = models.BooleanField(
         default=False,
         help_text='Enable if you want participants to enter an ID before participation.',
@@ -116,6 +103,25 @@ class Study(models.Model):
         blank=True,
         help_text='If you want to set a maximal number of participants, enter a number.',
         verbose_name='Maximal number of participants',
+    )
+    shared_with = models.CharField(
+        null=True,
+        blank=True,
+        max_length=200,
+        help_text='Give other users access to the study. Enter comma-separated user names (e.g. "user1, user2").',
+    )
+    instructions = MarkdownxField(
+        blank=True,
+        null=True,
+        max_length=5000,
+        help_text='These instructions will be presented to the participant before the experiment begins.',
+    )
+    short_instructions = MarkdownxField(
+        blank=True,
+        null=True,
+        max_length=3000,
+        help_text='You can optionally provide a shorter version of the instructions that the participant can access at '
+                  'any point during participation as a reminder of the task.'
     )
     contact_name = models.CharField(
         null=True,
@@ -228,12 +234,6 @@ class Study(models.Model):
         default=False,
         help_text='Enable to finish study participation.',
     )
-    shared_with = models.CharField(
-        null=True,
-        blank=True,
-        max_length=200,
-        help_text='Give other users access to the study. Enter comma-separated user names (e.g. "user1, user2").',
-    )
     created_date = DateField(
         default=now,
         editable=False,
@@ -249,7 +249,7 @@ class Study(models.Model):
         new_slug = slugify_unique(self.title, Study, self.id)
         if self.slug != new_slug:
             self.slug = new_slug
-            for materials in self.materials_list:
+            for materials in self.materials_set.all():
                 materials.save()
         return super().save(*args, **kwargs)
 
@@ -310,6 +310,14 @@ class Study(models.Model):
         ).exists()
 
     @cached_property
+    def has_demographics(self):
+        return self.demographicfield_set.exists()
+
+    @cached_property
+    def demographics_string(self):
+        return to_list_string(field.name for field in self.demographicfield_set.all())
+
+    @cached_property
     def has_items(self):
         from apps.item.models import Item
         return Item.objects.filter(materials__in=self.materials_list).exists()
@@ -335,10 +343,6 @@ class Study(models.Model):
     @cached_property
     def has_item_lists(self):
         return any(materials.has_lists for materials in self.materials_list)
-
-    @cached_property
-    def has_demographics(self):
-        return self.demographicfield_set.exists()
 
     @cached_property
     def is_active(self):
@@ -561,90 +565,73 @@ class Study(models.Model):
             csv_row = [i, trial.subject_id]
             writer.writerow(csv_row)
 
-    def settings_csv(self, fileobj):
-        # TODO: Add archive version + possibility for migrations
-        writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
-        writer.writerow(['title', self.title])
-        writer.writerow(['item_type', self.item_type])
-        writer.writerow(['use_blocks', self.use_blocks])
-        writer.writerow(['pseudo_randomize_question_order', self.pseudo_randomize_question_order])
-        writer.writerow(['password', self.password])
-        writer.writerow(['require_participant_id', self.require_participant_id])
-        writer.writerow(['end_date', self.end_date])
-        writer.writerow(['trial_limit', self.trial_limit])
-        writer.writerow(['questions', ','.join('"{}"'.format(question) for question in self.questions)])
-        writer.writerow(['question_scales', ','.join('"{}"'.format(question.scale_labels) for question in self.questions)])
-        writer.writerow(['question_legends', ','.join('"{}"'.format(question.legend if question.legend else '') for question in self.questions)])
-        writer.writerow(['instructions', self.instructions])
-        writer.writerow(['outro', self.outro])
-        writer.writerow(['continue_label', self.password])
-        writer.writerow(['materials_list', ','.join('"{}"'.format(materials.title) for materials in self.materials_list)])
-        writer.writerow(['filler', ','.join('"{}"'.format(materials.title) for materials in self.materials_list if materials.is_filler)])
+    @property
+    def ARCHIVE_FILES(self):
+        return [
+            ('01_results.csv', self.results_csv, None,
+             'Study results'),
+            ('02_settings.csv', self.settings_csv, self.settings_csv_restore,
+             'General study settings, tasks, instructions, etc.'),
+            ('03_questions.csv', self.questions_csv, self.questions_csv_restore,
+             'Questions'),
+            ('04_materials.csv', self.materials_csv, self.materials_csv_restore,
+             'Materials settings'),
+            ('05_items.csv', self.items_csv, self.items_csv_restore,
+             'Items for all expriments of the study'),
+            ('06_item_feedbacks.csv', self.item_feedbacks_csv, self.item_feedbacks_restore,
+             'Item feedback'),
+            ('07_lists.csv', self.itemlists_csv, self.itemlists_csv_restore,
+             'Item-lists for all expriments of the study'),
+            ('08_questionnaires.csv', self.questionnaires_csv, self.questionnaires_csv_restore,
+             'Study questionnaires'),
+            ('09_blocks.csv', self.questionnaire_blocks_csv, self.questionnaire_blocks_csv_restore,
+             'Questionnaire blocks'),
+        ]
 
-    def _read_settings(self, reader):
-        study_settings = {}
-        for row in reader:
-            if len(row) >= 2:
-                study_settings.update({row[0]: row[1]})
-        return study_settings
+    SETTING_FIELDS = [
+        'title',
+        'item_type',
+        'use_blocks',
+        'pseudo_randomize_question_order',
+        'enable_item_rating_feedback',
+        'password',
+        'require_participant_id',
+        'end_date',
+        'trial_limit',
+        'instructions',
+        'short_instructions',
+        'contact_name',
+        'contact_email',
+        'contact_affiliation',
+        'contact_details',
+        'privacy_statement',
+        'intro',
+        'outro',
+        'continue_label',
+        'privacy_statement_label',
+        'contact_label',
+        'instructions_label',
+        'block_instructions_label',
+        'optional_label',
+        'comment_label',
+        'answer_question_message',
+        'answer_questions_message',
+        'feedback_message',
+        'shared_with',
+    ]
 
     SETTING_BOOL_FIELDS = [
         'use_blocks',
         'pseudo_randomize_question_order',
         'require_participant_id',
-        'generate_participation_code',
     ]
 
-    SETTING_CHAR_FIELDS = [
-        'title',
-        'item_type',
-        'password',
-        'end_date',
-        'trial_limit',
-        'instructions',
-        'outro'
-    ]
-
-    def settings_csv_restore(self, fileobj):
-        from apps.materials.models import Materials
-        reader = csv.reader(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
-        study_settings = self._read_settings(reader)
-        if not self.is_archived:
-            for field in self.SETTING_CHAR_FIELDS:
-                if field in study_settings and study_settings[field]:
-                    setattr(self, field, study_settings[field])
-            for field in self.SETTING_BOOL_FIELDS:
-                if field in study_settings and study_settings[field]:
-                    setattr(self, field, study_settings[field] in ['True', 'true'])
-            self.save()
-        questions = re.findall('"([^"]+)"', study_settings['questions'])
-        scales = re.findall('"([^"]+)"', study_settings['question_scales'])
-        legends = re.findall('"([^"]*)"', study_settings['question_legends'])
-        for i, (question, scale, legend) in enumerate(zip(questions, scales, legends)):
-            question = Question.objects.create(
-                study=self,
-                question=question,
-                legend=legend,
-                number=i,
-            )
-            for i, scale_value in enumerate(scale.split(',')):
-                ScaleValue.objects.create(
-                    number=i,
-                    question=question,
-                    label=scale_value,
-                )
-        materials_titles = re.findall('"([^"]+)"', study_settings['materials_list'])
-        materials_fillers = re.findall('"([^"]+)"', study_settings['filler'])
-        for materials_title in materials_titles:
-            Materials.objects.create(
-                study=self,
-                title=materials_title,
-                is_filler=materials_title in materials_fillers,
-            )
-        self.created_date = now().date()
-        self.is_published = False
-        self.is_archived = False
-        self.save()
+    def _read_settings(self, reader):
+        study_settings = {}
+        for row in reader:
+            if len(row) == 2:
+                study_settings.update({row[0]: row[1]})
+        return study_settings
 
     def results_csv(self, fileobj):
         for i, materials in enumerate(self.materials_list):
@@ -653,6 +640,111 @@ class Study(models.Model):
                 header = materials.results_csv_header()
                 writer.writerow(header)
             materials.results_csv(fileobj)
+
+    def settings_csv(self, fileobj):
+        writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
+        writer.writerow(['version', settings.LREX_VERSION])
+        for setting_field in self.SETTING_FIELDS:
+            writer.writerow([setting_field, getattr(self, setting_field)])
+        writer.writerow(
+            ['demographics', self.demographics_string]
+        )
+
+    def settings_csv_restore(self, fileobj):
+        reader = csv.reader(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
+        study_settings = self._read_settings(reader)
+        if not self.is_archived:
+            for field in self.SETTING_FIELDS:
+                if field in study_settings and study_settings[field]:
+                    if field not in self.SETTING_BOOL_FIELDS:
+                        setattr(self, field, study_settings[field])
+                    else:
+                        setattr(self, field, study_settings[field] == 'True')
+
+            self.save()
+        for demographics_field in split_list_string(study_settings['demographics']):
+            self.demographicfield_set.create(name=demographics_field)
+        self.created_date = now().date()
+        self.is_published = False
+        self.is_archived = False
+        self.is_finished = False
+        self.save()
+
+    def questions_csv_header(self):
+        return ['question', 'scale_labels', 'legend', 'randomize_scale', 'rating_comment']
+
+    def questions_csv(self, fileobj):
+        writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
+        header = self.questions_csv_header()
+        writer.writerow(header)
+        for question in self.questions:
+            writer.writerow([
+                question.question,
+                question.scale_labels,
+                question.legend,
+                question.randomize_scale,
+                question.rating_comment,
+            ])
+
+    def questions_csv_restore(self, fileobj, detected_csv=contrib_csv.DEFAULT_DIALECT):
+        columns = contrib_csv.csv_columns(self.questions_csv_header)
+        reader = csv.reader(fileobj, delimiter=detected_csv['delimiter'], quoting=detected_csv['quoting'])
+        if detected_csv['has_header']:
+            next(reader)
+        question_number = 0
+        for row in reader:
+            if not row:
+                continue
+            question = Question.objects.create(
+                study=self,
+                number=question_number,
+                question=row[columns['question']],
+                legend=row[columns['legend']],
+                randomize_scale=(row[columns['randomize_scale']] == 'True'),
+                rating_comment=(row[columns['rating_comment']] == 'True'),
+            )
+            for i, scale_value in enumerate(split_list_string(row[columns['scale_labels']])):
+                ScaleValue.objects.create(
+                    number=i,
+                    question=question,
+                    label=scale_value,
+                )
+            question_number += 1
+
+    def materials_csv_header(self):
+        return ['title', 'list_distribution', 'is_filler', 'is_example', 'block', 'items_validated']
+
+    def materials_csv(self, fileobj):
+        writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
+        header = self.materials_csv_header()
+        writer.writerow(header)
+        for materials in self.materials_list:
+            writer.writerow([
+                materials.title,
+                materials.item_list_distribution,
+                materials.is_filler,
+                materials.is_example,
+                materials.block,
+                materials.items_validated,
+            ])
+
+    def materials_csv_restore(self, fileobj, detected_csv=contrib_csv.DEFAULT_DIALECT):
+        columns = contrib_csv.csv_columns(self.materials_csv_header)
+        reader = csv.reader(fileobj, delimiter=detected_csv['delimiter'], quoting=detected_csv['quoting'])
+        if detected_csv['has_header']:
+            next(reader)
+        for row in reader:
+            if not row:
+                continue
+            materials = self.materials_set.create(
+                title=row[columns['title']],
+                item_list_distribution=row[columns['list_distribution']],
+                is_filler=(row[columns['is_filler']] == 'True'),
+                is_example=(row[columns['is_example']] == 'True'),
+                block=(row[columns['block']] == 'True'),
+                items_validated=(row[columns['items_validated']] == 'True'),
+            )
+            materials.save()
 
     def items_csv(self, fileobj):
         for i, materials in enumerate(self.materials_list):
@@ -679,17 +771,6 @@ class Study(models.Model):
         for materials in self.materials_set.all():
             fileobj.seek(0)
             materials.itemlists_csv_create(fileobj, has_materials_column=True)
-
-    def _csv_columns(self, header_func, user_columns=None):
-        columns = {}
-        header = header_func()
-        for i, column in enumerate(header):
-            column_num = i
-            if user_columns and column in user_columns:
-                column_num = int(user_columns[column])
-            if column_num >= 0:
-                columns.update({column: column_num})
-        return columns
 
     def questionnaires_csv_header(self):
         return ['questionnaire', 'lists', 'items', 'question_order']
@@ -720,7 +801,7 @@ class Study(models.Model):
         reader = csv.reader(fileobj, delimiter=detected_csv['delimiter'], quoting=detected_csv['quoting'])
         if detected_csv['has_header']:
             next(reader)
-        columns = self._csv_columns(self.questionnaires_csv_header, user_columns=user_columns)
+        columns = contrib_csv.csv_columns(self.questionnaires_csv_header, user_columns=user_columns)
         for row in reader:
             if not row:
                 continue
@@ -741,31 +822,28 @@ class Study(models.Model):
             questionnaire.save()
 
     def questionnaire_blocks_csv_header(self):
-        return ['block', 'randomization', 'instructions']
+        return ['block', 'randomization', 'instructions', 'short_instructions']
 
     def questionnaire_blocks_csv(self, fileobj):
         writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
         header = self.questionnaire_blocks_csv_header()
         writer.writerow(header)
-        if not self.use_blocks:
-            return
         for block in self.questionnaireblock_set.all():
             csv_row = [
                 block.block,
+                block.instructions,
+                block.short_instructions,
                 block.randomization,
-                block.instructions
             ]
             writer.writerow(csv_row)
 
     def questionnaire_blocks_csv_restore(self, fileobj, user_columns=None, detected_csv=contrib_csv.DEFAULT_DIALECT):
         from apps.trial.models import QuestionnaireBlock
         self.delete_questionnaire_blocks()
-        if not self.use_blocks:
-            return
         reader = csv.reader(fileobj, delimiter=detected_csv['delimiter'], quoting=detected_csv['quoting'])
         if detected_csv['has_header']:
             next(reader)
-        columns = self._csv_columns(self.questionnaire_blocks_csv_header, user_columns=user_columns)
+        columns = contrib_csv.csv_columns(self.questionnaire_blocks_csv_header, user_columns=user_columns)
         for row in reader:
             if not row:
                 continue
@@ -773,24 +851,27 @@ class Study(models.Model):
                 study=self,
                 block=row[columns['block']],
                 instructions=row[columns['instructions']],
+                short_instructions=row[columns['short_instructions']],
                 randomization=row[columns['randomization']] if 'randomization' in columns else None,
             )
 
-    @property
-    def ARCHIVE_FILES(self):
-        return [
-            ('01_results.csv', self.results_csv, None),
-            ('02_settings.csv', self.settings_csv, self.settings_csv_restore),
-            ('03_items.csv', self.items_csv, self.items_csv_restore),
-            ('04_lists.csv', self.itemlists_csv, self.itemlists_csv_restore),
-            ('05_questionnaires.csv', self.questionnaires_csv, self.questionnaires_csv_restore),
-            ('06_blocks.csv', self.questionnaire_blocks_csv, self.questionnaire_blocks_csv_restore)
-        ]
+    def item_feedbacks_csv(self, fileobj):
+        for i, materials in enumerate(self.materials_list):
+            if i == 0:
+                writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
+                header = materials.item_feedbacks_csv_header(add_materials_column=True)
+                writer.writerow(header)
+            materials.item_feedbacks_csv(fileobj, add_header=False, add_materials_column=True)
+
+    def item_feedbacks_restore(self, fileobj, **kwargs):
+        for materials in self.materials_set.all():
+            fileobj.seek(0)
+            materials.item_feedbacks_csv_create(fileobj, has_materials_column=True)
 
     def archive_file(self, fileobj):
         with zipfile.ZipFile(fileobj, 'w', zipfile.ZIP_DEFLATED) as archive:
             file = io.StringIO()
-            for archive_file, archive_func, _ in self.ARCHIVE_FILES:
+            for archive_file, archive_func, _, _ in self.ARCHIVE_FILES:
                 if archive_func:
                     file.truncate(0)
                     file.seek(0)
@@ -798,6 +879,7 @@ class Study(models.Model):
                     archive.writestr(archive_file, file.getvalue())
 
     def archive(self):
+        self.delete_subject_mapping()
         self.delete_questionnaires()
         for materials in self.materials_list:
             materials.delete()
@@ -808,14 +890,16 @@ class Study(models.Model):
 
     def restore_from_archive(self, fileiobj, detected_csv_dialect=None):
         with zipfile.ZipFile(fileiobj) as archive:
-            for archive_file, _, restore_func  in self.ARCHIVE_FILES:
-                if restore_func:
-                    try:
-                        with archive.open(archive_file) as file:
-                            text_file = io.TextIOWrapper(file)
-                            restore_func(text_file)
-                    except KeyError:
-                        pass
+            for archive_file, _, restore_func, _  in self.ARCHIVE_FILES:
+                filename_without_num = archive_file[3:]
+                filename = None
+                for file_in_archive in archive.namelist():
+                    if file_in_archive.endswith(filename_without_num):
+                        filename = file_in_archive
+                if filename and restore_func:
+                    with archive.open(archive_file) as file:
+                        text_file = io.TextIOWrapper(file)
+                        restore_func(text_file)
 
     @classmethod
     def create_from_archive_file(cls, fileobj, creator, detected_csv_dialect=None):
@@ -950,6 +1034,7 @@ class Study(models.Model):
                     ]
             }
         return steps
+
 
 class Question(models.Model):
     study = models.ForeignKey(

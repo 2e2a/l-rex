@@ -2,6 +2,7 @@
 {% load contrib_tags %}
 {% load static %}
 
+{% block nav %}{% if not study.is_archived %}{{ block.super }}{% endif %}{% endblock %}
 {% block nav2 %}{% endblock %}
 {% block current_study %}{% endblock %}
 {% block content %}
@@ -158,8 +159,9 @@
     </div>
 </div>
 {% else %}
-<div class="p-4 border bg-white">
+<h1 class="title">Study {{ study.title }}</h1>
+<p>
     Study has been archived. <a href="{% url 'study-archive-restore' study.slug %}">Restore the study?</a>
-</div>
+</p>
 {% endif %}
 {% endblock %}

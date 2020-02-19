@@ -9,9 +9,9 @@
     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
         <form method="post">
             {% csrf_token %}
-            <button class="dropdown-item" type="submit" name="action" value="download_subjects">
+            <a class="dropdown-item" href="{% url 'trials-subjects-download' study.slug %}">
                 Download subject ID mapping
-            </button>
+            </a>
             <a class="dropdown-item" href="{% url 'trials-subjects-delete' study.slug %}">
                 Delete subject ID mapping
             </a>

@@ -3,6 +3,8 @@ import csv
 from collections import Counter
 from enum import Enum
 from itertools import groupby
+from string import ascii_lowercase
+
 from django.db import models
 from django.urls import reverse
 from django.utils.functional import cached_property
@@ -70,7 +72,7 @@ class Materials(models.Model):
         new_slug = slugify_unique(slug, Materials, self.id)
         if new_slug != self.slug:
             self.slug = slugify_unique(slug, Materials, self.id)
-            for item in self.items:
+            for item in self.item_set.all():
                 item.save()
         return super().save(*args, **kwargs)
 
@@ -149,9 +151,9 @@ class Materials(models.Model):
             else:
                 break
 
+        condition_count = len(conditions)
+        n_items = len(items)
         if self.item_list_distribution == self.LIST_DISTRIBUTION_LATIN_SQUARE:
-            condition_count = len(conditions)
-            n_items = len(items)
             if n_items % condition_count != 0:
                 msg = 'Number of stimuli is not a multiple of the number of conditions (stimuli: {}, conditions: {})'.format(
                     n_items,
@@ -222,6 +224,25 @@ class Materials(models.Model):
         self.save()
         self.compute_item_lists()
         return warnings
+
+    def pregenerate_items(self, n_items, n_conditions):
+        from apps.item.models import AudioLinkItem, TextItem, MarkdownItem
+        self.set_items_validated(False)
+        self.delete_lists()
+        for n_item in range(1, n_items + 1):
+            for condition in ascii_lowercase[:n_conditions]:
+                item_cls = None
+                if self.study.has_text_items:
+                    item_cls = TextItem
+                elif self.study.has_markdown_items:
+                    item_cls = MarkdownItem
+                elif self.study.has_audiolink_items:
+                    item_cls = AudioLinkItem
+                item_cls.objects.create(
+                    number=n_item,
+                    condition=condition,
+                    materials=self,
+                )
 
     def compute_item_lists(self):
         self.itemlist_set.all().delete()
@@ -367,22 +388,10 @@ class Materials(models.Model):
                     csv_row.extend(['', '', ''])
             writer.writerow(csv_row)
 
-    def _csv_columns(self, header_func, add_materials_column=False, user_columns=None):
-        columns = {}
-        if user_columns:
-            columns = user_columns
-            if add_materials_column:
-                columns.update({'materials': 0})
-        else:
-            header = header_func(add_materials_column=add_materials_column)
-            for i, column in enumerate(header):
-                columns.update({column: i})
-        return columns
-
     def items_csv_create(self, fileobj, has_materials_column=False, user_columns=None, detected_csv=contrib_csv.DEFAULT_DIALECT):
         new_items = []
         items_to_delete = list(item_models.Item.objects.filter(materials=self).all())
-        columns = self._csv_columns(self.items_csv_header, add_materials_column=has_materials_column, user_columns=user_columns)
+        columns = contrib_csv.csv_columns(self.items_csv_header, user_columns=user_columns, add_materials_column=has_materials_column)
         reader = csv.reader(fileobj, delimiter=detected_csv['delimiter'], quoting=detected_csv['quoting'])
         if detected_csv['has_header']:
             next(reader)
@@ -482,7 +491,7 @@ class Materials(models.Model):
         reader = csv.reader(fileobj, delimiter=detected_csv['delimiter'], quoting=detected_csv['quoting'])
         if detected_csv['has_header']:
             next(reader)
-        columns = self._csv_columns(self.item_feedbacks_csv_header, add_materials_column=has_materials_column, user_columns=user_columns)
+        columns = contrib_csv.csv_columns(self.item_feedbacks_csv_header, user_columns=user_columns, add_materials_column=has_materials_column)
         for row in reader:
             if not row:
                 continue
@@ -526,7 +535,7 @@ class Materials(models.Model):
         reader = csv.reader(fileobj, delimiter=detected_csv['delimiter'], quoting=detected_csv['quoting'])
         if detected_csv['has_header']:
             next(reader)
-        columns = self._csv_columns(self.itemlists_csv_header, add_materials_column=has_materials_column, user_columns=user_columns)
+        columns = contrib_csv.csv_columns(self.itemlists_csv_header, user_columns=user_columns, add_materials_column=has_materials_column)
         for row in reader:
             if not row:
                 continue

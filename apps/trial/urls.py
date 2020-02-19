@@ -22,8 +22,9 @@ urlpatterns_study = [
     path('contact/', views.TrialContactView.as_view(), name='trial-contact'),
     path('home/', views.TrialHomeView.as_view(), name='trial-home'),
     path('', views.TrialListView.as_view(), name='trials'),
-    path('delete-all', views.TrialDeleteAllView.as_view(), name='trials-delete'),
-    path('delete-subjects', views.TrialDeleteSubjectsView.as_view(), name='trials-subjects-delete'),
+    path('delete-all/', views.TrialDeleteAllView.as_view(), name='trials-delete'),
+    path('subjects/download/', views.TrialDownloadSubjectsView.as_view(), name='trials-subjects-download'),
+    path('subjects/delete/', views.TrialDeleteSubjectsView.as_view(), name='trials-subjects-delete'),
 ]
 
 urlpatterns = [

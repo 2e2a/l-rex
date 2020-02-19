@@ -1,5 +1,4 @@
 from io import StringIO
-from string import ascii_lowercase
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import ValidationError
@@ -298,36 +297,12 @@ class ItemPregenerateView(
     success_message = 'Items successfully generated.'
     title = 'Pregenerate items'
 
-    def _pregenerate_items(self, n_items, n_conditions):
-        for n_item in range(1, n_items + 1):
-            for condition in ascii_lowercase[:n_conditions]:
-                if self.study.has_text_items:
-                    models.TextItem.objects.create(
-                        number=n_item,
-                        condition=condition,
-                        materials=self.materials,
-                    )
-                elif self.study.has_markdown_items:
-                    models.TextItem.objects.create(
-                        number=n_item,
-                        condition=condition,
-                        materials=self.materials,
-                    )
-                elif self.study.has_audiolink_items:
-                    models.AudioLinkItem.objects.create(
-                        number=n_item,
-                        condition=condition,
-                        materials=self.materials,
-                    )
-
     def form_valid(self, form):
         result =  super().form_valid(form)
         n_items = form.cleaned_data['num_items']
         n_conditions = form.cleaned_data['num_conditions']
         models.Item.objects.filter(materials=self.materials).delete()
-        self.materials.set_items_validated(False)
-        self.materials.delete_lists()
-        self._pregenerate_items(n_items, n_conditions)
+        self.materials.pregenerate_items(n_items, n_conditions)
         return result
 
     def get_success_url(self):

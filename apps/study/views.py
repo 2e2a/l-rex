@@ -1,5 +1,6 @@
 from tempfile import TemporaryFile
 
+from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.messages.views import SuccessMessageMixin
@@ -204,26 +205,6 @@ class StudyCreateView(LoginRequiredMixin, generic.CreateView):
         return response
 
 
-class StudyCreateFromArchiveView(LoginRequiredMixin,  SuccessMessageMixin, generic.FormView):
-    title = 'Create a new study from archive'
-    template_name = 'lrex_home/base_form.html'
-    form_class = forms.StudyFromArchiveForm
-    success_message = 'Study successfully created.'
-
-    def get(self, request, *args, **kwargs):
-        messages.info(self.request, 'Note: Please be patient, this might take a while.')
-        return super().get(request, *args, **kwargs)
-
-    def form_valid(self, form):
-        super().form_valid(form)
-        file = form['file'].value()
-        study = models.Study.create_from_archive_file(file, self.request.user)
-        return redirect('study', study_slug=study.slug)
-
-    def get_success_url(self):
-        return reverse('studies', args=[])
-
-
 class StudyDetailView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
@@ -283,16 +264,27 @@ class StudyArchiveView(
     CheckStudyCreatorMixin,
     generic.UpdateView
 ):
-    # TODO: split as for delete
     model = models.Study
     template_name = 'lrex_study/study_archive.html'
     form_class = forms.ArchiveForm
     title = 'Archive the study'
 
+    def get_success_url(self):
+        import pdb;pdb.set_trace()
+        return reverse('studies')
+
+    def get(self, request, *args, **kwargs):
+        if self.study.has_subject_mapping:
+            download_link = (
+                '<a href="{}">download subject-ID mapping</a>'
+            ).format(reverse('trials-subjects-download', args=[self.study.slug]))
+            msg = 'Please {} first, if needed. It is not included in the archive.'.format(download_link)
+            messages.warning(request, mark_safe(msg))
+        return super().get(request, *args, **kwargs)
+
     def form_valid(self, form):
-        response = super().form_valid(form)
         self.study.archive()
-        return redirect('studies')
+        return super().form_valid(form)
 
 
 class StudyArchiveDownloadView(StudyObjectMixin, CheckStudyCreatorMixin, generic.DetailView):
@@ -306,11 +298,42 @@ class StudyArchiveDownloadView(StudyObjectMixin, CheckStudyCreatorMixin, generic
         return response
 
 
+class StudyCreateFromArchiveView(LoginRequiredMixin,  SuccessMessageMixin, generic.FormView):
+    title = 'Create a new study from archive'
+    template_name = 'lrex_home/base_form.html'
+    form_class = forms.StudyNewFromArchiveForm
+
+    def get(self, request, *args, **kwargs):
+        messages.info(self.request, 'Note: Please be patient, this might take a while.')
+        return super().get(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        super().form_valid(form)
+        title = form['title'].value()
+        file = form['file'].value()
+        try:
+            study = models.Study.create_from_archive_file(file, self.request.user)
+            study.title = title
+            study.save()
+            messages.success(self.request, 'Study successfully created.')
+            return redirect('study', study_slug=study.slug)
+        except Exception as err:
+            if settings.DEBUG:
+                raise err
+            messages.error(
+                self.request,
+                'An error occured during study creation. Please check the new study and contact the admin.'
+            )
+        return redirect('studies')
+
+    def get_success_url(self):
+        return reverse('studies', args=[])
+
+
 class StudyRestoreFromArchiveView(StudyMixin, CheckStudyCreatorMixin, SuccessMessageMixin, generic.FormView):
     title = 'Restore study from archive'
     template_name = 'lrex_home/base_form.html'
     form_class = forms.StudyFromArchiveForm
-    success_message = 'Study successfully restored.'
 
     def get(self, request, *args, **kwargs):
         messages.info(self.request, 'Note: Please be patient, restoring a study might take a while.')
@@ -319,7 +342,16 @@ class StudyRestoreFromArchiveView(StudyMixin, CheckStudyCreatorMixin, SuccessMes
     def form_valid(self, form):
         response = super().form_valid(form)
         file = form['file'].value()
-        self.study.restore_from_archive(file)
+        try:
+            self.study.restore_from_archive(file)
+            messages.success(self.request, 'Study successfully restored.')
+        except Exception as err:
+            if settings.DEBUG:
+                raise err
+            messages.error(
+                self.request,
+                'An error occured during study creation. Please check the new study and contact the admin.'
+            )
         return response
 
     def get_success_url(self):
@@ -340,8 +372,14 @@ class StudyCreateCopyView(StudyMixin, CheckStudyCreatorMixin, SuccessMessageMixi
         super().form_valid(form)
         title = form['title'].value()
         file = TemporaryFile()
-        self.study.archive_file(file)
-        study = models.Study.create_from_archive_file(file, self.request.user)
+        try:
+            self.study.archive_file(file)
+            study = models.Study.create_from_archive_file(file, self.request.user)
+        except:
+            messages.error(
+                self.request,
+                'An error occured during study creation. Please check the new study and contact the admin.'
+            )
         study.title = title
         study.save()
         return redirect('study', study_slug=study.slug)
@@ -395,16 +433,17 @@ class StudySettingsView(
 
 
 class StudySettingsDeleteView(
-    StudyObjectMixin,
-    CheckStudyCreatorMixin,
     SettingsNavMixin,
-    contib_views.DefaultDeleteView
+    StudyDeleteView,
 ):
-    model = models.Study
     template_name = 'lrex_dashboard/settings_confirm_delete.html'
 
-    def get_success_url(self):
-        return reverse('studies')
+
+class StudySettingsArchiveView(
+    SettingsNavMixin,
+    StudyArchiveView,
+):
+    template_name = 'lrex_study/study_archive_settings.html'
 
 
 class StudyTranslationsUpdateView(
