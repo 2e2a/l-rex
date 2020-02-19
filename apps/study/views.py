@@ -717,7 +717,7 @@ class DemographicsUpdateView(
         return super().dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
-        msg = 'Please, respect the privacy of your participants. Do not collect private data that you do not need.'
+        msg = 'Please respect the privacy of your participants. Do not collect private data that you do not need.'
         messages.warning(self.request, msg)
         self.formset = forms.demographic_formset_factory(self.n_fields, 0 if self.n_fields > 0 else 1)(
             queryset=self.study.demographicfield_set.all()

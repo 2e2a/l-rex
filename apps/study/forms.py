@@ -113,7 +113,7 @@ class StudyTranslationsForm(contrib_forms.CrispyModelForm):
 
 class StudyFromArchiveForm(contrib_forms.CrispyForm):
     file = forms.FileField(
-        help_text='An L-Rex archive file previously downloaded.',
+        help_text='Choose an L-Rex archive file (zip format) that you downloaded previously.',
         widget=forms.FileInput,
     )
 
@@ -183,7 +183,7 @@ class StudyIntroForm(contrib_forms.CrispyModelForm):
 class ArchiveForm(contrib_forms.CrispyModelForm):
     is_archived = forms.BooleanField(
         required=True,
-        label='Please, confirm that you have successfully downloaded and checked the archive file and want to proceed.'
+        label='Please confirm that you have successfully downloaded and checked the archive file and want to proceed.'
     )
 
     class Meta:

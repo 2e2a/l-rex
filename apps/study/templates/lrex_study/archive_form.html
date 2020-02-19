@@ -14,13 +14,13 @@
 </div>
 {% endfor %}
 <p class="mt-2">
-    You can then use this archive file to restore this study later or create a similar study. <br>Please, download the archive:
+    You can then use this archive file to restore this study later or create a similar study. <br>Please download the archive:
 </p>
 <div class="text-center mb-4">
     <a href="{% url 'study-archive-download' study.slug %}" class="btn btn-primary">Generate and download archive</a>
 </div>
 <p><strong>
-    Important: Please make sure that the archive <code>ZIP-file</code> is valid and all <code>CSV-files</code> contain the expected content.
+    Important: Please make sure that the downloaded archive <code>ZIP-file</code> is valid and all <code>CSV-files</code> contain the expected content.
     When you proceed, all study data and results will be deleted from the server.
 </strong></p>
 {% crispy form form.helper %}

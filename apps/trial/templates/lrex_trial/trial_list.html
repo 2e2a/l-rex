@@ -1,7 +1,7 @@
 {% extends "lrex_dashboard/results_base.html" %}
 
 {% block actions %}
-<div><a class="btn btn-outline-secondary btn-sm ml-0 mr-1 mt-1" href="{% url 'study-results-csv' study.slug %}">Results CSV</a></div>
+<div><a class="btn btn-outline-secondary btn-sm ml-0 mr-1 mt-1" href="{% url 'study-results-csv' study.slug %}">Download results</a></div>
 <div class="dropdown ml-1 mr-0 my-1">
     <button class="btn btn-outline-secondary btn-sm" type="button" id="dropdownActionsButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         &hellip;
