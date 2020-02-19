@@ -80,6 +80,10 @@ reset-db:
 .PHONY: reset-dev
 reset-dev: reset-db demo-load
 
+.PHONY: clean
+clean:
+	find . -type f -name '*.py[co]' -delete -o -type d -name __pycache__ -delete
+
 .PHONY: pull
 pull:
 	git pull
@@ -89,7 +93,7 @@ static:
 	$(VIRTUAL_ENV)/bin/python3 manage.py collectstatic --noinput
 
 .PHONY: deploy
-deploy: pull install build migrate static
+deploy: clean pull install build migrate static
 
 .PHONY: fixenv
 fixvenv:
