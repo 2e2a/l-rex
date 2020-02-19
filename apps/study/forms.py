@@ -118,6 +118,13 @@ class StudyFromArchiveForm(contrib_forms.CrispyForm):
     )
 
 
+class StudyNewFromArchiveForm(StudyFromArchiveForm):
+    title = forms.CharField(
+        max_length=100,
+        help_text='Title of the new study.'
+    )
+
+
 class StudyCopyForm(contrib_forms.CrispyForm):
     title = forms.CharField(
         max_length=100,

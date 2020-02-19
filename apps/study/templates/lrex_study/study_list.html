@@ -19,7 +19,9 @@
     <li class="list-group-item d-flex">
         <div class="flex-grow-1">
             <a href="{% url 'study' study.slug %}"><strong>{{ study.title }}</strong></a>
-            {% if study.is_published %}
+            {% if study.is_archived %}
+            <div class="badge badge-light">Archived</div>
+            {% elif study.is_published %}
             <div class="badge badge-primary">Published</div>
             {% elif study.is_finished %}
             <div class="badge badge-light">Finished</div>
@@ -34,9 +36,11 @@
             {% endif %}
             <div class="small mt-1">
                 <span class="pr-2">created: <strong>{{ study.created_date|date:"SHORT_DATE_FORMAT" }}</strong></span>
+                {% if not study.is_archived %}
                 <span class="pr-2">completed trials: <strong>{{ study.trial_count_finished }}</strong></span>
                 {% if study.creator != view.request.user %}
                 <span class="pr-2">shared by: <strong>{{ study.creator.username }}</strong></span>
+                {% endif %}
                 {% endif %}
             </div>
         </div>

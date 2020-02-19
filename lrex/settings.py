@@ -177,8 +177,8 @@ SITE_ID = 1
 ADMINS = []
 DEFAULT_FROM_EMAIL = 'lrex@localhost'
 
-
-# deployment dependant static content
+# lrex
+LREX_VERSION = 0
 LREX_CONTACT_MD = 'Please define contact as markdown in local.py'
 LREX_PRIVACY_MD = 'Please define privacy statement as markdown in local.py'
 

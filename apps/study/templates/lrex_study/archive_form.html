@@ -1,0 +1,26 @@
+{% load crispy_forms_tags %}
+
+<p>
+    You can archive a study by downloading and saving the archive <code>ZIP-file</code> containing all contents of your study as separate <code>CSV-files</code>:
+</p>
+{% for file, _, _, description in study.ARCHIVE_FILES %}
+<div class="row">
+    <div class="col-sm-5 text-right">
+        <code>{{ file }}:</code>
+    </div>
+    <div class="col-sm-5">
+        {{ description }}
+    </div>
+</div>
+{% endfor %}
+<p class="mt-2">
+    You can then use this archive file to restore this study later or create a similar study. <br>Please, download the archive:
+</p>
+<div class="text-center mb-4">
+    <a href="{% url 'study-archive-download' study.slug %}" class="btn btn-primary">Generate and download archive</a>
+</div>
+<p><strong>
+    Important: Please make sure that the archive <code>ZIP-file</code> is valid and all <code>CSV-files</code> contain the expected content.
+    When you proceed, all study data and results will be deleted from the server.
+</strong></p>
+{% crispy form form.helper %}

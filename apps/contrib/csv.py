@@ -87,3 +87,12 @@ def detect_dialect(data, form_cleaned_data, int_column_names=None, user_delimite
         )
     except csv.Error:
         raise forms.ValidationError('Unsupported CSV format.')
+
+
+def csv_columns(header_func, user_columns=None, **kwargs):
+    if user_columns:
+        columns = user_columns
+    else:
+        header = header_func(**kwargs)
+        columns = {column: i for i, column in enumerate(header)}
+    return columns
