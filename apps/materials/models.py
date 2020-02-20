@@ -438,28 +438,25 @@ class Materials(models.Model):
                 items_to_delete.remove(item.item_ptr)
 
             custom_question_column = any(
-                'question{}'.format(question.number) in columns for question in self.study.questions
+                'question{}'.format(question.number + 1) in columns for question in self.study.questions
             )
             if custom_question_column:
                 for question in self.study.questions:
-                    question_column = 'question{}'.format(question.number)
+                    question_column = 'question{}'.format(question.number + 1)
                     if question_column in columns:
-                        question_question = row[columns[question_column]]
-                        scale_labels_column = 'scale{}'.format(question.number)
-                        legend_column = 'legend{}'.format(question.number)
-                        scale_labels = row[columns[scale_labels_column]] if scale_labels_column in columns else None
-                        legend = row[columns[legend_column]] if legend_column in columns else None
-                    else:
-                        question_question = question.question
-                        scale_labels = question.scale_labels
-                        legend = question.legend
-                    item_models.ItemQuestion.objects.get_or_create(
-                        item=item,
-                        question=question_question,
-                        number=question.number,
-                        scale_labels=scale_labels,
-                        legend=legend,
-                    )
+                        item_question = row[columns[question_column]]
+                        if item_question:
+                            scale_labels_column = 'scale{}'.format(question.number +  1)
+                            legend_column = 'legend{}'.format(question.number + 1)
+                            scale_labels = row[columns[scale_labels_column]] if scale_labels_column in columns else None
+                            legend = row[columns[legend_column]] if legend_column in columns else None
+                            item_models.ItemQuestion.objects.get_or_create(
+                                item=item,
+                                question=item_question,
+                                number=question.number,
+                                scale_labels=scale_labels,
+                                legend=legend,
+                            )
         if new_items or items_to_delete and self.is_complete:
             self.delete_lists()
         for item in items_to_delete:
