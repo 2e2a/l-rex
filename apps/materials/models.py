@@ -480,7 +480,7 @@ class Materials(models.Model):
             csv_row.extend([
                 item_feedback.item.number,
                 item_feedback.item.condition,
-                item_feedback.question,
+                item_feedback.question.number,
                 item_feedback.scale_values,
                 item_feedback.feedback
             ])
