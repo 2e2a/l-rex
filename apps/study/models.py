@@ -831,9 +831,9 @@ class Study(models.Model):
         for block in self.questionnaireblock_set.all():
             csv_row = [
                 block.block,
+                block.randomization,
                 block.instructions,
                 block.short_instructions,
-                block.randomization,
             ]
             writer.writerow(csv_row)
 
