@@ -477,7 +477,7 @@ class Materials(models.Model):
             csv_row.extend([
                 item_feedback.item.number,
                 item_feedback.item.condition,
-                item_feedback.question.number,
+                item_feedback.question.number + 1,
                 item_feedback.scale_values,
                 item_feedback.feedback
             ])
@@ -488,7 +488,9 @@ class Materials(models.Model):
         reader = csv.reader(fileobj, delimiter=detected_csv['delimiter'], quoting=detected_csv['quoting'])
         if detected_csv['has_header']:
             next(reader)
-        columns = contrib_csv.csv_columns(self.item_feedbacks_csv_header, user_columns=user_columns, add_materials_column=has_materials_column)
+        columns = contrib_csv.csv_columns(
+            self.item_feedbacks_csv_header, user_columns=user_columns, add_materials_column=has_materials_column
+        )
         for row in reader:
             if not row:
                 continue
