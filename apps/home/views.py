@@ -7,6 +7,9 @@ from django.utils.safestring import mark_safe
 from django.views import generic
 from django.views.decorators.csrf import requires_csrf_token
 
+from apps.user import models as user_models
+from apps.study import models as study_models
+
 from . import models
 
 
@@ -27,6 +30,13 @@ class HomeView(generic.ListView):
             return redirect('user-profile-create')
         return super().get(request, *args, **kwargs)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'n_users': user_models.UserProfile.objects.all().count(),
+            'n_studies': study_models.Study.objects.all().count(),
+        })
+        return context
 
 class ImprintView(generic.TemplateView):
     template_name = 'lrex_home/imprint.html'

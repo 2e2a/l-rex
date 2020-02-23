@@ -4,22 +4,57 @@
 {% block title %}Linguistic rating experiments{% endblock %}
 
 {% block content %}
-<div class="card my-2">
-    <div class="card-body">
-        <p class="card-text">
-            Welcome to L-Rex, a platform for creating and running linguistic experiments.
-        </p>
-        <ul class="card-text">
-            <li>Supported stimuli types: texts or audio files.</li>
-            <li>Participants choose one of several responses (e.g., binary or ordinal ratings).</li>
-            <li>Automated Latin-square distribution and randomization available.</li>
-        </ul>
-        <p class="card-text">
-            L-Rex is free and open source. All functions are available without payment, advertisement, or user tracking.
-        </p>
-        <p class="card-text">
-            <a class="card-link" href="{% url 'studies' %}">Start creating experiments with L-Rex</a>
-        </p>
+<div class="row">
+    <div class="col-lg-9 d-flex align-items-stretch">
+        <div class="card my-2 flex-fill">
+            <div class="card-body">
+                <p class="card-text">
+                    Welcome to L-Rex, a platform for creating and running linguistic experiments.
+                </p>
+                <ul class="card-text">
+                    <li>Supported stimuli types: texts or audio files.</li>
+                    <li>Participants choose one of several responses (e.g., binary or ordinal ratings).</li>
+                    <li>Automated Latin-square distribution and randomization available.</li>
+                </ul>
+                <p class="card-text">
+                    L-Rex is free and open source. All functions are available without payment, advertisement, or user tracking.
+                </p>
+                <p class="card-text">
+                    <a class="card-link" href="{% url 'studies' %}">Start creating experiments with L-Rex</a>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 d-flex align-items-stretch">
+<div class="card my-2 flex-fill">
+            <div class="card-body text-center d-flex justify-content-between flex-column">
+                <h3 class="card-title">News</h3>
+                <ul class="list-group">
+                    {% for news in news_list %}
+                    <li class="list-group-item border-0 pt-0 pb-2">
+                        <div class="text-secondary small">{{ news.date|date:"SHORT_DATE_FORMAT" }}</div>
+                        <a href="{% url 'news' news.slug %}">{{ news.title }}</a>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item border-0">No news is good news.</li>
+                    {% endfor %}
+                </ul>
+                <nav class="mt-auto" aria-label="Pagination">
+                    <ul class="pagination justify-content-center mb-0 mt-1">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item"><a class="page-link py-1" href="?page={{ page_obj.previous_page_number }}">&lsaquo; newer</a></li>
+                        {% else %}
+                        <li class="page-item disabled"><a class="page-link py-1">&lsaquo; newer</a></li>
+                        {% endif %}
+                        {% if page_obj.has_next %}
+                        <li class="page-item"><a class="page-link py-1" href="?page={{ page_obj.next_page_number }}">older &rsaquo;</a></li>
+                        {% else %}
+                        <li class="page-item disabled"><a class="page-link py-1">older &rsaquo;</a></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
     </div>
 </div>
 <div class="row">
@@ -58,35 +93,19 @@
         </div>
     </div>
     <div class="col-lg-3 col-md-6 d-flex align-items-stretch">
-        <div class="card my-2 flex-fill">
-            <div class="card-body text-center d-flex justify-content-between flex-column">
-                <h3 class="card-title">News</h3>
-                <ul class="list-group">
-                    {% for news in news_list %}
-                    <li class="list-group-item border-0 pt-0 pb-2">
-                        <div class="text-secondary small">{{ news.date|date:"SHORT_DATE_FORMAT" }}</div>
-                        <a href="{% url 'news' news.slug %}">{{ news.title }}</a>
-                    </li>
-                    {% empty %}
-                    <li class="list-group-item border-0">No news is good news.</li>
-                    {% endfor %}
+                <div class="card my-2 flex-fill">
+            <div class="card-body">
+                <h3 class="card-title text-center">Statistics</h3>
+                <p class="card-text text-center">
+                    L-Rex currently has:
+                </p>
+                <ul class="card-text">
+                    <li>{{ n_users }} users</li>
+                    <li>{{ n_studies }} studies</li>
                 </ul>
-                <nav class="mt-auto" aria-label="Pagination">
-                    <ul class="pagination justify-content-center mb-0 mt-1">
-                        {% if page_obj.has_previous %}
-                        <li class="page-item"><a class="page-link py-1" href="?page={{ page_obj.previous_page_number }}">&lsaquo; newer</a></li>
-                        {% else %}
-                        <li class="page-item disabled"><a class="page-link py-1">&lsaquo; newer</a></li>
-                        {% endif %}
-                        {% if page_obj.has_next %}
-                        <li class="page-item"><a class="page-link py-1" href="?page={{ page_obj.next_page_number }}">older &rsaquo;</a></li>
-                        {% else %}
-                        <li class="page-item disabled"><a class="page-link py-1">older &rsaquo;</a></li>
-                        {% endif %}
-                    </ul>
-                </nav>
             </div>
         </div>
+
     </div>
 </div>
 {% endblock %}
