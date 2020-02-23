@@ -94,15 +94,17 @@
     </div>
     <div class="col-lg-3 col-md-6 d-flex align-items-stretch">
                 <div class="card my-2 flex-fill">
-            <div class="card-body">
+            <div class="card-body d-flex flex-column">
                 <h3 class="card-title text-center">Statistics</h3>
                 <p class="card-text text-center">
                     L-Rex currently has:
                 </p>
-                <ul class="card-text">
-                    <li>{{ n_users }} users</li>
-                    <li>{{ n_studies }} studies</li>
-                </ul>
+                <div class="d-flex justify-content-center">
+                    <ul class="card-text">
+                        <li>{{ n_users }} users</li>
+                        <li>{{ n_studies }} studies</li>
+                    </ul>
+                </div>
             </div>
         </div>
 
