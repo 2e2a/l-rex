@@ -7,8 +7,8 @@
             Settings
         </a>
     </li><li class="nav-item">
-        <a class="nav-link {% if nav2_active == 1 %}active{% endif %}" href="{% url 'study-translate' study.slug %}">
-            Translations
+        <a class="nav-link {% if nav2_active == 1 %}active{% endif %}" href="{% url 'study-labels' study.slug %}">
+            Customize labels
         </a>
     </li><li class="nav-item">
         <a class="nav-link {% if nav2_active == 2 %}active{% endif %}" href="{% url 'study-share' study.slug %}">

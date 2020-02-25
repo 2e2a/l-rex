@@ -346,6 +346,7 @@ class StudyRestoreFromArchiveView(StudyMixin, CheckStudyCreatorMixin, SuccessMes
             self.study.restore_from_archive(file)
             messages.success(self.request, 'Study successfully restored.')
         except Exception as err:
+            self.study.archive()
             if settings.DEBUG:
                 raise err
             messages.error(
@@ -446,7 +447,7 @@ class StudySettingsArchiveView(
     template_name = 'lrex_study/study_archive_settings.html'
 
 
-class StudyTranslationsUpdateView(
+class StudyLabelsUpdateView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
     SuccessMessageMixin,
@@ -456,10 +457,10 @@ class StudyTranslationsUpdateView(
     generic.UpdateView,
 ):
     model = models.Study
-    title = 'Translations'
+    title = 'Customize labels'
     template_name = 'lrex_dashboard/settings_form.html'
-    form_class = forms.StudyTranslationsForm
-    success_message = 'Translations updated.'
+    form_class = forms.StudyLabelsForm
+    success_message = 'Labels updated.'
 
     def get(self, request, *args, **kwargs):
         msg = 'Note: Translatable elements are not shown when the respective feature is disabled via a study or ' \
@@ -484,7 +485,7 @@ class StudyTranslationsUpdateView(
 
     def get_success_url(self):
         if 'save' in self.request.POST:
-            return reverse('study-translate', args=[self.object.slug])
+            return reverse('study-labels', args=[self.object.slug])
         return self.object.get_absolute_url()
 
 

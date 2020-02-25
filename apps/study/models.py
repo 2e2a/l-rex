@@ -890,16 +890,20 @@ class Study(models.Model):
 
     def restore_from_archive(self, fileiobj, detected_csv_dialect=None):
         with zipfile.ZipFile(fileiobj) as archive:
-            for archive_file, _, restore_func, _  in self.ARCHIVE_FILES:
-                filename_without_num = archive_file[3:]
-                filename = None
-                for file_in_archive in archive.namelist():
-                    if file_in_archive.endswith(filename_without_num):
-                        filename = file_in_archive
-                if filename and restore_func:
-                    with archive.open(archive_file) as file:
-                        text_file = io.TextIOWrapper(file)
-                        restore_func(text_file)
+            try:
+                for archive_file, _, restore_func, _  in self.ARCHIVE_FILES:
+                    filename_without_num = archive_file[3:]
+                    filename = None
+                    for file_in_archive in archive.namelist():
+                        if file_in_archive.endswith(filename_without_num):
+                            filename = file_in_archive
+                    if filename and restore_func:
+                        with archive.open(archive_file) as file:
+                            text_file = io.TextIOWrapper(file)
+                            restore_func(text_file)
+            except Exception as err:
+                self.delete()
+                raise err
 
     @classmethod
     def create_from_archive_file(cls, fileobj, creator, detected_csv_dialect=None):
@@ -1029,7 +1033,7 @@ class Study(models.Model):
                 'Settings':
                     [
                         ('customize study settings', reverse('study-settings', args=[self.slug])),
-                        ('translate built-in texts', reverse('study-translate', args=[self.slug])),
+                        ('customize labels', reverse('study-labels', args=[self.slug])),
                         ('share study with other users', reverse('study-share', args=[self.slug])),
                     ]
             }

@@ -80,7 +80,7 @@ class StudySettingsForm(contrib_forms.CrispyModelForm):
         return helper
 
 
-class StudyTranslationsForm(contrib_forms.CrispyModelForm):
+class StudyLabelsForm(contrib_forms.CrispyModelForm):
 
     class Meta:
         model = models.Study
