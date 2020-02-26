@@ -105,7 +105,7 @@ class StudyLabelsForm(contrib_forms.CrispyModelForm):
             self.fields['comment_label'].widget = forms.HiddenInput()
         if not study.enable_item_rating_feedback:
             self.fields['feedback_message'].widget = forms.HiddenInput()
-        if len(study.questions) > 1:
+        if study.questions.count() > 1:
             self.fields['answer_question_message'].widget = forms.HiddenInput()
         else:
             self.fields['answer_questions_message'].widget = forms.HiddenInput()

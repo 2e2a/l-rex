@@ -249,7 +249,7 @@ class Study(models.Model):
         new_slug = slugify_unique(self.title, Study, self.id)
         if self.slug != new_slug:
             self.slug = new_slug
-            for materials in self.materials_set.all():
+            for materials in self.materials.all():
                 materials.save()
         return super().save(*args, **kwargs)
 
@@ -258,10 +258,6 @@ class Study(models.Model):
 
     def get_absolute_url(self):
         return reverse('study', args=[self.slug])
-
-    @cached_property
-    def materials_list(self):
-        return self.materials_set.all()
 
     @cached_property
     def has_text_items(self):
@@ -278,17 +274,13 @@ class Study(models.Model):
     @cached_property
     def item_blocks(self):
         item_bocks = set()
-        for materials in self.materials_list:
+        for materials in self.materials.all():
             item_bocks.update(materials.item_blocks)
         return sorted(item_bocks)
 
     @cached_property
-    def questions(self):
-        return self.question_set.all()
-
-    @cached_property
     def question(self):
-        return self.questions[0] if self.questions else None
+        return self.questions.first()
 
     def get_question(self, number):
         for question in self.questions:
@@ -297,52 +289,52 @@ class Study(models.Model):
 
     @cached_property
     def is_multi_question(self):
-        return len(self.questions) > 1
+        return self.questions.count() > 1
 
     @cached_property
     def has_question_with_random_scale(self):
-        return any(question.randomize_scale for question in self.questions)
+        return any(question.randomize_scale for question in self.questions.all())
 
     @cached_property
     def has_question_rating_comments(self):
-        return self.question_set.filter(
+        return self.questions.filter(
             rating_comment__in=[Question.RATING_COMMENT_OPTIONAL, Question.RATING_COMMENT_REQUIRED]
         ).exists()
 
     @cached_property
     def has_demographics(self):
-        return self.demographicfield_set.exists()
+        return self.demographics.exists()
 
     @cached_property
     def demographics_string(self):
-        return to_list_string(field.name for field in self.demographicfield_set.all())
+        return to_list_string(field.name for field in self.demographics.all())
 
     @cached_property
     def has_items(self):
         from apps.item.models import Item
-        return Item.objects.filter(materials__in=self.materials_list).exists()
+        return Item.objects.filter(materials__study=self).exists()
 
     @cached_property
     def has_item_questions(self):
         from apps.item.models import Item, ItemQuestion
         try:
-            materials_items = Item.objects.filter(materials__in=self.materials_list).all()
+            materials_items = Item.objects.filter(materials__study=self).all()
             return ItemQuestion.objects.filter(item__in=materials_items).exists()
         except Item.DoesNotExist:
             return False
 
     @cached_property
     def has_block_instructions(self):
-        if not self.questionnaireblock_set.exists():
+        if not self.questionnaire_blocks.exists():
             return False
-        for block in self.questionnaireblock_set.all():
+        for block in self.questionnaire_blocks.all():
             if not block.instructions:
                 return False
         return True
 
     @cached_property
     def has_item_lists(self):
-        return any(materials.has_lists for materials in self.materials_list)
+        return any(materials.has_lists for materials in self.materials.all())
 
     @cached_property
     def is_active(self):
@@ -409,56 +401,57 @@ class Study(models.Model):
 
     @cached_property
     def is_allowed_create_questionnaires(self):
-        if not self.materials_list:
+        if not self.materials.exists():
             return False
-        for materials in self.materials_list:
+        for materials in self.materials.all():
             if not materials.is_complete:
                 return False
         return True
 
     @cached_property
     def is_allowed_publish(self):
-        return self.questions and self.instructions and self.intro and self.privacy_statement \
-               and self.items_validated and self.questionnaire_set.exists() \
-               and (not self.use_blocks or self.has_block_instructions)
+        return (
+            self.questions.exists() and self.instructions and self.intro and self.privacy_statement
+            and self.items_validated and self.questionnaires.exists()
+            and (not self.use_blocks or self.has_block_instructions)
+        )
 
     @cached_property
     def is_allowed_pseudo_randomization(self):
-        return self.materials_set.filter(is_filler=True).count() > 0
+        return self.materials.filter(is_filler=True).count() > 0
 
     @cached_property
     def items_validated(self):
-        for materials in self.materials_list:
-            if not materials.items_validated:
-                return False
-        return True
+        if not self.materials.exists():
+            return False
+        return self.materials.filter(items_validated=False).exists()
 
     @cached_property
     def randomization_reqiured(self):
         from apps.trial.models import QuestionnaireBlock
-        for questionnaire_block in self.questionnaireblock_set.all():
+        for questionnaire_block in self.questionnaire_blocks.all():
             if questionnaire_block.randomization != QuestionnaireBlock.RANDOMIZATION_NONE:
                 return True
         return False
 
     @cached_property
     def has_exmaples(self):
-        return any(materials.is_example for materials in self.materials_list)
+        return self.materials.filter(is_example=True).exists()
 
     @cached_property
     def has_questionnaires(self):
-        return self.questionnaire_set.exists()
+        return self.questionnaires.exists()
 
     @cached_property
     def questionnaire_length(self):
-        first_questionnaire = self.questionnaire_set.first()
+        first_questionnaire = self.questionnaires.first()
         if first_questionnaire:
-            return first_questionnaire.questionnaireitem_set.count()
+            return first_questionnaire.questionnaire_items.count()
         return 0
 
     def _questionnaire_trial_count(self, is_test=False):
         from apps.trial.models import Trial
-        questionnaires = self.questionnaire_set.all()
+        questionnaires = self.questionnaires.all()
         trials = Trial.objects.filter(
             questionnaire_id__in=[questionnaire.id for questionnaire in questionnaires],
             is_test=is_test,
@@ -477,15 +470,15 @@ class Study(models.Model):
 
     def _questionnaire_count(self):
         questionnaire_lcm = 1
-        for materials in self.materials_list:
+        for materials in self.materials.all():
             condition_count = len(materials.conditions)
             questionnaire_lcm = math.lcm(questionnaire_lcm,  condition_count)
         return questionnaire_lcm
 
     def _init_questionnaire_lists(self):
         questionnaire_item_list = []
-        for materials in self.materials_list:
-            item_list = materials.itemlist_set.first()
+        for materials in self.materials.all():
+            item_list = materials.lists.first()
             questionnaire_item_list.append(item_list)
         return questionnaire_item_list
 
@@ -511,7 +504,7 @@ class Study(models.Model):
     def _generate_questionnaire_permutations(self, materials_list, permutations=4):
         from apps.trial.models import Questionnaire
         if self.randomization_reqiured:
-            questionnaires = list(self.questionnaire_set.all())
+            questionnaires = list(self.questionnaires.all())
             questionnaire_count = len(questionnaires)
             for permutation in range(1, permutations):
                 for i, questionnaire in enumerate(questionnaires):
@@ -522,8 +515,8 @@ class Study(models.Model):
 
     def generate_questionnaires(self):
         try:
-            self.questionnaire_set.all().delete()
-            materials_list = {e.id: e for e in self.materials_list}
+            self.questionnaires.all().delete()
+            materials_list = {m.id: m for m in self.materials.all()}
             questionnaire_count = self._questionnaire_count()
             last_questionnaire = None
             for i in range(questionnaire_count):
@@ -538,10 +531,10 @@ class Study(models.Model):
     def delete_questionnaires(self):
         from apps.trial.models import Trial
         Trial.objects.filter(questionnaire__study=self).all().delete()
-        self.questionnaire_set.all().delete()
+        self.questionnaires.all().delete()
 
     def delete_questionnaire_blocks(self):
-        self.questionnaireblock_set.all().delete()
+        self.questionnaire_blocks.all().delete()
 
     @cached_property
     def contact_html(self):
@@ -634,7 +627,7 @@ class Study(models.Model):
         return study_settings
 
     def results_csv(self, fileobj):
-        for i, materials in enumerate(self.materials_list):
+        for i, materials in enumerate(self.materials.all()):
             if i == 0:
                 writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
                 header = materials.results_csv_header()
@@ -663,7 +656,7 @@ class Study(models.Model):
 
             self.save()
         for demographics_field in split_list_string(study_settings['demographics']):
-            self.demographicfield_set.create(name=demographics_field)
+            self.demographics.create(name=demographics_field)
         self.created_date = now().date()
         self.is_published = False
         self.is_archived = False
@@ -677,7 +670,7 @@ class Study(models.Model):
         writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
         header = self.questions_csv_header()
         writer.writerow(header)
-        for question in self.questions:
+        for question in self.questions.all():
             writer.writerow([
                 question.question,
                 question.scale_labels,
@@ -718,7 +711,7 @@ class Study(models.Model):
         writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
         header = self.materials_csv_header()
         writer.writerow(header)
-        for materials in self.materials_list:
+        for materials in self.materials.all():
             writer.writerow([
                 materials.title,
                 materials.item_list_distribution,
@@ -736,7 +729,7 @@ class Study(models.Model):
         for row in reader:
             if not row:
                 continue
-            materials = self.materials_set.create(
+            materials = self.materials.create(
                 title=row[columns['title']],
                 item_list_distribution=row[columns['list_distribution']],
                 is_filler=(row[columns['is_filler']] == 'True'),
@@ -747,7 +740,7 @@ class Study(models.Model):
             materials.save()
 
     def items_csv(self, fileobj):
-        for i, materials in enumerate(self.materials_list):
+        for i, materials in enumerate(self.materials.all()):
             if i == 0:
                 writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
                 header = materials.items_csv_header(add_materials_column=True)
@@ -755,12 +748,12 @@ class Study(models.Model):
             materials.items_csv(fileobj, add_header=False, add_materials_column=True)
 
     def items_csv_restore(self, fileobj, **kwargs):
-        for materials in self.materials_set.all():
+        for materials in self.materials.all():
             fileobj.seek(0)
             materials.items_csv_create(fileobj, has_materials_column=True)
 
     def itemlists_csv(self, fileobj):
-        for i, materials in enumerate(self.materials_list):
+        for i, materials in enumerate(self.materials.all()):
             if i == 0:
                 writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
                 header = materials.itemlists_csv_header(add_materials_column=True)
@@ -768,7 +761,7 @@ class Study(models.Model):
             materials.itemlists_csv(fileobj, add_header=False, add_materials_column=True)
 
     def itemlists_csv_restore(self, fileobj, **kwargs):
-        for materials in self.materials_set.all():
+        for materials in self.materials.all():
             fileobj.seek(0)
             materials.itemlists_csv_create(fileobj, has_materials_column=True)
 
@@ -779,7 +772,7 @@ class Study(models.Model):
         writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
         header = self.questionnaires_csv_header()
         writer.writerow(header)
-        for questionnaire in self.questionnaire_set.all():
+        for questionnaire in self.questionnaires.all():
             csv_row = [
                 questionnaire.number,
                 ','.join(['{}-{}'.format(item_list.materials.title, item_list.number)
@@ -788,7 +781,7 @@ class Study(models.Model):
             ]
             if self.pseudo_randomize_question_order:
                 csv_row.append(
-                    ','.join('"{}"'.format(q_item.question_order) for q_item in questionnaire.questionnaire_items)
+                    ','.join('"{}"'.format(q_item.question_order) for q_item in questionnaire.questionnaire_items.all())
                 )
             else:
                 csv_row.append('')
@@ -828,7 +821,7 @@ class Study(models.Model):
         writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
         header = self.questionnaire_blocks_csv_header()
         writer.writerow(header)
-        for block in self.questionnaireblock_set.all():
+        for block in self.questionnaire_blocks.all():
             csv_row = [
                 block.block,
                 block.randomization,
@@ -856,7 +849,7 @@ class Study(models.Model):
             )
 
     def item_feedbacks_csv(self, fileobj):
-        for i, materials in enumerate(self.materials_list):
+        for i, materials in enumerate(self.materials.all()):
             if i == 0:
                 writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
                 header = materials.item_feedbacks_csv_header(add_materials_column=True)
@@ -864,7 +857,7 @@ class Study(models.Model):
             materials.item_feedbacks_csv(fileobj, add_header=False, add_materials_column=True)
 
     def item_feedbacks_restore(self, fileobj, **kwargs):
-        for materials in self.materials_set.all():
+        for materials in self.materials.all():
             fileobj.seek(0)
             materials.item_feedbacks_csv_create(fileobj, has_materials_column=True)
 
@@ -881,10 +874,8 @@ class Study(models.Model):
     def archive(self):
         self.delete_subject_mapping()
         self.delete_questionnaires()
-        for materials in self.materials_list:
-            materials.delete()
-        for question in self.questions:
-            question.delete()
+        self.materials.all.delete()
+        self.questions.all.delete()
         self.is_archived = True
         self.save()
 
@@ -965,23 +956,23 @@ class Study(models.Model):
         next_steps = OrderedDict()
 
         group = 'Task and instructions'
-        if not self.questions:
+        if not self.questions.exists():
             self._append_step_info(next_steps, StudySteps.STEP_STD_QUESTION_CREATE, group)
         if not self.instructions:
             self._append_step_info(next_steps, StudySteps.STEP_STD_INSTRUCTIONS_EDIT, group)
         if not self.intro:
             self._append_step_info(next_steps, StudySteps.STEP_STD_INTRO_EDIT, group)
 
-        if not self.materials_list:
+        if self.materials.exists():
             group = 'Materials'
             self._append_step_info(next_steps, StudySteps.STEP_STD_EXP_CREATE, group)
         else:
-            for materials in self.materials_list:
+            for materials in self.materials.all():
                 next_exp_steps = materials.next_steps()
                 next_steps.update(next_exp_steps)
 
         group = 'Questionnaires'
-        if self.is_allowed_create_questionnaires and not self.questionnaire_set.exists():
+        if self.is_allowed_create_questionnaires and not self.questionnaire.exists():
             self._append_step_info(next_steps, StudySteps.STEP_STD_QUESTIONNAIRES_GENERATE, group)
         if self.use_blocks and self.has_questionnaires and not self.has_block_instructions:
             self._append_step_info(next_steps, StudySteps.STEP_STD_BLOCK_INSTRUCTIONS_CREATE, group)
@@ -1043,7 +1034,8 @@ class Study(models.Model):
 class Question(models.Model):
     study = models.ForeignKey(
         Study,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='questions',
     )
     number = models.IntegerField(
         default=0,
@@ -1081,19 +1073,15 @@ class Question(models.Model):
         ordering = ['study', 'number']
 
     @cached_property
-    def scale_values(self):
-        return list(self.scalevalue_set.all())
-
-    @cached_property
     def scale_labels(self):
-        return to_list_string(scale_value.label for scale_value in self.scalevalue_set.all())
+        return to_list_string(scale_value.label for scale_value in self.scalevalues.all())
 
     @cached_property
     def has_rating_comment(self):
         return self.rating_comment != self.RATING_COMMENT_NONE
 
     def is_valid_scale_value(self, scale_value_label):
-        return self.scalevalue_set.filter(label=scale_value_label).exists()
+        return self.scalevalues.filter(label=scale_value_label).exists()
 
     def get_absolute_url(self):
         return reverse('study-question', args=[self.study.slug, self.pk])
@@ -1108,7 +1096,8 @@ class ScaleValue(models.Model):
     )
     question = models.ForeignKey(
         Question,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='scale_values',
     )
     label = models.CharField(
         max_length=50,
@@ -1125,7 +1114,8 @@ class ScaleValue(models.Model):
 class DemographicField(models.Model):
     study = models.ForeignKey(
         Study,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='demographics'
     )
     name = models.CharField(
         max_length=500,

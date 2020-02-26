@@ -242,7 +242,7 @@ class StudyDetailView(
             'materials_ready': [],
             'materials_draft': [],
         })
-        for materials in self.study.materials_list:
+        for materials in self.study.materials.all():
             data['materials_ready' if materials.is_complete else 'materials_draft'].append(materials)
         return data
 
@@ -545,7 +545,7 @@ class QuestionUpdateView(
 
     def dispatch(self, *args, **kwargs):
         self.helper = forms.question_formset_helper()
-        self.n_questions = self.study.question_set.count()
+        self.n_questions = self.study.questions.count()
         return super().dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
@@ -559,9 +559,9 @@ class QuestionUpdateView(
                     reverse('questionnaires', args=[self.study.slug]))
                 messages.info(request, mark_safe(msg))
         self.formset = forms.question_formset_factory(self.n_questions, 0 if self.n_questions > 0 else 1)(
-            queryset=self.study.question_set.all()
+            queryset=self.study.questions.all()
         )
-        forms.initialize_with_questions(self.formset, self.study.questions)
+        forms.initialize_with_questions(self.formset, self.study.questions.all())
         forms.question_formset_disable_fields(
             self.formset,
             disable_randomize_scale=self.study.has_questionnaires,
@@ -569,7 +569,7 @@ class QuestionUpdateView(
         return super().get(request, *args, **kwargs)
 
     def _invalidate_materials_items(self):
-        for materials in self.study.materials_list:
+        for materials in self.study.materials.all():
             materials.set_items_validated(False)
 
     def post(self, request, *args, **kwargs):
@@ -581,7 +581,7 @@ class QuestionUpdateView(
                 instance.number = i
                 instance.save()
                 scale_values_new = []
-                scale_values_old = list(instance.scalevalue_set.all())
+                scale_values_old = list(instance.scalevalues.all())
                 scale_labels = split_list_string(form.cleaned_data['scale_labels'])
                 for j, scale_label in enumerate(scale_labels):
                     if scale_label:
@@ -598,7 +598,7 @@ class QuestionUpdateView(
                     self._invalidate_materials_items()
                 for scale_value in scale_values_old:
                     scale_value.delete()
-            self.n_questions = self.study.question_set.count()
+            self.n_questions = self.study.questions.count()
             extra = len(self.formset.forms) - self.n_questions
             if 'submit' in request.POST:
                 messages.success(request, 'Questions saved.')
@@ -613,14 +613,14 @@ class QuestionUpdateView(
                 if extra > 0:
                     extra -= 1
                 elif self.n_questions > 0:
-                    self.study.question_set.last().delete()
+                    self.study.questions.last().delete()
                     if self.study.has_item_questions:
                         self._invalidate_materials_items()
                     self.n_questions -= 1
                 self.formset = forms.question_formset_factory(self.n_questions, extra)(
                     queryset=models.Question.objects.filter(study=self.study)
                 )
-            forms.initialize_with_questions(self.formset, self.study.questions)
+            forms.initialize_with_questions(self.formset, self.study.questions.all())
             forms.question_formset_disable_fields(
                 self.formset,
                 disable_randomize_scale=self.study.has_questionnaires,
@@ -714,14 +714,14 @@ class DemographicsUpdateView(
 
     def dispatch(self, *args, **kwargs):
         self.helper = forms.demographic_formset_helper()
-        self.n_fields = self.study.demographicfield_set.count()
+        self.n_fields = self.study.demographics.count()
         return super().dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
         msg = 'Please respect the privacy of your participants. Do not collect private data that you do not need.'
         messages.warning(self.request, msg)
         self.formset = forms.demographic_formset_factory(self.n_fields, 0 if self.n_fields > 0 else 1)(
-            queryset=self.study.demographicfield_set.all()
+            queryset=self.study.demographics.all()
         )
         return super().get(request, *args, **kwargs)
 
@@ -733,7 +733,7 @@ class DemographicsUpdateView(
                 instance.study = self.study
                 instance.number = i
                 instance.save()
-            self.n_fields = self.study.demographicfield_set.count()
+            self.n_fields = self.study.demographics.count()
             extra = len(self.formset.forms) - self.n_fields
             if 'submit' in request.POST:
                 messages.success(request, 'Demographics saved.')
@@ -741,20 +741,20 @@ class DemographicsUpdateView(
             elif 'save' in request.POST:
                 messages.success(request, 'Demographics saved.')
                 self.formset = forms.demographic_formset_factory(self.n_fields, extra)(
-                    queryset=self.study.demographicfield_set.all()
+                    queryset=self.study.demographics.all()
                 )
             elif 'add' in request.POST:
                 self.formset = forms.demographic_formset_factory(self.n_fields, extra + 1)(
-                    queryset=self.study.demographicfield_set.all()
+                    queryset=self.study.demographics.all()
                 )
             else: # delete last
                 if extra > 0:
                     extra -= 1
                 elif self.n_fields > 0:
-                    self.study.demographicfield_set.last().delete()
+                    self.study.demographics.last().delete()
                     self.n_fields -= 1
                 self.formset = forms.demographic_formset_factory(self.n_fields, extra)(
-                    queryset=self.study.demographicfield_set.all()
+                    queryset=self.study.demographics.all()
                 )
         return super().get(request, *args, **kwargs)
 

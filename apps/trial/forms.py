@@ -361,13 +361,14 @@ def ratingformset_factory(n_questions=1):
 
 
 def ratingformset_init(ratingformset, study, item_questions, questionnaire_item):
+    questions = list(study.questions.all())
     if study.pseudo_randomize_question_order:
         reordered_questions = []
         for question_num in questionnaire_item.question_order.split(','):
-            reordered_questions.append(study.questions[int(question_num)])
+            reordered_questions.append(questions[int(question_num)])
         ordered_questions = reordered_questions
     else:
-        ordered_questions = study.questions
+        ordered_questions = questions
     for question, form in zip(ordered_questions, ratingformset):
         item_question = item_questions.filter(number=question.number).first()
         form.init_form(study, question, item_question)

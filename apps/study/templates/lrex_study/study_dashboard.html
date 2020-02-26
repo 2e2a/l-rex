@@ -95,10 +95,10 @@
                 </div>
                 {% endif %}
                 <div>
-                    {% if not study.question_set.exists %}
+                    {% if not study.questions.exists %}
                     No questions created yet.
                     {% else %}
-                    {{ study.question_set.count }} question{% if study.question_set.count > 1 %}s{% endif %} created.
+                    {{ study.questions.count }} question{% if study.questions.count > 1 %}s{% endif %} created.
                     {% endif %}
                 </div>
                 <div>
@@ -112,7 +112,7 @@
                             {% if materials.items_validated %}
                             (items: {{ materials.item_count }},
                             conditions: {{ materials.conditions|length }},
-                            lists: {{ materials.itemlist_set.count }})
+                            lists: {{ materials.lists.count }})
                             {% endif %}
                         </li>
                         {% endfor %}

@@ -20,8 +20,8 @@ class Command(BaseCommand):
         if not study:
             raise CommandError('Study does not exist.')
         questions_scale_values = []
-        for question in study.questions:
-            questions_scale_values.append((question.number, question.scalevalue_set.all()))
+        for question in study.questions.all():
+            questions_scale_values.append((question.number, question.scalevalues.all()))
         for i in range(n_ratings):
             questionnaire = study.next_questionnaire()
             trial = trial_models.Trial(
@@ -30,7 +30,7 @@ class Command(BaseCommand):
             if study.require_participant_id:
                 trial.subject_id = i
             trial.save()
-            for questionnaire_item in questionnaire.questionnaireitem_set.all():
+            for questionnaire_item in questionnaire.questionnaire_items.all():
                 for question, question_scale_values in questions_scale_values:
                     scale_value = random.choice(question_scale_values)
                     trial_models.Rating.objects.create(

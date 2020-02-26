@@ -22,6 +22,7 @@ class Item(models.Model):
         'lrex_materials.Materials',
         on_delete=models.CASCADE,
         null=True,
+        related_name='items',
     )
     block = models.IntegerField(
         help_text='Number of the questionnaire block in which the item will appear.',
@@ -112,6 +113,7 @@ class ItemList(models.Model):
         'lrex_materials.Materials',
         on_delete=models.CASCADE,
         null=True,
+        related_name='lists',
     )
     number = models.IntegerField(
         default=0,
@@ -125,16 +127,17 @@ class ItemList(models.Model):
         return '{} {}'.format(self.materials, self.number)
 
     def next(self):
-        next_list =  self.materials.itemlist_set.filter(pk__gt=self.pk).first()
+        next_list =  self.materials.lists.filter(pk__gt=self.pk).first()
         if not next_list:
-            next_list =  self.materials.itemlist_set.first()
+            next_list =  self.materials.lists.first()
         return next_list
 
 
 class ItemQuestion(models.Model):
     item = models.ForeignKey(
         Item,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='item_questions'
     )
     number = models.IntegerField(
         default=0,
@@ -171,6 +174,7 @@ class ItemFeedback(models.Model):
         Item,
         on_delete=models.CASCADE,
         help_text='Item for the feedback.',
+        related_name='item_feedback',
     )
     question = models.ForeignKey(
         'lrex_study.Question',

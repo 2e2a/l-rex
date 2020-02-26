@@ -126,7 +126,7 @@ class ItemUploadForm(contrib_forms.CSVUploadForm):
         self.fields['content_column'].help_text = content_help_text
         if not self.study.use_blocks or self.materials.is_example or self.materials.block > 0:
             self.fields['block_column'].widget = forms.HiddenInput()
-        for question in self.study.questions:
+        for question in self.study.questions.all():
             self.fields.update(
                 {
                     'question_{}_question_column'.format(question.number + 1):
@@ -173,7 +173,7 @@ class ItemUploadForm(contrib_forms.CSVUploadForm):
                 validate_urls(row[cleaned_data['content_column'] - 1])
             if cleaned_data['block_column'] > 0:
                 int(row[cleaned_data['block_column'] - 1])
-            for question in self.study.questions:
+            for question in self.study.questions.all():
                 if cleaned_data['question_{}_question_column'.format(question.number + 1)] > 0:
                     assert row[cleaned_data['question_{}_question_column'.format(question.number + 1)] - 1]
                 if cleaned_data['question_{}_scale_column'.format(question.number + 1)] > 0:
@@ -181,7 +181,7 @@ class ItemUploadForm(contrib_forms.CSVUploadForm):
                     scale_values = split_list_string(
                         row[cleaned_data['question_{}_scale_column'.format(question.number + 1)] - 1]
                     )
-                    assert len(scale_values) == question.scalevalue_set.count()
+                    assert len(scale_values) == question.scalevalues.count()
                 if cleaned_data['question_{}_legend_column'.format(question.number + 1)] > 0:
                     assert row[cleaned_data['question_{}_legend_column'.format(question.number + 1)] - 1]
 

@@ -28,7 +28,8 @@ class Questionnaire(models.Model):
     )
     study = models.ForeignKey(
         'lrex_study.Study',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='questionnaires',
     )
     number = models.IntegerField()
     item_lists = models.ManyToManyField(item_models.ItemList)
@@ -48,21 +49,17 @@ class Questionnaire(models.Model):
         return [
             questionnaire_item.item
             for questionnaire_item
-            in self.questionnaireitem_set.all().prefetch_related('item')
+            in self.questionnaire_items.all().prefetch_related('item')
         ]
 
     @cached_property
     def questionnaire_items_preview(self):
-        return self.questionnaireitem_set.all().prefetch_related('item')[:10]
-
-    @cached_property
-    def questionnaire_items(self):
-        return self.questionnaireitem_set.all().prefetch_related('item')
+        return self.questionnaire_items.all().prefetch_related('item')[:10]
 
     @cached_property
     def questionnaire_items_by_block(self):
         blocks = OrderedDict()
-        for questionnaire_item in self.questionnaireitem_set.all():
+        for questionnaire_item in self.questionnaire_items.all():
             if questionnaire_item.item.materials_block in blocks:
                 blocks[questionnaire_item.item.materials_block].append(questionnaire_item)
             else:
@@ -74,7 +71,7 @@ class Questionnaire(models.Model):
 
     def _block_randomization(self):
         block_randomization = OrderedDict()
-        questionnaire_blocks = self.study.questionnaireblock_set.all()
+        questionnaire_blocks = self.study.questionnaire_blocks.all()
         for questionnaire_block in questionnaire_blocks:
             block_randomization[questionnaire_block.block] = questionnaire_block.randomization
         return block_randomization
@@ -224,7 +221,7 @@ class Questionnaire(models.Model):
             questionnaire_item.question_order = ','.join(str(p) for p in permutation)
 
     def _random_scale_permutations(self, question, n_items):
-        scale = range(0, question.scalevalue_set.count())
+        scale = range(0, question.scalevalues.count())
         scale_permutations = list(permutations(scale))
         n_permutations = len(scale_permutations)
         per_permutation = ceil(n_items/n_permutations)
@@ -308,7 +305,8 @@ class QuestionnaireBlock(models.Model):
     )
     study = models.ForeignKey(
         'lrex_study.Study',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='questionnaire_blocks',
     )
 
     class Meta:
@@ -320,7 +318,7 @@ class QuestionnaireBlock(models.Model):
 
 class QuestionnaireItem(models.Model):
     number = models.IntegerField()
-    questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE)
+    questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE, related_name='questionnaire_items')
     item = models.ForeignKey(item_models.Item, on_delete=models.CASCADE)
     question_order = models.CharField(max_length=200, blank=True, null=True)
 
@@ -336,7 +334,7 @@ class QuestionnaireItem(models.Model):
         return list(self.questionproperty_set.all())
 
     def question_property(self, number):
-        return self.questionproperty_set.get(number=number)
+        return self.question_properties.get(number=number)
 
     def __str__(self):
         return '{} - {}'.format(self.number, self.item)
@@ -344,7 +342,11 @@ class QuestionnaireItem(models.Model):
 
 class QuestionProperty(models.Model):
     number = models.IntegerField()
-    questionnaire_item = models.ForeignKey(QuestionnaireItem, on_delete=models.CASCADE)
+    questionnaire_item = models.ForeignKey(
+        QuestionnaireItem,
+        on_delete=models.CASCADE,
+        related_name='question_properties',
+    )
     scale_order = models.CharField(max_length=200, blank=True, null=True)
 
     class Meta:
@@ -354,8 +356,8 @@ class QuestionProperty(models.Model):
     def question_scale_user(self):
         scale = []
         study = self.questionnaire_item.questionnaire.study
-        question = study.question_set.get(number=self.number)
-        scale_labels = [scale_value.label for scale_value in question.scalevalue_set.all()]
+        question = study.questions.get(number=self.number)
+        scale_labels = [scale_value.label for scale_value in question.scalevalues.all()]
         for pos in self.scale_order.split(','):
             scale.append(scale_labels[int(pos)])
         return ','.join(scale)
@@ -410,7 +412,7 @@ class Trial(models.Model):
     @cached_property
     def questionnaire_item_ratings(self):
         item_ratings = []
-        for questionnaire_item in self.questionnaire.questionnaireitem_set.all():
+        for questionnaire_item in self.questionnaire.questionnaire_items.all():
             ratings = Rating.objects.filter(trial=self, questionnaire_item=questionnaire_item).all()
             item_ratings.append((questionnaire_item, ratings))
         return item_ratings
@@ -458,7 +460,7 @@ class Trial(models.Model):
 
 class Rating(models.Model):
     trial = models.ForeignKey(Trial, on_delete=models.CASCADE)
-    questionnaire_item = models.ForeignKey(QuestionnaireItem, on_delete=models.CASCADE)
+    questionnaire_item = models.ForeignKey(QuestionnaireItem, on_delete=models.CASCADE, related_name='ratings')
     question = models.IntegerField(default=0)
     scale_value = models.ForeignKey(study_models.ScaleValue, on_delete=models.CASCADE)
     comment = models.CharField(
@@ -476,11 +478,11 @@ class Rating(models.Model):
 
     @cached_property
     def question_object(self):
-        return self.questionnaire_item.questionnaire.study.question_set.get(number=self.question)
+        return self.questionnaire_item.questionnaire.study.questions.get(number=self.question)
 
 
 class DemographicValue(models.Model):
-    trial = models.ForeignKey(Trial, on_delete=models.CASCADE)
+    trial = models.ForeignKey(Trial, on_delete=models.CASCADE, related_name='demographics')
     field = models.ForeignKey(study_models.DemographicField, on_delete=models.CASCADE)
     value = models.CharField(
         max_length=2000,

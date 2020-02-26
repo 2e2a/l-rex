@@ -322,7 +322,7 @@ class ItemUploadView(
     title = 'Upload items'
 
     def dispatch(self, request, *args, **kwargs):
-        if not self.study.questions:
+        if not self.study.questions.exists():
             msg = 'Note: If you want to use per item question customization, please ' \
                   '<a href="{}">define the study question</a> first.'.format(
                     reverse('study-questions', args=[self.study.slug]))
@@ -346,7 +346,7 @@ class ItemUploadView(
         if self.study.has_audiolink_items:
             if form.cleaned_data['audio_description_column'] > 0:
                 columns.update({'audio_description': form.cleaned_data['audio_description_column'] - 1})
-        for i, question in enumerate(self.study.questions):
+        for i, question in enumerate(self.study.questions.all()):
             question_column = 'question_{}_question_column'.format(question.number + 1)
             if form.cleaned_data[question_column] > 0:
                 columns.update({'question{}'.format(i): form.cleaned_data[question_column] - 1})
@@ -406,7 +406,7 @@ class ItemQuestionsUpdateView(
         return 'Customize item {} questions'.format(self.item)
 
     def dispatch(self, request, *args, **kwargs):
-        self.n_questions = len(self.study.questions)
+        self.n_questions = self.study.questions.count()
         self.helper = forms.itemquestion_formset_helper()
         return super().dispatch(request, *args, **kwargs)
 
@@ -414,7 +414,7 @@ class ItemQuestionsUpdateView(
         self.formset = forms.itemquestion_formset_factory(self.n_questions)(
             queryset=models.ItemQuestion.objects.filter(item=self.item),
         )
-        forms.initialize_with_questions(self.formset, self.study.questions)
+        forms.initialize_with_questions(self.formset, self.study.questions.all())
         if self.n_questions == 0:
             msg = 'Note: If you want to use per item question customization, please ' \
                   '<a href="{}">define the study question</a> first.'.format(
@@ -424,17 +424,17 @@ class ItemQuestionsUpdateView(
 
     def post(self, request, *args, **kwargs):
         if 'reset' in request.POST:
-            self.item.itemquestion_set.all().delete()
+            self.item.item_questions.all().delete()
             return self.get(request, *args, **kwargs)
         self.formset = forms.itemquestion_formset_factory(self.n_questions)(request.POST, request.FILES)
         if self.formset.is_valid():
             instances = self.formset.save(commit=False)
             scale_labels_valid = True
             for instance in instances:
-                question = next(question for question in self.study.questions if question.number == instance.number)
+                question = next(question for question in self.study.questions.all() if question.number == instance.number)
                 if instance.scale_labels:
                     scale_labels = split_list_string(instance.scale_labels)
-                    if len(scale_labels) != question.scalevalue_set.count():
+                    if len(scale_labels) != question.scalevalues.count():
                         self.formset._errors[question.number]['scale_labels'] = \
                             self.formset.error_class(ValidationError('Invalid scale labels').error_list)
                         scale_labels_valid = False
@@ -472,13 +472,13 @@ class ItemFeedbackUpdateView(
 
     def dispatch(self, request, *args, **kwargs):
         self.helper = forms.itemfeedback_formset_helper()
-        self.n_feedback = self.item.itemfeedback_set.count()
+        self.n_feedback = self.item.item_feedback.count()
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
         extra = 0 if self.n_feedback > 0 else  1
         self.formset = forms.itemfeedback_formset_factory(extra=extra)(
-            queryset=self.item.itemfeedback_set.all(),
+            queryset=self.item.item_feedback.all(),
         )
         forms.itemfeedback_init_formset(self.formset, self.study)
         return super().get(request, *args, **kwargs)
@@ -491,7 +491,7 @@ class ItemFeedbackUpdateView(
             scale_values_valid = True
             n_instances = len(instances)
             for i, instance in enumerate(instances):
-                scale_values = split_list_string(instance.scale_values)
+                scale_values = split_list_string(instance.scale_values.all())
                 if not all(instance.question.is_valid_scale_value(scale_value) for scale_value in scale_values):
                     form_num = n_forms - n_instances
                     self.formset._errors[form_num]['scale_values'] = \
@@ -502,7 +502,7 @@ class ItemFeedbackUpdateView(
             if scale_values_valid:
                 for instance in instances:
                     instance.save()
-            self.n_feedback = self.item.itemfeedback_set.count()
+            self.n_feedback = self.item.item_feedback.count()
             extra = n_forms - self.n_feedback
             if 'submit' in request.POST:
                 if scale_values_valid:
@@ -514,16 +514,16 @@ class ItemFeedbackUpdateView(
                     return self.redirect_paginated('item-feedback', item_slug=self.item.slug)
             elif 'add' in request.POST:
                 self.formset = forms.itemfeedback_formset_factory(extra + 1)(
-                    queryset=self.item.itemfeedback_set.all(),
+                    queryset=self.item.item_feedback.all(),
                 )
             else: # delete last
                 if extra > 0:
                     extra -= 1
                 elif self.n_feedback > 0:
-                    self.item.itemfeedback_set.last().delete(),
+                    self.item.item_feedback.last().delete(),
                     self.n_feedback -= 1
                 self.formset = forms.itemfeedback_formset_factory(extra)(
-                    queryset=self.item.itemfeedback_set.all(),
+                    queryset=self.item.item_feedback.all(),
                 )
             forms.itemfeedback_init_formset(self.formset, self.study)
         return super().get(request, *args, **kwargs)
@@ -629,7 +629,7 @@ class ItemListUploadView(
 
     def form_valid(self, form):
         result = super().form_valid(form)
-        self.materials.itemlist_set.all().delete()
+        self.materials.lists.all().delete()
         columns = {
             'list': form.cleaned_data['list_column'] - 1,
             'items': form.cleaned_data['items_column'] - 1,

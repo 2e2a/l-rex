@@ -174,9 +174,8 @@ class QuestionnaireDetailView(
 
     def _add_items_for_block(self, context_items, block, q_items):
         for q_item in q_items:
-            question_properties = q_item.question_properties
             context_items.append(
-                (block, q_item, question_properties)
+                (block, q_item, q_item.question_properties.all())
             )
 
     def _context_questionnaire_items(self):
@@ -185,7 +184,7 @@ class QuestionnaireDetailView(
             for block, q_items in self.questionnaire.questionnaire_items_by_block.items():
                 self._add_items_for_block(context_items, block, q_items)
         else:
-            self._add_items_for_block(context_items, 1, self.questionnaire.questionnaire_items)
+            self._add_items_for_block(context_items, 1, self.questionnaire.questionnaire_items.all())
         return context_items
 
     def get_context_data(self, **kwargs):
@@ -288,7 +287,7 @@ class QuestionnaireBlockInstructionsUpdateView(
     def is_disabled(self):
         if self.study.is_active or not self.study.use_blocks:
             return True
-        if any(not materials.items_validated for materials in self.study.materials_list):
+        if not self.study.items_validated:
             return True
         return False
 
@@ -298,7 +297,7 @@ class QuestionnaireBlockInstructionsUpdateView(
         )
         if not self.study.use_blocks:
             messages.info(request, 'Blocks are disabled for this study.')
-        elif any(not materials.items_validated for materials in self.study.materials_list):
+        if not self.study.items_validated:
             messages.info(request, 'All materials items need to be validated before creating block instructions.')
         return super().get(request, *args, **kwargs)
 
@@ -339,7 +338,7 @@ class QuestionnaireUploadView(
 
     def form_valid(self, form):
         result =  super().form_valid(form)
-        self.study.questionnaire_set.all().delete()
+        self.study.questionnaires.all().delete()
         columns = {
             'questionnaires': form.cleaned_data['questionnaires_column'] - 1,
             'items': form.cleaned_data['items_column'] - 1,
@@ -539,10 +538,9 @@ class DemographicsCreateView(TrialMixin, TestTrialMixin, generic.TemplateView):
     helper = None
 
     def dispatch(self, request, *args, **kwargs):
-        if self.trial.demographicvalue_set.exists():
+        if self.trial.demographics.exists():
             return redirect(reverse('ratings-create', args=[self.trial.slug, 0]))
-        self.fields_qs = self.study.demographicfield_set
-        self.n_fields = self.fields_qs.count()
+        self.n_fields = self.study.demographics.count()
         self.helper = forms.demographics_formset_helper(self.study.continue_label)
         return super().dispatch(request, *args, **kwargs)
 
@@ -550,7 +548,7 @@ class DemographicsCreateView(TrialMixin, TestTrialMixin, generic.TemplateView):
         self.formset = forms.demographics_formset_factory(self.n_fields, self.n_fields)(
             queryset=models.DemographicValue.objects.none()
         )
-        forms.demographics_formset_init(self.formset, self.fields_qs.all())
+        forms.demographics_formset_init(self.formset, self.study.demographics.all())
         return super().get(request, *args, **kwargs)
 
     def get_success_url(self):
@@ -650,8 +648,8 @@ class RatingsCreateView(ProgressMixin, TestTrialMixin, TrialMixin, generic.Templ
             questionnaire=self.trial.questionnaire,
             number=self.num
         )
-        self.n_questions = len(self.study.questions)
-        self.item_questions = self.questionnaire_item.item.itemquestion_set.all()
+        self.n_questions = self.study.questions.count()
+        self.item_questions = self.questionnaire_item.item.item_questions.all()
         self.helper = forms.rating_formset_helper()
         return super().dispatch(request, *args, **kwargs)
 
@@ -668,7 +666,7 @@ class RatingsCreateView(ProgressMixin, TestTrialMixin, TrialMixin, generic.Templ
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        if self.questionnaire_item.rating_set.filter(trial=self.trial).exists():
+        if self.questionnaire_item.ratings.filter(trial=self.trial).exists():
             return redirect(self.get_next_url())
         self.formset = forms.ratingformset_factory(self.n_questions)(request.POST, request.FILES)
         forms.ratingformset_init(
@@ -757,7 +755,7 @@ class RatingsCreateView(ProgressMixin, TestTrialMixin, TrialMixin, generic.Templ
     def _handle_feedbacks(self, ratingforms, instances):
         feedbacks = []
         reload_form_with_feedback = False
-        feedbacks_qs = self.questionnaire_item.item.itemfeedback_set
+        feedbacks_qs = self.questionnaire_item.item.item_feedback
         if feedbacks_qs.count() > 0:
             for i, instance in enumerate(instances):
                 question_feedbacks = feedbacks_qs.filter(question=instance.scale_value.question)

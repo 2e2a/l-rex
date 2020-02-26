@@ -32,7 +32,8 @@ class Materials(models.Model):
     )
     study = models.ForeignKey(
         'lrex_study.Study',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='materials',
     )
     LIST_DISTRIBUTION_LATIN_SQUARE = 'latin-square'
     LIST_DISTRIBUTION_ALL_TO_ALL = 'all-to-all'
@@ -72,29 +73,32 @@ class Materials(models.Model):
         new_slug = slugify_unique(slug, Materials, self.id)
         if new_slug != self.slug:
             self.slug = slugify_unique(slug, Materials, self.id)
-            for item in self.item_set.all():
+            for item in self.items.all():
                 item.save()
         return super().save(*args, **kwargs)
 
     @cached_property
-    def items(self):
-        items = self.item_set.all().order_by('number', 'condition')
-        items = sorted(items, key=lambda x:x.materials_block)
+    def items_sorted_by_block(self):
+        items = self.items.all().order_by('number', 'condition')
+        items = sorted(items, key=lambda x: x.materials_block)
         return items
 
     @cached_property
     def item_count(self):
         if self.items_validated:
-            return int(self.item_set.count() / len(self.conditions))
+            return int(self.items.count() / len(self.conditions))
         return 0
 
     def item_pos(self, item):
-        return self.item_set.filter(number__lt=item.number).count() \
-               + self.item_set.filter(number=item.number, condition__lte=item.condition).count()
+        return (
+                self.items.filter(number__lt=item.number).count() +
+                self.items.filter(number=item.number, condition__lte=item.condition).count()
+        )
+
 
     @cached_property
     def conditions(self):
-        items = self.item_set.filter(number=1)
+        items = self.items.filter(number=1)
         conditions = [item.condition for item in items]
         return conditions
 
@@ -104,12 +108,12 @@ class Materials(models.Model):
             return [0]
         if self.block > 0:
             return [self.block]
-        item_blocks = set([item.block for item in self.items])
+        item_blocks = set([item.block for item in self.items.all()])
         return sorted(item_blocks)
 
     @cached_property
     def has_lists(self):
-        return self.itemlist_set.exists()
+        return self.lists.exists()
 
     @cached_property
     def is_complete(self):
@@ -120,11 +124,11 @@ class Materials(models.Model):
         self.save()
 
     def delete_feedbacks(self):
-        item_models.ItemFeedback.objects.filter(item__in=self.items).delete()
+        item_models.ItemFeedback.objects.filter(item__materials=self).delete()
 
     def delete_lists(self):
         self.study.delete_questionnaires()
-        self.itemlist_set.all().delete()
+        self.lists.all().delete()
 
     def __str__(self):
         return self.title
@@ -141,7 +145,7 @@ class Materials(models.Model):
         conditions = []
         self.set_items_validated(False)
 
-        items = self.item_set.all().order_by('number', 'condition')
+        items = self.items.all()
         if len(items) == 0:
             raise AssertionError('No items.')
 
@@ -180,12 +184,12 @@ class Materials(models.Model):
                 raise AssertionError(msg)
 
             questions = self.study.questions
-            for item_question in item.itemquestion_set.all():
+            for item_question in item.item_questions.all():
                 if item_question.number >= len(questions):
                     raise AssertionError('For item question validation the study question(s) must be defined first.')
                 if item_question.scale_labels and \
                         len(split_list_string(item_question.scale_labels)) !=  \
-                        questions[item_question.number].scalevalue_set.count():
+                        questions[item_question.number].scalevalues.count():
                     msg = 'Scale of the item question "{}" does not match the study question {} ' \
                           'scale.'.format(item, item_question.number + 1)
                     raise AssertionError(msg)
@@ -245,7 +249,7 @@ class Materials(models.Model):
                 )
 
     def compute_item_lists(self):
-        self.itemlist_set.all().delete()
+        self.lists.all().delete()
         item_lists = []
         if self.item_list_distribution == self.LIST_DISTRIBUTION_LATIN_SQUARE:
             conditions = self.conditions
@@ -256,13 +260,13 @@ class Materials(models.Model):
                     number=i,
                 )
                 item_lists.append(item_list)
-            for i, item in enumerate(self.item_set.all().order_by('number', 'condition')):
+            for i, item in enumerate(self.item_set.all()):
                 shift = (i - (item.number - 1)) % condition_count
                 item_list = item_lists[shift]
                 item_list.items.add(item)
         elif self.item_list_distribution == self.LIST_DISTRIBUTION_ALL_TO_ALL:
             item_list = item_models.ItemList.objects.create(materials=self)
-            item_list.items.add(*list(self.items))
+            item_list.items.add(*list(self.items_sorted_by_block))
 
     def results(self):
         ratings = trial_models.Rating.objects.filter(
@@ -297,11 +301,13 @@ class Materials(models.Model):
                     row['question_order'] = rating.questionnaire_item.question_order_user
                 if self.study.has_question_with_random_scale:
                     row['random_scale'] = '\n'.join(
-                        q_property.question_scale_user for q_property in rating.questionnaire_item.question_properties
+                        q_property.question_scale_user
+                        for q_property in rating.questionnaire_item.question_properties.all()
                     )
                 if self.study.has_demographics:
-                    row['demographics'] = [demographic_value.value for demographic_value
-                                           in rating.trial.demographicvalue_set.all()]
+                    row['demographics'] = [
+                        demographic_value.value for demographic_value in rating.trial.demographics.all()
+                    ]
                 results[key] = row
         results_sorted = [results[key] for key in sorted(results)]
         return results_sorted
@@ -319,7 +325,9 @@ class Materials(models.Model):
             aggregated_result = copy.deepcopy(results_for_item[0])
             aggregated_result['scale_count'] = [None] * len(self.study.questions)
             for question in self.study.questions:
-                aggregated_result['scale_count'][question.number] = {scale_value.number: 0 for scale_value in question.scale_values}
+                aggregated_result['scale_count'][question.number] = {
+                    scale_value.number: 0 for scale_value in question.scale_values.all()
+                }
                 for result in results_for_item:
                     aggregated_result['scale_count'][question.number][result['ratings'][question.number]] +=1
 
@@ -369,7 +377,7 @@ class Materials(models.Model):
         if add_header:
             header = self.items_csv_header(add_materials_column=add_materials_column)
             writer.writerow(header)
-        for item in self.items:
+        for item in self.items.all():
             csv_row = [self.title] if add_materials_column else []
             csv_row.extend([item.number, item.condition, item.content, item.block])
             if self.study.has_audiolink_items:
@@ -377,8 +385,8 @@ class Materials(models.Model):
                     item.audiolinkitem.description
                 )
             for question in self.study.questions:
-                if item.itemquestion_set.filter(number=question.number).exists():
-                    itemquestion = item.itemquestion_set.get(number=question.number)
+                if item.item_questions.filter(number=question.number).exists():
+                    itemquestion = item.item_questions.get(number=question.number)
                     csv_row.extend([
                         itemquestion.question if itemquestion.question else '',
                         itemquestion.scale_labels if itemquestion.scale_labels else '',
@@ -483,7 +491,7 @@ class Materials(models.Model):
         if add_header:
             header = self.item_feedbacks_csv_header()
             writer.writerow(header)
-        for item_feedback in item_models.ItemFeedback.objects.filter(item__in=self.items):
+        for item_feedback in item_models.ItemFeedback.objects.filter(item__materials=self):
             csv_row = [self.title] if add_materials_column else []
             csv_row.extend([
                 item_feedback.item.number,
@@ -509,7 +517,7 @@ class Materials(models.Model):
                 continue
             item_number = row[columns['item_number']]
             item_condition = row[columns['item_condition']]
-            item = self.item_set.get(number=item_number, condition=item_condition)
+            item = self.items.get(number=item_number, condition=item_condition)
             question_num = int(row[columns['question']]) - 1
             question = self.study.get_question(question_num)
             scale_values = row[columns['scale_values']]
@@ -531,7 +539,7 @@ class Materials(models.Model):
         if add_header:
             header = self.itemlists_csv_header()
             writer.writerow(header)
-        for item_list in self.itemlist_set.all():
+        for item_list in self.lists.all():
             csv_row = [self.title] if add_materials_column else []
             csv_row.extend([
                 item_list.number,
@@ -569,7 +577,7 @@ class Materials(models.Model):
             for question in self.study.questions:
                 csv_row.append('comment{}'.format(question.number + 1))
         csv_row.append('content')
-        for i, demographic_field in enumerate(self.study.demographicfield_set.all(), 1):
+        for i, demographic_field in enumerate(self.study.demographics.all(), 1):
             csv_row.append('demographic{}'.format(i))
         return csv_row
 
@@ -611,10 +619,10 @@ class Materials(models.Model):
 
     def next_steps(self):
         next_steps = []
-        if not self.items:
+        if not self.items.exists():
             self._append_step_info(next_steps, MaterialsSteps.STEP_EXP_ITEMS_CREATE)
-        if self.items and not self.items_validated:
+        if self.items.exists() and not self.items_validated:
             self._append_step_info(next_steps, MaterialsSteps.STEP_EXP_ITEMS_VALIDATE)
-        if self.items_validated and not self.itemlist_set.exists():
+        if self.items_validated and not self.lists.exists():
             self._append_step_info(next_steps, MaterialsSteps.STEP_EXP_LISTS_GENERATE)
         return {'Materials: {}'.format(self.title): next_steps}
