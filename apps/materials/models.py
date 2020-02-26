@@ -401,6 +401,7 @@ class Materials(models.Model):
             if has_materials_column and not row[columns['materials']] == self.title:
                 continue
             item = None
+            created = False
             if 'block' in columns and row[columns['block']]:
                 block = int(row[columns['block']])
             else:
@@ -438,25 +439,35 @@ class Materials(models.Model):
                 items_to_delete.remove(item.item_ptr)
 
             custom_question_column = any(
-                'question{}'.format(question.number + 1) in columns for question in self.study.questions
+                'question{}'.format(question.number) in columns for question in self.study.questions
             )
             if custom_question_column:
                 for question in self.study.questions:
-                    question_column = 'question{}'.format(question.number + 1)
+                    question_column = 'question{}'.format(question.number)
                     if question_column in columns:
-                        item_question = row[columns[question_column]]
-                        if item_question:
-                            scale_labels_column = 'scale{}'.format(question.number +  1)
-                            legend_column = 'legend{}'.format(question.number + 1)
+                        item_question_question = row[columns[question_column]]
+                        if item_question_question:
+                            scale_labels_column = 'scale{}'.format(question.number)
+                            legend_column = 'legend{}'.format(question.number)
                             scale_labels = row[columns[scale_labels_column]] if scale_labels_column in columns else None
                             legend = row[columns[legend_column]] if legend_column in columns else None
-                            item_models.ItemQuestion.objects.get_or_create(
-                                item=item,
-                                question=item_question,
-                                number=question.number,
-                                scale_labels=scale_labels,
-                                legend=legend,
-                            )
+                            item_question = item_models.ItemQuestion.objects.filter(
+                                item=item, number=question.number
+                            ).first()
+                            if item_question:
+                                item_question.question = item_question_question
+                                item_question.scale_labels = scale_labels
+                                item_question.legend = legend
+                                item_question.save()
+                            else:
+                                item_models.ItemQuestion.objects.create(
+                                    item=item,
+                                    number=question.number,
+                                    question=item_question_question,
+                                    scale_labels=scale_labels,
+                                    legend=legend,
+                                )
+
         if new_items or items_to_delete and self.is_complete:
             self.delete_lists()
         for item in items_to_delete:
