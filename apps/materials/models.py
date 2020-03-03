@@ -183,13 +183,13 @@ class Materials(models.Model):
                 msg = 'Item "{}" was not expected. Check whether item number/condition is correct.'.format(item)
                 raise AssertionError(msg)
 
-            questions = self.study.questions
+            questions = list(self.study.questions.all())
             for item_question in item.item_questions.all():
                 if item_question.number >= len(questions):
                     raise AssertionError('For item question validation the study question(s) must be defined first.')
                 if item_question.scale_labels and \
                         len(split_list_string(item_question.scale_labels)) !=  \
-                        questions[item_question.number].scalevalues.count():
+                        questions[item_question.number].scale_values.count():
                     msg = 'Scale of the item question "{}" does not match the study question {} ' \
                           'scale.'.format(item, item_question.number + 1)
                     raise AssertionError(msg)
@@ -260,7 +260,7 @@ class Materials(models.Model):
                     number=i,
                 )
                 item_lists.append(item_list)
-            for i, item in enumerate(self.item_set.all()):
+            for i, item in enumerate(self.items.all()):
                 shift = (i - (item.number - 1)) % condition_count
                 item_list = item_lists[shift]
                 item_list.items.add(item)

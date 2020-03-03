@@ -221,7 +221,7 @@ class Questionnaire(models.Model):
             questionnaire_item.question_order = ','.join(str(p) for p in permutation)
 
     def _random_scale_permutations(self, question, n_items):
-        scale = range(0, question.scalevalues.count())
+        scale = range(0, question.scale_values.count())
         scale_permutations = list(permutations(scale))
         n_permutations = len(scale_permutations)
         per_permutation = ceil(n_items/n_permutations)
@@ -241,9 +241,8 @@ class Questionnaire(models.Model):
                         scale_order=','.join(str(p) for p in permutation)
                     )
 
-    def generate_items(self, materials_list=None):
-        if not materials_list:
-            materials_list = {e.id: e for e in materials_models.Materials.objects.filter(study=self.study)}
+    def generate_items(self):
+        materials_list = {e.id: e for e in self.study.materials.all()}   # TODO: rename to dict
         block_randomization = self._block_randomization()
         slots = self._compute_slots(materials_list, block_randomization)
         items_by_block = groupby(self._item_list_items, lambda x: x.materials_block)
@@ -357,7 +356,7 @@ class QuestionProperty(models.Model):
         scale = []
         study = self.questionnaire_item.questionnaire.study
         question = study.questions.get(number=self.number)
-        scale_labels = [scale_value.label for scale_value in question.scalevalues.all()]
+        scale_labels = [scale_value.label for scale_value in question.scale_values.all()]
         for pos in self.scale_order.split(','):
             scale.append(scale_labels[int(pos)])
         return ','.join(scale)

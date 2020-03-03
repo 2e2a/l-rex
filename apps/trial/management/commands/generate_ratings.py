@@ -21,7 +21,7 @@ class Command(BaseCommand):
             raise CommandError('Study does not exist.')
         questions_scale_values = []
         for question in study.questions.all():
-            questions_scale_values.append((question.number, question.scalevalues.all()))
+            questions_scale_values.append((question.number, question.scale_values.all()))
         for i in range(n_ratings):
             questionnaire = study.next_questionnaire()
             trial = trial_models.Trial(

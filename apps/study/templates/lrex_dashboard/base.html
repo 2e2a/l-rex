@@ -20,7 +20,7 @@
             Materials
         </a>
         <div class="dropdown-menu">
-            {% for materials in study.materials_list %}
+            {% for materials in study.materials.all %}
             <a class="dropdown-item {% if materials.pk == active_materials %}active{% endif %}"
                href="{% url 'items' materials.slug %}">
                 {{ materials.title }}

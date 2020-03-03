@@ -434,7 +434,7 @@ class ItemQuestionsUpdateView(
                 question = next(question for question in self.study.questions.all() if question.number == instance.number)
                 if instance.scale_labels:
                     scale_labels = split_list_string(instance.scale_labels)
-                    if len(scale_labels) != question.scalevalues.count():
+                    if len(scale_labels) != question.scale_values.count():
                         self.formset._errors[question.number]['scale_labels'] = \
                             self.formset.error_class(ValidationError('Invalid scale labels').error_list)
                         scale_labels_valid = False

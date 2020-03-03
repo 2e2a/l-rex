@@ -581,7 +581,7 @@ class QuestionUpdateView(
                 instance.number = i
                 instance.save()
                 scale_values_new = []
-                scale_values_old = list(instance.scalevalues.all())
+                scale_values_old = list(instance.scale_values.all())
                 scale_labels = split_list_string(form.cleaned_data['scale_labels'])
                 for j, scale_label in enumerate(scale_labels):
                     if scale_label:

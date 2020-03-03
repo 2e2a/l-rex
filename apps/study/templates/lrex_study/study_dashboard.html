@@ -102,12 +102,12 @@
                     {% endif %}
                 </div>
                 <div>
-                    {% if study.materials_list|length == 0 %}
+                    {% if study.materials.count == 0 %}
                     No materials created yet.
                     {% else %}
-                    {{ study.materials_list|length }} set{% if study.materials_list|length > 1 %}s{% endif %} of materials created:
+                    {{ study.materials.count }} set{% if study.materials.count > 1 %}s{% endif %} of materials created:
                     <ul class="mb-0">
-                        {% for materials in study.materials_list %}
+                        {% for materials in study.materials.all %}
                         <li>{{ materials }}
                             {% if materials.items_validated %}
                             (items: {{ materials.item_count }},

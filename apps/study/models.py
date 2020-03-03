@@ -424,7 +424,7 @@ class Study(models.Model):
     def items_validated(self):
         if not self.materials.exists():
             return False
-        return self.materials.filter(items_validated=False).exists()
+        return not self.materials.filter(items_validated=False).exists()
 
     @cached_property
     def randomization_reqiured(self):
@@ -963,7 +963,7 @@ class Study(models.Model):
         if not self.intro:
             self._append_step_info(next_steps, StudySteps.STEP_STD_INTRO_EDIT, group)
 
-        if self.materials.exists():
+        if not self.materials.exists():
             group = 'Materials'
             self._append_step_info(next_steps, StudySteps.STEP_STD_EXP_CREATE, group)
         else:
@@ -972,7 +972,7 @@ class Study(models.Model):
                 next_steps.update(next_exp_steps)
 
         group = 'Questionnaires'
-        if self.is_allowed_create_questionnaires and not self.questionnaire.exists():
+        if self.is_allowed_create_questionnaires and not self.questionnaires.exists():
             self._append_step_info(next_steps, StudySteps.STEP_STD_QUESTIONNAIRES_GENERATE, group)
         if self.use_blocks and self.has_questionnaires and not self.has_block_instructions:
             self._append_step_info(next_steps, StudySteps.STEP_STD_BLOCK_INSTRUCTIONS_CREATE, group)
@@ -1074,14 +1074,14 @@ class Question(models.Model):
 
     @cached_property
     def scale_labels(self):
-        return to_list_string(scale_value.label for scale_value in self.scalevalues.all())
+        return to_list_string(scale_value.label for scale_value in self.scale_values.all())
 
     @cached_property
     def has_rating_comment(self):
         return self.rating_comment != self.RATING_COMMENT_NONE
 
     def is_valid_scale_value(self, scale_value_label):
-        return self.scalevalues.filter(label=scale_value_label).exists()
+        return self.scale_values.filter(label=scale_value_label).exists()
 
     def get_absolute_url(self):
         return reverse('study-question', args=[self.study.slug, self.pk])
