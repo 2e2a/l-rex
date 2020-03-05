@@ -147,8 +147,8 @@ class MaterialsResultsView(
 ):
     model = models.Materials
     template_name = 'lrex_materials/materials_results.html'
-    aggregate_by = ['subject']
-    aggregate_by_label = 'subject'
+    aggregate_by = ['subject', 'item']
+    aggregate_by_label = 'subject+item'
     page = 1
     paginate_by = 16
     title = 'Materials result summery'
