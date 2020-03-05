@@ -181,7 +181,7 @@ class ItemUploadForm(contrib_forms.CSVUploadForm):
                     scale_values = split_list_string(
                         row[cleaned_data['question_{}_scale_column'.format(question.number + 1)] - 1]
                     )
-                    assert len(scale_values) == question.scalev_alues.count()
+                    assert len(scale_values) == question.scale_values.count()
                 if cleaned_data['question_{}_legend_column'.format(question.number + 1)] > 0:
                     assert row[cleaned_data['question_{}_legend_column'.format(question.number + 1)] - 1]
 
