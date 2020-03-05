@@ -206,7 +206,7 @@ class Questionnaire(models.Model):
         return slots
 
     def _random_question_permutations(self, n_items):
-        questions = [question.number for question in self.study.questions]
+        questions = [question.number for question in self.study.questions.all()]
         question_permutations = list(permutations(questions))
         n_permutations = len(question_permutations)
         per_permutation = ceil(n_items/n_permutations)
@@ -230,7 +230,7 @@ class Questionnaire(models.Model):
         return scale_permutations
 
     def _randomize_question_scales(self, questionnaire_items):
-        for question in self.study.questions:
+        for question in self.study.questions.all():
             if question.randomize_scale:
                 n_items = len(questionnaire_items)
                 scale_permutations = self._random_scale_permutations(question, n_items)
