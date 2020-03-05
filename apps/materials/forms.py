@@ -25,7 +25,7 @@ class MaterialsForm(contrib_forms.CrispyModelForm):
             self.fields['block'].widget = forms.HiddenInput()
 
 
-class MaterialsUpdateForm(MaterialsForm):
+class MaterialsSettingsForm(MaterialsForm):
 
     def __init__(self, *args, **kwargs):
         disable_block_settings = kwargs.pop('disable_block_settings')

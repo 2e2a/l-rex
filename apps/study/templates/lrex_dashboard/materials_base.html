@@ -9,7 +9,7 @@
     </li><li class="nav-item">
         <a class="nav-link {% if nav2_active == 1 %}active{% endif %}" href="{% url 'itemlists' materials.slug %}">Lists</a>
     </li><li class="nav-item">
-        <a class="nav-link {% if nav2_active == 2 %}active{% endif %}" href="{% url 'materials-update' materials.slug %}">Settings</a>
+        <a class="nav-link {% if nav2_active == 2 %}active{% endif %}" href="{% url 'materials-settings' materials.slug %}">Settings</a>
     </li>
 </ul>
 {% endblock %}

@@ -70,7 +70,7 @@ class MaterialsCreateView(
         return reverse('items', args=[self.object.slug])
 
 
-class MaterialsUpdateView(
+class MaterialsSettingsView(
     MaterialsObjectMixin,
     study_views.CheckStudyCreatorMixin,
     SuccessMessageMixin,
@@ -81,7 +81,7 @@ class MaterialsUpdateView(
 ):
     model = models.Materials
     template_name = 'lrex_materials/materials_settings.html'
-    form_class = forms.MaterialsUpdateForm
+    form_class = forms.MaterialsSettingsForm
     success_message = 'Materials successfully updated.'
     title = 'Materials settings'
 
@@ -94,6 +94,11 @@ class MaterialsUpdateView(
                 messages.info(request, mark_safe(msg))
         return super().get(request, *args, **kwargs)
 
+    def get_success_url(self):
+        if 'save' in self.request.POST:
+            return reverse('materials-settings', args=[self.materials.slug])
+        return reverse('study', args=[self.study.slug])
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({
@@ -104,6 +109,7 @@ class MaterialsUpdateView(
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs.update({
+            'add_save': True,
             'study': self.study,
             'disable_list_settings': self.study.has_questionnaires,
             'disable_block_settings': self.study.has_questionnaires,
