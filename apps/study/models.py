@@ -501,7 +501,7 @@ class Study(models.Model):
             questionnaire.item_lists.add(item_list)
         return questionnaire
 
-    def _generate_questionnaire_permutations(self, materials_list, permutations=4):
+    def _generate_questionnaire_permutations(self, permutations=4):
         from apps.trial.models import Questionnaire
         if self.randomization_reqiured:
             questionnaires = list(self.questionnaires.all())
@@ -511,19 +511,18 @@ class Study(models.Model):
                     num = questionnaire_count * permutation + i + 1
                     questionnaire_permutation=Questionnaire.objects.create(study=self, number=num)
                     questionnaire_permutation.item_lists.set(questionnaire.item_lists.all())
-                    questionnaire_permutation.generate_items(materials_list)
+                    questionnaire_permutation.generate_items()
 
     def generate_questionnaires(self):
         try:
             self.questionnaires.all().delete()
-            materials_list = {m.id: m for m in self.materials.all()}
             questionnaire_count = self._questionnaire_count()
             last_questionnaire = None
             for i in range(questionnaire_count):
                 last_questionnaire = self._create_next_questionnaire(last_questionnaire, i + 1)
-                last_questionnaire.generate_items(materials_list)
+                last_questionnaire.generate_items()
             if self.randomization_reqiured:
-                self._generate_questionnaire_permutations(materials_list)
+                self._generate_questionnaire_permutations()
         except RuntimeError as error:
             self.delete_questionnaires()
             raise error
