@@ -171,6 +171,7 @@ class MaterialsResultsView(
         context = super().get_context_data(**kwargs)
         context.update({
             'nav_active': 6,
+            'nav2_active': 1,
             'active_materials': self.materials.pk,
             'results': self._aggregated_results(),
             'aggregate_by': self.aggregate_by,
