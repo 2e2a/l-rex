@@ -329,12 +329,8 @@ class QuestionnaireItem(models.Model):
     def question_order_user(self):
         return ','.join(str(int(question_num) + 1) for question_num in self.question_order.split(','))
 
-    @cached_property
-    def question_properties(self):
-        return list(self.questionproperty_set.all())
-
     def question_property(self, number):
-        return self.question_properties.get(number=number)
+        return self.question_properties.filter(number=number).first()
 
     def __str__(self):
         return '{} - {}'.format(self.number, self.item)

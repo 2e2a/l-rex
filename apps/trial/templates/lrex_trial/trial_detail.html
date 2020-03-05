@@ -48,7 +48,7 @@
         </td>
         {% if study.has_question_with_random_scale %}
         <td>
-            {% for question_property in q_item.question_properties %}
+            {% for question_property in q_item.question_properties.all %}
             Q{{ forloop.counter }}: "{{ question_property.question_scale_user }}"<br>
             {% endfor %}
         </td>

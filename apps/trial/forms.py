@@ -318,7 +318,7 @@ class RatingForm(contrib_forms.CrispyModelForm):
         self.fields['scale_value'].empty_label = None
         self.fields['scale_value'].required = False
 
-    def init_form(self, study, question, item_question=None):
+    def init_form(self, study, question, item_question=None, question_property=None):
         if question.rating_comment == question.RATING_COMMENT_NONE:
             self.fields['comment'].widget = forms.HiddenInput()
         elif question.rating_comment == question.RATING_COMMENT_REQUIRED:
@@ -331,11 +331,18 @@ class RatingForm(contrib_forms.CrispyModelForm):
         scale_value.queryset = scale_value.queryset.filter(question=question)
         scale_value.label = item_question.question if item_question else question.question
         scale_value.help_text = item_question.legend if item_question and item_question.legend else question.legend
+        choices = scale_value.choices
         if item_question and item_question.scale_labels:
             custom_choices = []
             for (pk, _ ), custom_label in zip(scale_value.choices, split_list_string(item_question.scale_labels)):
                 custom_choices.append((pk, custom_label))
-            scale_value.choices = custom_choices
+            choices = custom_choices
+        if question_property and question_property.scale_order:
+            reordered_choices = []
+            for pos in question_property.scale_order.split(','):
+                reordered_choices.append(list(choices)[int(pos)])
+            choices = reordered_choices
+        scale_value.choices = choices
         self.fields['feedback'].widget = forms.HiddenInput()
         self.fields['feedbacks_given'].widget = forms.HiddenInput()
 
@@ -371,7 +378,8 @@ def ratingformset_init(ratingformset, study, item_questions, questionnaire_item)
         ordered_questions = questions
     for question, form in zip(ordered_questions, ratingformset):
         item_question = item_questions.filter(number=question.number).first()
-        form.init_form(study, question, item_question)
+        question_property = questionnaire_item.question_property(question.number)
+        form.init_form(study, question, item_question, question_property)
 
 
 def ratingformset_handle_feedbacks(ratingformset, feedbacks):
