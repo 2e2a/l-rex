@@ -323,8 +323,8 @@ class Materials(models.Model):
         for results_for_item in grouped_results.values():
             rating_count = len(results_for_item)
             aggregated_result = copy.deepcopy(results_for_item[0])
-            aggregated_result['scale_count'] = [None] * len(self.study.questions)
-            for question in self.study.questions:
+            aggregated_result['scale_count'] = [None] * self.study.questions.count()
+            for question in self.study.questions.all():
                 aggregated_result['scale_count'][question.number] = {
                     scale_value.number: 0 for scale_value in question.scale_values.all()
                 }
@@ -366,7 +366,7 @@ class Materials(models.Model):
         csv_row.extend(['item', 'condition', 'content', 'block'])
         if self.study.has_audiolink_items:
             csv_row.append('audio_description')
-        for question in self.study.questions:
+        for question in self.study.questions.all():
             csv_row.append('question{}'.format(question.number + 1))
             csv_row.append('scale{}'.format(question.number + 1))
             csv_row.append('legend{}'.format(question.number + 1))
@@ -384,7 +384,7 @@ class Materials(models.Model):
                 csv_row.append(
                     item.audiolinkitem.description
                 )
-            for question in self.study.questions:
+            for question in self.study.questions.all():
                 if item.item_questions.filter(number=question.number).exists():
                     itemquestion = item.item_questions.get(number=question.number)
                     csv_row.extend([
@@ -447,10 +447,10 @@ class Materials(models.Model):
                 items_to_delete.remove(item.item_ptr)
 
             custom_question_column = any(
-                'question{}'.format(question.number) in columns for question in self.study.questions
+                'question{}'.format(question.number) in columns for question in self.study.questions.all()
             )
             if custom_question_column:
-                for question in self.study.questions:
+                for question in self.study.questions.all():
                     question_column = 'question{}'.format(question.number)
                     if question_column in columns:
                         item_question_question = row[columns[question_column]]
@@ -571,10 +571,10 @@ class Materials(models.Model):
             csv_row.append('question order')
         if self.study.has_question_with_random_scale:
             csv_row.append('random scale')
-        for question in self.study.questions:
+        for question in self.study.questions.all():
             csv_row.append('rating{}'.format(question.number + 1))
         if self.study.has_question_rating_comments:
-            for question in self.study.questions:
+            for question in self.study.questions.all():
                 csv_row.append('comment{}'.format(question.number + 1))
         csv_row.append('content')
         for i, demographic_field in enumerate(self.study.demographics.all(), 1):

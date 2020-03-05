@@ -12,7 +12,7 @@
         {% if study.has_question_with_random_scale %}
         <th>Random scale</th>
         {% endif %}
-        {% for question in trial.questionnaire.study.questions %}
+        {% for question in trial.questionnaire.study.questions.all %}
         <th>Rating</th>
         {% if question.has_rating_comment %}
         <th>Comment</th>
