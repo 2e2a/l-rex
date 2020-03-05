@@ -215,6 +215,7 @@ class Questionnaire(models.Model):
         return question_permutations
 
     def _randomize_question_order(self, questionnaire_items):
+        import pdb;pdb.set_trace()
         n_items = len(questionnaire_items)
         question_permutations = self._random_question_permutations(n_items)
         for questionnaire_item, permutation in zip(questionnaire_items, question_permutations):
@@ -229,10 +230,11 @@ class Questionnaire(models.Model):
         random.SystemRandom().shuffle(scale_permutations)
         return scale_permutations
 
-    def _randomize_question_scales(self, questionnaire_items):
+    def _randomize_question_scales(self):
+        questionnaire_items = list(self.questionnaire_items.all())
+        n_items = len(questionnaire_items)
         for question in self.study.questions.all():
             if question.randomize_scale:
-                n_items = len(questionnaire_items)
                 scale_permutations = self._random_scale_permutations(question, n_items)
                 for questionnaire_item, permutation in zip(questionnaire_items, scale_permutations):
                     QuestionProperty.objects.create(
@@ -263,7 +265,7 @@ class Questionnaire(models.Model):
             self._randomize_question_order(questionnaire_items)
         QuestionnaireItem.objects.bulk_create(questionnaire_items)
         if self.study.has_question_with_random_scale:
-            self._randomize_question_scales(questionnaire_items)
+            self._randomize_question_scales()
 
     def __str__(self):
         return str(self.number)
