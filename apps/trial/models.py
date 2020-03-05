@@ -215,7 +215,6 @@ class Questionnaire(models.Model):
         return question_permutations
 
     def _randomize_question_order(self, questionnaire_items):
-        import pdb;pdb.set_trace()
         n_items = len(questionnaire_items)
         question_permutations = self._random_question_permutations(n_items)
         for questionnaire_item, permutation in zip(questionnaire_items, question_permutations):
