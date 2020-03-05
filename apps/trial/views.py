@@ -253,11 +253,12 @@ class QuestionnaireDeleteAllView(
     generic.TemplateView
 ):
     title = 'Confirm deletion'
-    template_name = 'lrex_questionnaire/questionnaire_confirm_delete.html'
+    template_name = 'lrex_dashboard/questionnaire_confirm_delete.html'
     message = 'Delete all questionnaires?'
 
     def post(self, request, *args, **kwargs):
         self.study.delete_questionnaires()
+        self.study.delete_questionnaire_blocks()
         messages.success(self.request, 'All questionnaires deleted.')
         return redirect(self.get_success_url())
 
