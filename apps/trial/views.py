@@ -792,7 +792,7 @@ class RatingOutroView(TrialMixin, TestTrialMixin, generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        if not self.study.require_participant_id:
+        if self.study.participant_id == self.study.PARTICIPANT_ID_RANDOM:
             data['subject_id'] = self.trial.subject_id
         data['outro_rich'] = mark_safe(markdownify(self.study.outro))
         return data

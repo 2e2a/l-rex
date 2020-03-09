@@ -27,7 +27,7 @@ class Command(BaseCommand):
             trial = trial_models.Trial(
                 questionnaire=questionnaire
             )
-            if study.require_participant_id:
+            if study.participant_id == study.PARTICIPANT_ID_ENTER:
                 trial.subject_id = i
             trial.save()
             for questionnaire_item in questionnaire.questionnaire_items.all():

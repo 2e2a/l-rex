@@ -88,10 +88,25 @@ class Study(models.Model):
         max_length=200,
         help_text='This password will be required to participate in the study.',
     )
-    require_participant_id = models.BooleanField(
-        default=False,
-        help_text='Enable if you want participants to enter an ID before participation.',
-        verbose_name='Participant ID required',
+    PARTICIPANT_ID_NONE = 'none'
+    PARTICIPANT_ID_ENTER = 'enter'
+    PARTICIPANT_ID_RANDOM = 'random'
+    PARTICIPANT_ID_CHOICES = (
+        (PARTICIPANT_ID_NONE, 'No participant IDs'),
+        (PARTICIPANT_ID_ENTER, 'Participants are asked to enter an ID'),
+        (PARTICIPANT_ID_RANDOM, 'Generate random ID for each participant'),
+    )
+    participant_id = models.CharField(
+        max_length=8,
+        choices=PARTICIPANT_ID_CHOICES,
+        default=PARTICIPANT_ID_NONE,
+        help_text=(
+            'Choose the first option for fully anonymous participation. Choose the second option if you want to '
+            'save an ID that participants receive independently (e.g., from an external participant recruitment '
+            'platform). Choose the third option to generate a unique identifier (code) for each participant which '
+            'will be displayed at the end of the questionnaire and which can be used e.g. as proof of participation.'
+        ),
+        verbose_name='participant ID'
     )
     end_date = DateField(
         blank=True,
@@ -210,6 +225,19 @@ class Study(models.Model):
         max_length=40,
         default='Comment',
         help_text='Label used for the comment field.',
+    )
+    participation_id_label = models.CharField(
+        max_length=40,
+        default='Participation ID',
+        help_text=(
+            'Label used for the participant ID form on the instruction page or for the participation code on the outro '
+            'page, depending on the "participant ID" setting.'
+        ),
+    )
+    password_label = models.CharField(
+        max_length=40,
+        default='Password',
+        help_text='Label used for the participant password form on the instruction page.'
     )
     answer_question_message = models.CharField(
         max_length=500,
@@ -587,7 +615,7 @@ class Study(models.Model):
         'pseudo_randomize_question_order',
         'enable_item_rating_feedback',
         'password',
-        'require_participant_id',
+        'participant_id',
         'end_date',
         'trial_limit',
         'instructions',
@@ -615,7 +643,6 @@ class Study(models.Model):
     SETTING_BOOL_FIELDS = [
         'use_blocks',
         'pseudo_randomize_question_order',
-        'require_participant_id',
     ]
 
     def _read_settings(self, reader):

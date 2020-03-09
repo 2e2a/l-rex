@@ -463,8 +463,10 @@ class StudyLabelsUpdateView(
     success_message = 'Labels updated.'
 
     def get(self, request, *args, **kwargs):
-        msg = 'Note: Translatable elements are not shown when the respective feature is disabled via a study or ' \
-              'a question setting.'
+        msg = (
+            'Note: Customizable elements are not shown when the respective feature is disabled via a study or a '
+            'question setting.'
+        )
         messages.info(request, msg)
         return super().get(request, *args, **kwargs)
 

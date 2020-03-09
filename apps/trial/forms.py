@@ -207,7 +207,6 @@ class TrialForm(contrib_forms.CrispyModelForm):
     password = forms.CharField(
         max_length=200,
         widget=forms.PasswordInput,
-        help_text='Provide a password (as instructed by the experimenter).',
     )
     optional_label_ignore_fields = ['subject_id']
 
@@ -218,6 +217,11 @@ class TrialForm(contrib_forms.CrispyModelForm):
     class Meta:
         model = models.Trial
         fields = ['subject_id']
+        help_texts = {
+            'password': None,
+            'subject_id': None,
+        }
+
 
     @property
     def _test_subject_id(self):
@@ -233,10 +237,12 @@ class TrialForm(contrib_forms.CrispyModelForm):
         is_test = kwargs.pop('is_test')
         self.study = kwargs.pop('study')
         super().__init__(*args, **kwargs)
+        self.fields['subject_id'].label = self.study.participation_id_label
+        self.fields['subject_id'].label = self.study.password_label
         if is_test:
             self.fields['subject_id'].initial = self._test_subject_id
             self.fields['subject_id'].readonly = True
-        if self.study.require_participant_id:
+        if self.study.participant_id == self.study.PARTICIPANT_ID_ENTER:
             self.fields['subject_id'].required = True
         else:
             self.fields['subject_id'].required = False

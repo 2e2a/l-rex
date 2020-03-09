@@ -16,6 +16,9 @@ class StudyForm(contrib_forms.CrispyModelForm):
             'title',
             'item_type',
         ]
+        widgets = {
+            'item_type': forms.RadioSelect(),
+        }
 
 
 class StudySettingsForm(contrib_forms.CrispyModelForm):
@@ -26,13 +29,17 @@ class StudySettingsForm(contrib_forms.CrispyModelForm):
             'title',
             'item_type',
             'password',
-            'require_participant_id',
+            'participant_id',
             'end_date',
             'trial_limit',
             'use_blocks',
             'pseudo_randomize_question_order',
             'enable_item_rating_feedback',
         ]
+        widgets = {
+            'item_type': forms.RadioSelect(),
+            'participant_id': forms.RadioSelect(),
+        }
 
     def __init__(self, *args, **kwargs):
         self.disable_itemtype = kwargs.pop('disable_itemtype', False)
@@ -63,7 +70,7 @@ class StudySettingsForm(contrib_forms.CrispyModelForm):
                 Fieldset(
                     'Restrictions on participation',
                     'password',
-                    'require_participant_id',
+                    'participant_id',
                     'end_date',
                     'trial_limit',
                     HTML('<hr>'),
@@ -92,6 +99,8 @@ class StudyLabelsForm(contrib_forms.CrispyModelForm):
             'block_instructions_label',
             'optional_label',
             'comment_label',
+            'participation_id_label',
+            'password_label',
             'answer_question_message',
             'answer_questions_message',
             'feedback_message',
@@ -109,6 +118,10 @@ class StudyLabelsForm(contrib_forms.CrispyModelForm):
             self.fields['answer_question_message'].widget = forms.HiddenInput()
         else:
             self.fields['answer_questions_message'].widget = forms.HiddenInput()
+        if study.participant_id != study.PARTICIPANT_ID_RANDOM:
+            self.fields['participation_id_label'].widget = forms.HiddenInput()
+        if not study.password:
+            self.fields['password_label'].widget = forms.HiddenInput()
 
 
 class StudyFromArchiveForm(contrib_forms.CrispyForm):

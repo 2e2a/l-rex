@@ -2,16 +2,13 @@
 
 {% block content %}
 <div class="my-2 p-4 border bg-white">
+    {% if subject_id %}
+    <p>
+        {{ study.participation_id_label}}: <code>{{ subject_id }}</code>
+    </p>
+    {% endif %}
     <p>
         {{ outro_rich }}
     </p>
-    {% if not study.require_participant_id %}
-    <p>
-        If needed, save the following subject ID as proof of your participation:
-        <code>
-            {{ subject_id }}
-        </code>
-    </p>
-    {% endif %}
 </div>
 {% endblock %}
