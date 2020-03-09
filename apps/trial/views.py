@@ -412,6 +412,7 @@ class TrialDownloadSubjectsView(
 class TrialDeleteSubjectsView(
     study_views.StudyMixin,
     study_views.CheckStudyCreatorMixin,
+    study_views.ResultsNavMixin,
     generic.TemplateView,
 ):
     title = 'Confirm deletion'
@@ -430,6 +431,7 @@ class TrialDeleteSubjectsView(
 class TrialDeleteAllView(
     study_views.StudyMixin,
     study_views.CheckStudyCreatorMixin,
+    study_views.ResultsNavMixin,
     generic.TemplateView,
 ):
     title = 'Confirm deletion'

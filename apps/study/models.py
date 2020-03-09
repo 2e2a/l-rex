@@ -900,8 +900,8 @@ class Study(models.Model):
     def archive(self):
         self.delete_subject_mapping()
         self.delete_questionnaires()
-        self.materials.all.delete()
-        self.questions.all.delete()
+        self.materials.all().delete()
+        self.questions.all().delete()
         self.is_archived = True
         self.save()
 
@@ -971,7 +971,7 @@ class Study(models.Model):
         elif step == StudySteps.STEP_STD_ANONYMIZE:
             return reverse('trials', args=[self.slug])
         elif step == StudySteps.STEP_STD_ARCHIVE:
-            return reverse('study', args=[self.slug])
+            return reverse('study-settings', args=[self.slug])
 
     def _append_step_info(self, steps, step, group):
         if group not in steps:
@@ -1016,12 +1016,16 @@ class Study(models.Model):
             if self.is_allowed_publish:
                 self._append_step_info(next_steps, StudySteps.STEP_STD_PUBLISH, group)
 
+        group = 'Results'
         if self.is_finished:
-            group = 'Results'
             if self.trial_count_finished > 0:
                 self._append_step_info(next_steps, StudySteps.STEP_STD_RESULTS, group)
             if self.has_subject_mapping:
                 self._append_step_info(next_steps, StudySteps.STEP_STD_ANONYMIZE, group)
+
+        group = 'Settings'
+        if self.is_finished:
+            self._append_step_info(next_steps, StudySteps.STEP_STD_ARCHIVE, group)
 
         # TODO: add archive
         return next_steps

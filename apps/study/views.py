@@ -270,7 +270,6 @@ class StudyArchiveView(
     title = 'Archive the study'
 
     def get_success_url(self):
-        import pdb;pdb.set_trace()
         return reverse('studies')
 
     def get(self, request, *args, **kwargs):
