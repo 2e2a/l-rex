@@ -14,6 +14,7 @@ python:
 	if [ ! -f $(VIRTUAL_ENV)/bin/python3 ]; then python3 -m venv $(VIRTUAL_ENV); fi
 	$(VIRTUAL_ENV)/bin/python3 -m pip install -r requirements.txt
 
+
 .PHONY: node
 node:
 	npm install
@@ -24,8 +25,7 @@ install: python node
 .PHONY: update
 update:
 	npm update
-	$(VIRTUAL_ENV)/bin/python3 -m pip install --upgrade --upgrade-strategy eager -r requirements-dev.txt
-	$(VIRTUAL_ENV)/bin/python3 -m pip freeze > requirements.txt
+	$(VIRTUAL_ENV)/bin/pip-compile requirements.in
 
 
 .PHONY: js

@@ -1,8 +1,0 @@
-Django
-django-allauth
-django-allauth
-django-crispy-forms
-django-debug-toolbar
-python-memcached
-psycopg2-binary
-pytz

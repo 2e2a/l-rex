@@ -1,0 +1,5 @@
+Django<3.0
+django-allauth
+django-crispy-forms
+django-markdownx
+psycopg2-binary
