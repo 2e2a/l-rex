@@ -143,23 +143,22 @@ class MaterialsResultsView(
     MaterialsObjectMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.ResultsNavMixin,
+    contrib_views.PaginationHelperMixin,
     generic.DetailView
 ):
     model = models.Materials
     template_name = 'lrex_materials/materials_results.html'
     aggregate_by = ['subject', 'item']
-    aggregate_by_label = 'subject+item'
+    aggregate_by_par = 'subject+item'
     page = 1
-    paginate_by = 16
+    paginate_by = 1
     title = 'Materials result summery'
 
-    def dispatch(self, request, *args, **kwargs):
-        self.page = request.GET.get('page')
-        aggregate_by = request.GET.get('aggregate_by')
-        if aggregate_by:
-            self.aggregate_by = aggregate_by.split(',')
-            self.aggregate_by_label = '+'.join(self.aggregate_by)
-        return super().dispatch(request, *args, **kwargs)
+    def get(self, request, *args, **kwargs):
+        self.page = request.GET.get('page', self.page)
+        self.aggregate_by_par = request.GET.get('aggregate_by', self.aggregate_by_par)
+        self.aggregate_by = self.aggregate_by_par.split()
+        return super().get(request, *args, **kwargs)
 
     def _aggregated_results(self):
         results = self.object.aggregated_results(self.aggregate_by)
@@ -175,7 +174,6 @@ class MaterialsResultsView(
             'active_materials': self.materials.pk,
             'results': self._aggregated_results(),
             'aggregate_by': self.aggregate_by,
-            'aggregate_by_label': self.aggregate_by_label,
-            'aggregate_by_url_par': 'aggregate_by=' + ','.join(self.aggregate_by),
+            'aggregate_by_par': self.aggregate_by_par,
         })
         return context

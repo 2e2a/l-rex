@@ -4,10 +4,10 @@
 <div class="dropdown">
   <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="dropdownAggregate" data-toggle="dropdown"
           aria-haspopup="true" aria-expanded="false">
-      Aggregated by: {{ aggregate_by_label }}
+      Aggregated by: {{ aggregate_by_par }}
   </button>
   <div class="dropdown-menu" aria-labelledby="dropdownAggregate">
-      <a class="dropdown-item" href="?aggregate_by=subject,item">subject+item</a>
+      <a class="dropdown-item" href="?aggregate_by=subject+item">subject+item</a>
       <a class="dropdown-item" href="?aggregate_by=subject">subject</a>
       <a class="dropdown-item" href="?aggregate_by=item">item</a>
   </div>
@@ -53,5 +53,5 @@
 {% endfor %}
 </tbody>
 </table>
-{% include 'lrex_contrib/pagination.html' with page_obj=results%}
+{% include 'lrex_contrib/pagination.html' with page_obj=results %}
 {% endblock %}
