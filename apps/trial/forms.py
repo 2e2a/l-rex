@@ -238,7 +238,7 @@ class TrialForm(contrib_forms.CrispyModelForm):
         self.study = kwargs.pop('study')
         super().__init__(*args, **kwargs)
         self.fields['subject_id'].label = self.study.participation_id_label
-        self.fields['subject_id'].label = self.study.password_label
+        self.fields['password'].label = self.study.password_label
         if is_test:
             self.fields['subject_id'].initial = self._test_subject_id
             self.fields['subject_id'].readonly = True
