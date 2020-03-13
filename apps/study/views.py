@@ -172,21 +172,41 @@ class ResultsNavMixin:
         return context
 
 
-class StudyListView(LoginRequiredMixin, generic.ListView):
+class StudyListView(LoginRequiredMixin, contib_views.PaginationHelperMixin, generic.ListView):
     model = models.Study
     title = 'Studies'
     paginate_by = 16
 
+    show_archived = False
+    show_shared = False
+
     def get(self, request, *args, **kwargs):
         if not hasattr(self.request.user, 'userprofile'):
             return redirect('user-profile-create')
+        self.show_archived = self.request.GET.get('archived')
+        self.show_shared = self.request.GET.get('shared')
         return super().get(request, *args, **kwargs)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'show_archived': self.show_archived,
+            'show_shared': self.show_shared,
+        })
+        return context
+
     def get_queryset(self):
-        return super().get_queryset().filter(
-            Q(creator=self.request.user) |
-            Q(shared_with__contains=self.request.user.username)
-        )
+        queryset = super().get_queryset()
+        if not self.show_shared:
+            queryset = queryset.filter(creator=self.request.user)
+        else:
+            queryset = queryset.filter(
+                Q(creator=self.request.user) |
+                Q(shared_with__contains=self.request.user.username)
+            )
+        if not self.show_archived:
+            queryset = queryset.filter(is_archived=False)
+        return queryset
 
 
 class StudyCreateView(LoginRequiredMixin, generic.CreateView):
@@ -250,13 +270,14 @@ class StudyDetailView(
 class StudyDeleteView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
+    contib_views.PaginationHelperMixin,
     contib_views.DefaultDeleteView
 ):
     model = models.Study
     template_name = 'lrex_home/base_confirm_delete.html'
 
     def get_success_url(self):
-        return reverse('studies')
+        return self.reverse_paginated('studies')
 
 
 class StudyArchiveView(

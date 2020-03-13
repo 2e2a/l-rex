@@ -14,6 +14,22 @@
 {% endblock %}
 
 {% block content %}
+<form class="form d-flex align-items-center border rounded px-2 py-2 mb-2" method="get">
+    <div class="mr-2">
+        Show:
+    </div>
+    <div class="form-check form-check-inline">
+        <input class="form-check-input" type="checkbox" name="archived" id="archived" value="true"
+               {%if show_archived %}checked{% endif %}>
+        <label class="form-check-label" for="archived">archived</label>
+    </div>
+    <div class="form-check form-check-inline">
+        <input class="form-check-input" type="checkbox" name="shared" id="shared" value="true"
+               {%if show_shared %}checked{% endif %}>
+        <label class="form-check-label" for="shared">shared</label>
+    </div>
+    <button class="btn btn-sm btn-outline-secondary">Update</button>
+</form>
 <ul class="list-group">
     {% for study in study_list %}
     <li class="list-group-item d-flex">
@@ -56,7 +72,7 @@
                     {% else %}
                     <a href="{% url 'study-archive-restore' study.slug %}" class="dropdown-item">Restore</a>
                     {% endif %}
-                    <a href="{% url 'study-delete' study.slug %}" class="dropdown-item">Delete</a>
+                    <a href="{% url 'study-delete' study.slug %}{{ url_par_paginated }}" class="dropdown-item">Delete</a>
                     <a href="{% url 'study-copy' study.slug %}" class="dropdown-item">Copy</a>
                 </div>
             </div>

@@ -87,16 +87,32 @@ class DisableFormMixin:
 
 class PaginationHelperMixin:
 
-    def url_paginated(self, url, page=None):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'url_par': self.url_par(),
+            'url_par_paginated': self.url_paginated(),
+        })
+        return context
+
+    def url_par(self):
+        url_par = ''
+        for par, value in self.request.GET.items():
+            if par != 'page':
+                url_par += '&{}={}'.format(par, value)
+        return url_par
+
+    def url_paginated(self, url=None, page=None):
+        if not url:
+            url = ''
         if page is None:
             page = self.request.GET.get('page', None)
-        if page:
-            url += '?page={}'.format(page)
-        return url
+        url += '?page={}'.format(page if page else 1)
+        return url + self.url_par()
 
     def reverse_paginated(self, to, **kwargs):
         if 'args' in kwargs:
-            url = reverse(to, args=kwargs['args'])
+            url = reverse(to, args=kwargs['args']) + self.url_par()
         else:
             url = reverse(to, kwargs=kwargs)
         return self.url_paginated(url, kwargs.get('page', None))
