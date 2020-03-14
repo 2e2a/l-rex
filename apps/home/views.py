@@ -38,13 +38,35 @@ class HomeView(generic.ListView):
         })
         return context
 
-class ImprintView(generic.TemplateView):
-    template_name = 'lrex_home/imprint.html'
+
+class ContactView(generic.TemplateView):
+    template_name = 'lrex_home/contact.html'
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         data['contact_rich'] = mark_safe(markdownify(settings.LREX_CONTACT_MD))
+        return data
+
+
+class PrivacyView(generic.TemplateView):
+    template_name = 'lrex_home/privacy.html'
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
         data['privacy_rich'] = mark_safe(markdownify(settings.LREX_PRIVACY_MD))
+        return data
+
+
+class HelpView(generic.TemplateView):
+    template_name = 'lrex_home/help.html'
+
+
+class DemoView(generic.TemplateView):
+    template_name = 'lrex_home/demo.html'
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['demo_rich'] = mark_safe(markdownify(settings.LREX_PRIVACY_MD))
         return data
 
 

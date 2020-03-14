@@ -32,11 +32,13 @@
                     <a class="nav-link" href="{% url 'studies' %}">My studies</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" target="_blank"
-                       href="https://github.com/2e2a/l-rex/wiki">Help&nearr;</a>
+                    <a class="nav-link" href="{% url 'help' %}">Help</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'imprint' %}">Contact and privacy</a>
+                    <a class="nav-link" href="{% url 'contact' %}">Contact</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'privacy' %}">Privacy</a>
                 </li>
                 {% if user.is_authenticated %}
                 <li class="nav-item dropdown">
