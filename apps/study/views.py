@@ -177,21 +177,29 @@ class StudyListView(LoginRequiredMixin, contib_views.PaginationHelperMixin, gene
     title = 'Studies'
     paginate_by = 16
 
+    filter_sort_form = None
+
+    sort_by = 'date'
     show_archived = False
     show_shared = False
 
     def get(self, request, *args, **kwargs):
         if not hasattr(self.request.user, 'userprofile'):
             return redirect('user-profile-create')
-        self.show_archived = self.request.GET.get('archived')
-        self.show_shared = self.request.GET.get('shared')
+        self.sort_by = self.request.GET.get('sort_by', 'date')
+        self.show_archived = self.request.GET.get('archived', False)
+        self.show_shared = self.request.GET.get('shared', True)
+        self.filter_sort_form = forms.StudyFilterSortForm(
+            sort_by=self.sort_by,
+            archived=self.show_archived,
+            shared=self.show_shared,
+        )
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({
-            'show_archived': self.show_archived,
-            'show_shared': self.show_shared,
+            'filter_sort_form': self.filter_sort_form,
         })
         return context
 
@@ -206,6 +214,8 @@ class StudyListView(LoginRequiredMixin, contib_views.PaginationHelperMixin, gene
             )
         if not self.show_archived:
             queryset = queryset.filter(is_archived=False)
+        if self.sort_by == 'name':
+            queryset = queryset.order_by('title', 'created_date')
         return queryset
 
 

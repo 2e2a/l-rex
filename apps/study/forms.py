@@ -1,11 +1,49 @@
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Fieldset, HTML, Layout, Submit
+from crispy_forms.layout import Div, Field, Fieldset, HTML, Layout, Submit
 from django import forms
 from django.contrib.auth.models import User
 
 from apps.contrib import forms as contrib_forms
 
 from . import models
+
+
+class StudyFilterSortForm(contrib_forms.CrispyForm):
+    SORT_BY_DATE = 'date'
+    SORT_BY_NAME = 'name'
+    SORT_BY_CHOICES = (
+        (SORT_BY_DATE, 'date'),
+        (SORT_BY_NAME, 'name'),
+    )
+    sort_by = forms.ChoiceField(choices=SORT_BY_CHOICES, label='')
+    archived = forms.BooleanField(required=False)
+    shared = forms.BooleanField(required=False)
+
+    def __init__(self, *args, **kwargs):
+        sort_by = kwargs.pop('sort_by')
+        archived = kwargs.pop('archived')
+        shared = kwargs.pop('shared')
+        super().__init__(*args, **kwargs)
+        self.fields['sort_by'].initial = sort_by
+        self.fields['archived'].initial = archived
+        self.fields['shared'].initial = shared
+
+    def init_helper(self):
+        self.helper = self.custom_helper if hasattr(self, 'custom_helper') else FormHelper()
+        self.helper.add_layout(
+            Layout(
+                HTML('<div class="form-group mr-2 text-secondary">Sort by:</div>'),
+                Div('sort_by', css_class='mr-2'),
+                HTML('<div class="form-group mx-2 text-secondary">Show:</div>'),
+                Div('archived', css_class='mr-2'),
+                Div('shared', css_class='mr-2'),
+            )
+        )
+        submit = Submit('submit', 'Update')
+        submit.field_classes = 'btn btn-sm btn-outline-secondary'
+        self.helper.add_input(submit)
+        self.helper.form_class = 'form-row align-items-center px-2 pt-2'
+        self.helper.form_method = 'GET'
 
 
 class StudyForm(contrib_forms.CrispyModelForm):
