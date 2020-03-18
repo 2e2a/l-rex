@@ -150,7 +150,7 @@ class MaterialsResultsView(
     model = models.Materials
     template_name = 'lrex_materials/materials_results.html'
     aggregate_by = ['subject', 'item']
-    aggregate_by_par = 'subject+item'
+    aggregate_by_par = 'subject,item'
     page = 1
     paginate_by = 1
     title = 'Materials result summery'
@@ -158,7 +158,7 @@ class MaterialsResultsView(
     def get(self, request, *args, **kwargs):
         self.page = request.GET.get('page', self.page)
         self.aggregate_by_par = request.GET.get('aggregate_by', self.aggregate_by_par)
-        self.aggregate_by = self.aggregate_by_par.split()
+        self.aggregate_by = self.aggregate_by_par.split(',')
         return super().get(request, *args, **kwargs)
 
     def _aggregated_results(self):
@@ -175,6 +175,5 @@ class MaterialsResultsView(
             'active_materials': self.materials.pk,
             'results': self._aggregated_results(),
             'aggregate_by': self.aggregate_by,
-            'aggregate_by_par': self.aggregate_by_par,
         })
         return context
