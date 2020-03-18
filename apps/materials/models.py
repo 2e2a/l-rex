@@ -273,12 +273,21 @@ class Materials(models.Model):
             questionnaire_item__item__materials=self,
             trial__is_test=False,
         ).prefetch_related(
-            'trial', 'questionnaire_item',
+            'scale_value',
+            'trial',
+            'trial__questionnaire',
+            'trial__questionnaire__study',
+            'questionnaire_item',
+            'questionnaire_item__item',
+            'questionnaire_item__item__textitem',
+            'questionnaire_item__item__audiolinkitem',
+            'questionnaire_item__item__markdownitem',
         )
         results = {}
         for rating in ratings:
+            subject = rating.trial.number
             item = rating.questionnaire_item.item
-            key = '{:03d}-{:02d}{}'.format(rating.trial.number, item.number, item.condition)
+            key = '{:03d}-{:02d}{}'.format(subject, item.number, item.condition)
             if key in results:
                 row = results[key]
                 row['questions'].append(rating.question)
@@ -287,7 +296,7 @@ class Materials(models.Model):
                 row['comments'].append(rating.comment)
             else:
                 row = {
-                    'subject': rating.trial.number,
+                    'subject': subject,
                     'item': item.number,
                     'condition': item.condition,
                     'position': rating.questionnaire_item.number + 1,

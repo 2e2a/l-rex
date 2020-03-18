@@ -10,6 +10,7 @@ from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.utils.functional import cached_property
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
 from django.views import generic
@@ -86,7 +87,7 @@ class StudyMixin:
     slug_url_kwarg = 'study_slug'
     study_object = None
 
-    @property
+    @cached_property
     def study(self):
         if not self.study_object:
             study_slug = self.kwargs['study_slug']
@@ -101,7 +102,7 @@ class StudyMixin:
 
 class StudyObjectMixin(StudyMixin):
 
-    @property
+    @cached_property
     def study(self):
         if not self.study_object:
             self.study_object =  self.get_object()
@@ -216,6 +217,9 @@ class StudyListView(LoginRequiredMixin, contib_views.PaginationHelperMixin, gene
             queryset = queryset.filter(is_archived=False)
         if self.sort_by == 'name':
             queryset = queryset.order_by('title', 'created_date')
+        queryset = queryset.prefetch_related(
+            'creator',
+        )
         return queryset
 
 
@@ -260,6 +264,17 @@ class StudyDetailView(
             messages.success(request, 'Study status changed to finished.')
         self.study.save()
         return redirect('study', study_slug=self.study.slug)
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        queryset = queryset.prefetch_related(
+            'questions',
+            'materials',
+            'materials__items',
+            'materials__lists',
+            'questionnaires',
+        )
+        return queryset
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)

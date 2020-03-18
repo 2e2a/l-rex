@@ -94,7 +94,14 @@ class ItemListView(
         return redirect('items', materials_slug=self.materials.slug)
 
     def get_queryset(self):
-        return super().get_queryset().filter(materials=self.materials).order_by('number','condition')
+        queryset = super().get_queryset()
+        queryset = queryset.filter(materials=self.materials)
+        queryset = queryset.prefetch_related(
+            'textitem',
+            'markdownitem',
+            'audiolinkitem',
+        )
+        return queryset
 
 
 class ItemCreateMixin(contrib_views.PaginationHelperMixin):

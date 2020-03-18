@@ -54,7 +54,13 @@ class Questionnaire(models.Model):
 
     @cached_property
     def questionnaire_items_preview(self):
-        return self.questionnaire_items.all().prefetch_related('item')[:10]
+        queryset = self.questionnaire_items.prefetch_related(
+            'item',
+            'item__materials',
+            'questionnaire',
+        )
+        queryset = queryset[:10]
+        return queryset
 
     @cached_property
     def questionnaire_items_by_block(self):

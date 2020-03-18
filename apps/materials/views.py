@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.paginator import Paginator
 from django.urls import reverse
+from django.utils.functional import cached_property
 from django.utils.safestring import mark_safe
 from django.views import generic
 
@@ -16,11 +17,11 @@ class MaterialsMixin:
     materials_object = None
     slug_url_kwarg = 'materials_slug'
 
-    @property
+    @cached_property
     def study(self):
         return self.materials.study
 
-    @property
+    @cached_property
     def materials(self):
         if not self.materials_object:
             materials_slug = self.kwargs['materials_slug']
@@ -36,7 +37,7 @@ class MaterialsMixin:
 
 class MaterialsObjectMixin(MaterialsMixin):
 
-    @property
+    @cached_property
     def materials(self):
         if not self.materials_object:
             self.materials_object =  self.get_object()
