@@ -37,7 +37,7 @@ class StudySteps(Enum):
     STEP_STD_QUESTIONNAIRES_GENERATE = 5
     STEP_STD_BLOCK_INSTRUCTIONS_CREATE = 6
     STEP_STD_CONTACT_ADD = 7
-    STEP_STD_PRIVACY_ADD = 8
+    STEP_STD_CONSENT_ADD = 8
     STEP_STD_PUBLISH = 9
     STEP_STD_FINISH = 10
     STEP_STD_RESULTS = 11
@@ -176,6 +176,11 @@ class Study(models.Model):
                   'statement should include the following information: for what purpose '
                   'is the ID/personal data collected, how long will the data be stored in non-anonymized '
                   'form, and who is responsible for data processing?'
+    )
+    consent_statement = models.CharField(
+        max_length=500,
+        default='I have read and understood the above information. I agree to participate in this study.',
+        help_text='Participants will have to check a box with this statement before study begins.',
     )
     intro = MarkdownxField(
         blank=True,
@@ -937,7 +942,7 @@ class Study(models.Model):
         StudySteps.STEP_STD_QUESTIONNAIRES_GENERATE: 'generate questionnaires',
         StudySteps.STEP_STD_BLOCK_INSTRUCTIONS_CREATE: 'write instructions for questionnaire blocks',
         StudySteps.STEP_STD_CONTACT_ADD: 'add contact information',
-        StudySteps.STEP_STD_PRIVACY_ADD: 'add a privacy statement',
+        StudySteps.STEP_STD_CONSENT_ADD: 'add consent form',
         StudySteps.STEP_STD_PUBLISH: 'set study status to published to start collecting results',
         StudySteps.STEP_STD_FINISH: 'set study status to finished when done',
         StudySteps.STEP_STD_RESULTS: 'download results',
@@ -960,8 +965,8 @@ class Study(models.Model):
             return reverse('questionnaire-blocks', args=[self.slug])
         elif step == StudySteps.STEP_STD_CONTACT_ADD:
             return reverse('study-contact', args=[self.slug])
-        elif step == StudySteps.STEP_STD_PRIVACY_ADD:
-            return reverse('study-privacy', args=[self.slug])
+        elif step == StudySteps.STEP_STD_CONSENT_ADD:
+            return reverse('study-consent', args=[self.slug])
         elif step == StudySteps.STEP_STD_PUBLISH:
             return reverse('study', args=[self.slug])
         elif step == StudySteps.STEP_STD_FINISH:
@@ -1007,7 +1012,7 @@ class Study(models.Model):
         if not self.contact_name:
             self._append_step_info(next_steps, StudySteps.STEP_STD_CONTACT_ADD, group)
         if not self.privacy_statement:
-            self._append_step_info(next_steps, StudySteps.STEP_STD_PRIVACY_ADD, group)
+            self._append_step_info(next_steps, StudySteps.STEP_STD_CONSENT_ADD, group)
 
         group = 'Dashboard'
         if self.is_published:

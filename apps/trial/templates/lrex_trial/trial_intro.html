@@ -1,4 +1,5 @@
 {% extends "lrex_trial/trial_base.html" %}
+{% load crispy_forms_tags %}
 
 {% block content %}
 {% if not study.is_imit_reached or is_test %}
@@ -16,9 +17,7 @@
         <p>
             {{ privacy_statement_rich }}
         </p>
-        <a href="{% url 'trial-create' study.slug %}{% if is_test %}?test=True{% endif %}" class="btn btn-primary">
-            {{ study.continue_label }}
-        </a>
+        {% crispy form form.helper %}
     </div>
     {% else %}
     <div class="my-2 p-4 border bg-white">

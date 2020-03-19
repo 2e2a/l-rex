@@ -824,7 +824,7 @@ class StudyContactUpdateView(
 ):
     model = models.Study
     title = 'Contact information'
-    template_name = 'lrex_dashboard/privacy_form.html'
+    template_name = 'lrex_dashboard/info_form.html'
     form_class = forms.StudyContactForm
     success_message = 'Contact information saved.'
 
@@ -841,7 +841,7 @@ class StudyContactUpdateView(
         return self.object.get_absolute_url()
 
 
-class StudyPrivacyUpdateView(
+class StudyConsentUpdateView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
     SuccessMessageMixin,
@@ -851,10 +851,10 @@ class StudyPrivacyUpdateView(
     generic.UpdateView,
 ):
     model = models.Study
-    title = 'Privacy statement'
-    template_name = 'lrex_dashboard/privacy_form.html'
+    title = 'Consent form'
+    template_name = 'lrex_dashboard/info_form.html'
     form_class = forms.StudyPrivacyForm
-    success_message = 'Privacy statement saved.'
+    success_message = 'Conset form saved.'
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -872,7 +872,7 @@ class StudyPrivacyUpdateView(
 
     def get_success_url(self):
         if 'save' in self.request.POST:
-            return reverse('study-privacy', args=[self.object.slug])
+            return reverse('study-consent', args=[self.object.slug])
         return self.object.get_absolute_url()
 
 

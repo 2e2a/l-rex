@@ -346,17 +346,20 @@ class StudyContactForm(contrib_forms.CrispyModelForm):
 class StudyPrivacyForm(contrib_forms.CrispyModelForm):
     optional_label_ignore_fields = [
         'privacy_statement',
+        'consent_statement',
     ]
 
     class Meta:
         model = models.Study
         fields = [
             'privacy_statement',
+            'consent_statement',
         ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['privacy_statement'].required = True
+        self.fields['consent_statement'].required = True
 
 
 class DemographicFieldForm(contrib_forms.CrispyModelForm):

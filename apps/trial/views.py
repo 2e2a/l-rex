@@ -475,27 +475,33 @@ class TestTrialMixin:
         return url
 
 
-class TrialIntroView(study_views.StudyMixin, TestTrialMixin, generic.TemplateView):
+class TrialIntroView(study_views.StudyMixin, TestTrialMixin, generic.FormView):
+    form_class = forms.ConsentForm
     template_name = 'lrex_trial/trial_intro.html'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['study'] = self.study
+        return kwargs
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         if self.study.intro:
             data['intro_rich'] = mark_safe(markdownify(self.study.intro))
-        if self.study.privacy_statement:
-            data['privacy_statement_rich'] = mark_safe(markdownify(self.study.privacy_statement))
-        if self.study.contact_name:
-            data['contact'] = mark_safe(self.study.contact_html)
+        data['privacy_statement_rich'] = mark_safe(markdownify(self.study.privacy_statement))
+        data['contact'] = mark_safe(self.study.contact_html)
         if self.study.contact_details:
             data['contact_details_rich'] = mark_safe(markdownify(self.study.contact_details))
         data['is_test'] = self.is_test_trial
         return data
 
+    def get_success_url(self):
+        return reverse('trial-create', args=[self.study.slug])
+
 
 class TrialCreateView(study_views.StudyMixin, TestTrialMixin, generic.CreateView):
     model = models.Trial
     form_class = forms.TrialForm
-    add_form_kwargs = True
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)

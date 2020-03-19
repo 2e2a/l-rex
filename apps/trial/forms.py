@@ -203,6 +203,28 @@ class QuestionnaireUploadForm(contrib_forms.CSVUploadForm):
             raise forms.ValidationError('Not all items used in questionnaires.')
 
 
+class ConsentForm(contrib_forms.CrispyForm):
+    consent = forms.BooleanField()
+
+    def __init__(self, *args, **kwargs):
+        is_test = kwargs.pop('is_test')
+        self.study = kwargs.pop('study')
+        super().__init__(*args, **kwargs)
+        self.fields['consent'].label = self.study.consent_statement
+
+    def init_helper(self):
+        super().init_helper()
+        self.helper.add_input(
+            Button(
+                'print', 'Save this page', css_class='btn btn-secondary', onclick='window.print()'
+            )
+        )
+
+    @property
+    def submit_label(self):
+        return self.study.continue_label
+
+
 class TrialForm(contrib_forms.CrispyModelForm):
     password = forms.CharField(
         max_length=200,
