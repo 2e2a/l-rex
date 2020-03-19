@@ -630,6 +630,7 @@ class Study(models.Model):
         'contact_affiliation',
         'contact_details',
         'privacy_statement',
+        'consent_statement',
         'intro',
         'outro',
         'continue_label',
@@ -648,6 +649,7 @@ class Study(models.Model):
     SETTING_BOOL_FIELDS = [
         'use_blocks',
         'pseudo_randomize_question_order',
+        'consent_statement',
     ]
 
     def _read_settings(self, reader):
