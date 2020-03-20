@@ -531,7 +531,7 @@ class TrialCreateView(study_views.StudyMixin, TestTrialMixin, generic.CreateView
     def get_success_url(self):
         if self.study.has_demographics:
             url = reverse('trial-demographics', args=[self.object.slug])
-        if self.study.use_blocks:
+        elif self.study.use_blocks:
             url = reverse('rating-block-instructions', args=[self.object.slug, 0])
         else:
             url = reverse('ratings-create', args=[self.object.slug, 0])
