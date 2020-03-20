@@ -570,6 +570,7 @@ class DemographicsCreateView(TrialMixin, TestTrialMixin, generic.TemplateView):
 
     def post(self, request, *args, **kwargs):
         self.formset = forms.demographics_formset_factory(self.n_fields)(request.POST, request.FILES)
+        forms.demographics_formset_init(self.formset, self.study.demographics.all())
         if self.formset.is_valid():
             instances = self.formset.save(commit=False)
             for instance in instances:
