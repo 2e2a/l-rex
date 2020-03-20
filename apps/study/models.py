@@ -199,6 +199,11 @@ class Study(models.Model):
         default='Continue',
         help_text='Label of the "Continue" button used during participation.',
     )
+    save_consent_form_label = models.CharField(
+        max_length=40,
+        default='Save this page',
+        help_text='Label of the button used to save/print the consent form.',
+    )
     privacy_statement_label = models.CharField(
         max_length=40,
         default='Privacy statement',
@@ -634,6 +639,7 @@ class Study(models.Model):
         'intro',
         'outro',
         'continue_label',
+        'save_consent_form_label',
         'privacy_statement_label',
         'contact_label',
         'instructions_label',

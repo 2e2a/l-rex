@@ -216,7 +216,7 @@ class ConsentForm(contrib_forms.CrispyForm):
         super().init_helper()
         self.helper.add_input(
             Button(
-                'print', 'Save this page', css_class='btn btn-secondary', onclick='window.print()'
+                'print', self.study.save_consent_form_label, css_class='btn btn-secondary', onclick='window.print()'
             )
         )
 

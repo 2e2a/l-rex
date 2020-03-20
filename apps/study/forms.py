@@ -131,6 +131,7 @@ class StudyLabelsForm(contrib_forms.CrispyModelForm):
         model = models.Study
         fields = [
             'continue_label',
+            'save_consent_form_label',
             'privacy_statement_label',
             'contact_label',
             'instructions_label',
