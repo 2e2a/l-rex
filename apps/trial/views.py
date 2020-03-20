@@ -496,7 +496,7 @@ class TrialIntroView(study_views.StudyMixin, TestTrialMixin, generic.FormView):
         return data
 
     def get_success_url(self):
-        return reverse('trial-create', args=[self.study.slug])
+        return self.test_url(reverse('trial-create', args=[self.study.slug]))
 
 
 class TrialCreateView(study_views.StudyMixin, TestTrialMixin, generic.CreateView):
