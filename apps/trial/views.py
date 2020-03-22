@@ -375,8 +375,10 @@ class TrialListView(
     paginate_by = 16
 
     def get(self, request, *args, **kwargs):
-        if self.study.has_subject_mapping:
-            message = 'Please remove the subject mapping when not needed anymore to reduce the stored personal data.'
+        if self.study.has_subject_information:
+            message = (
+                'Please remove the subject information when not needed anymore to reduce the stored personal data.'
+            )
             messages.warning(request, message)
         return super().get(request, *args, **kwargs)
 
@@ -405,7 +407,7 @@ class TrialDownloadSubjectsView(
         filename = '{}_SUBJECTS_{}.csv'.format(self.study.title.replace(' ', '_'), str(now().date()))
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
-        self.study.subject_mapping_csv(response)
+        self.study.subject_information_csv(response)
         return response
 
 
@@ -417,14 +419,14 @@ class TrialDeleteSubjectsView(
 ):
     title = 'Confirm deletion'
     template_name = 'lrex_dashboard/results_confirm_delete.html'
-    message = 'Delete subject mapping?'
+    message = 'Delete subject information?'
 
     def get_success_url(self):
         return reverse('trials', args=[self.study.slug])
 
     def post(self, request, *args, **kwargs):
-        self.study.delete_subject_mapping()
-        messages.success(request, 'Subject mapping deleted.')
+        self.study.delete_subject_information()
+        messages.success(request, 'Subject information deleted.')
         return redirect(self.get_success_url())
 
 

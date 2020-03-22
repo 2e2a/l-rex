@@ -313,10 +313,6 @@ class Materials(models.Model):
                         q_property.question_scale_user
                         for q_property in rating.questionnaire_item.question_properties.all()
                     )
-                if self.study.has_demographics:
-                    row['demographics'] = [
-                        demographic_value.value for demographic_value in rating.trial.demographics.all()
-                    ]
                 results[key] = row
         results_sorted = [results[key] for key in sorted(results)]
         return results_sorted
@@ -586,8 +582,6 @@ class Materials(models.Model):
             for question in self.study.questions.all():
                 csv_row.append('comment{}'.format(question.number + 1))
         csv_row.append('content')
-        for i, demographic_field in enumerate(self.study.demographics.all(), 1):
-            csv_row.append('demographic{}'.format(i))
         return csv_row
 
     def results_csv(self, fileobj):
@@ -605,8 +599,6 @@ class Materials(models.Model):
                 for comment in result['comments']:
                     csv_row.append(comment if comment else '')
             csv_row.append(result['content'])
-            if self.study.has_demographics:
-                csv_row.extend(result['demographics'])
             writer.writerow(csv_row)
 
     STEP_DESCRIPTION = {

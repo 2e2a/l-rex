@@ -183,7 +183,6 @@ class StudyListView(LoginRequiredMixin, contib_views.PaginationHelperMixin, gene
 
     sort_by = 'date'
     show_archived = False
-    show_shared = False
 
     def get(self, request, *args, **kwargs):
         if not hasattr(self.request.user, 'userprofile'):
@@ -320,9 +319,9 @@ class StudyArchiveView(
         return reverse('studies')
 
     def get(self, request, *args, **kwargs):
-        if self.study.has_subject_mapping:
+        if self.study.has_subject_information:
             download_link = (
-                '<a href="{}">download subject-ID mapping</a>'
+                '<a href="{}">download subject information</a>'
             ).format(reverse('trials-subjects-download', args=[self.study.slug]))
             msg = 'Please {} first, if needed. It is not included in the archive.'.format(download_link)
             messages.warning(request, mark_safe(msg))

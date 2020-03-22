@@ -431,13 +431,18 @@ class Study(models.Model):
         Trial.objects.filter(questionnaire__study=self, is_test=True).delete()
 
     @property
-    def has_subject_mapping(self):
+    def has_subject_information(self):
         from apps.trial.models import Trial
-        return Trial.objects.filter(questionnaire__study=self).exclude(subject_id=None).exists()
+        return Trial.objects.filter(
+            questionnaire__study=self,
+        ).exclude(
+            models.Q(subject_id=None) | models.Q(demographics=None)
+        ).exists()
 
-    def delete_subject_mapping(self):
-        from apps.trial.models import Trial
+    def delete_subject_information(self):
+        from apps.trial.models import Trial, DemographicValue
         Trial.objects.filter(questionnaire__study=self).update(subject_id=None)
+        DemographicValue.objects.filter(trial__questionnaire__study=self).delete()
 
     @cached_property
     def is_rating_possible(self):
@@ -588,17 +593,22 @@ class Study(models.Model):
             self.contact_email,
         )
 
-    def subject_mapping_csv(self, fileobj):
+    def subject_information_csv(self, fileobj):
         from apps.trial.models import Trial
         writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
-        csv_row = [
-            'Subject',
-            'ID'
-        ]
+        csv_row = ['Subject', 'ID']
+        if self.has_demographics:
+            csv_row.extend(
+                'demographic{}'.format(i) for i, demographic_field in enumerate(self.demographics.all(), 1)
+            )
         writer.writerow(csv_row)
         trials = Trial.objects.filter(questionnaire__study=self, is_test=False)
+        if self.has_demographics:
+            trials = trials.prefetch_related('demographics')
         for i, trial in enumerate(trials, 1):
             csv_row = [i, trial.subject_id]
+            if self.has_demographics:
+                csv_row.extend(demographic_value.value for demographic_value in trial.demographics.all())
             writer.writerow(csv_row)
 
     @property
@@ -917,7 +927,7 @@ class Study(models.Model):
                     archive.writestr(archive_file, file.getvalue())
 
     def archive(self):
-        self.delete_subject_mapping()
+        self.delete_subject_information()
         self.delete_questionnaires()
         self.materials.all().delete()
         self.questions.all().delete()
@@ -960,7 +970,7 @@ class Study(models.Model):
         StudySteps.STEP_STD_PUBLISH: 'set study status to published to start collecting results',
         StudySteps.STEP_STD_FINISH: 'set study status to finished when done',
         StudySteps.STEP_STD_RESULTS: 'download results',
-        StudySteps.STEP_STD_ANONYMIZE: 'remove subject-ID mapping when not needed anymore',
+        StudySteps.STEP_STD_ANONYMIZE: 'remove subject-ID information when not needed anymore',
         StudySteps.STEP_STD_ARCHIVE: 'archive the study',
     }
 
@@ -1039,14 +1049,13 @@ class Study(models.Model):
         if self.is_finished:
             if self.trial_count_finished > 0:
                 self._append_step_info(next_steps, StudySteps.STEP_STD_RESULTS, group)
-            if self.has_subject_mapping:
+            if self.has_subject_information:
                 self._append_step_info(next_steps, StudySteps.STEP_STD_ANONYMIZE, group)
 
         group = 'Settings'
         if self.is_finished:
             self._append_step_info(next_steps, StudySteps.STEP_STD_ARCHIVE, group)
 
-        # TODO: add archive
         return next_steps
 
     def optional_steps(self):
