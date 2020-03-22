@@ -119,11 +119,17 @@ class Study(models.Model):
         help_text='If you want to set a maximal number of participants, enter a number.',
         verbose_name='Maximal number of participants',
     )
-    shared_with = models.CharField(
+    shared_with_old = models.CharField(
         null=True,
         blank=True,
         max_length=200,
         help_text='Give other users access to the study. Enter comma-separated user names (e.g. "user1, user2").',
+    )
+    shared_with = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        blank=True,
+        related_name='shared_studies',
+        help_text='Give other users access to the study.',
     )
     instructions = MarkdownxField(
         blank=True,

@@ -306,13 +306,16 @@ def question_formset_helper():
     return formset_helper
 
 
-class SharedWithForm(contrib_forms.CrispyModelForm):
+class SharedWithForm(contrib_forms.CrispyForm):
+    shared_with = forms.CharField(
+        required=True,
+        help_text='Give other users access to the study. Enter comma-separated user names (e.g. "user1, user2").',
+    )
 
-    class Meta:
-        model = models.Study
-        fields = [
-            'shared_with'
-        ]
+    def __init__(self, *args, **kwargs):
+        study = kwargs.pop('study')
+        super().__init__(*args, **kwargs)
+        self.fields['shared_with'].initial = ', '.join(user.username for user in study.shared_with.all())
 
     def clean_shared_with(self):
         shared_with = self.cleaned_data['shared_with']

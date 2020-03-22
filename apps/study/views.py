@@ -3,6 +3,7 @@ from tempfile import TemporaryFile
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
 from django.db.models import Q
@@ -211,7 +212,7 @@ class StudyListView(LoginRequiredMixin, contib_views.PaginationHelperMixin, gene
         else:
             queryset = queryset.filter(
                 Q(creator=self.request.user) |
-                Q(shared_with__contains=self.request.user.username)
+                Q(shared_with=self.request.user)
             )
         if not self.show_archived:
             queryset = queryset.filter(is_archived=False)
@@ -537,11 +538,11 @@ class StudyLabelsUpdateView(
 
 
 class StudyShareView(
-    StudyObjectMixin,
+    StudyMixin,
     CheckStudyCreatorMixin,
     contib_views.LeaveWarningMixin,
     SettingsNavMixin,
-    generic.UpdateView
+    generic.FormView
 ):
     model = models.Study
     title = 'Share the study'
@@ -551,6 +552,7 @@ class StudyShareView(
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs.update({
+            'study': self.study,
             'add_save': True,
         })
         return kwargs
@@ -562,10 +564,18 @@ class StudyShareView(
         })
         return context
 
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        user_names = [user_name for user_name in form['shared_with'].value().split(',')]
+        users = User.objects.filter(username__in=user_names)
+        self.study.shared_with.set(users)
+        self.study.save()
+        return response
+
     def get_success_url(self):
         if 'save' in self.request.POST:
-            return reverse('study-share', args=[self.object.slug])
-        return self.object.get_absolute_url()
+            return reverse('study-share', args=[self.study.slug])
+        return self.study.get_absolute_url()
 
 
 class QuestionUpdateView(
