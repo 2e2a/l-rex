@@ -187,9 +187,10 @@ class StudyListView(LoginRequiredMixin, contib_views.PaginationHelperMixin, gene
     def get(self, request, *args, **kwargs):
         if not hasattr(self.request.user, 'userprofile'):
             return redirect('user-profile-create')
+        is_filtered = 'submit' in self.request.GET
         self.sort_by = self.request.GET.get('sort_by', 'date')
-        self.show_archived = self.request.GET.get('archived', False)
-        self.show_shared = self.request.GET.get('shared', True)
+        self.show_archived = is_filtered and self.request.GET.get('archived', False)
+        self.show_shared = not is_filtered or self.request.GET.get('shared', False)
         self.filter_sort_form = forms.StudyFilterSortForm(
             sort_by=self.sort_by,
             archived=self.show_archived,
