@@ -566,7 +566,7 @@ class StudyShareView(
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        user_names = [user_name for user_name in form['shared_with'].value().split(',')]
+        user_names = [user_name for user_name in form.cleaned_data['shared_with'].split(',')]
         users = User.objects.filter(username__in=user_names)
         self.study.shared_with.set(users)
         self.study.save()

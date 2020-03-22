@@ -308,7 +308,8 @@ def question_formset_helper():
 
 class SharedWithForm(contrib_forms.CrispyForm):
     shared_with = forms.CharField(
-        required=True,
+        required=False,
+        label='Shared with',
         help_text='Give other users access to the study. Enter comma-separated user names (e.g. "user1, user2").',
     )
 
@@ -320,6 +321,7 @@ class SharedWithForm(contrib_forms.CrispyForm):
     def clean_shared_with(self):
         shared_with = self.cleaned_data['shared_with']
         if shared_with:
+            shared_with = shared_with.replace(' ', '')
             for username in shared_with.split(','):
                 if not User.objects.filter(username=username).exists():
                     raise forms.ValidationError('No user with username {} registered'.format(username))

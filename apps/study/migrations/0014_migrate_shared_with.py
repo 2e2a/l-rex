@@ -4,7 +4,7 @@ from django.db import migrations
 
 def migrate(apps, schema_editor):
     Study = apps.get_model('lrex_study', 'Study')
-    User = get_user_model()
+    User = apps.get_model('auth', 'User')
     for study in Study.objects.exclude(shared_with_old=None):
         user_names = [user_name for user_name in study.shared_with_old.split(',')]
         users = User.objects.filter(username__in=user_names)
