@@ -8,6 +8,7 @@ from markdownx.models import MarkdownxField
 
 from enum import Enum
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
@@ -302,6 +303,10 @@ class Study(models.Model):
 
     def get_absolute_url(self):
         return reverse('study', args=[self.slug])
+
+    @cached_property
+    def shared_with_string(self):
+        return to_list_string(self.shared_with.all())
 
     @cached_property
     def has_text_items(self):
@@ -665,7 +670,6 @@ class Study(models.Model):
         'answer_question_message',
         'answer_questions_message',
         'feedback_message',
-        'shared_with',
     ]
 
     SETTING_BOOL_FIELDS = [
@@ -695,6 +699,9 @@ class Study(models.Model):
         for setting_field in self.SETTING_FIELDS:
             writer.writerow([setting_field, getattr(self, setting_field)])
         writer.writerow(
+            ['shared_with', self.shared_with_string]
+        )
+        writer.writerow(
             ['demographics', self.demographics_string]
         )
 
@@ -710,6 +717,9 @@ class Study(models.Model):
                         setattr(self, field, study_settings[field] == 'True')
 
             self.save()
+        shared_with_user_names = split_list_string(study_settings['shared_with'])
+        shared_with_users = User.objects.filter(username__in=shared_with_user_names)
+        self.shared_with.set(shared_with_users)
         for demographics_field in split_list_string(study_settings['demographics']):
             self.demographics.create(name=demographics_field)
         self.created_date = now().date()

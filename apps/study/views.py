@@ -117,7 +117,7 @@ class CheckStudyCreatorMixin(UserPassesTestMixin):
             return False
         if self.request.user == self.study.creator:
             return True
-        if self.study.shared_with and self.request.user.username in self.study.shared_with:
+        if self.study.shared_with and self.request.user in self.study.shared_with.all():
             return True
         if self.request.user.is_superuser:
             return True
