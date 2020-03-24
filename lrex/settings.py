@@ -158,25 +158,19 @@ STATICFILES_DIRS = [
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 # Security (set all True in production)
-SECURE_CONTENT_TYPE_NOSNIFF = True
-SECURE_BROWSER_XSS_FILTER = True
-X_FRAME_OPTIONS = 'DENY'
-SECURE_HSTS_SECONDS = False
-SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = False
 SECURE_SSL_REDIRECT = False
-SECURE_HSTS_INCLUDE_SUBDOMAINS = False
-SECURE_HSTS_PRELOAD = False
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '&+b$6n1(x=h0($ww_d4^j&6r%rtv47$gacl!nazl71g7&siqa3'
 
 # server settings
 SITE_ID = 1
 ADMINS = []
-DEFAULT_FROM_EMAIL = 'lrex@localhost'
+DEFAULT_FROM_EMAIL = 'noreply@l-rex.de'
 
 # lrex
-LREX_VERSION = 0
+LREX_VERSION = 0.1
 LREX_CONTACT_MD = 'Please define contact as markdown in local.py'
 LREX_PRIVACY_MD = 'Please define privacy statement as markdown in local.py'
 
