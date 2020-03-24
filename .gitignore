@@ -4,6 +4,5 @@ db.sqlite3
 /.venv
 /.idea
 /lrex/local.py
-/lrex/static/
 /node_modules/
-/static/
+/staticfiles/
