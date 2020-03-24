@@ -564,7 +564,7 @@ class DemographicsCreateView(TrialMixin, TestTrialMixin, generic.TemplateView):
 
     def get_success_url(self):
         if self.study.use_blocks:
-            url = reverse('rating-block-instructions', args=[self.object.slug, 0])
+            url = reverse('rating-block-instructions', args=[self.trial.slug, 0])
         else:
             url = reverse('ratings-create', args=[self.trial.slug, 0])
         url = self.test_url(url)
