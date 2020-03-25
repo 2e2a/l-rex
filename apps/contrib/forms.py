@@ -13,7 +13,7 @@ from . import utils
 def disable_form_field(form, field):
     form.fields[field].widget.attrs['readonly'] = True
     form.fields[field].widget.attrs['disabled'] = True
-    form.fields[field].required = False
+    form.fields[field].disabled = True
 
 
 class OptionalLabelMixin:
