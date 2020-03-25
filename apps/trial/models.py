@@ -457,7 +457,7 @@ class Trial(models.Model):
         return reverse('trial', args=[self.slug])
 
     def __str__(self):
-        return self.subject_id
+        return self.subject_id if self.subject_id else str(self.number)
 
 
 class Rating(models.Model):
