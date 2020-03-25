@@ -454,32 +454,35 @@ class Materials(models.Model):
             custom_question_column = any(
                 'question{}'.format(question.number) in columns for question in self.study.questions.all()
             )
-            if custom_question_column:
+            custom_scale_column = any(
+                'scale{}'.format(question.number) in columns for question in self.study.questions.all()
+            )
+            if custom_question_column or custom_scale_column:
                 for question in self.study.questions.all():
                     question_column = 'question{}'.format(question.number)
-                    if question_column in columns:
-                        item_question_question = row[columns[question_column]]
-                        if item_question_question:
-                            scale_labels_column = 'scale{}'.format(question.number)
-                            legend_column = 'legend{}'.format(question.number)
-                            scale_labels = row[columns[scale_labels_column]] if scale_labels_column in columns else None
-                            legend = row[columns[legend_column]] if legend_column in columns else None
-                            item_question = item_models.ItemQuestion.objects.filter(
-                                item=item, number=question.number
-                            ).first()
-                            if item_question:
-                                item_question.question = item_question_question
-                                item_question.scale_labels = scale_labels
-                                item_question.legend = legend
-                                item_question.save()
-                            else:
-                                item_models.ItemQuestion.objects.create(
-                                    item=item,
-                                    number=question.number,
-                                    question=item_question_question,
-                                    scale_labels=scale_labels,
-                                    legend=legend,
-                                )
+                    scale_labels_column = 'scale{}'.format(question.number)
+                    legend_column = 'legend{}'.format(question.number)
+                    item_question_question = (
+                        row[columns[question_column]] if question_column in columns else question.question
+                    )
+                    scale_labels = row[columns[scale_labels_column]] if scale_labels_column in columns else None
+                    legend = row[columns[legend_column]] if legend_column in columns else None
+                    item_question = item_models.ItemQuestion.objects.filter(
+                        item=item, number=question.number
+                    ).first()
+                    if item_question:
+                        item_question.question = item_question_question
+                        item_question.scale_labels = scale_labels
+                        item_question.legend = legend
+                        item_question.save()
+                    else:
+                        item_models.ItemQuestion.objects.create(
+                            item=item,
+                            number=question.number,
+                            question=item_question_question,
+                            scale_labels=scale_labels,
+                            legend=legend,
+                        )
 
         if new_items or items_to_delete and self.is_complete:
             self.delete_lists()
