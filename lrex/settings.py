@@ -22,6 +22,7 @@ BASE_DIR = os.path.dirname(CONFIG_DIR)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+DEV = True
 
 ALLOWED_HOSTS = []
 

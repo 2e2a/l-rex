@@ -1,6 +1,5 @@
 from allauth import urls as allauth_urls
 from django.conf import settings
-from django.conf.urls import handler404
 from django.conf.urls import handler500
 from django.contrib import admin
 from django.urls import include, path
@@ -30,7 +29,7 @@ urlpatterns = [
 handler500 = home_views.handler500
 
 
-if settings.DEBUG:
+if settings.DEV:
     import debug_toolbar
     urlpatterns = [
         path('__debug__/', include(debug_toolbar.urls)),
