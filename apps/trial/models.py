@@ -395,7 +395,7 @@ class Trial(models.Model):
         ordering = ['created']
 
     def save(self, *args, **kwargs):
-        if not self.subject_id:
+        if not self.subject_id and self.questionnaire.study.participant_id == study_models.Study.PARTICIPANT_ID_RANDOM:
             self.subject_id = ''.join(
                 random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(8)
             )
