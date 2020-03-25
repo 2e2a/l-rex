@@ -75,9 +75,6 @@ def questionnaire_block_formset_helper(has_example_block=False):
 
 
 class QuestionnaireBlockUpdateForm(contrib_forms.CrispyModelForm):
-    optional_label_ignore_fields = [
-        'instructions',
-    ]
 
     class Meta:
         model = models.QuestionnaireBlock

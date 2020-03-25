@@ -36,14 +36,13 @@ class StudySteps(Enum):
     STEP_STD_INTRO_EDIT = 3
     STEP_STD_EXP_CREATE = 4
     STEP_STD_QUESTIONNAIRES_GENERATE = 5
-    STEP_STD_BLOCK_INSTRUCTIONS_CREATE = 6
-    STEP_STD_CONTACT_ADD = 7
-    STEP_STD_CONSENT_ADD = 8
-    STEP_STD_PUBLISH = 9
-    STEP_STD_FINISH = 10
-    STEP_STD_RESULTS = 11
-    STEP_STD_ANONYMIZE = 12
-    STEP_STD_ARCHIVE = 13
+    STEP_STD_CONTACT_ADD = 6
+    STEP_STD_CONSENT_ADD = 7
+    STEP_STD_PUBLISH = 8
+    STEP_STD_FINISH = 9
+    STEP_STD_RESULTS = 10
+    STEP_STD_ANONYMIZE = 11
+    STEP_STD_ARCHIVE = 12
 
 
 class Study(models.Model):
@@ -461,7 +460,6 @@ class Study(models.Model):
         return (
             self.questions.exists() and self.instructions and self.intro and self.privacy_statement
             and self.items_validated and self.questionnaires.exists()
-            and (not self.use_blocks or self.has_block_instructions)
         )
 
     @cached_property
@@ -968,7 +966,6 @@ class Study(models.Model):
         StudySteps.STEP_STD_INTRO_EDIT: 'create intro/outro',
         StudySteps.STEP_STD_EXP_CREATE: 'create materials',
         StudySteps.STEP_STD_QUESTIONNAIRES_GENERATE: 'generate questionnaires',
-        StudySteps.STEP_STD_BLOCK_INSTRUCTIONS_CREATE: 'write instructions for questionnaire blocks',
         StudySteps.STEP_STD_CONTACT_ADD: 'add contact information',
         StudySteps.STEP_STD_CONSENT_ADD: 'add consent form',
         StudySteps.STEP_STD_PUBLISH: 'set study status to published to start collecting results',
@@ -989,8 +986,6 @@ class Study(models.Model):
             return reverse('materials-create', args=[self.slug])
         elif step == StudySteps.STEP_STD_QUESTIONNAIRES_GENERATE:
             return reverse('questionnaires', args=[self.slug])
-        elif step == StudySteps.STEP_STD_BLOCK_INSTRUCTIONS_CREATE:
-            return reverse('questionnaire-blocks', args=[self.slug])
         elif step == StudySteps.STEP_STD_CONTACT_ADD:
             return reverse('study-contact', args=[self.slug])
         elif step == StudySteps.STEP_STD_CONSENT_ADD:
@@ -1033,8 +1028,6 @@ class Study(models.Model):
         group = 'Questionnaires'
         if self.is_allowed_create_questionnaires and not self.questionnaires.exists():
             self._append_step_info(next_steps, StudySteps.STEP_STD_QUESTIONNAIRES_GENERATE, group)
-        if self.use_blocks and self.has_questionnaires and not self.has_block_instructions:
-            self._append_step_info(next_steps, StudySteps.STEP_STD_BLOCK_INSTRUCTIONS_CREATE, group)
 
         group = 'Contact and privacy'
         if not self.contact_name:
@@ -1065,31 +1058,38 @@ class Study(models.Model):
     def optional_steps(self):
         steps = {}
         if self.is_published:
-            steps = {
+            steps.update({
                 'Dashboard':
                     [
                         ('set study status to draft to make changes', reverse('study', args=[self.slug])),
                     ]
 
-            }
+            })
         elif self.is_finished:
-            steps = {
+            steps.update({
                 'Dashboard':
                     [
                         ('set study status to draft to make changes', reverse('study', args=[self.slug])),
                         ('set study status to publish to resume collecting results', reverse('study', args=[self.slug])),
                     ]
 
-            }
+            })
         else:
-            steps = {
-                'Settings':
-                    [
-                        ('customize study settings', reverse('study-settings', args=[self.slug])),
-                        ('customize labels', reverse('study-labels', args=[self.slug])),
-                        ('share study with other users', reverse('study-share', args=[self.slug])),
+            if self.use_blocks and self.has_questionnaires and not self.has_block_instructions:
+                steps.update({
+                    'Questionnaires': [
+                        ('write instructions for questionnaire blocks',
+                         reverse('questionnaire-blocks', args=[self.slug]))
                     ]
-            }
+                })
+            steps.update({
+                'Settings':
+                [
+                    ('customize study settings', reverse('study-settings', args=[self.slug])),
+                    ('customize labels', reverse('study-labels', args=[self.slug])),
+                    ('share study with other users', reverse('study-share', args=[self.slug])),
+                ]
+            })
         return steps
 
 

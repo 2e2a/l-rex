@@ -754,8 +754,10 @@ class RatingsCreateView(ProgressMixin, TestTrialMixin, TrialMixin, generic.Templ
     def get_next_url(self):
         if not self.is_last:
             trial_items = self.trial.items
-            if self.study.use_blocks and \
-                    trial_items[self.num].materials_block != trial_items[self.num + 1].materials_block:
+            if (
+                    self.study.use_blocks
+                    and trial_items[self.num].materials_block != trial_items[self.num + 1].materials_block
+            ):
                 url = reverse('rating-block-instructions', args=[self.trial.slug, self.num + 1])
             else:
                 url = reverse('ratings-create', args=[self.trial.slug, self.num + 1])
@@ -787,15 +789,25 @@ class RatingsCreateView(ProgressMixin, TestTrialMixin, TrialMixin, generic.Templ
 class RatingBlockInstructionsView(ProgressMixin, TestTrialMixin, TrialMixin, generic.TemplateView):
     template_name = 'lrex_trial/rating_block_instructions.html'
 
+    def get(self, request, *args, **kwargs):
+        self.questionnaire_block = self.trial.current_block
+        num = int(self.kwargs['num'])
+        self.next_url = reverse('ratings-create', args=[self.trial.slug, num])
+        self.next_url = self.test_url(self.next_url)
+        if not self.questionnaire_block.instructions:
+            return redirect(self.next_url)
+        return super().get(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         kwargs.update(
             {'n_trial_items': len(self.trial.items)}
         )
-        data = super().get_context_data(**kwargs)
-        questionnaire_block = self.trial.current_block
-        data['block_instructions_rich'] = mark_safe(markdownify(questionnaire_block.instructions))
-        data['trial'] = self.trial
-        return data
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'block_instructions_rich': mark_safe(markdownify(self.questionnaire_block.instructions)),
+            'next_url': self.next_url,
+        })
+        return context
 
 
 class RatingOutroView(TrialMixin, TestTrialMixin, generic.TemplateView):
