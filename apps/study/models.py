@@ -432,9 +432,10 @@ class Study(models.Model):
     def has_subject_information(self):
         from apps.trial.models import Trial
         return Trial.objects.filter(
-            questionnaire__study=self,
+            questionnaire__study=self
         ).exclude(
-            models.Q(subject_id=None) | models.Q(demographics=None)
+            subject_id=None,
+            demographics=None
         ).exists()
 
     def delete_subject_information(self):
