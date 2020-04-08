@@ -49,7 +49,7 @@ class Study(models.Model):
     title = models.CharField(
         max_length=100,
         help_text='Give your study a name.',
-        )
+    )
     slug = models.SlugField(
         unique=True,
         max_length=110,
