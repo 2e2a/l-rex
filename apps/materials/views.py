@@ -152,7 +152,7 @@ class MaterialsResultsView(
     aggregate_by = ['subject', 'item']
     aggregate_by_par = 'subject,item'
     page = 1
-    paginate_by = 1
+    paginate_by = 16
     title = 'Materials result summery'
 
     def get(self, request, *args, **kwargs):
