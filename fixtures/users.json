@@ -1,0 +1,25 @@
+[
+{
+    "model": "auth.user",
+    "pk": 1,
+    "fields": {
+        "password": "pbkdf2_sha256$150000$ORGeJCYUQJeQ$TmWe2OwMOsBKV74grTYaKDBTA4sj9xHxkARFuIMKtPM=",
+        "username": "user",
+        "email": "user@lrex.org",
+        "is_staff": false,
+        "is_active": true
+    }
+},
+{
+    "model": "auth.user",
+    "pk": 2,
+    "fields": {
+        "password": "pbkdf2_sha256$120000$iODLuIkmTyfd$i2OE/6s/yJkY/5lUqtdF85OYNm2/xKw9mBLxopRD4V4=",
+        "is_superuser": true,
+        "username": "admin",
+        "email": "admin@lrex.org",
+        "is_staff": true,
+        "is_active": true
+    }
+}
+]
