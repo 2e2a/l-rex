@@ -243,6 +243,7 @@ class Study(models.Model):
             'Label used for the participant ID form on the instruction page or for the participation code on the outro '
             'page, depending on the "participant ID" setting.'
         ),
+        verbose_name='Participation ID label',
     )
     password_label = models.CharField(
         max_length=40,
