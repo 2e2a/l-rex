@@ -71,7 +71,7 @@ demo-save:
 .PHONY: demo-load
 demo-load:
 	$(VIRTUAL_ENV)/bin/python3 manage.py migrate
-	$(VIRTUAL_ENV)/bin/python3 manage.py loaddata fixtures/demo.json
+	$(VIRTUAL_ENV)/bin/python3 manage.py loaddata fixtures/users.json
 
 .PHONY: reset-db
 reset-db:
