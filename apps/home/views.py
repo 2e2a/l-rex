@@ -41,6 +41,7 @@ class HomeView(generic.ListView):
 
 class ContactView(generic.TemplateView):
     template_name = 'lrex_home/contact.html'
+    title = 'Contact'
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
@@ -50,6 +51,7 @@ class ContactView(generic.TemplateView):
 
 class PrivacyView(generic.TemplateView):
     template_name = 'lrex_home/privacy.html'
+    title = 'Privacy statement'
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
