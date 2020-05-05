@@ -110,6 +110,5 @@ class CSVUploadForm(CrispyForm):
         except forms.ValidationError as error:
             raise forms.ValidationError('Line {}: {}'.format(reader.line_num, str(error.message)), code='invalid')
         except (ValueError, AssertionError):
-            raise forms.ValidationError('Line {}: unexpected format.', code='invalid')
+            raise forms.ValidationError('Line {}: unexpected entry.'.format(reader.line_num), code='invalid')
         return cleaned_data
-
