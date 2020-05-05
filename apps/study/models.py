@@ -166,16 +166,16 @@ class Study(models.Model):
                   '(e.g., "This study is part of the research project XY, for more information, see ..."). '
                   'This information will be shown to participants before the study begins.'
     )
-    privacy_statement = MarkdownxField(
+    consent_form_text = MarkdownxField(
         null=True,
         blank=True,
         max_length=5000,
-        help_text='This statement will be shown to the participants before the study begins. '
-                  'It should state whether the study is fully anonymous or not. '
-                  'If you ask for individual IDs or personal data in your study, the privacy '
-                  'statement should include the following information: for what purpose '
-                  'is the ID/personal data collected, how long will the data be stored in non-anonymized '
-                  'form, and who is responsible for data processing?'
+        help_text=(
+            'This text informs participants about the procedure and'
+            'purpose of the study. It will be shown to the participants before the'
+            'study begins. It should include a privacy statement: whether any'
+            'personal data is collected and how it will be processed and stored.'
+        )
     )
     consent_statement = models.CharField(
         max_length=500,
@@ -204,10 +204,10 @@ class Study(models.Model):
         default='Save this page',
         help_text='Label of the button used to save/print the consent form.',
     )
-    privacy_statement_label = models.CharField(
+    consent_form_label = models.CharField(
         max_length=40,
-        default='Privacy statement',
-        help_text='Label for "Privacy statement" used during participation.',
+        default='Consent form',
+        help_text='Label for "Consent form" used during participation.',
     )
     contact_label = models.CharField(
         max_length=40,
@@ -460,7 +460,7 @@ class Study(models.Model):
     @cached_property
     def is_allowed_publish(self):
         return (
-            self.questions.exists() and self.instructions and self.intro and self.privacy_statement
+            self.questions.exists() and self.instructions and self.intro and self.consent_form_text
             and self.items_validated and self.questionnaires.exists()
         )
 
@@ -649,13 +649,13 @@ class Study(models.Model):
         'contact_email',
         'contact_affiliation',
         'contact_details',
-        'privacy_statement',
+        'consent_form_text',
         'consent_statement',
         'intro',
         'outro',
         'continue_label',
         'save_consent_form_label',
-        'privacy_statement_label',
+        'consent_form_label',
         'contact_label',
         'instructions_label',
         'block_instructions_label',
@@ -1031,10 +1031,10 @@ class Study(models.Model):
         if self.is_allowed_create_questionnaires and not self.questionnaires.exists():
             self._append_step_info(next_steps, StudySteps.STEP_STD_QUESTIONNAIRES_GENERATE, group)
 
-        group = 'Contact and privacy'
+        group = 'Info and consent'
         if not self.contact_name:
             self._append_step_info(next_steps, StudySteps.STEP_STD_CONTACT_ADD, group)
-        if not self.privacy_statement:
+        if not self.consent_form_text:
             self._append_step_info(next_steps, StudySteps.STEP_STD_CONSENT_ADD, group)
 
         group = 'Dashboard'

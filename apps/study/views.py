@@ -863,7 +863,7 @@ class StudyConsentUpdateView(
     model = models.Study
     title = 'Consent form'
     template_name = 'lrex_dashboard/info_form.html'
-    form_class = forms.StudyPrivacyForm
+    form_class = forms.StudyConsentForm
     success_message = 'Conset form saved.'
 
     def get_form_kwargs(self):
