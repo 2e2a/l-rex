@@ -167,7 +167,7 @@ class ItemUploadForm(contrib_forms.CSVUploadForm):
             assert len(row) >= min_columns
             int(row[cleaned_data['number_column'] - 1])
             assert row[cleaned_data['condition_column'] - 1]
-            assert len(row[cleaned_data['condition_column'] - 1]) < 8
+            assert len(row[cleaned_data['condition_column'] - 1]) <= 16
             assert row[cleaned_data['content_column'] - 1]
             if self.study.has_audiolink_items:
                 validate_urls(row[cleaned_data['content_column'] - 1])
