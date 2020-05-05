@@ -29,7 +29,7 @@ class StudyFilterSortForm(contrib_forms.CrispyForm):
         self.fields['shared'].initial = shared
 
     def init_helper(self):
-        self.helper = self.custom_helper if hasattr(self, 'custom_helper') else FormHelper()
+        self.helper = FormHelper()
         self.helper.add_layout(
             Layout(
                 HTML('<div class="form-group mr-2 text-secondary">Sort by:</div>'),
