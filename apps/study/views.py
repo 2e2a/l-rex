@@ -320,10 +320,10 @@ class StudyArchiveView(
         return reverse('studies')
 
     def get(self, request, *args, **kwargs):
-        if self.study.has_subject_information:
+        if self.study.has_participant_information:
             download_link = (
-                '<a href="{}">download subject information</a>'
-            ).format(reverse('trials-subjects-download', args=[self.study.slug]))
+                '<a href="{}">download participant information</a>'
+            ).format(reverse('trials-participants-download', args=[self.study.slug]))
             msg = 'Please {} first, if needed. It is not included in the archive.'.format(download_link)
             messages.warning(request, mark_safe(msg))
         return super().get(request, *args, **kwargs)

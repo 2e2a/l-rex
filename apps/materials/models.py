@@ -285,9 +285,9 @@ class Materials(models.Model):
         )
         results = {}
         for rating in ratings:
-            subject = rating.trial.number
+            participant = rating.trial.number
             item = rating.questionnaire_item.item
-            key = '{:03d}-{:03d}{}'.format(subject, item.number, item.condition)
+            key = '{:03d}-{:03d}{}'.format(participant, item.number, item.condition)
             if key in results:
                 row = results[key]
                 row['questions'].append(rating.question)
@@ -296,7 +296,7 @@ class Materials(models.Model):
                 row['comments'].append(rating.comment)
             else:
                 row = {
-                    'subject': subject,
+                    'participant': participant,
                     'item': item.number,
                     'condition': item.condition,
                     'position': rating.questionnaire_item.number + 1,
@@ -352,17 +352,17 @@ class Materials(models.Model):
     def aggregated_results(self, columns):
         aggregated_results = []
         results = self.results()
-        if columns == ['subject']:
+        if columns == ['participant']:
             group_function = lambda result: str(result['item']) + result['condition']
             key_function = lambda result: '{:03d}{}'.format(result['item'], result['condition'])
             aggregated_results = self._aggregated_results(results, group_function, key_function)
         elif columns == ['item']:
-            group_function = lambda result: str(result['subject']) + result['condition']
-            key_function = lambda result: '{:03d}-{}'.format(result['subject'], result['condition'])
+            group_function = lambda result: str(result['participant']) + result['condition']
+            key_function = lambda result: '{:03d}-{}'.format(result['participant'], result['condition'])
             aggregated_results = self._aggregated_results(results, group_function, key_function)
-        elif columns == ['subject', 'item']:
+        elif columns == ['participant', 'item']:
             group_function = lambda result: result['condition']
-            key_function = lambda result: '{:03d}-{:03d}'.format(result['subject'], result['item'])
+            key_function = lambda result: '{:03d}-{:03d}'.format(result['participant'], result['item'])
             aggregated_results = self._aggregated_results(results, group_function, key_function)
         return aggregated_results
 
@@ -574,7 +574,7 @@ class Materials(models.Model):
             itemlist.items.set(items)
 
     def results_csv_header(self):
-        csv_row = ['materials', 'subject', 'item', 'condition', 'position']
+        csv_row = ['materials', 'participant', 'item', 'condition', 'position']
         if self.study.pseudo_randomize_question_order:
             csv_row.append('question order')
         if self.study.has_question_with_random_scale:
@@ -591,7 +591,7 @@ class Materials(models.Model):
         writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
         results = self.results()
         for result in results:
-            csv_row = [self.title, result['subject'], result['item'], result['condition'], result['position']]
+            csv_row = [self.title, result['participant'], result['item'], result['condition'], result['position']]
             if self.study.pseudo_randomize_question_order:
                 csv_row.append(result['question_order'])
             if self.study.has_question_with_random_scale:

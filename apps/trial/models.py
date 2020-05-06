@@ -380,7 +380,7 @@ class Trial(models.Model):
         blank=True,
         null=True,
     )
-    subject_id = models.CharField(
+    participant_id = models.CharField(
         max_length=200,
         help_text='Provide an identification number/name (as instructed by the experimenter).',
         verbose_name='ID',
@@ -395,8 +395,11 @@ class Trial(models.Model):
         ordering = ['created']
 
     def save(self, *args, **kwargs):
-        if not self.subject_id and self.questionnaire.study.participant_id == study_models.Study.PARTICIPANT_ID_RANDOM:
-            self.subject_id = ''.join(
+        if (
+                not self.participant_id
+                and self.questionnaire.study.participant_id == study_models.Study.PARTICIPANT_ID_RANDOM
+        ):
+            self.participant_id = ''.join(
                 random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(8)
             )
         return super().save(*args, **kwargs)
@@ -457,7 +460,7 @@ class Trial(models.Model):
         return reverse('trial', args=[self.slug])
 
     def __str__(self):
-        return self.subject_id if self.subject_id else str(self.number)
+        return self.participant_id if self.participant_id else str(self.number)
 
 
 class Rating(models.Model):
