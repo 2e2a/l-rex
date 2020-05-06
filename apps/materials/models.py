@@ -287,7 +287,7 @@ class Materials(models.Model):
         for rating in ratings:
             subject = rating.trial.number
             item = rating.questionnaire_item.item
-            key = '{:03d}-{:02d}{}'.format(subject, item.number, item.condition)
+            key = '{:03d}-{:03d}{}'.format(subject, item.number, item.condition)
             if key in results:
                 row = results[key]
                 row['questions'].append(rating.question)
@@ -354,7 +354,7 @@ class Materials(models.Model):
         results = self.results()
         if columns == ['subject']:
             group_function = lambda result: str(result['item']) + result['condition']
-            key_function = lambda result: '{:02d}{}'.format(result['item'], result['condition'])
+            key_function = lambda result: '{:03d}{}'.format(result['item'], result['condition'])
             aggregated_results = self._aggregated_results(results, group_function, key_function)
         elif columns == ['item']:
             group_function = lambda result: str(result['subject']) + result['condition']
@@ -362,7 +362,7 @@ class Materials(models.Model):
             aggregated_results = self._aggregated_results(results, group_function, key_function)
         elif columns == ['subject', 'item']:
             group_function = lambda result: result['condition']
-            key_function = lambda result: '{:03d}-{:02d}'.format(result['subject'], result['item'])
+            key_function = lambda result: '{:03d}-{:03d}'.format(result['subject'], result['item'])
             aggregated_results = self._aggregated_results(results, group_function, key_function)
         return aggregated_results
 
