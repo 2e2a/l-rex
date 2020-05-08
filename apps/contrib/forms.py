@@ -28,6 +28,10 @@ class OptionalLabelMixin:
 
 
 class HelperMixin:
+    helper = None
+    submit_label = None
+    save_label = None
+
     add_save = False
 
     def __init__(self, *args, **kwargs):
@@ -35,7 +39,7 @@ class HelperMixin:
         super().__init__(*args, **kwargs)
 
     def init_helper(self):
-        self.helper = self.custom_helper if hasattr(self, 'custom_helper') else FormHelper()
+        self.helper = FormHelper()
         self.helper.add_input(Submit('submit', self.submit_label))
         if self.add_save:
             self.helper.add_input(Submit('save', self.save_label, css_class='btn-secondary'))
@@ -110,6 +114,5 @@ class CSVUploadForm(CrispyForm):
         except forms.ValidationError as error:
             raise forms.ValidationError('Line {}: {}'.format(reader.line_num, str(error.message)), code='invalid')
         except (ValueError, AssertionError):
-            raise forms.ValidationError('Line {}: unexpected format.', code='invalid')
+            raise forms.ValidationError('Line {}: unexpected entry.'.format(reader.line_num), code='invalid')
         return cleaned_data
-

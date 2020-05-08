@@ -15,8 +15,8 @@ class Item(models.Model):
         help_text='Number of the item.',
     )
     condition = models.CharField(
-        max_length=8,
-        help_text='Condition of the item (character limit: 8).',
+        max_length=16,
+        help_text='Condition of the item (character limit: 16).',
     )
     materials = models.ForeignKey(
         'lrex_materials.Materials',

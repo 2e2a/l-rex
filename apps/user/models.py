@@ -9,5 +9,5 @@ class UserProfile(models.Model):
     )
     accept_emails = models.BooleanField(
         default=False,
-        help_text='Allow L-Rex admin to send me important emails.',
+        help_text='Allow L-Rex admin to send me emails about technical problems or other issues with my studies.',
     )

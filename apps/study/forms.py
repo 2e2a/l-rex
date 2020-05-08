@@ -29,7 +29,7 @@ class StudyFilterSortForm(contrib_forms.CrispyForm):
         self.fields['shared'].initial = shared
 
     def init_helper(self):
-        self.helper = self.custom_helper if hasattr(self, 'custom_helper') else FormHelper()
+        self.helper = FormHelper()
         self.helper.add_layout(
             Layout(
                 HTML('<div class="form-group mr-2 text-secondary">Sort by:</div>'),
@@ -132,7 +132,7 @@ class StudyLabelsForm(contrib_forms.CrispyModelForm):
         fields = [
             'continue_label',
             'save_consent_form_label',
-            'privacy_statement_label',
+            'consent_form_label',
             'contact_label',
             'instructions_label',
             'block_instructions_label',
@@ -349,22 +349,22 @@ class StudyContactForm(contrib_forms.CrispyModelForm):
             self.fields[field].required = True
 
 
-class StudyPrivacyForm(contrib_forms.CrispyModelForm):
+class StudyConsentForm(contrib_forms.CrispyModelForm):
     optional_label_ignore_fields = [
-        'privacy_statement',
+        'consent_form_text',
         'consent_statement',
     ]
 
     class Meta:
         model = models.Study
         fields = [
-            'privacy_statement',
+            'consent_form_text',
             'consent_statement',
         ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['privacy_statement'].required = True
+        self.fields['consent_form_text'].required = True
         self.fields['consent_statement'].required = True
 
 

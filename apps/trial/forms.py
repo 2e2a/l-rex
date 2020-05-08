@@ -227,7 +227,7 @@ class TrialForm(contrib_forms.CrispyModelForm):
         max_length=200,
         widget=forms.PasswordInput,
     )
-    optional_label_ignore_fields = ['subject_id']
+    optional_label_ignore_fields = ['participant_id']
 
     @property
     def submit_label(self):
@@ -235,37 +235,37 @@ class TrialForm(contrib_forms.CrispyModelForm):
 
     class Meta:
         model = models.Trial
-        fields = ['subject_id']
+        fields = ['participant_id']
         help_texts = {
             'password': None,
-            'subject_id': None,
+            'participant_id': None,
         }
 
 
     @property
-    def _test_subject_id(self):
+    def _test_participant_id(self):
         test_num = 1
         while True:
-            test_subject_id = 'Test {}'.format(test_num)
-            if not models.Trial.objects.filter(questionnaire__study=self.study, is_test=True, subject_id=test_subject_id).exists():
+            test_participant_id = 'Test {}'.format(test_num)
+            if not models.Trial.objects.filter(questionnaire__study=self.study, is_test=True, participant_id=test_participant_id).exists():
                 break
             test_num += 1
-        return test_subject_id
+        return test_participant_id
 
     def __init__(self, *args, **kwargs):
         is_test = kwargs.pop('is_test')
         self.study = kwargs.pop('study')
         super().__init__(*args, **kwargs)
-        self.fields['subject_id'].label = self.study.participation_id_label
+        self.fields['participant_id'].label = self.study.participation_id_label
         self.fields['password'].label = self.study.password_label
         if is_test:
-            self.fields['subject_id'].initial = self._test_subject_id
-            self.fields['subject_id'].readonly = True
+            self.fields['participant_id'].initial = self._test_participant_id
+            self.fields['participant_id'].readonly = True
         if self.study.participant_id == self.study.PARTICIPANT_ID_ENTER:
-            self.fields['subject_id'].required = True
+            self.fields['participant_id'].required = True
         else:
-            self.fields['subject_id'].required = False
-            self.fields['subject_id'].widget = forms.HiddenInput()
+            self.fields['participant_id'].required = False
+            self.fields['participant_id'].widget = forms.HiddenInput()
         if not self.study.password:
             self.fields['password'].required = False
             self.fields['password'].widget = forms.HiddenInput()

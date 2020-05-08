@@ -13,6 +13,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
+from django.utils.dateformat import format
 from django.utils.timezone import now
 
 from apps.contrib import csv as contrib_csv
@@ -166,16 +167,16 @@ class Study(models.Model):
                   '(e.g., "This study is part of the research project XY, for more information, see ..."). '
                   'This information will be shown to participants before the study begins.'
     )
-    privacy_statement = MarkdownxField(
+    consent_form_text = MarkdownxField(
         null=True,
         blank=True,
         max_length=5000,
-        help_text='This statement will be shown to the participants before the study begins. '
-                  'It should state whether the study is fully anonymous or not. '
-                  'If you ask for individual IDs or personal data in your study, the privacy '
-                  'statement should include the following information: for what purpose '
-                  'is the ID/personal data collected, how long will the data be stored in non-anonymized '
-                  'form, and who is responsible for data processing?'
+        help_text=(
+            'This text informs participants about the procedure and'
+            'purpose of the study. It will be shown to the participants before the'
+            'study begins. It should include a privacy statement: whether any'
+            'personal data is collected and how it will be processed and stored.'
+        )
     )
     consent_statement = models.CharField(
         max_length=500,
@@ -204,10 +205,10 @@ class Study(models.Model):
         default='Save this page',
         help_text='Label of the button used to save/print the consent form.',
     )
-    privacy_statement_label = models.CharField(
+    consent_form_label = models.CharField(
         max_length=40,
-        default='Privacy statement',
-        help_text='Label for "Privacy statement" used during participation.',
+        default='Consent form',
+        help_text='Label for "Consent form" used during participation.',
     )
     contact_label = models.CharField(
         max_length=40,
@@ -243,6 +244,7 @@ class Study(models.Model):
             'Label used for the participant ID form on the instruction page or for the participation code on the outro '
             'page, depending on the "participant ID" setting.'
         ),
+        verbose_name='Participation ID label',
     )
     password_label = models.CharField(
         max_length=40,
@@ -422,25 +424,29 @@ class Study(models.Model):
 
     def delete_abandoned_trials(self):
         trials_abandoned = [trial for trial in self.trials if trial.is_abandoned]
-        map(lambda trial: trial.delete(), trials_abandoned)
+        for trial in trials_abandoned:
+            trial.delete()
 
     def delete_test_trials(self):
         from apps.trial.models import Trial
         Trial.objects.filter(questionnaire__study=self, is_test=True).delete()
 
     @property
-    def has_subject_information(self):
+    def has_participant_information(self):
         from apps.trial.models import Trial
         return Trial.objects.filter(
-            questionnaire__study=self
+            questionnaire__study=self,
+            is_test = False,
         ).exclude(
-            subject_id=None,
-            demographics=None
+            participant_id=None,
+            created=None,
+            ended=None,
+            demographics=None,
         ).exists()
 
-    def delete_subject_information(self):
+    def delete_participant_information(self):
         from apps.trial.models import Trial, DemographicValue
-        Trial.objects.filter(questionnaire__study=self).update(subject_id=None)
+        Trial.objects.filter(questionnaire__study=self).update(participant_id=None, created=None, ended=None)
         DemographicValue.objects.filter(trial__questionnaire__study=self).delete()
 
     @cached_property
@@ -459,7 +465,7 @@ class Study(models.Model):
     @cached_property
     def is_allowed_publish(self):
         return (
-            self.questions.exists() and self.instructions and self.intro and self.privacy_statement
+            self.questions.exists() and self.instructions and self.intro and self.consent_form_text
             and self.items_validated and self.questionnaires.exists()
         )
 
@@ -591,10 +597,10 @@ class Study(models.Model):
             self.contact_email,
         )
 
-    def subject_information_csv(self, fileobj):
+    def participant_information_csv(self, fileobj):
         from apps.trial.models import Trial
         writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
-        csv_row = ['Subject', 'ID']
+        csv_row = ['participant', 'id', 'trial start utc', 'trial end utc', 'time taken sec']
         if self.has_demographics:
             csv_row.extend(
                 'demographic{}'.format(i) for i, demographic_field in enumerate(self.demographics.all(), 1)
@@ -604,7 +610,13 @@ class Study(models.Model):
         if self.has_demographics:
             trials = trials.prefetch_related('demographics')
         for i, trial in enumerate(trials, 1):
-            csv_row = [i, trial.subject_id]
+            csv_row = [
+                i,
+                trial.participant_id,
+                format(trial.created, 'Y-m-d H:i:s') if trial.created else '',
+                format(trial.ended, 'Y-m-d H:i:s') if trial.ended else '',
+                trial.time_taken,
+            ]
             if self.has_demographics:
                 csv_row.extend(demographic_value.value for demographic_value in trial.demographics.all())
             writer.writerow(csv_row)
@@ -648,13 +660,13 @@ class Study(models.Model):
         'contact_email',
         'contact_affiliation',
         'contact_details',
-        'privacy_statement',
+        'consent_form_text',
         'consent_statement',
         'intro',
         'outro',
         'continue_label',
         'save_consent_form_label',
-        'privacy_statement_label',
+        'consent_form_label',
         'contact_label',
         'instructions_label',
         'block_instructions_label',
@@ -930,7 +942,7 @@ class Study(models.Model):
                     archive.writestr(archive_file, file.getvalue())
 
     def archive(self):
-        self.delete_subject_information()
+        self.delete_participant_information()
         self.delete_questionnaires()
         self.materials.all().delete()
         self.questions.all().delete()
@@ -972,7 +984,7 @@ class Study(models.Model):
         StudySteps.STEP_STD_PUBLISH: 'set study status to published to start collecting results',
         StudySteps.STEP_STD_FINISH: 'set study status to finished when done',
         StudySteps.STEP_STD_RESULTS: 'download results',
-        StudySteps.STEP_STD_ANONYMIZE: 'remove subject-ID information when not needed anymore',
+        StudySteps.STEP_STD_ANONYMIZE: 'remove participant information when not needed anymore',
         StudySteps.STEP_STD_ARCHIVE: 'archive the study',
     }
 
@@ -1030,10 +1042,10 @@ class Study(models.Model):
         if self.is_allowed_create_questionnaires and not self.questionnaires.exists():
             self._append_step_info(next_steps, StudySteps.STEP_STD_QUESTIONNAIRES_GENERATE, group)
 
-        group = 'Contact and privacy'
+        group = 'Info and consent'
         if not self.contact_name:
             self._append_step_info(next_steps, StudySteps.STEP_STD_CONTACT_ADD, group)
-        if not self.privacy_statement:
+        if not self.consent_form_text:
             self._append_step_info(next_steps, StudySteps.STEP_STD_CONSENT_ADD, group)
 
         group = 'Dashboard'
@@ -1047,7 +1059,7 @@ class Study(models.Model):
         if self.is_finished:
             if self.trial_count_finished > 0:
                 self._append_step_info(next_steps, StudySteps.STEP_STD_RESULTS, group)
-            if self.has_subject_information:
+            if self.has_participant_information:
                 self._append_step_info(next_steps, StudySteps.STEP_STD_ANONYMIZE, group)
 
         group = 'Settings'

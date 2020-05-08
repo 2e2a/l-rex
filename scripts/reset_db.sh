@@ -11,8 +11,8 @@ ENGINE="$($VIRTUAL_ENV/bin/python manage.py get_settings_value DATABASES default
 if [ "$ENGINE" == "django.db.backends.postgresql" ]; then
     DATABASE="$($VIRTUAL_ENV/bin/python manage.py get_settings_value DATABASES default,NAME)"
     USER="$($VIRTUAL_ENV/bin/python manage.py get_settings_value DATABASES default,USER)"
-    sudo -u postgres dropdb $DATABASE
-    sudo -u postgres createdb $DATABASE -O $USER
+    sudo -u postgres psql -c "DROP DATABASE $DATABASE"
+    sudo -u postgres psql -c "CREATE DATABASE $DATABASE OWNER $USER"
 elif [ "$ENGINE" == "django.db.backends.sqlite3" ]; then
     FILE="$($VIRTUAL_ENV/bin/python manage.py get_settings_value DATABASES default,NAME)"
     rm -f $FILE

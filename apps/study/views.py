@@ -320,10 +320,10 @@ class StudyArchiveView(
         return reverse('studies')
 
     def get(self, request, *args, **kwargs):
-        if self.study.has_subject_information:
+        if self.study.has_participant_information:
             download_link = (
-                '<a href="{}">download subject information</a>'
-            ).format(reverse('trials-subjects-download', args=[self.study.slug]))
+                '<a href="{}">download participant information</a>'
+            ).format(reverse('trials-participants-download', args=[self.study.slug]))
             msg = 'Please {} first, if needed. It is not included in the archive.'.format(download_link)
             messages.warning(request, mark_safe(msg))
         return super().get(request, *args, **kwargs)
@@ -863,7 +863,7 @@ class StudyConsentUpdateView(
     model = models.Study
     title = 'Consent form'
     template_name = 'lrex_dashboard/info_form.html'
-    form_class = forms.StudyPrivacyForm
+    form_class = forms.StudyConsentForm
     success_message = 'Conset form saved.'
 
     def get_form_kwargs(self):
@@ -890,7 +890,7 @@ class StudyResultsCSVDownloadView(StudyObjectMixin, CheckStudyCreatorMixin, gene
     model = models.Study
 
     def get(self, request, *args, **kwargs):
-        filename = '{}_RESULTS_{}.csv'.format(self.study.title.replace(' ', '_'), str(now().date()))
+        filename = '{}_RESULTS_{}.csv'.format(self.study.title.replace(' ', '_'), now().strftime('%Y-%m-%d-%H%M'))
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
         self.study.results_csv(response)
