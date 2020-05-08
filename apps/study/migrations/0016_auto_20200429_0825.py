@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('lrex_study', '0001_initial'),
+        ('lrex_study', '0015_remove_study_shared_with_old'),
     ]
 
     operations = [
