@@ -13,6 +13,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
+from django.utils.dateformat import format
 from django.utils.timezone import now
 
 from apps.contrib import csv as contrib_csv
@@ -423,7 +424,8 @@ class Study(models.Model):
 
     def delete_abandoned_trials(self):
         trials_abandoned = [trial for trial in self.trials if trial.is_abandoned]
-        map(lambda trial: trial.delete(), trials_abandoned)
+        for trial in trials_abandoned:
+            trial.delete()
 
     def delete_test_trials(self):
         from apps.trial.models import Trial
@@ -437,12 +439,14 @@ class Study(models.Model):
             is_test = False,
         ).exclude(
             participant_id=None,
+            created=None,
+            ended=None,
             demographics=None,
         ).exists()
 
     def delete_participant_information(self):
         from apps.trial.models import Trial, DemographicValue
-        Trial.objects.filter(questionnaire__study=self).update(participant_id=None)
+        Trial.objects.filter(questionnaire__study=self).update(participant_id=None, created=None, ended=None)
         DemographicValue.objects.filter(trial__questionnaire__study=self).delete()
 
     @cached_property
@@ -596,7 +600,7 @@ class Study(models.Model):
     def participant_information_csv(self, fileobj):
         from apps.trial.models import Trial
         writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
-        csv_row = ['Participant', 'ID']
+        csv_row = ['participant', 'id', 'trial start utc', 'trial end utc', 'time taken sec']
         if self.has_demographics:
             csv_row.extend(
                 'demographic{}'.format(i) for i, demographic_field in enumerate(self.demographics.all(), 1)
@@ -606,7 +610,13 @@ class Study(models.Model):
         if self.has_demographics:
             trials = trials.prefetch_related('demographics')
         for i, trial in enumerate(trials, 1):
-            csv_row = [i, trial.participant_id]
+            csv_row = [
+                i,
+                trial.participant_id,
+                format(trial.created, 'Y-m-d H:i:s') if trial.created else '',
+                format(trial.ended, 'Y-m-d H:i:s') if trial.ended else '',
+                trial.time_taken,
+            ]
             if self.has_demographics:
                 csv_row.extend(demographic_value.value for demographic_value in trial.demographics.all())
             writer.writerow(csv_row)

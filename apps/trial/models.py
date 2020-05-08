@@ -10,7 +10,6 @@ from markdownx.models import MarkdownxField
 
 from collections import OrderedDict
 from datetime import timedelta
-from enum import Enum
 from django.db import models
 from django.urls import reverse
 from django.utils.functional import cached_property
@@ -375,7 +374,9 @@ class Trial(models.Model):
     )
     questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE)
     created = models.DateTimeField(
-        default=timezone.now
+        default=timezone.now,
+        blank=True,
+        null=True,
     )
     ended = models.DateTimeField(
         blank=True,
@@ -446,11 +447,21 @@ class Trial(models.Model):
     def is_finished(self):
         return self.ratings_completed == self.ratings_count
 
+    @property
+    def time_taken(self):
+        if self.created and self.ended:
+            return (self.ended - self.created).seconds
+
     ABANDONED_AFTER_HRS = 1
 
     @property
     def is_abandoned(self):
-        return not self.is_finished and self.created + timedelta(hours=self.ABANDONED_AFTER_HRS) < timezone.now()
+        return (
+            self.created and not self.is_finished
+            and self.created + timedelta(hours=self.ABANDONED_AFTER_HRS) < timezone.now()
+        ) or (
+            not self.created and not self.is_finished
+        )
 
     def init(self, study):
         self.questionnaire = study.next_questionnaire(is_test=self.is_test)

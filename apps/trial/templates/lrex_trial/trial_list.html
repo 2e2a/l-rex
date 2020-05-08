@@ -44,10 +44,13 @@
             <span class="badge badge-warning">Abandoned</span>
             {% endif %}
             <div class="small mt-1">
-                <span class="pr-2">created: <strong>{{ trial.created|date:"SHORT_DATETIME_FORMAT" }}</strong></span>
                 <span class="pr-2">questionnaire: <strong>Questionnaire {{ trial.questionnaire.number }}</strong></span>
                 {% if trial.ended %}
-                <span class="pr-2">ended on: <strong>{{ trial.ended|date:"SHORT_DATETIME_FORMAT" }}</strong></span>
+                    <span class="pr-2">created : <strong>{{ trial.created|date:"SHORT_DATETIME_FORMAT" }} utc</strong></span>
+                {% endif %}
+                {% if trial.ended %}
+                <span class="pr-2">ended on: <strong>{{ trial.ended|date:"SHORT_DATETIME_FORMAT" }} utc</strong></span>
+                    <span class="pr-2">time taken: <strong>{{ trial.time_taken }} sec</strong></span>
                 {% else %}
                 <span class="pr-2">ratings: <strong>{{ trial.ratings_completed }}/{{ trial.ratings_count }}</strong></span>
                 {% endif %}
