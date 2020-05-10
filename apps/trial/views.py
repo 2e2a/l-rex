@@ -419,7 +419,7 @@ class TrialDeleteParticipantsView(
 ):
     title = 'Confirm deletion'
     template_name = 'lrex_dashboard/results_confirm_delete.html'
-    message = 'Delete participant information?'
+    message = 'Delete participant information? This includes participant IDs, demographic data and participation times.'
 
     def get_success_url(self):
         return reverse('trials', args=[self.study.slug])
