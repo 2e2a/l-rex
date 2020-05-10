@@ -590,7 +590,7 @@ class Study(models.Model):
 
     @cached_property
     def contact_html(self):
-        return '<strong>{}</strong>, {}<a href="mailto:{}">{}</a>'.format(
+        return '{}, {}<a href="mailto:{}">{}</a>'.format(
             self.contact_name,
             '{}, '.format(self.contact_affiliation) if self.contact_affiliation else '',
             self.contact_email,
