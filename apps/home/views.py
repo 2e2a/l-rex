@@ -4,6 +4,7 @@ from django.conf import settings
 from django.shortcuts import render_to_response
 from django.shortcuts import redirect
 from django.utils.safestring import mark_safe
+from django.utils.timezone import now
 from django.views import generic
 from django.views.decorators.csrf import requires_csrf_token
 
@@ -61,6 +62,20 @@ class PrivacyView(generic.TemplateView):
 
 class HelpView(generic.TemplateView):
     template_name = 'lrex_home/help.html'
+    title = 'Help'
+
+
+class AboutView(generic.TemplateView):
+    template_name = 'lrex_home/about.html'
+    title = 'About'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'version': settings.LREX_VERSION,
+            'year': now().year,
+        })
+        return context
 
 
 class DemoView(generic.TemplateView):
