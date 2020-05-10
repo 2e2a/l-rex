@@ -16,7 +16,7 @@ from django.utils.safestring import mark_safe
 from django.utils.timezone import now
 from django.views import generic
 
-from apps.contrib import views as contib_views
+from apps.contrib import views as contrib_views
 from apps.contrib.utils import split_list_string
 
 from . import models
@@ -47,7 +47,7 @@ class WarnUserIfStudyActiveMixin:
         return super().get(request, *args, **kwargs)
 
 
-class DisableFormIfStudyActiveMixin(WarnUserIfStudyActiveMixin, contib_views.DisableFormMixin):
+class DisableFormIfStudyActiveMixin(WarnUserIfStudyActiveMixin, contrib_views.DisableFormMixin):
 
     @property
     def is_disabled(self):
@@ -174,7 +174,7 @@ class ResultsNavMixin:
         return context
 
 
-class StudyListView(LoginRequiredMixin, contib_views.PaginationHelperMixin, generic.ListView):
+class StudyListView(LoginRequiredMixin, contrib_views.PaginationHelperMixin, generic.ListView):
     model = models.Study
     title = 'Studies'
     paginate_by = 16
@@ -186,7 +186,7 @@ class StudyListView(LoginRequiredMixin, contib_views.PaginationHelperMixin, gene
 
     def get(self, request, *args, **kwargs):
         if not hasattr(self.request.user, 'userprofile'):
-            return redirect('user-profile-create')
+            return redirect('user-account-create')
         is_filtered = 'submit' in self.request.GET
         self.sort_by = self.request.GET.get('sort_by', 'date')
         self.show_archived = is_filtered and self.request.GET.get('archived', False)
@@ -296,8 +296,8 @@ class StudyDetailView(
 class StudyDeleteView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
-    contib_views.PaginationHelperMixin,
-    contib_views.DefaultDeleteView
+    contrib_views.PaginationHelperMixin,
+    contrib_views.DefaultDeleteView
 ):
     model = models.Study
     template_name = 'lrex_home/base_confirm_delete.html'
@@ -439,7 +439,7 @@ class StudySettingsView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
     SuccessMessageMixin,
-    contib_views.LeaveWarningMixin,
+    contrib_views.LeaveWarningMixin,
     DisableFormIfStudyActiveMixin,
     SettingsNavMixin,
     generic.UpdateView,
@@ -497,7 +497,7 @@ class StudyLabelsUpdateView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
     SuccessMessageMixin,
-    contib_views.LeaveWarningMixin,
+    contrib_views.LeaveWarningMixin,
     DisableFormIfStudyActiveMixin,
     SettingsNavMixin,
     generic.UpdateView,
@@ -540,7 +540,7 @@ class StudyLabelsUpdateView(
 class StudyShareView(
     StudyMixin,
     CheckStudyCreatorMixin,
-    contib_views.LeaveWarningMixin,
+    contrib_views.LeaveWarningMixin,
     SettingsNavMixin,
     generic.FormView
 ):
@@ -581,7 +581,7 @@ class StudyShareView(
 class QuestionUpdateView(
     StudyMixin,
     CheckStudyCreatorMixin,
-    contib_views.LeaveWarningMixin,
+    contrib_views.LeaveWarningMixin,
     DisableFormIfStudyActiveMixin,
     TasksNavMixin,
     generic.DetailView,
@@ -689,7 +689,7 @@ class StudyInstructionsUpdateView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
     SuccessMessageMixin,
-    contib_views.LeaveWarningMixin,
+    contrib_views.LeaveWarningMixin,
     DisableFormIfStudyActiveMixin,
     TasksNavMixin,
     generic.UpdateView,
@@ -724,7 +724,7 @@ class StudyIntroUpdateView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
     SuccessMessageMixin,
-    contib_views.LeaveWarningMixin,
+    contrib_views.LeaveWarningMixin,
     DisableFormIfStudyActiveMixin,
     TasksNavMixin,
     generic.UpdateView,
@@ -758,7 +758,7 @@ class StudyIntroUpdateView(
 class DemographicsUpdateView(
     StudyMixin,
     CheckStudyCreatorMixin,
-    contib_views.LeaveWarningMixin,
+    contrib_views.LeaveWarningMixin,
     DisableFormIfStudyActiveMixin,
     TasksNavMixin,
     generic.DetailView,
@@ -827,7 +827,7 @@ class StudyContactUpdateView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
     SuccessMessageMixin,
-    contib_views.LeaveWarningMixin,
+    contrib_views.LeaveWarningMixin,
     DisableFormIfStudyActiveMixin,
     PrivacyNavMixin,
     generic.UpdateView,
@@ -855,7 +855,7 @@ class StudyConsentUpdateView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
     SuccessMessageMixin,
-    contib_views.LeaveWarningMixin,
+    contrib_views.LeaveWarningMixin,
     DisableFormIfStudyActiveMixin,
     PrivacyNavMixin,
     generic.UpdateView,

@@ -27,7 +27,7 @@ class HomeView(generic.ListView):
 
     def get(self, request, *args, **kwargs):
         if self.request.user.is_authenticated and not hasattr(self.request.user, 'userprofile'):
-            return redirect('user-profile-create')
+            return redirect('user-account-create')
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
