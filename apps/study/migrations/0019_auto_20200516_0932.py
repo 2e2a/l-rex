@@ -7,7 +7,7 @@ import markdownx.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('lrex_study', '0004_auto_20200505_1235'),
+        ('lrex_study', '0018_auto_20200505_1235'),
     ]
 
     operations = [
