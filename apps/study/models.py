@@ -172,9 +172,9 @@ class Study(models.Model):
         blank=True,
         max_length=5000,
         help_text=(
-            'This text informs participants about the procedure and'
-            'purpose of the study. It will be shown to the participants before the'
-            'study begins. It should include a privacy statement: whether any'
+            'This text informs participants about the procedure and '
+            'purpose of the study. It will be shown to the participants before the '
+            'study begins. It should include a privacy statement: whether any '
             'personal data is collected and how it will be processed and stored.'
         )
     )
