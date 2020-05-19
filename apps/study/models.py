@@ -589,8 +589,8 @@ class Study(models.Model):
         self.questionnaire_blocks.all().delete()
 
     @cached_property
-    def contact_html(self):
-        return '{}, {}<a href="mailto:{}">{}</a>'.format(
+    def contact(self):
+        return '{}, {}{}'.format(
             self.contact_name,
             '{}, '.format(self.contact_affiliation) if self.contact_affiliation else '',
             self.contact_email,
