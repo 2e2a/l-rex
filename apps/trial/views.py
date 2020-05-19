@@ -491,7 +491,7 @@ class TrialIntroView(study_views.StudyMixin, TestTrialMixin, generic.FormView):
         context.update({
             'intro_rich': mark_safe(markdownify(self.study.intro)),
             'consent_form_text_rich': mark_safe(markdownify(self.study.consent_form_text)),
-            'contact_rich': mark_safe(self.study.contact_html),
+            'contact': mark_safe(self.study.contact),
             'contact_details_rich': mark_safe(markdownify(self.study.contact_details)),
         })
         return context
@@ -708,7 +708,7 @@ class RatingsCreateView(ProgressMixin, TestTrialMixin, TrialMixin, generic.Templ
         )
         context = super().get_context_data(**kwargs)
         context.update({
-            'contact_rich': mark_safe(self.study.contact_html)
+            'contact': mark_safe(self.study.contact)
         })
         if self.study.short_instructions:
             context['short_instructions_rich'] = mark_safe(markdownify(self.study.short_instructions))
