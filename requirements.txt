@@ -10,7 +10,7 @@ defusedxml==0.6.0         # via python3-openid
 django-allauth==0.41.0    # via -r requirements.in
 django-crispy-forms==1.9.0  # via -r requirements.in
 django-markdownx==3.0.1   # via -r requirements.in
-django==2.2.11            # via -r requirements.in, django-allauth, django-markdownx
+django==2.2.13            # via -r requirements.in, django-allauth, django-markdownx
 idna==2.9                 # via requests
 markdown==3.2.1           # via django-markdownx
 oauthlib==3.1.0           # via requests-oauthlib
