@@ -25,7 +25,7 @@ install: python node
 .PHONY: update
 update:
 	npm update
-	$(VIRTUAL_ENV)/bin/pip-compile requirements.in
+	$(VIRTUAL_ENV)/bin/pip-compile -U requirements.in
 
 
 .PHONY: js
