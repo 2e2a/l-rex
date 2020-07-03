@@ -959,11 +959,12 @@ class Study(models.Model):
                         if file_in_archive.endswith(filename_without_num):
                             filename = file_in_archive
                     if filename and restore_func:
-                        with archive.open(archive_file) as file:
-                            text_file = io.TextIOWrapper(file)
-                            restore_func(text_file)
+                        with archive.open(archive_file, 'r') as file:
+                            text_file = io.StringIO(file.read().decode())
+                            restore_func(text_file)#/
             except Exception as err:
-                self.delete()
+                if self.id:
+                    self.delete()
                 raise err
 
     @classmethod
