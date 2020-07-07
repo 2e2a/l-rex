@@ -456,12 +456,11 @@ class Trial(models.Model):
 
     @property
     def is_abandoned(self):
-        return (
-            self.created and not self.is_finished
-            and self.created + timedelta(hours=self.ABANDONED_AFTER_HRS) < timezone.now()
-        ) or (
-            not self.created and not self.is_finished
-        )
+        if not self.is_finished:
+            latest_rating = self.rating_set.exclude(created=None).order_by('created').last()
+            last_time_active = latest_rating.created if latest_rating else self.created
+            return last_time_active + timedelta(hours=self.ABANDONED_AFTER_HRS) < timezone.now()
+        return False
 
     def init(self, study):
         self.questionnaire = study.next_questionnaire(is_test=self.is_test)
@@ -476,6 +475,7 @@ class Trial(models.Model):
 
 class Rating(models.Model):
     trial = models.ForeignKey(Trial, on_delete=models.CASCADE)
+    created = models.DateTimeField(default=timezone.now, blank=True, null=True)
     questionnaire_item = models.ForeignKey(QuestionnaireItem, on_delete=models.CASCADE, related_name='ratings')
     question = models.IntegerField(default=0)
     scale_value = models.ForeignKey(study_models.ScaleValue, on_delete=models.CASCADE)

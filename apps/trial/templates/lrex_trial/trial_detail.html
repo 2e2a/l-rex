@@ -18,6 +18,7 @@
         <th>Comment</th>
         {% endif %}
         {% endfor %}
+        <th>Time</th>
     </tr>
     </thead>
     <tbody>
@@ -64,6 +65,9 @@
             {% endif %}
         </td>
         {% endif %}
+        <td>
+            {{ rating.created|date:"SHORT_DATETIME_FORMAT" }}
+        </td>
         {% endfor %}
     </tr>
     {% endfor %}
