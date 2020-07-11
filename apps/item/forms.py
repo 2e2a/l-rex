@@ -194,9 +194,12 @@ class ItemQuestionForm(contrib_forms.OptionalLabelMixin, forms.ModelForm):
 
     class Meta:
         model = models.ItemQuestion
-        fields = ['question', 'scale_labels', 'legend']
+        fields = ['question', 'scale_labels', 'legend', 'number']
         field_classes = {
             'scale_labels': contrib_forms.ListField,
+        }
+        widgets = {
+            'number': forms.HiddenInput()
         }
 
 
@@ -221,6 +224,7 @@ def initialize_with_questions(itemquestion_formset, questions):
         question = get_question(i, questions)
         if not form['question'].initial:
             form['question'].initial = question.question
+            form['number'].initial = i
             form['scale_labels'].initial = question.scale_labels
             form['legend'].initial = question.legend
 
