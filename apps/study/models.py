@@ -291,6 +291,8 @@ class Study(models.Model):
             self.slug = new_slug
             for materials in self.materials.all():
                 materials.save()
+        for questionnaire in self.questionnaires.all():
+            questionnaire.save()
         return super().save(*args, **kwargs)
 
     def __str__(self):
@@ -680,7 +682,6 @@ class Study(models.Model):
     SETTING_BOOL_FIELDS = [
         'use_blocks',
         'pseudo_randomize_question_order',
-        'consent_statement',
     ]
 
     def _read_settings(self, reader):
@@ -733,7 +734,7 @@ class Study(models.Model):
         self.is_finished = False
         self.save()
 
-    def questions_csv_header(self):
+    def questions_csv_header(self, **kwargs):
         return ['question', 'scale_labels', 'legend', 'randomize_scale', 'rating_comment']
 
     def questions_csv(self, fileobj):
@@ -774,7 +775,7 @@ class Study(models.Model):
                 )
             question_number += 1
 
-    def materials_csv_header(self):
+    def materials_csv_header(self, **kwargs):
         return ['title', 'list_distribution', 'is_filler', 'is_example', 'block', 'items_validated']
 
     def materials_csv(self, fileobj):
@@ -835,7 +836,7 @@ class Study(models.Model):
             fileobj.seek(0)
             materials.itemlists_csv_create(fileobj, has_materials_column=True)
 
-    def questionnaires_csv_header(self):
+    def questionnaires_csv_header(self, **kwargs):
         return ['questionnaire', 'lists', 'items', 'question_order']
 
     def questionnaires_csv(self, fileobj):
@@ -884,7 +885,7 @@ class Study(models.Model):
                 )
             questionnaire.save()
 
-    def questionnaire_blocks_csv_header(self):
+    def questionnaire_blocks_csv_header(self, **kwargs):
         return ['block', 'randomization', 'instructions', 'short_instructions']
 
     def questionnaire_blocks_csv(self, fileobj):
@@ -961,7 +962,7 @@ class Study(models.Model):
                     if filename and restore_func:
                         with archive.open(archive_file, 'r') as file:
                             text_file = io.StringIO(file.read().decode())
-                            restore_func(text_file)#/
+                            restore_func(text_file)
             except Exception as err:
                 if self.id:
                     self.delete()

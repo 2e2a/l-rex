@@ -13,6 +13,8 @@ def slugify_unique(value, model, self_id=None):
 
 def split_list_string(value):
     values = []
+    if not value:
+        return values
     end = 0
     while True:
         end = value.find(',', end + 1)

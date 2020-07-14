@@ -492,7 +492,7 @@ class TrialIntroView(study_views.StudyMixin, TestTrialMixin, generic.FormView):
             'intro_rich': mark_safe(markdownify(self.study.intro)),
             'consent_form_text_rich': mark_safe(markdownify(self.study.consent_form_text)),
             'contact': mark_safe(self.study.contact),
-            'contact_details_rich': mark_safe(markdownify(self.study.contact_details)),
+            'contact_details_rich': mark_safe(markdownify(self.study.contact_details)) if self.study.contact_details else None,
         })
         return context
 

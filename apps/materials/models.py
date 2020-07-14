@@ -366,15 +366,16 @@ class Materials(models.Model):
             aggregated_results = self._aggregated_results(results, group_function, key_function)
         return aggregated_results
 
-    def items_csv_header(self, add_materials_column=False):
+    def items_csv_header(self, add_materials_column=False, zero_index=False):
         csv_row = ['materials'] if add_materials_column else []
         csv_row.extend(['item', 'condition', 'content', 'block'])
         if self.study.has_audiolink_items:
             csv_row.append('audio_description')
         for question in self.study.questions.all():
-            csv_row.append('question{}'.format(question.number + 1))
-            csv_row.append('scale{}'.format(question.number + 1))
-            csv_row.append('legend{}'.format(question.number + 1))
+            question_number  = question.number if zero_index else question.number +1
+            csv_row.append('question{}'.format(question_number))
+            csv_row.append('scale{}'.format(question_number))
+            csv_row.append('legend{}'.format(question_number))
         return csv_row
 
     def items_csv(self, fileobj, add_header=True, add_materials_column=False):
@@ -489,7 +490,7 @@ class Materials(models.Model):
         for item in items_to_delete:
             item.delete()
 
-    def item_feedbacks_csv_header(self, add_materials_column=False):
+    def item_feedbacks_csv_header(self, add_materials_column=False, **kwargs):
         csv_row = ['materials'] if add_materials_column else []
         csv_row.extend(['item_number', 'item_condition', 'question', 'scale_values', 'feedback'])
         return csv_row
@@ -537,7 +538,7 @@ class Materials(models.Model):
                 feedback=feedback
             )
 
-    def itemlists_csv_header(self, add_materials_column=False):
+    def itemlists_csv_header(self, add_materials_column=False, **kwargs):
         csv_row = ['materials'] if add_materials_column else []
         csv_row.extend(['list', 'items'])
         return csv_row
