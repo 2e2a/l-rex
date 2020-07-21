@@ -555,7 +555,8 @@ class StudyShareView(
             self.study.shared_with.remove(request.user)
             self.study.save()
             messages.success(request, 'Unsubscribed from shared study.')
-        return redirect('studies')
+            return redirect('studies')
+        return super().post(request, *args, **kwargs)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
