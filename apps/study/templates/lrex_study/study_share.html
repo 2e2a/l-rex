@@ -1,0 +1,13 @@
+{% extends "lrex_dashboard/settings_form.html" %}
+
+{% block actions %}
+    {% if study.creator != user %}
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" name="action" value="unsubscribe" class="btn btn-outline-danger btn-sm ml-0 mr-1 mt-1">
+                Unsubscribe
+            </button>
+        </form>
+    {% endif %}
+{% endblock %}
+
