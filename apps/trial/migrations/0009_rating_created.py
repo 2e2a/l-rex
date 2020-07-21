@@ -7,7 +7,7 @@ import django.utils.timezone
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('lrex_trial', '0003_auto_20200508_0900'),
+        ('lrex_trial', '0008_auto_20200508_0900'),
     ]
 
     operations = [
