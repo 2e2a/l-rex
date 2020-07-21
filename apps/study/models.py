@@ -765,7 +765,7 @@ class Study(models.Model):
                 question=row[columns['question']],
                 legend=row[columns['legend']],
                 randomize_scale=(row[columns['randomize_scale']] == 'True'),
-                rating_comment=(row[columns['rating_comment']] == 'True'),
+                rating_comment=row[columns['rating_comment']],
             )
             for i, scale_value in enumerate(split_list_string(row[columns['scale_labels']])):
                 ScaleValue.objects.create(
