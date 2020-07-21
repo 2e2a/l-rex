@@ -80,6 +80,7 @@ class AboutView(generic.TemplateView):
 
 class DemoView(generic.TemplateView):
     template_name = 'lrex_home/demo.html'
+    title = 'Demo studies'
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)

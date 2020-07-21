@@ -96,6 +96,6 @@ def csv_columns(header_func, user_columns=None, **kwargs):
     if user_columns:
         columns = user_columns
     else:
-        header = header_func(**kwargs)
+        header = header_func(zero_index=True, **kwargs)
         columns = {column: i for i, column in enumerate(header)}
     return columns

@@ -45,9 +45,7 @@
             {% endif %}
             <div class="small mt-1">
                 <span class="pr-2">questionnaire: <strong>Questionnaire {{ trial.questionnaire.number }}</strong></span>
-                {% if trial.ended %}
-                    <span class="pr-2">created : <strong>{{ trial.created|date:"SHORT_DATETIME_FORMAT" }} utc</strong></span>
-                {% endif %}
+                <span class="pr-2">created : <strong>{{ trial.created|date:"SHORT_DATETIME_FORMAT" }} utc</strong></span>
                 {% if trial.ended %}
                 <span class="pr-2">ended on: <strong>{{ trial.ended|date:"SHORT_DATETIME_FORMAT" }} utc</strong></span>
                     <span class="pr-2">time taken: <strong>{{ trial.time_taken }} sec</strong></span>
