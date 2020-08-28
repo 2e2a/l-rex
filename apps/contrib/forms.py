@@ -95,24 +95,25 @@ class CSVUploadForm(CrispyForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        data = contrib_csv.read_file(cleaned_data)
-        delimiter = cleaned_data['delimiter']
-        sniff_data = contrib_csv.sniff(data)
-        delimiter, quoting, has_header = contrib_csv.detect_dialect(
-            sniff_data, cleaned_data, self.validator_int_columns, user_delimiter=delimiter
-        )
-        self.detected_csv = {'delimiter': delimiter, 'quoting': quoting, 'has_header': has_header}
-        contrib_csv.seek_file(cleaned_data)
-        data = contrib_csv.read_file(cleaned_data)
-        reader = csv.reader(
-            StringIO(data), delimiter=self.detected_csv['delimiter'], quoting=self.detected_csv['quoting'])
-        if self.detected_csv['has_header']:
-            next(reader)
-        try:
-            self.check_upload_form(reader, cleaned_data)
+        if 'file' in cleaned_data:
+            data = contrib_csv.read_file(cleaned_data)
+            delimiter = cleaned_data['delimiter']
+            sniff_data = contrib_csv.sniff(data)
+            delimiter, quoting, has_header = contrib_csv.detect_dialect(
+                sniff_data, cleaned_data, self.validator_int_columns, user_delimiter=delimiter
+            )
+            self.detected_csv = {'delimiter': delimiter, 'quoting': quoting, 'has_header': has_header}
             contrib_csv.seek_file(cleaned_data)
-        except forms.ValidationError as error:
-            raise forms.ValidationError('Line {}: {}'.format(reader.line_num, str(error.message)), code='invalid')
-        except (ValueError, AssertionError):
-            raise forms.ValidationError('Line {}: unexpected entry.'.format(reader.line_num), code='invalid')
+            data = contrib_csv.read_file(cleaned_data)
+            reader = csv.reader(
+                StringIO(data), delimiter=self.detected_csv['delimiter'], quoting=self.detected_csv['quoting'])
+            if self.detected_csv['has_header']:
+                next(reader)
+            try:
+                self.check_upload_form(reader, cleaned_data)
+                contrib_csv.seek_file(cleaned_data)
+            except forms.ValidationError as error:
+                raise forms.ValidationError('Line {}: {}'.format(reader.line_num, str(error.message)), code='invalid')
+            except (ValueError, AssertionError):
+                raise forms.ValidationError('Line {}: unexpected entry.'.format(reader.line_num), code='invalid')
         return cleaned_data

@@ -31,4 +31,4 @@ def split_list_string(value):
 
 
 def to_list_string(value_list):
-    return ','.join(value.replace(',', '\\,') for value in value_list)
+    return ','.join(str(value).replace(',', '\\,') for value in value_list)
