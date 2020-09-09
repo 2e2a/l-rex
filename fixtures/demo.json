@@ -1,13 +1,11 @@
 [
 {
     "model": "lrex_study.study",
-    "pk": 3,
+    "pk": 1,
     "fields": {
         "title": "DemoAcceptabilityRating",
         "slug": "demoacceptabilityrating",
-        "creator": [
-            "user"
-        ],
+        "creator": 1,
         "item_type": "mkd",
         "use_blocks": false,
         "pseudo_randomize_question_order": false,
@@ -16,19 +14,19 @@
         "participant_id": "none",
         "end_date": null,
         "trial_limit": null,
-        "instructions": "## Instructions\r\n\r\nIn this study, you will be asked to rate sentences on a scale from 1 to 7. The question is how natural they sound to you \u2013 not necessarily in a formal text, but in an everyday conversation. Use 1 for completely unnatural and 7 for completely natural.\r\n\r\n---\r\n\r\n**Examples:**\r\n\r\nIf you find the following sentence fully natural, you can give it a high rating.\r\n\r\n*Peter often does his homework in the library.*\r\n\r\nIf the following sentence sounds unnatural/odd/wrong to you, you can give it a low rating.\r\n\r\n*Peter in the library often his homework does.*\r\n\r\n---\r\n\r\nWe are interested in your intuitive first impression of the sentences \u2013 don't think about them for too long. Completing this study will take about 5 minutes.",
-        "short_instructions": "",
+        "instructions": "## Instructions\r\n\r\nIn this study, you will be asked to rate sentences on a scale from 1 to 7. The question is how natural they sound to you \u2013 not necessarily in a formal text, but in an everyday conversation. Use 1 for completely unnatural and 7 for completely natural.\r\n\r\n---\r\n\r\n**Examples:**\r\n\r\nIf you find the following sentence fully natural, you can give it a high rating.\r\n\r\n*Peter often does his homework in the library.*\r\n\r\nIf the following sentence sounds unnatural/odd/wrong to you, you can give it a low rating.\r\n\r\n*Peter in the library often his homework does.*\r\n\r\n---\r\n\r\nWe are interested in your intuitive first impression of the sentences \u2013 don't think about them for too long.",
+        "short_instructions": null,
         "contact_name": "L. Rex",
-        "contact_email": "email@example.com",
+        "contact_email": "email@example.org",
         "contact_affiliation": "Example University",
-        "contact_details": "",
-        "privacy_statement": "Your responses in this demo study will be stored in anonymized form.",
+        "contact_details": null,
+        "consent_form_text": "This is a demo study provided by the L-Rex developers. The purpose is to illustrate features of the software. Your responses will be stored in anonymized form. Completing the study will take about 2 minutes.",
         "consent_statement": "I have read and understood the above information. I agree to participate in this study.",
-        "intro": "## Welcome to the L-Rex demo study \"acceptability rating study\"\r\n\r\nThis demo study illustrates a short acceptability rating study.\r\n\r\nLet's assume that the research question is: which word order is preferred with particle verbs - \"...picked the book up...\" or \"...picked up the book...\"?\r\n\r\nThis demo illustrates the following L-Rex features:\r\n\r\n- **Latin-square distribution** of the critical items: each participant will see the sentences in one of the different word orders.\r\n- The study additionally contains four other sentences serving as **fillers/distractors**.\r\n- The stimuli are presented in **pseudo-randomized** order: critical items never directly follow each other.\r\n\r\nFor the purpose of illustration, you will see which item/condition is currently being presented in this demo study. Usually, this would not be visible to the participants.",
-        "outro": "Thank you for taking a look at this L-Rex demo study!\r\n\r\n- [Try out the other L-Rex demo studies]() for an illustration of further features.\r\n- [Start creating experiments with L-Rex]() (user account required \u2013 sign up or log in).",
+        "intro": "## Welcome to the L-Rex demo study \"acceptability rating study\"\r\n\r\nThis demo study illustrates a short acceptability rating study.\r\n\r\nLet's assume that the research question is: which word order is preferred with particle verbs \u2013 \"...picked the book up...\" or \"...picked up the book...\"?\r\n\r\nThis demo illustrates the following L-Rex features:\r\n\r\n- **Latin-square distribution** of the critical items: each participant will see the sentences in one of the different word orders.\r\n- The study additionally contains four other sentences serving as **filler items/distractors**.\r\n- The stimuli are presented in **pseudo-randomized** order: critical items never directly follow each other.\r\n\r\nFor the purpose of illustration, you will see which item/condition is currently being presented in this demo study. Usually, this would not be visible to the participants.",
+        "outro": "Thank you for taking a look at this L-Rex demo study!\r\n\r\n- [Try out the other L-Rex demo studies](https://lrex.2e2a.de/demo/) for an illustration of further features.\r\n- [Go back to the main page and start creating experiments with L-Rex](https://lrex.2e2a.de/) (user account required \u2013 sign up or log in).",
         "continue_label": "Continue",
         "save_consent_form_label": "Save this page",
-        "privacy_statement_label": "Privacy statement",
+        "consent_form_label": "Consent form",
         "contact_label": "Contact",
         "instructions_label": "Show/hide short instructions",
         "block_instructions_label": "Show/hide short instructions for this block",
@@ -39,22 +37,20 @@
         "answer_question_message": "Please answer this question.",
         "answer_questions_message": "Please answer all questions.",
         "feedback_message": "Please note the following feedback.",
-        "is_published": false,
+        "is_published": true,
         "is_finished": false,
-        "created_date": "2019-12-07",
+        "created_date": "2020-09-09",
         "is_archived": false,
         "shared_with": []
     }
 },
 {
     "model": "lrex_study.study",
-    "pk": 8,
+    "pk": 2,
     "fields": {
         "title": "DemoForcedChoice",
         "slug": "demoforcedchoice",
-        "creator": [
-            "user"
-        ],
+        "creator": 1,
         "item_type": "mkd",
         "use_blocks": false,
         "pseudo_randomize_question_order": false,
@@ -63,19 +59,19 @@
         "participant_id": "none",
         "end_date": null,
         "trial_limit": null,
-        "instructions": "## Instructions\r\n\r\nIn this study, you will be asked how you would interpret pronouns like **he** or **she**.\r\n\r\n---\r\n\r\n**Example:**\r\n\r\n*Yesterday, I saw Julia and her mother. **She** seemed upset.*\r\n\r\nIf this sentence, the highlighted pronoun \"she\" could refer to Julia or to her mother. In other words, the second sentence could mean:  \r\n1. \"She (Julia) seemed upset\" or  \r\n2. \"She (Julia's mother) seemed upset\"  \r\nYou will be asked which interpretation you prefer.  \r\n\r\n---\r\n\r\nWe are interested in your intuitive first interpretation of the sentences \u2013 don't think about them for too long. Completing this study will take about 5 minutes.",
-        "short_instructions": "",
+        "instructions": "## Instructions\r\n\r\nIn this study, you will be asked how you would interpret pronouns like **he** or **she**.\r\n\r\n---\r\n\r\n**Example:**\r\n\r\n*Yesterday, I saw Julia and her mother. **She** seemed upset.*\r\n\r\nIf this sentence, the highlighted pronoun \"she\" could refer to Julia or to her mother. In other words, the second sentence could mean:  \r\n1. \"She (Julia) seemed upset\" or  \r\n2. \"She (Julia's mother) seemed upset\"  \r\nYou will be asked which interpretation you prefer.  \r\n\r\n---\r\n\r\nWe are interested in your intuitive first interpretation of the sentences \u2013 don't think about them for too long.",
+        "short_instructions": null,
         "contact_name": "L. Rex",
-        "contact_email": "email@example.com",
+        "contact_email": "email@example.org",
         "contact_affiliation": "Example University",
-        "contact_details": "",
-        "privacy_statement": "Your responses in this demo study will be stored in anonymized form.",
+        "contact_details": null,
+        "consent_form_text": "This is a demo study provided by the L-Rex developers. The purpose is to illustrate features of the software. Your responses will be stored in anonymized form. Completing the study will take about 2 minutes.",
         "consent_statement": "I have read and understood the above information. I agree to participate in this study.",
         "intro": "## Welcome to the L-Rex demo study \"forced-choice study\"\r\n\r\nThis demo study illustrates a forced-choice study.\r\n\r\nLet's assume that the research question is: do personal pronouns rather refer to the subject or object of the preceding sentence \u2013 e.g., in a text like \"Peter called Tom. He was unhappy\", does \"he\" refer to Peter or Tom?\r\n\r\nThis demo illustrates the following L-Rex features:\r\n\r\n- **Text formatting (boldface, italics)** in the stimuli, using Markdown.\r\n- Each stimulus has an **individual question** and an **individual pair of responses**.\r\n- **Balanced response presentation order**: in 50% of the cases, the subject of the preceding sentence is presented as the first option (Peter/Tom), in the other 50% the order is reversed (Tom/Peter).\r\n- Participants can optionally provide a **comment**.\r\n\r\nFor the purpose of illustration, you will see which item/condition is currently being presented in this demo study. Usually, this would not be visible to the participants.",
-        "outro": "Thank you for taking a look at this L-Rex demo study!\r\n\r\n- [Try out the other L-Rex demo studies]() for an illustration of further features.\r\n- [Start creating experiments with L-Rex]() (user account required \u2013 sign up or log in).",
+        "outro": "Thank you for taking a look at this L-Rex demo study!\r\n\r\n- [Try out the other L-Rex demo studies](https://lrex.2e2a.de/demo/) for an illustration of further features.\r\n- [Go back to the main page and start creating experiments with L-Rex](https://lrex.2e2a.de/) (user account required \u2013 sign up or log in).",
         "continue_label": "Continue",
         "save_consent_form_label": "Save this page",
-        "privacy_statement_label": "Privacy statement",
+        "consent_form_label": "Consent form",
         "contact_label": "Contact",
         "instructions_label": "Show/hide short instructions",
         "block_instructions_label": "Show/hide short instructions for this block",
@@ -86,18 +82,18 @@
         "answer_question_message": "Please answer this question.",
         "answer_questions_message": "Please answer all questions.",
         "feedback_message": "Please note the following feedback.",
-        "is_published": false,
+        "is_published": true,
         "is_finished": false,
-        "created_date": "2020-03-05",
+        "created_date": "2020-09-09",
         "is_archived": false,
         "shared_with": []
     }
 },
 {
     "model": "lrex_study.question",
-    "pk": 4,
+    "pk": 1,
     "fields": {
-        "study": 3,
+        "study": 1,
         "number": 0,
         "question": "How natural does this sentence sound to you?",
         "legend": "1 = very unnatural, 7 = very natural",
@@ -107,1848 +103,1351 @@
 },
 {
     "model": "lrex_study.question",
-    "pk": 12,
+    "pk": 2,
     "fields": {
-        "study": 8,
+        "study": 2,
         "number": 0,
         "question": "Q",
-        "legend": null,
+        "legend": "",
         "randomize_scale": true,
-        "rating_comment": "optional"
+        "rating_comment": "False"
     }
 },
 {
     "model": "lrex_study.scalevalue",
-    "pk": 33,
+    "pk": 1,
     "fields": {
         "number": 0,
-        "question": 4,
+        "question": 1,
         "label": "1"
     }
 },
 {
     "model": "lrex_study.scalevalue",
-    "pk": 34,
+    "pk": 2,
     "fields": {
         "number": 1,
-        "question": 4,
+        "question": 1,
         "label": "2"
     }
 },
 {
     "model": "lrex_study.scalevalue",
-    "pk": 35,
+    "pk": 3,
     "fields": {
         "number": 2,
-        "question": 4,
+        "question": 1,
         "label": "3"
     }
 },
 {
     "model": "lrex_study.scalevalue",
-    "pk": 36,
+    "pk": 4,
     "fields": {
         "number": 3,
-        "question": 4,
+        "question": 1,
         "label": "4"
     }
 },
 {
     "model": "lrex_study.scalevalue",
-    "pk": 37,
+    "pk": 5,
     "fields": {
         "number": 4,
-        "question": 4,
+        "question": 1,
         "label": "5"
     }
 },
 {
     "model": "lrex_study.scalevalue",
-    "pk": 38,
+    "pk": 6,
     "fields": {
         "number": 5,
-        "question": 4,
+        "question": 1,
         "label": "6"
     }
 },
 {
     "model": "lrex_study.scalevalue",
-    "pk": 39,
+    "pk": 7,
     "fields": {
         "number": 6,
-        "question": 4,
+        "question": 1,
         "label": "7"
     }
 },
 {
     "model": "lrex_study.scalevalue",
-    "pk": 66,
+    "pk": 8,
     "fields": {
         "number": 0,
-        "question": 12,
+        "question": 2,
         "label": "A"
     }
 },
 {
     "model": "lrex_study.scalevalue",
-    "pk": 67,
+    "pk": 9,
     "fields": {
         "number": 1,
-        "question": 12,
+        "question": 2,
         "label": "B"
     }
 },
 {
     "model": "lrex_materials.materials",
-    "pk": 7,
-    "fields": {
-        "title": "ParticleVerbsItemsText",
-        "slug": "demoacceptabilityrating-particleverbsitemstext",
-        "study": 3,
-        "item_list_distribution": "latin-square",
-        "is_filler": false,
-        "is_example": false,
-        "block": -1,
-        "items_validated": true
-    }
-},
-{
-    "model": "lrex_materials.materials",
-    "pk": 8,
+    "pk": 1,
     "fields": {
         "title": "FillersText",
         "slug": "demoacceptabilityrating-fillerstext",
-        "study": 3,
+        "study": 1,
         "item_list_distribution": "all-to-all",
         "is_filler": true,
         "is_example": false,
-        "block": -1,
+        "block": 0,
         "items_validated": true
     }
 },
 {
     "model": "lrex_materials.materials",
-    "pk": 20,
+    "pk": 2,
+    "fields": {
+        "title": "ParticleVerbsItemsText",
+        "slug": "demoacceptabilityrating-particleverbsitemstext",
+        "study": 1,
+        "item_list_distribution": "latin-square",
+        "is_filler": false,
+        "is_example": false,
+        "block": 0,
+        "items_validated": true
+    }
+},
+{
+    "model": "lrex_materials.materials",
+    "pk": 3,
     "fields": {
         "title": "ForcedChoiceItems",
         "slug": "demoforcedchoice-forcedchoiceitems",
-        "study": 8,
+        "study": 2,
         "item_list_distribution": "all-to-all",
         "is_filler": false,
         "is_example": false,
-        "block": -1,
+        "block": 0,
         "items_validated": true
     }
 },
 {
     "model": "lrex_item.item",
-    "pk": 131,
-    "fields": {
-        "slug": "demoacceptabilityrating-particleverbsitemstext-1a",
-        "number": 1,
-        "condition": "a",
-        "materials": 7,
-        "block": 1
-    }
-},
-{
-    "model": "lrex_item.item",
-    "pk": 132,
-    "fields": {
-        "slug": "demoacceptabilityrating-particleverbsitemstext-1b",
-        "number": 1,
-        "condition": "b",
-        "materials": 7,
-        "block": 1
-    }
-},
-{
-    "model": "lrex_item.item",
-    "pk": 133,
-    "fields": {
-        "slug": "demoacceptabilityrating-particleverbsitemstext-2a",
-        "number": 2,
-        "condition": "a",
-        "materials": 7,
-        "block": 1
-    }
-},
-{
-    "model": "lrex_item.item",
-    "pk": 134,
-    "fields": {
-        "slug": "demoacceptabilityrating-particleverbsitemstext-2b",
-        "number": 2,
-        "condition": "b",
-        "materials": 7,
-        "block": 1
-    }
-},
-{
-    "model": "lrex_item.item",
-    "pk": 139,
+    "pk": 1,
     "fields": {
         "slug": "demoacceptabilityrating-fillerstext-1a",
         "number": 1,
         "condition": "a",
-        "materials": 8,
+        "materials": 1,
         "block": 1
     }
 },
 {
     "model": "lrex_item.item",
-    "pk": 140,
+    "pk": 2,
     "fields": {
         "slug": "demoacceptabilityrating-fillerstext-2a",
         "number": 2,
         "condition": "a",
-        "materials": 8,
+        "materials": 1,
         "block": 1
     }
 },
 {
     "model": "lrex_item.item",
-    "pk": 141,
+    "pk": 3,
     "fields": {
         "slug": "demoacceptabilityrating-fillerstext-3a",
         "number": 3,
         "condition": "a",
-        "materials": 8,
+        "materials": 1,
         "block": 1
     }
 },
 {
     "model": "lrex_item.item",
-    "pk": 143,
+    "pk": 4,
     "fields": {
         "slug": "demoacceptabilityrating-fillerstext-4a",
         "number": 4,
         "condition": "a",
-        "materials": 8,
+        "materials": 1,
         "block": 1
     }
 },
 {
     "model": "lrex_item.item",
-    "pk": 222,
+    "pk": 5,
+    "fields": {
+        "slug": "demoacceptabilityrating-particleverbsitemstext-1a",
+        "number": 1,
+        "condition": "a",
+        "materials": 2,
+        "block": 1
+    }
+},
+{
+    "model": "lrex_item.item",
+    "pk": 6,
+    "fields": {
+        "slug": "demoacceptabilityrating-particleverbsitemstext-1b",
+        "number": 1,
+        "condition": "b",
+        "materials": 2,
+        "block": 1
+    }
+},
+{
+    "model": "lrex_item.item",
+    "pk": 7,
+    "fields": {
+        "slug": "demoacceptabilityrating-particleverbsitemstext-2a",
+        "number": 2,
+        "condition": "a",
+        "materials": 2,
+        "block": 1
+    }
+},
+{
+    "model": "lrex_item.item",
+    "pk": 8,
+    "fields": {
+        "slug": "demoacceptabilityrating-particleverbsitemstext-2b",
+        "number": 2,
+        "condition": "b",
+        "materials": 2,
+        "block": 1
+    }
+},
+{
+    "model": "lrex_item.item",
+    "pk": 9,
     "fields": {
         "slug": "demoforcedchoice-forcedchoiceitems-1a",
         "number": 1,
         "condition": "a",
-        "materials": 20,
+        "materials": 3,
         "block": 1
     }
 },
 {
     "model": "lrex_item.item",
-    "pk": 223,
+    "pk": 10,
     "fields": {
         "slug": "demoforcedchoice-forcedchoiceitems-2a",
         "number": 2,
         "condition": "a",
-        "materials": 20,
+        "materials": 3,
         "block": 1
     }
 },
 {
     "model": "lrex_item.item",
-    "pk": 224,
+    "pk": 11,
     "fields": {
         "slug": "demoforcedchoice-forcedchoiceitems-3a",
         "number": 3,
         "condition": "a",
-        "materials": 20,
+        "materials": 3,
         "block": 1
     }
 },
 {
     "model": "lrex_item.item",
-    "pk": 225,
+    "pk": 12,
     "fields": {
         "slug": "demoforcedchoice-forcedchoiceitems-4a",
         "number": 4,
         "condition": "a",
-        "materials": 20,
+        "materials": 3,
         "block": 1
     }
 },
 {
     "model": "lrex_item.markdownitem",
-    "pk": 131,
+    "pk": 5,
     "fields": {
-        "item_ptr": 131,
         "text": "The woman picked up the book. *(item 1a)*"
     }
 },
 {
     "model": "lrex_item.markdownitem",
-    "pk": 139,
+    "pk": 9,
     "fields": {
-        "item_ptr": 139,
-        "text": "A bird flew to its nest. *(filler 1)*"
-    }
-},
-{
-    "model": "lrex_item.markdownitem",
-    "pk": 222,
-    "fields": {
-        "item_ptr": 222,
         "text": "Sue invited Emma. **She** is always nice to everyone. *(item 1)*"
     }
 },
 {
     "model": "lrex_item.markdownitem",
-    "pk": 132,
+    "pk": 1,
     "fields": {
-        "item_ptr": 132,
+        "text": "A bird flew to its nest. *(filler 1)*"
+    }
+},
+{
+    "model": "lrex_item.markdownitem",
+    "pk": 6,
+    "fields": {
         "text": "The woman picked the book up. *(item 1b)*"
     }
 },
 {
     "model": "lrex_item.markdownitem",
-    "pk": 133,
+    "pk": 7,
     "fields": {
-        "item_ptr": 133,
         "text": "The man took off the shoe. *(item 2a)*"
     }
 },
 {
     "model": "lrex_item.markdownitem",
-    "pk": 140,
+    "pk": 2,
     "fields": {
-        "item_ptr": 140,
         "text": "He arrived on Tuesday. *(filler 2)*"
     }
 },
 {
     "model": "lrex_item.markdownitem",
-    "pk": 223,
+    "pk": 10,
     "fields": {
-        "item_ptr": 223,
         "text": "Dean insulted Roger. **He** is a horrible person. *(item 2)*"
     }
 },
 {
     "model": "lrex_item.markdownitem",
-    "pk": 134,
+    "pk": 8,
     "fields": {
-        "item_ptr": 134,
         "text": "The man took the shoe off. *(item 2b)*"
     }
 },
 {
     "model": "lrex_item.markdownitem",
-    "pk": 141,
+    "pk": 3,
     "fields": {
-        "item_ptr": 141,
         "text": "Mary at school yelled at a girl. *(filler 3)*"
     }
 },
 {
     "model": "lrex_item.markdownitem",
-    "pk": 224,
+    "pk": 11,
     "fields": {
-        "item_ptr": 224,
         "text": "Nina called Rebecca. **She** said something about the weather. *(item 3)*"
     }
 },
 {
     "model": "lrex_item.markdownitem",
-    "pk": 143,
+    "pk": 12,
     "fields": {
-        "item_ptr": 143,
-        "text": "The parents forgot to tell she about it. *(filler 4)*"
-    }
-},
-{
-    "model": "lrex_item.markdownitem",
-    "pk": 225,
-    "fields": {
-        "item_ptr": 225,
         "text": "Harry met John. **He** was late because of the traffic. *(item 4)*"
     }
 },
 {
-    "model": "lrex_item.itemlist",
-    "pk": 22,
+    "model": "lrex_item.markdownitem",
+    "pk": 4,
     "fields": {
-        "materials": 7,
+        "text": "The parents forgot to tell she about it. *(filler 4)*"
+    }
+},
+{
+    "model": "lrex_item.itemlist",
+    "pk": 1,
+    "fields": {
+        "materials": 1,
         "number": 0,
         "items": [
-            131,
-            134
+            1,
+            2,
+            3,
+            4
         ]
     }
 },
 {
     "model": "lrex_item.itemlist",
-    "pk": 23,
+    "pk": 2,
     "fields": {
-        "materials": 7,
+        "materials": 2,
+        "number": 0,
+        "items": [
+            5,
+            8
+        ]
+    }
+},
+{
+    "model": "lrex_item.itemlist",
+    "pk": 3,
+    "fields": {
+        "materials": 2,
         "number": 1,
         "items": [
-            132,
-            133
+            6,
+            7
         ]
     }
 },
 {
     "model": "lrex_item.itemlist",
-    "pk": 26,
+    "pk": 4,
     "fields": {
-        "materials": 8,
+        "materials": 3,
         "number": 0,
         "items": [
-            139,
-            140,
-            141,
-            143
-        ]
-    }
-},
-{
-    "model": "lrex_item.itemlist",
-    "pk": 44,
-    "fields": {
-        "materials": 20,
-        "number": 0,
-        "items": [
-            222,
-            223,
-            224,
-            225
+            9,
+            10,
+            11,
+            12
         ]
     }
 },
 {
     "model": "lrex_item.itemquestion",
-    "pk": 37,
+    "pk": 1,
     "fields": {
-        "item": 222,
+        "item": 1,
+        "number": 0,
+        "question": "",
+        "scale_labels": "",
+        "legend": ""
+    }
+},
+{
+    "model": "lrex_item.itemquestion",
+    "pk": 2,
+    "fields": {
+        "item": 2,
+        "number": 0,
+        "question": "",
+        "scale_labels": "",
+        "legend": ""
+    }
+},
+{
+    "model": "lrex_item.itemquestion",
+    "pk": 3,
+    "fields": {
+        "item": 3,
+        "number": 0,
+        "question": "",
+        "scale_labels": "",
+        "legend": ""
+    }
+},
+{
+    "model": "lrex_item.itemquestion",
+    "pk": 4,
+    "fields": {
+        "item": 4,
+        "number": 0,
+        "question": "",
+        "scale_labels": "",
+        "legend": ""
+    }
+},
+{
+    "model": "lrex_item.itemquestion",
+    "pk": 5,
+    "fields": {
+        "item": 5,
+        "number": 0,
+        "question": "",
+        "scale_labels": "",
+        "legend": ""
+    }
+},
+{
+    "model": "lrex_item.itemquestion",
+    "pk": 6,
+    "fields": {
+        "item": 6,
+        "number": 0,
+        "question": "",
+        "scale_labels": "",
+        "legend": ""
+    }
+},
+{
+    "model": "lrex_item.itemquestion",
+    "pk": 7,
+    "fields": {
+        "item": 7,
+        "number": 0,
+        "question": "",
+        "scale_labels": "",
+        "legend": ""
+    }
+},
+{
+    "model": "lrex_item.itemquestion",
+    "pk": 8,
+    "fields": {
+        "item": 8,
+        "number": 0,
+        "question": "",
+        "scale_labels": "",
+        "legend": ""
+    }
+},
+{
+    "model": "lrex_item.itemquestion",
+    "pk": 9,
+    "fields": {
+        "item": 9,
         "number": 0,
         "question": "Who is always nice to everyone?",
         "scale_labels": "Sue,Emma",
-        "legend": null
+        "legend": ""
     }
 },
 {
     "model": "lrex_item.itemquestion",
-    "pk": 38,
+    "pk": 10,
     "fields": {
-        "item": 223,
+        "item": 10,
         "number": 0,
         "question": "Who is a horrible person?",
         "scale_labels": "Dean,Roger",
-        "legend": null
+        "legend": ""
     }
 },
 {
     "model": "lrex_item.itemquestion",
-    "pk": 39,
+    "pk": 11,
     "fields": {
-        "item": 224,
+        "item": 11,
         "number": 0,
         "question": "Who said something about the weather?",
         "scale_labels": "Nina,Rebecca",
-        "legend": null
+        "legend": ""
     }
 },
 {
     "model": "lrex_item.itemquestion",
-    "pk": 40,
+    "pk": 12,
     "fields": {
-        "item": 225,
+        "item": 12,
         "number": 0,
         "question": "Who was late because of the traffic?",
         "scale_labels": "Harry,John",
-        "legend": null
+        "legend": ""
     }
 },
 {
     "model": "lrex_trial.questionnaire",
-    "pk": 97,
+    "pk": 1,
     "fields": {
-        "slug": "demotext-1",
-        "study": 3,
+        "slug": "demoacceptabilityrating-1",
+        "study": 1,
         "number": 1,
         "item_lists": [
-            26,
-            22
+            1,
+            2
         ]
     }
 },
 {
     "model": "lrex_trial.questionnaire",
-    "pk": 98,
+    "pk": 2,
     "fields": {
-        "slug": "demotext-2",
-        "study": 3,
+        "slug": "demoacceptabilityrating-2",
+        "study": 1,
         "number": 2,
         "item_lists": [
-            26,
-            23
+            1,
+            3
         ]
     }
 },
 {
     "model": "lrex_trial.questionnaire",
-    "pk": 99,
+    "pk": 3,
     "fields": {
-        "slug": "demotext-3",
-        "study": 3,
+        "slug": "demoacceptabilityrating-3",
+        "study": 1,
         "number": 3,
         "item_lists": [
-            26,
-            22
+            1,
+            2
         ]
     }
 },
 {
     "model": "lrex_trial.questionnaire",
-    "pk": 100,
+    "pk": 4,
     "fields": {
-        "slug": "demotext-4",
-        "study": 3,
+        "slug": "demoacceptabilityrating-4",
+        "study": 1,
         "number": 4,
         "item_lists": [
-            26,
-            23
+            1,
+            3
         ]
     }
 },
 {
     "model": "lrex_trial.questionnaire",
-    "pk": 101,
+    "pk": 5,
     "fields": {
-        "slug": "demotext-5",
-        "study": 3,
+        "slug": "demoacceptabilityrating-5",
+        "study": 1,
         "number": 5,
         "item_lists": [
-            26,
-            22
+            1,
+            2
         ]
     }
 },
 {
     "model": "lrex_trial.questionnaire",
-    "pk": 102,
+    "pk": 6,
     "fields": {
-        "slug": "demotext-6",
-        "study": 3,
+        "slug": "demoacceptabilityrating-6",
+        "study": 1,
         "number": 6,
         "item_lists": [
-            26,
-            23
+            1,
+            3
         ]
     }
 },
 {
     "model": "lrex_trial.questionnaire",
-    "pk": 103,
-    "fields": {
-        "slug": "demotext-7",
-        "study": 3,
-        "number": 7,
-        "item_lists": [
-            26,
-            22
-        ]
-    }
-},
-{
-    "model": "lrex_trial.questionnaire",
-    "pk": 104,
-    "fields": {
-        "slug": "demotext-8",
-        "study": 3,
-        "number": 8,
-        "item_lists": [
-            26,
-            23
-        ]
-    }
-},
-{
-    "model": "lrex_trial.questionnaire",
-    "pk": 181,
-    "fields": {
-        "slug": "demoforcedchoice-1",
-        "study": 8,
-        "number": 1,
-        "item_lists": [
-            44
-        ]
-    }
-},
-{
-    "model": "lrex_trial.questionnaire",
-    "pk": 182,
-    "fields": {
-        "slug": "demoforcedchoice-2",
-        "study": 8,
-        "number": 2,
-        "item_lists": [
-            44
-        ]
-    }
-},
-{
-    "model": "lrex_trial.questionnaire",
-    "pk": 183,
-    "fields": {
-        "slug": "demoforcedchoice-3",
-        "study": 8,
-        "number": 3,
-        "item_lists": [
-            44
-        ]
-    }
-},
-{
-    "model": "lrex_trial.questionnaire",
-    "pk": 184,
-    "fields": {
-        "slug": "demoforcedchoice-4",
-        "study": 8,
-        "number": 4,
-        "item_lists": [
-            44
-        ]
-    }
-},
-{
-    "model": "lrex_trial.questionnaireblock",
     "pk": 7,
     "fields": {
-        "block": 1,
-        "instructions": null,
-        "short_instructions": null,
-        "randomization": "pseudo",
-        "study": 3
+        "slug": "demoacceptabilityrating-7",
+        "study": 1,
+        "number": 7,
+        "item_lists": [
+            1,
+            2
+        ]
+    }
+},
+{
+    "model": "lrex_trial.questionnaire",
+    "pk": 8,
+    "fields": {
+        "slug": "demoacceptabilityrating-8",
+        "study": 1,
+        "number": 8,
+        "item_lists": [
+            1,
+            3
+        ]
+    }
+},
+{
+    "model": "lrex_trial.questionnaire",
+    "pk": 9,
+    "fields": {
+        "slug": "demoforcedchoice-1",
+        "study": 2,
+        "number": 1,
+        "item_lists": [
+            4
+        ]
+    }
+},
+{
+    "model": "lrex_trial.questionnaire",
+    "pk": 10,
+    "fields": {
+        "slug": "demoforcedchoice-2",
+        "study": 2,
+        "number": 2,
+        "item_lists": [
+            4
+        ]
+    }
+},
+{
+    "model": "lrex_trial.questionnaire",
+    "pk": 11,
+    "fields": {
+        "slug": "demoforcedchoice-3",
+        "study": 2,
+        "number": 3,
+        "item_lists": [
+            4
+        ]
+    }
+},
+{
+    "model": "lrex_trial.questionnaire",
+    "pk": 12,
+    "fields": {
+        "slug": "demoforcedchoice-4",
+        "study": 2,
+        "number": 4,
+        "item_lists": [
+            4
+        ]
     }
 },
 {
     "model": "lrex_trial.questionnaireblock",
-    "pk": 19,
+    "pk": 1,
     "fields": {
         "block": 1,
-        "instructions": null,
-        "short_instructions": null,
+        "instructions": "",
+        "short_instructions": "",
+        "randomization": "pseudo",
+        "study": 1
+    }
+},
+{
+    "model": "lrex_trial.questionnaireblock",
+    "pk": 2,
+    "fields": {
+        "block": 1,
+        "instructions": "",
+        "short_instructions": "",
         "randomization": "true",
-        "study": 8
+        "study": 2
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2113,
+    "pk": 1,
     "fields": {
         "number": 0,
-        "questionnaire": 97,
-        "item": 134,
+        "questionnaire": 1,
+        "item": 8,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2114,
+    "pk": 2,
     "fields": {
         "number": 1,
-        "questionnaire": 97,
-        "item": 141,
+        "questionnaire": 1,
+        "item": 3,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2115,
+    "pk": 3,
     "fields": {
         "number": 2,
-        "questionnaire": 97,
-        "item": 139,
+        "questionnaire": 1,
+        "item": 1,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2116,
+    "pk": 4,
     "fields": {
         "number": 3,
-        "questionnaire": 97,
-        "item": 131,
+        "questionnaire": 1,
+        "item": 5,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2117,
+    "pk": 5,
     "fields": {
         "number": 4,
-        "questionnaire": 97,
-        "item": 140,
+        "questionnaire": 1,
+        "item": 2,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2118,
+    "pk": 6,
     "fields": {
         "number": 5,
-        "questionnaire": 97,
-        "item": 143,
+        "questionnaire": 1,
+        "item": 4,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2119,
+    "pk": 7,
     "fields": {
         "number": 0,
-        "questionnaire": 98,
-        "item": 132,
+        "questionnaire": 2,
+        "item": 6,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2120,
+    "pk": 8,
     "fields": {
         "number": 1,
-        "questionnaire": 98,
-        "item": 141,
+        "questionnaire": 2,
+        "item": 3,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2121,
+    "pk": 9,
     "fields": {
         "number": 2,
-        "questionnaire": 98,
-        "item": 140,
+        "questionnaire": 2,
+        "item": 2,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2122,
+    "pk": 10,
     "fields": {
         "number": 3,
-        "questionnaire": 98,
-        "item": 139,
+        "questionnaire": 2,
+        "item": 1,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2123,
+    "pk": 11,
     "fields": {
         "number": 4,
-        "questionnaire": 98,
-        "item": 143,
+        "questionnaire": 2,
+        "item": 4,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2124,
+    "pk": 12,
     "fields": {
         "number": 5,
-        "questionnaire": 98,
-        "item": 133,
+        "questionnaire": 2,
+        "item": 7,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2125,
+    "pk": 13,
     "fields": {
         "number": 0,
-        "questionnaire": 99,
-        "item": 143,
+        "questionnaire": 3,
+        "item": 4,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2126,
+    "pk": 14,
     "fields": {
         "number": 1,
-        "questionnaire": 99,
-        "item": 134,
+        "questionnaire": 3,
+        "item": 8,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2127,
+    "pk": 15,
     "fields": {
         "number": 2,
-        "questionnaire": 99,
-        "item": 141,
+        "questionnaire": 3,
+        "item": 3,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2128,
+    "pk": 16,
     "fields": {
         "number": 3,
-        "questionnaire": 99,
-        "item": 131,
+        "questionnaire": 3,
+        "item": 5,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2129,
+    "pk": 17,
     "fields": {
         "number": 4,
-        "questionnaire": 99,
-        "item": 140,
+        "questionnaire": 3,
+        "item": 2,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2130,
+    "pk": 18,
     "fields": {
         "number": 5,
-        "questionnaire": 99,
-        "item": 139,
+        "questionnaire": 3,
+        "item": 1,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2131,
+    "pk": 19,
     "fields": {
         "number": 0,
-        "questionnaire": 100,
-        "item": 139,
+        "questionnaire": 4,
+        "item": 1,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2132,
+    "pk": 20,
     "fields": {
         "number": 1,
-        "questionnaire": 100,
-        "item": 132,
+        "questionnaire": 4,
+        "item": 6,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2133,
+    "pk": 21,
     "fields": {
         "number": 2,
-        "questionnaire": 100,
-        "item": 143,
+        "questionnaire": 4,
+        "item": 4,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2134,
+    "pk": 22,
     "fields": {
         "number": 3,
-        "questionnaire": 100,
-        "item": 133,
+        "questionnaire": 4,
+        "item": 7,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2135,
+    "pk": 23,
     "fields": {
         "number": 4,
-        "questionnaire": 100,
-        "item": 140,
+        "questionnaire": 4,
+        "item": 2,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2136,
+    "pk": 24,
     "fields": {
         "number": 5,
-        "questionnaire": 100,
-        "item": 141,
+        "questionnaire": 4,
+        "item": 3,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2137,
+    "pk": 25,
     "fields": {
         "number": 0,
-        "questionnaire": 101,
-        "item": 131,
+        "questionnaire": 5,
+        "item": 5,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2138,
+    "pk": 26,
     "fields": {
         "number": 1,
-        "questionnaire": 101,
-        "item": 139,
+        "questionnaire": 5,
+        "item": 1,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2139,
+    "pk": 27,
     "fields": {
         "number": 2,
-        "questionnaire": 101,
-        "item": 140,
+        "questionnaire": 5,
+        "item": 2,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2140,
+    "pk": 28,
     "fields": {
         "number": 3,
-        "questionnaire": 101,
-        "item": 141,
+        "questionnaire": 5,
+        "item": 3,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2141,
+    "pk": 29,
     "fields": {
         "number": 4,
-        "questionnaire": 101,
-        "item": 143,
+        "questionnaire": 5,
+        "item": 4,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2142,
+    "pk": 30,
     "fields": {
         "number": 5,
-        "questionnaire": 101,
-        "item": 134,
+        "questionnaire": 5,
+        "item": 8,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2143,
+    "pk": 31,
     "fields": {
         "number": 0,
-        "questionnaire": 102,
-        "item": 140,
+        "questionnaire": 6,
+        "item": 2,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2144,
+    "pk": 32,
     "fields": {
         "number": 1,
-        "questionnaire": 102,
-        "item": 139,
+        "questionnaire": 6,
+        "item": 1,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2145,
+    "pk": 33,
     "fields": {
         "number": 2,
-        "questionnaire": 102,
-        "item": 132,
+        "questionnaire": 6,
+        "item": 6,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2146,
+    "pk": 34,
     "fields": {
         "number": 3,
-        "questionnaire": 102,
-        "item": 141,
+        "questionnaire": 6,
+        "item": 3,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2147,
+    "pk": 35,
     "fields": {
         "number": 4,
-        "questionnaire": 102,
-        "item": 133,
+        "questionnaire": 6,
+        "item": 7,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2148,
+    "pk": 36,
     "fields": {
         "number": 5,
-        "questionnaire": 102,
-        "item": 143,
+        "questionnaire": 6,
+        "item": 4,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2149,
+    "pk": 37,
     "fields": {
         "number": 0,
-        "questionnaire": 103,
-        "item": 139,
+        "questionnaire": 7,
+        "item": 1,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2150,
+    "pk": 38,
     "fields": {
         "number": 1,
-        "questionnaire": 103,
-        "item": 134,
+        "questionnaire": 7,
+        "item": 8,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2151,
+    "pk": 39,
     "fields": {
         "number": 2,
-        "questionnaire": 103,
-        "item": 143,
+        "questionnaire": 7,
+        "item": 4,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2152,
+    "pk": 40,
     "fields": {
         "number": 3,
-        "questionnaire": 103,
-        "item": 131,
+        "questionnaire": 7,
+        "item": 5,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2153,
+    "pk": 41,
     "fields": {
         "number": 4,
-        "questionnaire": 103,
-        "item": 141,
+        "questionnaire": 7,
+        "item": 3,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2154,
+    "pk": 42,
     "fields": {
         "number": 5,
-        "questionnaire": 103,
-        "item": 140,
+        "questionnaire": 7,
+        "item": 2,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2155,
+    "pk": 43,
     "fields": {
         "number": 0,
-        "questionnaire": 104,
-        "item": 141,
+        "questionnaire": 8,
+        "item": 3,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2156,
+    "pk": 44,
     "fields": {
         "number": 1,
-        "questionnaire": 104,
-        "item": 140,
+        "questionnaire": 8,
+        "item": 2,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2157,
+    "pk": 45,
     "fields": {
         "number": 2,
-        "questionnaire": 104,
-        "item": 132,
+        "questionnaire": 8,
+        "item": 6,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2158,
+    "pk": 46,
     "fields": {
         "number": 3,
-        "questionnaire": 104,
-        "item": 143,
+        "questionnaire": 8,
+        "item": 4,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2159,
+    "pk": 47,
     "fields": {
         "number": 4,
-        "questionnaire": 104,
-        "item": 139,
+        "questionnaire": 8,
+        "item": 1,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2160,
+    "pk": 48,
     "fields": {
         "number": 5,
-        "questionnaire": 104,
-        "item": 133,
+        "questionnaire": 8,
+        "item": 7,
         "question_order": null
     }
 },
 {
     "model": "lrex_trial.questionnaireitem",
-    "pk": 2855,
-    "fields": {
-        "number": 0,
-        "questionnaire": 181,
-        "item": 225,
-        "question_order": null
-    }
-},
-{
-    "model": "lrex_trial.questionnaireitem",
-    "pk": 2856,
-    "fields": {
-        "number": 1,
-        "questionnaire": 181,
-        "item": 222,
-        "question_order": null
-    }
-},
-{
-    "model": "lrex_trial.questionnaireitem",
-    "pk": 2857,
-    "fields": {
-        "number": 2,
-        "questionnaire": 181,
-        "item": 223,
-        "question_order": null
-    }
-},
-{
-    "model": "lrex_trial.questionnaireitem",
-    "pk": 2858,
-    "fields": {
-        "number": 3,
-        "questionnaire": 181,
-        "item": 224,
-        "question_order": null
-    }
-},
-{
-    "model": "lrex_trial.questionnaireitem",
-    "pk": 2859,
-    "fields": {
-        "number": 0,
-        "questionnaire": 182,
-        "item": 222,
-        "question_order": null
-    }
-},
-{
-    "model": "lrex_trial.questionnaireitem",
-    "pk": 2860,
-    "fields": {
-        "number": 1,
-        "questionnaire": 182,
-        "item": 225,
-        "question_order": null
-    }
-},
-{
-    "model": "lrex_trial.questionnaireitem",
-    "pk": 2861,
-    "fields": {
-        "number": 2,
-        "questionnaire": 182,
-        "item": 223,
-        "question_order": null
-    }
-},
-{
-    "model": "lrex_trial.questionnaireitem",
-    "pk": 2862,
-    "fields": {
-        "number": 3,
-        "questionnaire": 182,
-        "item": 224,
-        "question_order": null
-    }
-},
-{
-    "model": "lrex_trial.questionnaireitem",
-    "pk": 2863,
-    "fields": {
-        "number": 0,
-        "questionnaire": 183,
-        "item": 224,
-        "question_order": null
-    }
-},
-{
-    "model": "lrex_trial.questionnaireitem",
-    "pk": 2864,
-    "fields": {
-        "number": 1,
-        "questionnaire": 183,
-        "item": 225,
-        "question_order": null
-    }
-},
-{
-    "model": "lrex_trial.questionnaireitem",
-    "pk": 2865,
-    "fields": {
-        "number": 2,
-        "questionnaire": 183,
-        "item": 222,
-        "question_order": null
-    }
-},
-{
-    "model": "lrex_trial.questionnaireitem",
-    "pk": 2866,
-    "fields": {
-        "number": 3,
-        "questionnaire": 183,
-        "item": 223,
-        "question_order": null
-    }
-},
-{
-    "model": "lrex_trial.questionnaireitem",
-    "pk": 2867,
-    "fields": {
-        "number": 0,
-        "questionnaire": 184,
-        "item": 222,
-        "question_order": null
-    }
-},
-{
-    "model": "lrex_trial.questionnaireitem",
-    "pk": 2868,
-    "fields": {
-        "number": 1,
-        "questionnaire": 184,
-        "item": 225,
-        "question_order": null
-    }
-},
-{
-    "model": "lrex_trial.questionnaireitem",
-    "pk": 2869,
-    "fields": {
-        "number": 2,
-        "questionnaire": 184,
-        "item": 223,
-        "question_order": null
-    }
-},
-{
-    "model": "lrex_trial.questionnaireitem",
-    "pk": 2870,
-    "fields": {
-        "number": 3,
-        "questionnaire": 184,
-        "item": 224,
-        "question_order": null
-    }
-},
-{
-    "model": "lrex_trial.questionproperty",
     "pk": 49,
     "fields": {
         "number": 0,
-        "questionnaire_item": 2855,
-        "scale_order": "1,0"
+        "questionnaire": 9,
+        "item": 12,
+        "question_order": null
     }
 },
 {
-    "model": "lrex_trial.questionproperty",
+    "model": "lrex_trial.questionnaireitem",
     "pk": 50,
     "fields": {
-        "number": 0,
-        "questionnaire_item": 2856,
-        "scale_order": "0,1"
+        "number": 1,
+        "questionnaire": 9,
+        "item": 9,
+        "question_order": null
     }
 },
 {
-    "model": "lrex_trial.questionproperty",
+    "model": "lrex_trial.questionnaireitem",
     "pk": 51,
     "fields": {
-        "number": 0,
-        "questionnaire_item": 2857,
-        "scale_order": "0,1"
+        "number": 2,
+        "questionnaire": 9,
+        "item": 10,
+        "question_order": null
     }
 },
 {
-    "model": "lrex_trial.questionproperty",
+    "model": "lrex_trial.questionnaireitem",
     "pk": 52,
     "fields": {
-        "number": 0,
-        "questionnaire_item": 2858,
-        "scale_order": "1,0"
+        "number": 3,
+        "questionnaire": 9,
+        "item": 11,
+        "question_order": null
     }
 },
 {
-    "model": "lrex_trial.questionproperty",
+    "model": "lrex_trial.questionnaireitem",
     "pk": 53,
     "fields": {
         "number": 0,
-        "questionnaire_item": 2859,
-        "scale_order": "0,1"
+        "questionnaire": 10,
+        "item": 9,
+        "question_order": null
     }
 },
 {
-    "model": "lrex_trial.questionproperty",
+    "model": "lrex_trial.questionnaireitem",
     "pk": 54,
     "fields": {
-        "number": 0,
-        "questionnaire_item": 2860,
-        "scale_order": "0,1"
+        "number": 1,
+        "questionnaire": 10,
+        "item": 12,
+        "question_order": null
     }
 },
 {
-    "model": "lrex_trial.questionproperty",
+    "model": "lrex_trial.questionnaireitem",
     "pk": 55,
     "fields": {
-        "number": 0,
-        "questionnaire_item": 2861,
-        "scale_order": "1,0"
+        "number": 2,
+        "questionnaire": 10,
+        "item": 10,
+        "question_order": null
     }
 },
 {
-    "model": "lrex_trial.questionproperty",
+    "model": "lrex_trial.questionnaireitem",
     "pk": 56,
     "fields": {
-        "number": 0,
-        "questionnaire_item": 2862,
-        "scale_order": "1,0"
+        "number": 3,
+        "questionnaire": 10,
+        "item": 11,
+        "question_order": null
     }
 },
 {
-    "model": "lrex_trial.questionproperty",
+    "model": "lrex_trial.questionnaireitem",
     "pk": 57,
     "fields": {
         "number": 0,
-        "questionnaire_item": 2863,
-        "scale_order": "1,0"
+        "questionnaire": 11,
+        "item": 11,
+        "question_order": null
     }
 },
 {
-    "model": "lrex_trial.questionproperty",
+    "model": "lrex_trial.questionnaireitem",
     "pk": 58,
     "fields": {
-        "number": 0,
-        "questionnaire_item": 2864,
-        "scale_order": "0,1"
+        "number": 1,
+        "questionnaire": 11,
+        "item": 12,
+        "question_order": null
     }
 },
 {
-    "model": "lrex_trial.questionproperty",
+    "model": "lrex_trial.questionnaireitem",
     "pk": 59,
     "fields": {
-        "number": 0,
-        "questionnaire_item": 2865,
-        "scale_order": "0,1"
+        "number": 2,
+        "questionnaire": 11,
+        "item": 9,
+        "question_order": null
     }
 },
 {
-    "model": "lrex_trial.questionproperty",
+    "model": "lrex_trial.questionnaireitem",
     "pk": 60,
     "fields": {
-        "number": 0,
-        "questionnaire_item": 2866,
-        "scale_order": "1,0"
+        "number": 3,
+        "questionnaire": 11,
+        "item": 10,
+        "question_order": null
     }
 },
 {
-    "model": "lrex_trial.questionproperty",
+    "model": "lrex_trial.questionnaireitem",
     "pk": 61,
     "fields": {
         "number": 0,
-        "questionnaire_item": 2867,
-        "scale_order": "0,1"
+        "questionnaire": 12,
+        "item": 9,
+        "question_order": null
     }
 },
 {
-    "model": "lrex_trial.questionproperty",
+    "model": "lrex_trial.questionnaireitem",
     "pk": 62,
     "fields": {
-        "number": 0,
-        "questionnaire_item": 2868,
-        "scale_order": "1,0"
+        "number": 1,
+        "questionnaire": 12,
+        "item": 12,
+        "question_order": null
     }
 },
 {
-    "model": "lrex_trial.questionproperty",
+    "model": "lrex_trial.questionnaireitem",
     "pk": 63,
     "fields": {
-        "number": 0,
-        "questionnaire_item": 2869,
-        "scale_order": "1,0"
+        "number": 2,
+        "questionnaire": 12,
+        "item": 10,
+        "question_order": null
     }
 },
 {
-    "model": "lrex_trial.questionproperty",
+    "model": "lrex_trial.questionnaireitem",
     "pk": 64,
     "fields": {
-        "number": 0,
-        "questionnaire_item": 2870,
-        "scale_order": "0,1"
-    }
-},
-{
-    "model": "lrex_trial.trial",
-    "pk": "3c429349-8101-4ac2-9d78-db45a869e183",
-    "fields": {
-        "questionnaire": 97,
-        "created": "2020-02-19T15:00:35.181Z",
-        "ended": "2020-02-19T15:00:53.478Z",
-        "subject_id": "Test 1",
-        "is_test": true
-    }
-},
-{
-    "model": "lrex_trial.trial",
-    "pk": "41da6ca4-ed5f-4567-9a32-3c6b54e5d7aa",
-    "fields": {
-        "questionnaire": 99,
-        "created": "2020-03-05T10:38:37.713Z",
-        "ended": "2020-03-05T10:39:01.645Z",
-        "subject_id": "Test 3",
-        "is_test": true
-    }
-},
-{
-    "model": "lrex_trial.trial",
-    "pk": "5f2849e1-9fef-4603-be5d-489c49d33361",
-    "fields": {
-        "questionnaire": 101,
-        "created": "2020-03-05T11:16:15.982Z",
-        "ended": null,
-        "subject_id": "Test 5",
-        "is_test": true
-    }
-},
-{
-    "model": "lrex_trial.trial",
-    "pk": "618aa703-bd6b-45ad-a72d-7195c10bfd2f",
-    "fields": {
-        "questionnaire": 100,
-        "created": "2020-03-05T11:14:41.003Z",
-        "ended": "2020-03-05T11:15:02.861Z",
-        "subject_id": "Test 4",
-        "is_test": true
-    }
-},
-{
-    "model": "lrex_trial.trial",
-    "pk": "7eb49620-b22e-4150-a689-2d1899c56de3",
-    "fields": {
-        "questionnaire": 98,
-        "created": "2020-02-19T15:04:42.246Z",
-        "ended": "2020-02-19T15:06:26.179Z",
-        "subject_id": "Test 2",
-        "is_test": true
-    }
-},
-{
-    "model": "lrex_trial.trial",
-    "pk": "918d6d68-6044-4467-bedd-e6143213f32e",
-    "fields": {
-        "questionnaire": 181,
-        "created": "2020-03-05T12:39:46.244Z",
-        "ended": "2020-03-05T12:40:02.299Z",
-        "subject_id": "Test 1",
-        "is_test": true
-    }
-},
-{
-    "model": "lrex_trial.trial",
-    "pk": "a377a9db-d562-4864-b55b-9bdfeed55141",
-    "fields": {
-        "questionnaire": 182,
-        "created": "2020-03-05T12:46:00.772Z",
-        "ended": "2020-03-05T12:46:15.623Z",
-        "subject_id": "Test 2",
-        "is_test": true
-    }
-},
-{
-    "model": "lrex_trial.rating",
-    "pk": 96,
-    "fields": {
-        "trial": "3c429349-8101-4ac2-9d78-db45a869e183",
-        "questionnaire_item": 2113,
-        "question": 0,
-        "scale_value": 35,
-        "comment": null
-    }
-},
-{
-    "model": "lrex_trial.rating",
-    "pk": 97,
-    "fields": {
-        "trial": "3c429349-8101-4ac2-9d78-db45a869e183",
-        "questionnaire_item": 2114,
-        "question": 0,
-        "scale_value": 37,
-        "comment": null
-    }
-},
-{
-    "model": "lrex_trial.rating",
-    "pk": 98,
-    "fields": {
-        "trial": "3c429349-8101-4ac2-9d78-db45a869e183",
-        "questionnaire_item": 2115,
-        "question": 0,
-        "scale_value": 36,
-        "comment": null
-    }
-},
-{
-    "model": "lrex_trial.rating",
-    "pk": 99,
-    "fields": {
-        "trial": "3c429349-8101-4ac2-9d78-db45a869e183",
-        "questionnaire_item": 2116,
-        "question": 0,
-        "scale_value": 38,
-        "comment": null
-    }
-},
-{
-    "model": "lrex_trial.rating",
-    "pk": 100,
-    "fields": {
-        "trial": "3c429349-8101-4ac2-9d78-db45a869e183",
-        "questionnaire_item": 2117,
-        "question": 0,
-        "scale_value": 34,
-        "comment": null
-    }
-},
-{
-    "model": "lrex_trial.rating",
-    "pk": 101,
-    "fields": {
-        "trial": "3c429349-8101-4ac2-9d78-db45a869e183",
-        "questionnaire_item": 2118,
-        "question": 0,
-        "scale_value": 37,
-        "comment": null
-    }
-},
-{
-    "model": "lrex_trial.rating",
-    "pk": 102,
-    "fields": {
-        "trial": "7eb49620-b22e-4150-a689-2d1899c56de3",
-        "questionnaire_item": 2119,
-        "question": 0,
-        "scale_value": 36,
-        "comment": null
-    }
-},
-{
-    "model": "lrex_trial.rating",
-    "pk": 103,
-    "fields": {
-        "trial": "7eb49620-b22e-4150-a689-2d1899c56de3",
-        "questionnaire_item": 2120,
-        "question": 0,
-        "scale_value": 37,
-        "comment": null
-    }
-},
-{
-    "model": "lrex_trial.rating",
-    "pk": 104,
-    "fields": {
-        "trial": "7eb49620-b22e-4150-a689-2d1899c56de3",
-        "questionnaire_item": 2121,
-        "question": 0,
-        "scale_value": 35,
-        "comment": null
-    }
-},
-{
-    "model": "lrex_trial.rating",
-    "pk": 105,
-    "fields": {
-        "trial": "7eb49620-b22e-4150-a689-2d1899c56de3",
-        "questionnaire_item": 2122,
-        "question": 0,
-        "scale_value": 38,
-        "comment": null
-    }
-},
-{
-    "model": "lrex_trial.rating",
-    "pk": 106,
-    "fields": {
-        "trial": "7eb49620-b22e-4150-a689-2d1899c56de3",
-        "questionnaire_item": 2123,
-        "question": 0,
-        "scale_value": 36,
-        "comment": null
-    }
-},
-{
-    "model": "lrex_trial.rating",
-    "pk": 107,
-    "fields": {
-        "trial": "7eb49620-b22e-4150-a689-2d1899c56de3",
-        "questionnaire_item": 2124,
-        "question": 0,
-        "scale_value": 37,
-        "comment": null
-    }
-},
-{
-    "model": "lrex_trial.rating",
-    "pk": 114,
-    "fields": {
-        "trial": "41da6ca4-ed5f-4567-9a32-3c6b54e5d7aa",
-        "questionnaire_item": 2125,
-        "question": 0,
-        "scale_value": 33,
-        "comment": null
-    }
-},
-{
-    "model": "lrex_trial.rating",
-    "pk": 115,
-    "fields": {
-        "trial": "41da6ca4-ed5f-4567-9a32-3c6b54e5d7aa",
-        "questionnaire_item": 2126,
-        "question": 0,
-        "scale_value": 39,
-        "comment": null
-    }
-},
-{
-    "model": "lrex_trial.rating",
-    "pk": 116,
-    "fields": {
-        "trial": "41da6ca4-ed5f-4567-9a32-3c6b54e5d7aa",
-        "questionnaire_item": 2127,
-        "question": 0,
-        "scale_value": 33,
-        "comment": null
-    }
-},
-{
-    "model": "lrex_trial.rating",
-    "pk": 117,
-    "fields": {
-        "trial": "41da6ca4-ed5f-4567-9a32-3c6b54e5d7aa",
-        "questionnaire_item": 2128,
-        "question": 0,
-        "scale_value": 39,
-        "comment": null
-    }
-},
-{
-    "model": "lrex_trial.rating",
-    "pk": 118,
-    "fields": {
-        "trial": "41da6ca4-ed5f-4567-9a32-3c6b54e5d7aa",
-        "questionnaire_item": 2129,
-        "question": 0,
-        "scale_value": 39,
-        "comment": null
-    }
-},
-{
-    "model": "lrex_trial.rating",
-    "pk": 119,
-    "fields": {
-        "trial": "41da6ca4-ed5f-4567-9a32-3c6b54e5d7aa",
-        "questionnaire_item": 2130,
-        "question": 0,
-        "scale_value": 38,
-        "comment": null
-    }
-},
-{
-    "model": "lrex_trial.rating",
-    "pk": 144,
-    "fields": {
-        "trial": "618aa703-bd6b-45ad-a72d-7195c10bfd2f",
-        "questionnaire_item": 2131,
-        "question": 0,
-        "scale_value": 39,
-        "comment": null
-    }
-},
-{
-    "model": "lrex_trial.rating",
-    "pk": 145,
-    "fields": {
-        "trial": "618aa703-bd6b-45ad-a72d-7195c10bfd2f",
-        "questionnaire_item": 2132,
-        "question": 0,
-        "scale_value": 37,
-        "comment": null
-    }
-},
-{
-    "model": "lrex_trial.rating",
-    "pk": 146,
-    "fields": {
-        "trial": "618aa703-bd6b-45ad-a72d-7195c10bfd2f",
-        "questionnaire_item": 2133,
-        "question": 0,
-        "scale_value": 35,
-        "comment": null
-    }
-},
-{
-    "model": "lrex_trial.rating",
-    "pk": 147,
-    "fields": {
-        "trial": "618aa703-bd6b-45ad-a72d-7195c10bfd2f",
-        "questionnaire_item": 2134,
-        "question": 0,
-        "scale_value": 38,
-        "comment": null
-    }
-},
-{
-    "model": "lrex_trial.rating",
-    "pk": 148,
-    "fields": {
-        "trial": "618aa703-bd6b-45ad-a72d-7195c10bfd2f",
-        "questionnaire_item": 2135,
-        "question": 0,
-        "scale_value": 36,
-        "comment": null
-    }
-},
-{
-    "model": "lrex_trial.rating",
-    "pk": 149,
-    "fields": {
-        "trial": "618aa703-bd6b-45ad-a72d-7195c10bfd2f",
-        "questionnaire_item": 2136,
-        "question": 0,
-        "scale_value": 37,
-        "comment": null
-    }
-},
-{
-    "model": "lrex_trial.rating",
-    "pk": 198,
-    "fields": {
-        "trial": "918d6d68-6044-4467-bedd-e6143213f32e",
-        "questionnaire_item": 2855,
-        "question": 0,
-        "scale_value": 67,
-        "comment": null
-    }
-},
-{
-    "model": "lrex_trial.rating",
-    "pk": 199,
-    "fields": {
-        "trial": "918d6d68-6044-4467-bedd-e6143213f32e",
-        "questionnaire_item": 2856,
-        "question": 0,
-        "scale_value": 67,
-        "comment": null
-    }
-},
-{
-    "model": "lrex_trial.rating",
-    "pk": 200,
-    "fields": {
-        "trial": "918d6d68-6044-4467-bedd-e6143213f32e",
-        "questionnaire_item": 2857,
-        "question": 0,
-        "scale_value": 66,
-        "comment": null
-    }
-},
-{
-    "model": "lrex_trial.rating",
-    "pk": 201,
-    "fields": {
-        "trial": "918d6d68-6044-4467-bedd-e6143213f32e",
-        "questionnaire_item": 2858,
-        "question": 0,
-        "scale_value": 66,
-        "comment": null
-    }
-},
-{
-    "model": "lrex_trial.rating",
-    "pk": 202,
-    "fields": {
-        "trial": "a377a9db-d562-4864-b55b-9bdfeed55141",
-        "questionnaire_item": 2859,
-        "question": 0,
-        "scale_value": 66,
-        "comment": "..."
-    }
-},
-{
-    "model": "lrex_trial.rating",
-    "pk": 203,
-    "fields": {
-        "trial": "a377a9db-d562-4864-b55b-9bdfeed55141",
-        "questionnaire_item": 2860,
-        "question": 0,
-        "scale_value": 67,
-        "comment": "..."
-    }
-},
-{
-    "model": "lrex_trial.rating",
-    "pk": 204,
-    "fields": {
-        "trial": "a377a9db-d562-4864-b55b-9bdfeed55141",
-        "questionnaire_item": 2861,
-        "question": 0,
-        "scale_value": 67,
-        "comment": "..."
-    }
-},
-{
-    "model": "lrex_trial.rating",
-    "pk": 205,
-    "fields": {
-        "trial": "a377a9db-d562-4864-b55b-9bdfeed55141",
-        "questionnaire_item": 2862,
-        "question": 0,
-        "scale_value": 66,
-        "comment": "..."
+        "number": 3,
+        "questionnaire": 12,
+        "item": 11,
+        "question_order": null
     }
 }
 ]
