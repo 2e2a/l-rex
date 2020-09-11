@@ -75,6 +75,11 @@
             {% block actions %}{% endblock %}
         </div>
     </div>
+    {% for announcement in announcements %}
+        <div class="alert alert-dark border" role="alert">
+            {{ announcement }}
+        </div>
+    {% endfor %}
     {% for message in messages %}
     <div class="alert {{ message.level_tag|bootstrap_alert_class }} border" role="alert">
         {{ message }}
