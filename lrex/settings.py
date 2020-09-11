@@ -77,6 +77,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'apps.home.context_processors.announcements',
             ],
         },
     },
@@ -167,6 +168,7 @@ DEFAULT_FROM_EMAIL = 'noreply@l-rex.de'
 LREX_VERSION = 0.8
 LREX_CONTACT_MD = 'Please define contact as markdown in local.py'
 LREX_PRIVACY_MD = 'Please define privacy statement as markdown in local.py'
+LREX_ANNOUNCEMENTS = []
 
 # Import local settings
 try:
