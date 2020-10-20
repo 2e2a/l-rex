@@ -41,10 +41,10 @@
     </div>
     {% if short_instructions_rich %}
     <div class="mt-2">
-        <a data-toggle="collapse" href="#Instructions" aria-expanded="false" aria-controls="Instructions">
+        <a data-toggle="collapse" href="#instructions" aria-expanded="false" aria-controls="instructions">
             {{ study.instructions_label }}
         </a>
-        <div class="collapse" id="Instructions">
+        <div class="collapse" id="instructions">
             {{ short_instructions_rich }}
         </div>
     </div>
@@ -59,5 +59,8 @@
         </div>
     </div>
     {% endif %}
+    <div class="mt-4">
+        <span class="mr-2">{{ study.contact_label }}:</span>{{ contact }}
+    </div>
 </div>
 {% endblock %}

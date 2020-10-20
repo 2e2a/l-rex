@@ -13,9 +13,9 @@
         {% if contact_details_rich %}
         {{ contact_details_rich }}
         {% endif %}
-        <h2>{{ study.privacy_statement_label }}</h2>
+        <h2>{{ study.consent_form_label }}</h2>
         <p>
-            {{ privacy_statement_rich }}
+            {{ consent_form_text_rich }}
         </p>
         {% crispy form form.helper %}
     </div>

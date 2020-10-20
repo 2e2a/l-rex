@@ -1,0 +1,77 @@
+{% extends "lrex_home/base.html" %}
+
+{% load static contrib_tags %}
+
+{% block content %}
+<p>Current software version: <code>{{ version }}</code></p>
+
+<h2>Who we are and why we built L-Rex</h2>
+<p>
+    L-Rex is developed by Marta (<a target="_blank" href="https://github.com/gvarab">GitHub profile&#8599;</a>) and
+    Alexej (<a target="_blank" href="https://github.com/2e2a">GitHub profile&#8599;</a>). We have been continuously
+    working on it since February 2019. The idea for L-Rex stems from Marta's work as a linguist with a research focus on
+    acceptability rating experiments. The main motivation is to make setting up this specific kind of experiment
+    quick, easy, and error-proof.
+</p>
+<p>
+    The project is also a great learning experience for us regarding developing and maintaining a free and open-source
+    software project. We hope to provide a useful, accessible and privacy-friendly research tool for everyone
+    working with rating experiments. All functions are available without payment, advertisement or user tracking.
+</p>
+<h2>How is the project funded?</h2>
+<p>
+    We develop L-Rex in our free time and without external funding. This gives us full control of the project
+    and the freedom to focus on aspects important to us.
+</p>
+<p>
+    Currently, this instance of L-Rex is running on our private test server, along with other projects.
+    We are planning to set up a server specifically dedicated to L-Rex soon
+    on the cloud application platform <a target='_blank' href="https://www.heroku.com/">Heroku&#8599;</a>
+    in order to ensure stable service and reliable data storage.
+    We are planning to cover the server and maintenance costs via optional support in the form of donations.
+</p>
+<h2>Acknowledgments</h2>
+<p>The L-Rex project has benefited greatly from contributions and feedback by various people:</p>
+<ul>
+    <li>We thank <a target='_blank' href="http://www.damusp.info/">David Muigg-Spörr&#8599;</a> for comprehensive
+        support and advice regarding the design, and for the L-Rex logo.</li>
+    <li>We thank <a target='_blank' href="http://3c33.de/">Kuba Wierzba&#8599;</a>,
+        <a target='_blank' href="https://github.com/xi">Tobias Bengfort&#8599;</a>, and
+        <a target='_blank' href="https://github.com/kleingeist">Johannes Dillmann&#8599;</a> for feedback
+        on technical implementation, design and usability.</li>
+    <li>We thank Marta's colleagues Mira Grubic, Henry Fominyam, Joseph P. De Veaugh-Geiss, and Radek Šimík for
+        entrusting their research projects to L-Rex at relatively early stages of development, and for giving us
+        valuable feedback and reporting bugs.</li>
+    <li>We also thank Radek Šimík for his help in conceptualizing a predecessor of L-Rex.</li>
+</ul>
+<h2>How to cite L-Rex</h2>
+<p>If you want to cite L-Rex in a publication, you can use a bibliography entry along the following lines:</p>
+<p>
+Alexej Starschenko and Marta Wierzba ({{ year }}). L-Rex: Linguistic rating experiments [software],
+    version {{ version }}, GNU General Public License v3.0, https://github.com/2e2a/l-rex/.
+</p>
+<p>
+If you use Bib(La)TeX, you can use the following entry:
+</p>
+<p>
+<code>
+@Misc{,<br>
+&nbsp;&nbsp;title = &#123;&#123;L-Rex Linguistic rating experiments [software], version {{ version }}&#125;&#125;,<br>
+&nbsp;&nbsp;author = &#123;Alexej Starschenko and Marta Wierzba&#125;,<br>
+&nbsp;&nbsp;year = &#123;{{ year }}&#125;,<br>
+&nbsp;&nbsp;note = &#123;&#123;GNU General Public License v3.0&#125;&#125;,<br>
+&nbsp;&nbsp;url = &#123;https://github.com/2e2a/l-rex/&#125;<br>
+&#125;
+</code>
+</p>
+<div class="d-flex">
+    <div class="mr-2">
+        <img src="{% static 'img/logo.svg' %}" width="30" height="30" alt="Logo">
+    </div>
+    <div>
+        As for the L-Rex logo, you may copy, distribute, display, adapt it for non-commercial purposes if you credit the author:
+        <a target='_blank' href="http://www.damusp.info/">David Muigg-Spörr&#8599;</a>,
+        <a target='_blank' href="https://creativecommons.org/licenses/by-nc/3.0/de/legalcode">CC BY-NC 3.0 de</a>.
+    </div>
+</div>
+{% endblock %}

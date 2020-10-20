@@ -16,7 +16,7 @@ from django.utils.safestring import mark_safe
 from django.utils.timezone import now
 from django.views import generic
 
-from apps.contrib import views as contib_views
+from apps.contrib import views as contrib_views
 from apps.contrib.utils import split_list_string
 
 from . import models
@@ -47,7 +47,7 @@ class WarnUserIfStudyActiveMixin:
         return super().get(request, *args, **kwargs)
 
 
-class DisableFormIfStudyActiveMixin(WarnUserIfStudyActiveMixin, contib_views.DisableFormMixin):
+class DisableFormIfStudyActiveMixin(WarnUserIfStudyActiveMixin, contrib_views.DisableFormMixin):
 
     @property
     def is_disabled(self):
@@ -174,7 +174,7 @@ class ResultsNavMixin:
         return context
 
 
-class StudyListView(LoginRequiredMixin, contib_views.PaginationHelperMixin, generic.ListView):
+class StudyListView(LoginRequiredMixin, contrib_views.PaginationHelperMixin, generic.ListView):
     model = models.Study
     title = 'Studies'
     paginate_by = 16
@@ -186,7 +186,7 @@ class StudyListView(LoginRequiredMixin, contib_views.PaginationHelperMixin, gene
 
     def get(self, request, *args, **kwargs):
         if not hasattr(self.request.user, 'userprofile'):
-            return redirect('user-profile-create')
+            return redirect('user-account-create')
         is_filtered = 'submit' in self.request.GET
         self.sort_by = self.request.GET.get('sort_by', 'date')
         self.show_archived = is_filtered and self.request.GET.get('archived', False)
@@ -296,8 +296,8 @@ class StudyDetailView(
 class StudyDeleteView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
-    contib_views.PaginationHelperMixin,
-    contib_views.DefaultDeleteView
+    contrib_views.PaginationHelperMixin,
+    contrib_views.DefaultDeleteView
 ):
     model = models.Study
     template_name = 'lrex_home/base_confirm_delete.html'
@@ -320,10 +320,10 @@ class StudyArchiveView(
         return reverse('studies')
 
     def get(self, request, *args, **kwargs):
-        if self.study.has_subject_information:
+        if self.study.has_participant_information:
             download_link = (
-                '<a href="{}">download subject information</a>'
-            ).format(reverse('trials-subjects-download', args=[self.study.slug]))
+                '<a href="{}">download participant information</a>'
+            ).format(reverse('trials-participants-download', args=[self.study.slug]))
             msg = 'Please {} first, if needed. It is not included in the archive.'.format(download_link)
             messages.warning(request, mark_safe(msg))
         return super().get(request, *args, **kwargs)
@@ -439,7 +439,7 @@ class StudySettingsView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
     SuccessMessageMixin,
-    contib_views.LeaveWarningMixin,
+    contrib_views.LeaveWarningMixin,
     DisableFormIfStudyActiveMixin,
     SettingsNavMixin,
     generic.UpdateView,
@@ -497,7 +497,7 @@ class StudyLabelsUpdateView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
     SuccessMessageMixin,
-    contib_views.LeaveWarningMixin,
+    contrib_views.LeaveWarningMixin,
     DisableFormIfStudyActiveMixin,
     SettingsNavMixin,
     generic.UpdateView,
@@ -540,14 +540,23 @@ class StudyLabelsUpdateView(
 class StudyShareView(
     StudyMixin,
     CheckStudyCreatorMixin,
-    contib_views.LeaveWarningMixin,
+    contrib_views.LeaveWarningMixin,
     SettingsNavMixin,
     generic.FormView
 ):
     model = models.Study
     title = 'Share the study'
     form_class = forms.SharedWithForm
-    template_name = 'lrex_dashboard/settings_form.html'
+    template_name = 'lrex_study/study_share.html'
+
+    def post(self, request, *args, **kwargs):
+        action = request.POST.get('action', None)
+        if action == 'unsubscribe':
+            self.study.shared_with.remove(request.user)
+            self.study.save()
+            messages.success(request, 'Unsubscribed from shared study.')
+            return redirect('studies')
+        return super().post(request, *args, **kwargs)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -581,7 +590,7 @@ class StudyShareView(
 class QuestionUpdateView(
     StudyMixin,
     CheckStudyCreatorMixin,
-    contib_views.LeaveWarningMixin,
+    contrib_views.LeaveWarningMixin,
     DisableFormIfStudyActiveMixin,
     TasksNavMixin,
     generic.DetailView,
@@ -689,7 +698,7 @@ class StudyInstructionsUpdateView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
     SuccessMessageMixin,
-    contib_views.LeaveWarningMixin,
+    contrib_views.LeaveWarningMixin,
     DisableFormIfStudyActiveMixin,
     TasksNavMixin,
     generic.UpdateView,
@@ -724,7 +733,7 @@ class StudyIntroUpdateView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
     SuccessMessageMixin,
-    contib_views.LeaveWarningMixin,
+    contrib_views.LeaveWarningMixin,
     DisableFormIfStudyActiveMixin,
     TasksNavMixin,
     generic.UpdateView,
@@ -758,7 +767,7 @@ class StudyIntroUpdateView(
 class DemographicsUpdateView(
     StudyMixin,
     CheckStudyCreatorMixin,
-    contib_views.LeaveWarningMixin,
+    contrib_views.LeaveWarningMixin,
     DisableFormIfStudyActiveMixin,
     TasksNavMixin,
     generic.DetailView,
@@ -827,7 +836,7 @@ class StudyContactUpdateView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
     SuccessMessageMixin,
-    contib_views.LeaveWarningMixin,
+    contrib_views.LeaveWarningMixin,
     DisableFormIfStudyActiveMixin,
     PrivacyNavMixin,
     generic.UpdateView,
@@ -855,7 +864,7 @@ class StudyConsentUpdateView(
     StudyObjectMixin,
     CheckStudyCreatorMixin,
     SuccessMessageMixin,
-    contib_views.LeaveWarningMixin,
+    contrib_views.LeaveWarningMixin,
     DisableFormIfStudyActiveMixin,
     PrivacyNavMixin,
     generic.UpdateView,
@@ -863,8 +872,8 @@ class StudyConsentUpdateView(
     model = models.Study
     title = 'Consent form'
     template_name = 'lrex_dashboard/info_form.html'
-    form_class = forms.StudyPrivacyForm
-    success_message = 'Conset form saved.'
+    form_class = forms.StudyConsentForm
+    success_message = 'Consent form saved.'
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -890,7 +899,7 @@ class StudyResultsCSVDownloadView(StudyObjectMixin, CheckStudyCreatorMixin, gene
     model = models.Study
 
     def get(self, request, *args, **kwargs):
-        filename = '{}_RESULTS_{}.csv'.format(self.study.title.replace(' ', '_'), str(now().date()))
+        filename = '{}_RESULTS_{}.csv'.format(self.study.title.replace(' ', '_'), now().strftime('%Y-%m-%d-%H%M'))
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
         self.study.results_csv(response)

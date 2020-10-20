@@ -4,6 +4,7 @@ from django.conf import settings
 from django.shortcuts import render_to_response
 from django.shortcuts import redirect
 from django.utils.safestring import mark_safe
+from django.utils.timezone import now
 from django.views import generic
 from django.views.decorators.csrf import requires_csrf_token
 
@@ -27,7 +28,7 @@ class HomeView(generic.ListView):
 
     def get(self, request, *args, **kwargs):
         if self.request.user.is_authenticated and not hasattr(self.request.user, 'userprofile'):
-            return redirect('user-profile-create')
+            return redirect('user-account-create')
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -41,6 +42,7 @@ class HomeView(generic.ListView):
 
 class ContactView(generic.TemplateView):
     template_name = 'lrex_home/contact.html'
+    title = 'Contact'
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
@@ -50,6 +52,7 @@ class ContactView(generic.TemplateView):
 
 class PrivacyView(generic.TemplateView):
     template_name = 'lrex_home/privacy.html'
+    title = 'Privacy statement'
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
@@ -59,10 +62,25 @@ class PrivacyView(generic.TemplateView):
 
 class HelpView(generic.TemplateView):
     template_name = 'lrex_home/help.html'
+    title = 'Help'
+
+
+class AboutView(generic.TemplateView):
+    template_name = 'lrex_home/about.html'
+    title = 'About'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'version': settings.LREX_VERSION,
+            'year': now().year,
+        })
+        return context
 
 
 class DemoView(generic.TemplateView):
     template_name = 'lrex_home/demo.html'
+    title = 'Demo studies'
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)

@@ -13,21 +13,13 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
+from django.utils.dateformat import format
 from django.utils.timezone import now
 
 from apps.contrib import csv as contrib_csv
 from apps.contrib import math
 from apps.contrib.utils import slugify_unique
-from apps.contrib.datefield import DateField
 from apps.contrib.utils import split_list_string, to_list_string
-
-
-class StudyStatus(Enum):
-    DRAFT = 1
-    STARTED = 2
-    ACTIVE = 3
-    FINISHED = 4
-    ARCHIVED = 5
 
 
 class StudySteps(Enum):
@@ -49,7 +41,7 @@ class Study(models.Model):
     title = models.CharField(
         max_length=100,
         help_text='Give your study a name.',
-        )
+    )
     slug = models.SlugField(
         unique=True,
         max_length=110,
@@ -108,7 +100,7 @@ class Study(models.Model):
         ),
         verbose_name='participant ID'
     )
-    end_date = DateField(
+    end_date = models.DateField(
         blank=True,
         null=True,
         help_text='Set a participation deadline.'
@@ -166,16 +158,16 @@ class Study(models.Model):
                   '(e.g., "This study is part of the research project XY, for more information, see ..."). '
                   'This information will be shown to participants before the study begins.'
     )
-    privacy_statement = MarkdownxField(
+    consent_form_text = MarkdownxField(
         null=True,
         blank=True,
         max_length=5000,
-        help_text='This statement will be shown to the participants before the study begins. '
-                  'It should state whether the study is fully anonymous or not. '
-                  'If you ask for individual IDs or personal data in your study, the privacy '
-                  'statement should include the following information: for what purpose '
-                  'is the ID/personal data collected, how long will the data be stored in non-anonymized '
-                  'form, and who is responsible for data processing?'
+        help_text=(
+            'This text informs participants about the procedure and '
+            'purpose of the study. It will be shown to the participants before the '
+            'study begins. It should include a privacy statement: whether any '
+            'personal data is collected and how it will be processed and stored.'
+        )
     )
     consent_statement = models.CharField(
         max_length=500,
@@ -204,10 +196,10 @@ class Study(models.Model):
         default='Save this page',
         help_text='Label of the button used to save/print the consent form.',
     )
-    privacy_statement_label = models.CharField(
+    consent_form_label = models.CharField(
         max_length=40,
-        default='Privacy statement',
-        help_text='Label for "Privacy statement" used during participation.',
+        default='Consent form',
+        help_text='Label for "Consent form" used during participation.',
     )
     contact_label = models.CharField(
         max_length=40,
@@ -243,6 +235,7 @@ class Study(models.Model):
             'Label used for the participant ID form on the instruction page or for the participation code on the outro '
             'page, depending on the "participant ID" setting.'
         ),
+        verbose_name='Participation ID label',
     )
     password_label = models.CharField(
         max_length=40,
@@ -272,7 +265,7 @@ class Study(models.Model):
         default=False,
         help_text='Enable to finish study participation.',
     )
-    created_date = DateField(
+    created_date = models.DateField(
         default=now,
         editable=False,
     )
@@ -282,6 +275,7 @@ class Study(models.Model):
 
     class Meta:
         ordering = ['-created_date', 'title']
+        verbose_name_plural = 'Studies'
 
     def save(self, *args, **kwargs):
         new_slug = slugify_unique(self.title, Study, self.id)
@@ -289,6 +283,8 @@ class Study(models.Model):
             self.slug = new_slug
             for materials in self.materials.all():
                 materials.save()
+        for questionnaire in self.questionnaires.all():
+            questionnaire.save()
         return super().save(*args, **kwargs)
 
     def __str__(self):
@@ -422,29 +418,30 @@ class Study(models.Model):
 
     def delete_abandoned_trials(self):
         trials_abandoned = [trial for trial in self.trials if trial.is_abandoned]
-        map(lambda trial: trial.delete(), trials_abandoned)
+        for trial in trials_abandoned:
+            trial.delete()
 
     def delete_test_trials(self):
         from apps.trial.models import Trial
         Trial.objects.filter(questionnaire__study=self, is_test=True).delete()
 
     @property
-    def has_subject_information(self):
+    def has_participant_information(self):
         from apps.trial.models import Trial
         return Trial.objects.filter(
             questionnaire__study=self,
+            is_test = False,
         ).exclude(
-            models.Q(subject_id=None) | models.Q(demographics=None)
+            participant_id=None,
+            created=None,
+            ended=None,
+            demographics=None,
         ).exists()
 
-    def delete_subject_information(self):
+    def delete_participant_information(self):
         from apps.trial.models import Trial, DemographicValue
-        Trial.objects.filter(questionnaire__study=self).update(subject_id=None)
+        Trial.objects.filter(questionnaire__study=self).update(participant_id=None, created=None, ended=None)
         DemographicValue.objects.filter(trial__questionnaire__study=self).delete()
-
-    @cached_property
-    def is_rating_possible(self):
-        return self.status == StudyStatus.ACTIVE or self.status == StudyStatus.STARTED
 
     @cached_property
     def is_allowed_create_questionnaires(self):
@@ -458,7 +455,7 @@ class Study(models.Model):
     @cached_property
     def is_allowed_publish(self):
         return (
-            self.questions.exists() and self.instructions and self.intro and self.privacy_statement
+            self.questions.exists() and self.instructions and self.intro and self.consent_form_text
             and self.items_validated and self.questionnaires.exists()
         )
 
@@ -582,18 +579,18 @@ class Study(models.Model):
         self.questionnaire_blocks.all().delete()
 
     @cached_property
-    def contact_html(self):
-        return '<strong>{}</strong>, {}<a href="mailto:{}">{}</a>'.format(
+    def contact(self):
+        return '{}, {}{}'.format(
             self.contact_name,
             '{}, '.format(self.contact_affiliation) if self.contact_affiliation else '',
             self.contact_email,
             self.contact_email,
         )
 
-    def subject_information_csv(self, fileobj):
+    def participant_information_csv(self, fileobj):
         from apps.trial.models import Trial
         writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
-        csv_row = ['Subject', 'ID']
+        csv_row = ['participant', 'id', 'trial start utc', 'trial end utc', 'time taken sec']
         if self.has_demographics:
             csv_row.extend(
                 'demographic{}'.format(i) for i, demographic_field in enumerate(self.demographics.all(), 1)
@@ -603,7 +600,13 @@ class Study(models.Model):
         if self.has_demographics:
             trials = trials.prefetch_related('demographics')
         for i, trial in enumerate(trials, 1):
-            csv_row = [i, trial.subject_id]
+            csv_row = [
+                i,
+                trial.participant_id,
+                format(trial.created, 'Y-m-d H:i:s') if trial.created else '',
+                format(trial.ended, 'Y-m-d H:i:s') if trial.ended else '',
+                trial.time_taken,
+            ]
             if self.has_demographics:
                 csv_row.extend(demographic_value.value for demographic_value in trial.demographics.all())
             writer.writerow(csv_row)
@@ -647,13 +650,13 @@ class Study(models.Model):
         'contact_email',
         'contact_affiliation',
         'contact_details',
-        'privacy_statement',
+        'consent_form_text',
         'consent_statement',
         'intro',
         'outro',
         'continue_label',
         'save_consent_form_label',
-        'privacy_statement_label',
+        'consent_form_label',
         'contact_label',
         'instructions_label',
         'block_instructions_label',
@@ -667,7 +670,6 @@ class Study(models.Model):
     SETTING_BOOL_FIELDS = [
         'use_blocks',
         'pseudo_randomize_question_order',
-        'consent_statement',
     ]
 
     def _read_settings(self, reader):
@@ -720,7 +722,7 @@ class Study(models.Model):
         self.is_finished = False
         self.save()
 
-    def questions_csv_header(self):
+    def questions_csv_header(self, **kwargs):
         return ['question', 'scale_labels', 'legend', 'randomize_scale', 'rating_comment']
 
     def questions_csv(self, fileobj):
@@ -751,7 +753,7 @@ class Study(models.Model):
                 question=row[columns['question']],
                 legend=row[columns['legend']],
                 randomize_scale=(row[columns['randomize_scale']] == 'True'),
-                rating_comment=(row[columns['rating_comment']] == 'True'),
+                rating_comment=row[columns['rating_comment']],
             )
             for i, scale_value in enumerate(split_list_string(row[columns['scale_labels']])):
                 ScaleValue.objects.create(
@@ -761,7 +763,7 @@ class Study(models.Model):
                 )
             question_number += 1
 
-    def materials_csv_header(self):
+    def materials_csv_header(self, **kwargs):
         return ['title', 'list_distribution', 'is_filler', 'is_example', 'block', 'items_validated']
 
     def materials_csv(self, fileobj):
@@ -822,7 +824,7 @@ class Study(models.Model):
             fileobj.seek(0)
             materials.itemlists_csv_create(fileobj, has_materials_column=True)
 
-    def questionnaires_csv_header(self):
+    def questionnaires_csv_header(self, **kwargs):
         return ['questionnaire', 'lists', 'items', 'question_order']
 
     def questionnaires_csv(self, fileobj):
@@ -871,7 +873,7 @@ class Study(models.Model):
                 )
             questionnaire.save()
 
-    def questionnaire_blocks_csv_header(self):
+    def questionnaire_blocks_csv_header(self, **kwargs):
         return ['block', 'randomization', 'instructions', 'short_instructions']
 
     def questionnaire_blocks_csv(self, fileobj):
@@ -929,7 +931,7 @@ class Study(models.Model):
                     archive.writestr(archive_file, file.getvalue())
 
     def archive(self):
-        self.delete_subject_information()
+        self.delete_participant_information()
         self.delete_questionnaires()
         self.materials.all().delete()
         self.questions.all().delete()
@@ -946,11 +948,12 @@ class Study(models.Model):
                         if file_in_archive.endswith(filename_without_num):
                             filename = file_in_archive
                     if filename and restore_func:
-                        with archive.open(archive_file) as file:
-                            text_file = io.TextIOWrapper(file)
+                        with archive.open(archive_file, 'r') as file:
+                            text_file = io.StringIO(file.read().decode())
                             restore_func(text_file)
             except Exception as err:
-                self.delete()
+                if self.id:
+                    self.delete()
                 raise err
 
     @classmethod
@@ -971,7 +974,7 @@ class Study(models.Model):
         StudySteps.STEP_STD_PUBLISH: 'set study status to published to start collecting results',
         StudySteps.STEP_STD_FINISH: 'set study status to finished when done',
         StudySteps.STEP_STD_RESULTS: 'download results',
-        StudySteps.STEP_STD_ANONYMIZE: 'remove subject-ID information when not needed anymore',
+        StudySteps.STEP_STD_ANONYMIZE: 'remove participant information when not needed anymore',
         StudySteps.STEP_STD_ARCHIVE: 'archive the study',
     }
 
@@ -1029,10 +1032,10 @@ class Study(models.Model):
         if self.is_allowed_create_questionnaires and not self.questionnaires.exists():
             self._append_step_info(next_steps, StudySteps.STEP_STD_QUESTIONNAIRES_GENERATE, group)
 
-        group = 'Contact and privacy'
+        group = 'Info and consent'
         if not self.contact_name:
             self._append_step_info(next_steps, StudySteps.STEP_STD_CONTACT_ADD, group)
-        if not self.privacy_statement:
+        if not self.consent_form_text:
             self._append_step_info(next_steps, StudySteps.STEP_STD_CONSENT_ADD, group)
 
         group = 'Dashboard'
@@ -1046,7 +1049,7 @@ class Study(models.Model):
         if self.is_finished:
             if self.trial_count_finished > 0:
                 self._append_step_info(next_steps, StudySteps.STEP_STD_RESULTS, group)
-            if self.has_subject_information:
+            if self.has_participant_information:
                 self._append_step_info(next_steps, StudySteps.STEP_STD_ANONYMIZE, group)
 
         group = 'Settings'

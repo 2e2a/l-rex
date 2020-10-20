@@ -15,8 +15,8 @@ class Item(models.Model):
         help_text='Number of the item.',
     )
     condition = models.CharField(
-        max_length=8,
-        help_text='Condition of the item (character limit: 8).',
+        max_length=16,
+        help_text='Condition of the item (character limit: 16).',
     )
     materials = models.ForeignKey(
         'lrex_materials.Materials',
@@ -124,7 +124,7 @@ class ItemList(models.Model):
         ordering = ['materials', 'number']
 
     def __str__(self):
-        return '{} {}'.format(self.materials, self.number)
+        return '{}-{}'.format(self.materials, self.number)
 
     def next(self):
         next_list =  self.materials.lists.filter(pk__gt=self.pk).first()

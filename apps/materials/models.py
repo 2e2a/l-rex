@@ -67,6 +67,7 @@ class Materials(models.Model):
 
     class Meta:
         ordering = ['study', 'title']
+        verbose_name_plural = 'Materials'
 
     def save(self, *args, **kwargs):
         slug = '{}--{}'.format(self.study.slug, self.title)
@@ -94,7 +95,6 @@ class Materials(models.Model):
                 self.items.filter(number__lt=item.number).count() +
                 self.items.filter(number=item.number, condition__lte=item.condition).count()
         )
-
 
     @cached_property
     def conditions(self):
@@ -285,9 +285,9 @@ class Materials(models.Model):
         )
         results = {}
         for rating in ratings:
-            subject = rating.trial.number
+            participant = rating.trial.number
             item = rating.questionnaire_item.item
-            key = '{:03d}-{:02d}{}'.format(subject, item.number, item.condition)
+            key = '{:03d}-{:03d}{}'.format(participant, item.number, item.condition)
             if key in results:
                 row = results[key]
                 row['questions'].append(rating.question)
@@ -296,7 +296,7 @@ class Materials(models.Model):
                 row['comments'].append(rating.comment)
             else:
                 row = {
-                    'subject': subject,
+                    'participant': participant,
                     'item': item.number,
                     'condition': item.condition,
                     'position': rating.questionnaire_item.number + 1,
@@ -352,29 +352,30 @@ class Materials(models.Model):
     def aggregated_results(self, columns):
         aggregated_results = []
         results = self.results()
-        if columns == ['subject']:
+        if columns == ['participant']:
             group_function = lambda result: str(result['item']) + result['condition']
-            key_function = lambda result: '{:02d}{}'.format(result['item'], result['condition'])
+            key_function = lambda result: '{:03d}{}'.format(result['item'], result['condition'])
             aggregated_results = self._aggregated_results(results, group_function, key_function)
         elif columns == ['item']:
-            group_function = lambda result: str(result['subject']) + result['condition']
-            key_function = lambda result: '{:03d}-{}'.format(result['subject'], result['condition'])
+            group_function = lambda result: str(result['participant']) + result['condition']
+            key_function = lambda result: '{:03d}-{}'.format(result['participant'], result['condition'])
             aggregated_results = self._aggregated_results(results, group_function, key_function)
-        elif columns == ['subject', 'item']:
+        elif columns == ['participant', 'item']:
             group_function = lambda result: result['condition']
-            key_function = lambda result: '{:03d}-{:02d}'.format(result['subject'], result['item'])
+            key_function = lambda result: '{:03d}-{:03d}'.format(result['participant'], result['item'])
             aggregated_results = self._aggregated_results(results, group_function, key_function)
         return aggregated_results
 
-    def items_csv_header(self, add_materials_column=False):
+    def items_csv_header(self, add_materials_column=False, zero_index=False):
         csv_row = ['materials'] if add_materials_column else []
         csv_row.extend(['item', 'condition', 'content', 'block'])
         if self.study.has_audiolink_items:
             csv_row.append('audio_description')
         for question in self.study.questions.all():
-            csv_row.append('question{}'.format(question.number + 1))
-            csv_row.append('scale{}'.format(question.number + 1))
-            csv_row.append('legend{}'.format(question.number + 1))
+            question_number  = question.number if zero_index else question.number +1
+            csv_row.append('question{}'.format(question_number))
+            csv_row.append('scale{}'.format(question_number))
+            csv_row.append('legend{}'.format(question_number))
         return csv_row
 
     def items_csv(self, fileobj, add_header=True, add_materials_column=False):
@@ -454,39 +455,42 @@ class Materials(models.Model):
             custom_question_column = any(
                 'question{}'.format(question.number) in columns for question in self.study.questions.all()
             )
-            if custom_question_column:
+            custom_scale_column = any(
+                'scale{}'.format(question.number) in columns for question in self.study.questions.all()
+            )
+            if custom_question_column or custom_scale_column:
                 for question in self.study.questions.all():
                     question_column = 'question{}'.format(question.number)
-                    if question_column in columns:
-                        item_question_question = row[columns[question_column]]
-                        if item_question_question:
-                            scale_labels_column = 'scale{}'.format(question.number)
-                            legend_column = 'legend{}'.format(question.number)
-                            scale_labels = row[columns[scale_labels_column]] if scale_labels_column in columns else None
-                            legend = row[columns[legend_column]] if legend_column in columns else None
-                            item_question = item_models.ItemQuestion.objects.filter(
-                                item=item, number=question.number
-                            ).first()
-                            if item_question:
-                                item_question.question = item_question_question
-                                item_question.scale_labels = scale_labels
-                                item_question.legend = legend
-                                item_question.save()
-                            else:
-                                item_models.ItemQuestion.objects.create(
-                                    item=item,
-                                    number=question.number,
-                                    question=item_question_question,
-                                    scale_labels=scale_labels,
-                                    legend=legend,
-                                )
+                    scale_labels_column = 'scale{}'.format(question.number)
+                    legend_column = 'legend{}'.format(question.number)
+                    item_question_question = (
+                        row[columns[question_column]] if question_column in columns else question.question
+                    )
+                    scale_labels = row[columns[scale_labels_column]] if scale_labels_column in columns else None
+                    legend = row[columns[legend_column]] if legend_column in columns else None
+                    item_question = item_models.ItemQuestion.objects.filter(
+                        item=item, number=question.number
+                    ).first()
+                    if item_question:
+                        item_question.question = item_question_question
+                        item_question.scale_labels = scale_labels
+                        item_question.legend = legend
+                        item_question.save()
+                    else:
+                        item_models.ItemQuestion.objects.create(
+                            item=item,
+                            number=question.number,
+                            question=item_question_question,
+                            scale_labels=scale_labels,
+                            legend=legend,
+                        )
 
         if new_items or items_to_delete and self.is_complete:
             self.delete_lists()
         for item in items_to_delete:
             item.delete()
 
-    def item_feedbacks_csv_header(self, add_materials_column=False):
+    def item_feedbacks_csv_header(self, add_materials_column=False, **kwargs):
         csv_row = ['materials'] if add_materials_column else []
         csv_row.extend(['item_number', 'item_condition', 'question', 'scale_values', 'feedback'])
         return csv_row
@@ -534,7 +538,7 @@ class Materials(models.Model):
                 feedback=feedback
             )
 
-    def itemlists_csv_header(self, add_materials_column=False):
+    def itemlists_csv_header(self, add_materials_column=False, **kwargs):
         csv_row = ['materials'] if add_materials_column else []
         csv_row.extend(['list', 'items'])
         return csv_row
@@ -571,7 +575,7 @@ class Materials(models.Model):
             itemlist.items.set(items)
 
     def results_csv_header(self):
-        csv_row = ['materials', 'subject', 'item', 'condition', 'position']
+        csv_row = ['materials', 'participant', 'item', 'condition', 'position']
         if self.study.pseudo_randomize_question_order:
             csv_row.append('question order')
         if self.study.has_question_with_random_scale:
@@ -588,7 +592,7 @@ class Materials(models.Model):
         writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
         results = self.results()
         for result in results:
-            csv_row = [self.title, result['subject'], result['item'], result['condition'], result['position']]
+            csv_row = [self.title, result['participant'], result['item'], result['condition'], result['position']]
             if self.study.pseudo_randomize_question_order:
                 csv_row.append(result['question_order'])
             if self.study.has_question_with_random_scale:

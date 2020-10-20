@@ -8,7 +8,10 @@ from apps.contrib.utils import slugify_unique
 
 
 class News(models.Model):
-    slug = models.SlugField(unique=True, max_length=210)
+    slug = models.SlugField(
+        unique=True,
+        max_length=210,
+    )
     title = models.CharField(
         max_length=200,
     )
@@ -21,6 +24,7 @@ class News(models.Model):
 
     class Meta:
         ordering = ['-date']
+        verbose_name_plural = 'News'
 
     def save(self, *args, **kwargs):
         new_slug = slugify_unique(self.title, News, self.id)

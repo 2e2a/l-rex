@@ -80,7 +80,10 @@ def detect_dialect(data, form_cleaned_data, int_column_names=None, user_delimite
             if rows_valid:
                 has_header = _has_header(first_row, int_columns)
                 return delimiter, csv.QUOTE_MINIMAL, has_header
-        raise forms.ValidationError('Unsupported CSV format.')
+        error = (
+            'Failed to detect CSV format. Unsupported CSV format or invalid entries in the first {} rows.'
+        ).format(SNIFF_ROWS)
+        raise forms.ValidationError(error)
     except (UnicodeDecodeError, TypeError):
         raise forms.ValidationError(
             'Unsupported file encoding or format. Use UTF-8 or Latin-1 and check the CSV for errors.'
@@ -93,6 +96,6 @@ def csv_columns(header_func, user_columns=None, **kwargs):
     if user_columns:
         columns = user_columns
     else:
-        header = header_func(**kwargs)
+        header = header_func(zero_index=True, **kwargs)
         columns = {column: i for i, column in enumerate(header)}
     return columns

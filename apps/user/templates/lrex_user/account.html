@@ -1,0 +1,7 @@
+{% extends "lrex_home/base.html" %}
+
+{% block content %}
+    {% include 'lrex_contrib/crispy_form.html' %}
+    <p><a href="{% url 'account_change_password' %}">Change password</a></p>
+    <p><a href="{% url 'user-account-delete' %}">Delete account</a></p>
+{% endblock %}

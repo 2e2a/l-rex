@@ -1,10 +1,8 @@
+from django.db.models import TextField
 from django.contrib import admin
 
+from apps.contrib.admin import MarkdownxAdminWidget
 from . import models
-
-
-class QuestionnaireItemInline(admin.TabularInline):
-    model = models.QuestionnaireItem
 
 
 @admin.register(models.Questionnaire)
@@ -18,9 +16,17 @@ class QuestionnaireAdmin(admin.ModelAdmin):
     search_fields = (
         'study__title',
     )
-    inlines = [
-        QuestionnaireItemInline,
-    ]
+    fields = (
+        'slug',
+        'number',
+        'study',
+        'item_lists',
+    )
+    readonly_fields = fields
+    ordering = (
+        'study',
+        'number',
+    )
 
 
 @admin.register(models.QuestionnaireBlock)
@@ -32,19 +38,110 @@ class QuestionnaireBlockAdmin(admin.ModelAdmin):
         'randomization'
     )
     list_per_page = 32
+    readonly_fields = (
+        'study',
+    )
     search_fields = (
         'study__title',
     )
+    ordering = (
+        'study',
+        'block',
+    )
+    formfield_overrides = {
+        TextField: {'widget': MarkdownxAdminWidget},
+    }
 
 
-class RatingInline(admin.TabularInline):
-    model = models.Rating
+class QuestionPropertyAdmin(admin.TabularInline):
+    model = models.QuestionProperty
+    fields = (
+        'number',
+        'scale_order',
+    )
     readonly_fields = (
+        'number',
+    )
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(models.QuestionnaireItem)
+class QuestionnaireItemAdmin(admin.ModelAdmin):
+    date_hierarchy = 'questionnaire__study__created_date'
+    list_display = (
+        'number',
+        'questionnaire',
+        'study',
+    )
+    list_per_page = 32
+    ordering = (
+        'questionnaire__study',
+        'questionnaire',
+        'number'
+    )
+    search_fields = (
+        'questionnaire__study__title',
+    )
+    fields = (
+        'number',
+        'questionnaire',
+        'item_materials',
+        'item',
+        'question_order',
+    )
+    readonly_fields = (
+        'number',
+        'questionnaire',
+        'item_materials',
+        'item',
+    )
+    inlines = (
+        QuestionPropertyAdmin,
+    )
+
+    def study(self, obj):
+        return obj.questionnaire.study
+    study.admin_order_field = 'questionnaire__study'
+
+    def item_materials(self, obj):
+        return obj.item.materials
+
+
+class RatingInlineAdmin(admin.TabularInline):
+    model = models.Rating
+    fields = (
+        'created',
+        'scale_value',
         'trial',
         'questionnaire_item',
         'question',
+        'comment',
     )
-    can_delete = False
+    ordering = (
+        'created',
+    )
+    readonly_fields = fields
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+class DemographicsValueInlineAdmin(admin.TabularInline):
+    model = models.DemographicValue
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(models.Trial)
@@ -57,39 +154,27 @@ class TrialAdmin(admin.ModelAdmin):
         'created',
     )
     list_per_page = 32
+    ordering = (
+        'questionnaire__study',
+        'created',
+    )
+    fields = (
+        'slug',
+        'questionnaire',
+        'created',
+        'ended',
+        'participant_id',
+        'is_test',
+    )
+    readonly_fields = fields
     search_fields = (
         'questionnaire__study__title',
     )
     inlines = [
-        RatingInline,
+        RatingInlineAdmin,
+        DemographicsValueInlineAdmin,
     ]
 
     def study(self, obj):
         return obj.questionnaire.study
-
-
-@admin.register(models.Rating)
-class RatingAdmin(admin.ModelAdmin):
-    date_hierarchy = 'trial__questionnaire__study__created_date'
-    list_display = (
-        'pk',
-        'study',
-        'trial',
-        'questionnaire_item',
-        'question',
-    )
-    readonly_fields = (
-        'trial',
-        'questionnaire_item',
-        'question',
-    )
-    list_per_page = 32
-    search_fields = (
-        'trial__questionnaire__study__title',
-    )
-
-    def questionnare(self, obj):
-        return obj.trial.questionnaire
-
-    def study(self, obj):
-        return self.questionnare(obj).study
+    study.admin_order_field = 'questionnaire__study'

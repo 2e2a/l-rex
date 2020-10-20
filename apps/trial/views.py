@@ -375,9 +375,9 @@ class TrialListView(
     paginate_by = 16
 
     def get(self, request, *args, **kwargs):
-        if self.study.has_subject_information:
+        if self.study.has_participant_information:
             message = (
-                'Please remove the subject information when not needed anymore to reduce the stored personal data.'
+                'Please remove the participant information when not needed anymore to reduce the stored personal data.'
             )
             messages.warning(request, message)
         return super().get(request, *args, **kwargs)
@@ -397,21 +397,21 @@ class TrialListView(
         return super().get_queryset().filter(questionnaire__study=self.study)
 
 
-class TrialDownloadSubjectsView(
+class TrialDownloadParticipantsView(
     study_views.StudyMixin,
     study_views.CheckStudyCreatorMixin,
     generic.View,
 ):
 
     def get(self, request, *args, **kwargs):
-        filename = '{}_SUBJECTS_{}.csv'.format(self.study.title.replace(' ', '_'), str(now().date()))
+        filename = '{}_PARTICIPANTS_{}.csv'.format(self.study.title.replace(' ', '_'), str(now().date()))
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
-        self.study.subject_information_csv(response)
+        self.study.participant_information_csv(response)
         return response
 
 
-class TrialDeleteSubjectsView(
+class TrialDeleteParticipantsView(
     study_views.StudyMixin,
     study_views.CheckStudyCreatorMixin,
     study_views.ResultsNavMixin,
@@ -419,14 +419,14 @@ class TrialDeleteSubjectsView(
 ):
     title = 'Confirm deletion'
     template_name = 'lrex_dashboard/results_confirm_delete.html'
-    message = 'Delete subject information?'
+    message = 'Delete participant information? This includes participant IDs, demographic data and participation times.'
 
     def get_success_url(self):
         return reverse('trials', args=[self.study.slug])
 
     def post(self, request, *args, **kwargs):
-        self.study.delete_subject_information()
-        messages.success(request, 'Subject information deleted.')
+        self.study.delete_participant_information()
+        messages.success(request, 'Participant information deleted.')
         return redirect(self.get_success_url())
 
 
@@ -487,15 +487,14 @@ class TrialIntroView(study_views.StudyMixin, TestTrialMixin, generic.FormView):
         return kwargs
 
     def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-        if self.study.intro:
-            data['intro_rich'] = mark_safe(markdownify(self.study.intro))
-        data['privacy_statement_rich'] = mark_safe(markdownify(self.study.privacy_statement))
-        data['contact'] = mark_safe(self.study.contact_html)
-        if self.study.contact_details:
-            data['contact_details_rich'] = mark_safe(markdownify(self.study.contact_details))
-        data['is_test'] = self.is_test_trial
-        return data
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'intro_rich': mark_safe(markdownify(self.study.intro)),
+            'consent_form_text_rich': mark_safe(markdownify(self.study.consent_form_text)),
+            'contact': mark_safe(self.study.contact),
+            'contact_details_rich': mark_safe(markdownify(self.study.contact_details)) if self.study.contact_details else None,
+        })
+        return context
 
     def get_success_url(self):
         return self.test_url(reverse('trial-create', args=[self.study.slug]))
@@ -513,19 +512,19 @@ class TrialCreateView(study_views.StudyMixin, TestTrialMixin, generic.CreateView
     def _trial_by_id(self, id):
         if id:
             try:
-                return models.Trial.objects.get(questionnaire__study=self.study, subject_id=id)
+                return models.Trial.objects.get(questionnaire__study=self.study, participant_id=id)
             except models.Trial.DoesNotExist:
                 pass
         return None
 
     def form_valid(self, form):
-        active_trial = self._trial_by_id(form.instance.subject_id)
+        active_trial = self._trial_by_id(form.instance.participant_id)
         if active_trial:
             active_trial_url = reverse('ratings-create', args=[active_trial.slug, 0])
             return redirect(active_trial_url)
         if self.is_test_trial:
-            if not form.instance.subject_id:
-                form.instance.subject_id = 'Test'
+            if not form.instance.participant_id:
+                form.instance.participant_id = 'Test'
             form.instance.is_test = True
         form.instance.init(self.study)
         return super().form_valid(form)
@@ -606,28 +605,9 @@ class TrialDeleteView(
 class TrialHomeView(study_views.StudyMixin, generic.TemplateView):
     template_name = 'lrex_trial/trial_home.html'
 
-
-class TrialPrivacyStatementView(study_views.StudyMixin, generic.TemplateView):
-    template_name = 'lrex_trial/trial_privacy.html'
-
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        if self.study.privacy_statement:
-            data['privacy_statement_trial_rich'] = mark_safe(markdownify(self.study.privacy_statement))
-        data['privacy_statement_lrex_rich'] = mark_safe(markdownify(settings.LREX_PRIVACY_MD))
-        return data
-
-
-class TrialContactView(study_views.StudyMixin, generic.TemplateView):
-    template_name = 'lrex_trial/trial_contact.html'
-
-    def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-        if self.study.contact_name:
-            data['contact'] = mark_safe(self.study.contact_html)
-        if self.study.contact_details:
-            data['contact_details_rich'] = mark_safe(markdownify(self.study.contact_details))
-        data['contact_lrex_rich'] = mark_safe(markdownify(settings.LREX_CONTACT_MD))
+        data['privacy_statement_rich'] = mark_safe(markdownify(settings.LREX_PRIVACY_MD))
         return data
 
 
@@ -727,6 +707,9 @@ class RatingsCreateView(ProgressMixin, TestTrialMixin, TrialMixin, generic.Templ
             }
         )
         context = super().get_context_data(**kwargs)
+        context.update({
+            'contact': mark_safe(self.study.contact)
+        })
         if self.study.short_instructions:
             context['short_instructions_rich'] = mark_safe(markdownify(self.study.short_instructions))
         if self.study.use_blocks and self.trial.current_block.short_instructions:
@@ -816,7 +799,7 @@ class RatingOutroView(TrialMixin, TestTrialMixin, generic.TemplateView):
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         if self.study.participant_id == self.study.PARTICIPANT_ID_RANDOM:
-            data['subject_id'] = self.trial.subject_id
+            data['participant_id'] = self.trial.participant_id
         data['outro_rich'] = mark_safe(markdownify(self.study.outro))
         return data
 

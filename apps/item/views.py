@@ -498,7 +498,7 @@ class ItemFeedbackUpdateView(
             scale_values_valid = True
             n_instances = len(instances)
             for i, instance in enumerate(instances):
-                scale_values = split_list_string(instance.scale_values.all())
+                scale_values = split_list_string(instance.scale_values)
                 if not all(instance.question.is_valid_scale_value(scale_value) for scale_value in scale_values):
                     form_num = n_forms - n_instances
                     self.formset._errors[form_num]['scale_values'] = \

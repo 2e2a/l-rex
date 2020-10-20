@@ -12,5 +12,10 @@ class MaterialsAdmin(admin.ModelAdmin):
     )
     list_per_page = 32
     search_fields = (
+        'title',
         'study__title',
+    )
+    readonly_fields = (
+        'slug',
+        'study',
     )

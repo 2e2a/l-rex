@@ -167,7 +167,7 @@ class ItemUploadForm(contrib_forms.CSVUploadForm):
             assert len(row) >= min_columns
             int(row[cleaned_data['number_column'] - 1])
             assert row[cleaned_data['condition_column'] - 1]
-            assert len(row[cleaned_data['condition_column'] - 1]) < 8
+            assert len(row[cleaned_data['condition_column'] - 1]) <= 16
             assert row[cleaned_data['content_column'] - 1]
             if self.study.has_audiolink_items:
                 validate_urls(row[cleaned_data['content_column'] - 1])
@@ -194,9 +194,12 @@ class ItemQuestionForm(contrib_forms.OptionalLabelMixin, forms.ModelForm):
 
     class Meta:
         model = models.ItemQuestion
-        fields = ['question', 'scale_labels', 'legend']
+        fields = ['question', 'scale_labels', 'legend', 'number']
         field_classes = {
             'scale_labels': contrib_forms.ListField,
+        }
+        widgets = {
+            'number': forms.HiddenInput()
         }
 
 
@@ -221,6 +224,7 @@ def initialize_with_questions(itemquestion_formset, questions):
         question = get_question(i, questions)
         if not form['question'].initial:
             form['question'].initial = question.question
+            form['number'].initial = i
             form['scale_labels'].initial = question.scale_labels
             form['legend'].initial = question.legend
 
