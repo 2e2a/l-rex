@@ -18,7 +18,6 @@ ALLOWED_HOSTS = [
     'l-rex.herokuapp.com',
 ]
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -90,8 +89,6 @@ ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
 ACCOUNT_FORMS = {'signup': 'apps.home.forms.FixedAutofocusSignupForm'}
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
 
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
@@ -135,7 +132,13 @@ SECURE_SSL_REDIRECT = True
 # server settings
 SITE_ID = 1
 ADMINS = []
-DEFAULT_FROM_EMAIL = 'lrex@localhost'
+DEFAULT_FROM_EMAIL = 'support@l-rex.de'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = 465
+EMAIL_HOST_USER = os.getenv('EMAIL_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PASSWORD')
+EMAIL_USE_SSL = True
 
 # lrex
 LREX_VERSION = 'beta'
