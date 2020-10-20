@@ -1,4 +1,3 @@
-import re
 import csv
 from io import StringIO
 from crispy_forms.helper import FormHelper

@@ -15,7 +15,6 @@ from django.urls import reverse
 from django.utils.functional import cached_property
 from django.utils import timezone
 
-from apps.materials import models as materials_models
 from apps.item import models as item_models
 from apps.study import models as study_models
 

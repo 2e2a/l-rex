@@ -22,14 +22,6 @@ from apps.contrib.utils import slugify_unique
 from apps.contrib.utils import split_list_string, to_list_string
 
 
-class StudyStatus(Enum):
-    DRAFT = 1
-    STARTED = 2
-    ACTIVE = 3
-    FINISHED = 4
-    ARCHIVED = 5
-
-
 class StudySteps(Enum):
     STEP_STD_QUESTION_CREATE = 1
     STEP_STD_INSTRUCTIONS_EDIT = 2
@@ -283,6 +275,7 @@ class Study(models.Model):
 
     class Meta:
         ordering = ['-created_date', 'title']
+        verbose_name_plural = 'Studies'
 
     def save(self, *args, **kwargs):
         new_slug = slugify_unique(self.title, Study, self.id)
@@ -449,10 +442,6 @@ class Study(models.Model):
         from apps.trial.models import Trial, DemographicValue
         Trial.objects.filter(questionnaire__study=self).update(participant_id=None, created=None, ended=None)
         DemographicValue.objects.filter(trial__questionnaire__study=self).delete()
-
-    @cached_property
-    def is_rating_possible(self):
-        return self.status == StudyStatus.ACTIVE or self.status == StudyStatus.STARTED
 
     @cached_property
     def is_allowed_create_questionnaires(self):

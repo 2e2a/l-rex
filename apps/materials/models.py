@@ -67,6 +67,7 @@ class Materials(models.Model):
 
     class Meta:
         ordering = ['study', 'title']
+        verbose_name_plural = 'Materials'
 
     def save(self, *args, **kwargs):
         slug = '{}--{}'.format(self.study.slug, self.title)
@@ -94,7 +95,6 @@ class Materials(models.Model):
                 self.items.filter(number__lt=item.number).count() +
                 self.items.filter(number=item.number, condition__lte=item.condition).count()
         )
-
 
     @cached_property
     def conditions(self):

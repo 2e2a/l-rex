@@ -124,7 +124,7 @@ class ItemList(models.Model):
         ordering = ['materials', 'number']
 
     def __str__(self):
-        return '{} {}'.format(self.materials, self.number)
+        return '{}-{}'.format(self.materials, self.number)
 
     def next(self):
         next_list =  self.materials.lists.filter(pk__gt=self.pk).first()
