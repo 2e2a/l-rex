@@ -7,9 +7,9 @@
       Aggregated by: {% for x in aggregate_by %}{{ x }}{% if not forloop.last %}+{% endif %}{% endfor %}
   </button>
   <div class="dropdown-menu" aria-labelledby="dropdownAggregate">
-      <a class="dropdown-item" href="?aggregate_by=participant,item">participant+item</a>
-      <a class="dropdown-item" href="?aggregate_by=participant">participant</a>
-      <a class="dropdown-item" href="?aggregate_by=item">item</a>
+      <a class="dropdown-item" href="?aggregate_by=condition">condition</a>
+      <a class="dropdown-item" href="?aggregate_by=item,condition">item+condition</a>
+      <a class="dropdown-item" href="?aggregate_by=participant,condition">participant+condition</a>
   </div>
 </div>
 {% endblock %}
@@ -28,9 +28,9 @@
 </tr>
 {% endif %}
 <tr>
-    {% if 'participant' not in aggregate_by %}<th scope="col">Participant</th>{% endif %}
-    {% if 'item' not in aggregate_by %}<th scope="col">Item</th>{% endif %}
-    {% if 'condition' not in aggregate_by %}<th scope="col">Condition</th>{% endif %}
+    {% if 'participant' in aggregate_by %}<th scope="col">Participant</th>{% endif %}
+    {% if 'item' in aggregate_by %}<th scope="col">Item</th>{% endif %}
+    {% if 'condition' in aggregate_by %}<th scope="col">Condition</th>{% endif %}
     <th scope="col">N</th>
     {% for question in study.questions.all %}
         {% for scale_value in question.scale_values.all %}
@@ -42,9 +42,9 @@
 <tbody>
 {% for row in results %}
 <tr>
-    {% if 'participant' not in aggregate_by %}<td>{{ row.participant }}</td>{% endif %}
-    {% if 'item' not in aggregate_by %}<td>{{ row.item }}</td>{% endif %}
-    {% if 'condition' not in aggregate_by %}<td>{{ row.condition }}</td>{% endif %}
+    {% if 'participant' in aggregate_by %}<td>{{ row.participant }}</td>{% endif %}
+    {% if 'item' in aggregate_by %}<td>{{ row.item }}</td>{% endif %}
+    {% if 'condition' in aggregate_by %}<td>{{ row.condition }}</td>{% endif %}
     <td>{{ row.rating_count }}</td>
     {% for rating in row.scale_ratings_flat %}
     <td class="table-primary">{{ rating|floatformat:2 }}</td>

@@ -149,8 +149,8 @@ class MaterialsResultsView(
 ):
     model = models.Materials
     template_name = 'lrex_materials/materials_results.html'
-    aggregate_by = ['participant', 'item']
-    aggregate_by_par = 'participant,item'
+    aggregate_by = ['condition']
+    aggregate_by_par = 'condition'
     page = 1
     paginate_by = 16
     title = 'Materials result summery'
@@ -163,6 +163,8 @@ class MaterialsResultsView(
 
     def _aggregated_results(self):
         results = self.object.aggregated_results(self.aggregate_by)
+        print(self.aggregate_by)
+        print(results)
         paginator = Paginator(results, self.paginate_by)
         results_on_page = paginator.get_page(self.page)
         return results_on_page
