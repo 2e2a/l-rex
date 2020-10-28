@@ -77,7 +77,6 @@ class StudySettingsForm(contrib_forms.CrispyModelForm):
         widgets = {
             'item_type': forms.RadioSelect(),
             'participant_id': forms.RadioSelect(),
-            'end_date': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date'}),
         }
 
     def __init__(self, *args, **kwargs):

@@ -19,6 +19,7 @@ from django.utils.timezone import now
 from apps.contrib import csv as contrib_csv
 from apps.contrib import math
 from apps.contrib.utils import slugify_unique
+from apps.contrib.datefield import DateField
 from apps.contrib.utils import split_list_string, to_list_string
 
 
@@ -108,7 +109,7 @@ class Study(models.Model):
         ),
         verbose_name='participant ID'
     )
-    end_date = models.DateField(
+    end_date = DateField(
         blank=True,
         null=True,
         help_text='Set a participation deadline.'
@@ -273,7 +274,7 @@ class Study(models.Model):
         default=False,
         help_text='Enable to finish study participation.',
     )
-    created_date = models.DateField(
+    created_date = DateField(
         default=now,
         editable=False,
     )
