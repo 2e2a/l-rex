@@ -397,7 +397,7 @@ class TrialListView(
         return super().get_queryset().filter(questionnaire__study=self.study)
 
 
-class TrialDownloadParticipantsView(
+class TrialParticipantsCSVDownloadView(
     study_views.StudyMixin,
     study_views.CheckStudyCreatorMixin,
     generic.View,
