@@ -404,7 +404,7 @@ class TrialParticipantsCSVDownloadView(
 ):
 
     def get(self, request, *args, **kwargs):
-        filename = '{}_PARTICIPANTS_{}.csv'.format(self.study.title.replace(' ', '_'), str(now().date()))
+        filename = '{}_PARTICIPANTS_{}.csv'.format(self.study.title.replace(' ', '_'), now().strftime('%Y-%m-%d-%H%M'))
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
         self.study.participant_information_csv(response)
