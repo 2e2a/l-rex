@@ -617,10 +617,9 @@ class ProgressMixin:
         num = kwargs['num']
         count = kwargs['n_trial_items']
         data = super().get_context_data(**kwargs)
-        i = num + 1
-        data['progress_i'] =  i
+        data['progress_i'] = num
         data['progress_count'] = count
-        data['progress'] = i * 100 / (count + 1)
+        data['progress'] = num * 100 / count
         return data
 
 
