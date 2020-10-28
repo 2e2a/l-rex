@@ -352,17 +352,17 @@ class Materials(models.Model):
     def aggregated_results(self, columns):
         aggregated_results = []
         results = self.results()
-        if columns == ['participant']:
+        if columns == ['item', 'condition']:
             group_function = lambda result: str(result['item']) + result['condition']
-            key_function = lambda result: '{:03d}{}'.format(result['item'], result['condition'])
+            key_function = lambda result: '{:03d}-{}'.format(result['item'], result['condition'])
             aggregated_results = self._aggregated_results(results, group_function, key_function)
-        elif columns == ['item']:
+        elif columns == ['participant', 'condition']:
             group_function = lambda result: str(result['participant']) + result['condition']
             key_function = lambda result: '{:03d}-{}'.format(result['participant'], result['condition'])
             aggregated_results = self._aggregated_results(results, group_function, key_function)
-        elif columns == ['participant', 'item']:
+        elif columns == ['condition']:
             group_function = lambda result: result['condition']
-            key_function = lambda result: '{:03d}-{:03d}'.format(result['participant'], result['item'])
+            key_function = lambda result: '{}'.format(result['condition'])
             aggregated_results = self._aggregated_results(results, group_function, key_function)
         return aggregated_results
 
