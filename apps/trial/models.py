@@ -457,9 +457,12 @@ class Trial(models.Model):
     @property
     def is_abandoned(self):
         if not self.is_finished:
-            latest_rating = self.rating_set.exclude(created=None).order_by('created').last()
-            last_time_active = latest_rating.created if latest_rating else self.created
-            return last_time_active + timedelta(hours=self.ABANDONED_AFTER_HRS) < timezone.now()
+            latest_rating = self.rating_set.exclude(created=None).order_by('created').last()  # FIXME: handle empty
+            if latest_rating:
+                last_time_active = latest_rating.created if latest_rating else self.created
+                return last_time_active + timedelta(hours=self.ABANDONED_AFTER_HRS) < timezone.now()
+            else:
+                return True
         return False
 
     def init(self, study):
