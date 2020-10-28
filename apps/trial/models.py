@@ -366,7 +366,6 @@ class QuestionProperty(models.Model):
 
 class Trial(models.Model):
     slug = models.UUIDField(
-        primary_key=True,
         default=uuid.uuid4,
         editable=False,
         unique=True,
@@ -391,9 +390,6 @@ class Trial(models.Model):
     is_test = models.BooleanField(
         default=False,
     )
-
-    class Meta:
-        ordering = ['created']
 
     def save(self, *args, **kwargs):
         if (
