@@ -9,7 +9,7 @@
         <div class="progress" style="height: 2px;">
             <div class="progress-bar" role="progressbar" style="width: {{ progress }}%" aria-valuenow="{{ view.progress }}" aria-valuemin="0" aria-valuemax="100"></div>
         </div>
-        {% if progress_i and progress_count %}
+        {% if progress_i >= 0 and progress_count %}
         <small>{{ progress_i }}/{{ progress_count }} </small>
         {% endif %}
     </div>
