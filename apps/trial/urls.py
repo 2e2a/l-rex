@@ -21,7 +21,7 @@ urlpatterns_study = [
     path('home/', views.TrialHomeView.as_view(), name='trial-home'),
     path('', views.TrialListView.as_view(), name='trials'),
     path('delete-all/', views.TrialDeleteAllView.as_view(), name='trials-delete'),
-    path('participants/download/', views.TrialDownloadParticipantsView.as_view(), name='trials-participants-download'),
+    path('participants/download/', views.TrialParticipantsCSVDownloadView.as_view(), name='trials-participants-download'),
     path('participants/delete/', views.TrialDeleteParticipantsView.as_view(), name='trials-participants-delete'),
 ]
 

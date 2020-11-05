@@ -397,14 +397,14 @@ class TrialListView(
         return super().get_queryset().filter(questionnaire__study=self.study)
 
 
-class TrialDownloadParticipantsView(
+class TrialParticipantsCSVDownloadView(
     study_views.StudyMixin,
     study_views.CheckStudyCreatorMixin,
     generic.View,
 ):
 
     def get(self, request, *args, **kwargs):
-        filename = '{}_PARTICIPANTS_{}.csv'.format(self.study.title.replace(' ', '_'), str(now().date()))
+        filename = '{}_PARTICIPANTS_{}.csv'.format(self.study.title.replace(' ', '_'), now().strftime('%Y-%m-%d-%H%M'))
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
         self.study.participant_information_csv(response)
@@ -617,10 +617,9 @@ class ProgressMixin:
         num = kwargs['num']
         count = kwargs['n_trial_items']
         data = super().get_context_data(**kwargs)
-        i = num + 1
-        data['progress_i'] =  i
+        data['progress_i'] = num
         data['progress_count'] = count
-        data['progress'] = i * 100 / (count + 1)
+        data['progress'] = num * 100 / count
         return data
 
 

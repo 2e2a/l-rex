@@ -366,7 +366,6 @@ class QuestionProperty(models.Model):
 
 class Trial(models.Model):
     slug = models.UUIDField(
-        primary_key=True,
         default=uuid.uuid4,
         editable=False,
         unique=True,
@@ -392,9 +391,6 @@ class Trial(models.Model):
         default=False,
     )
 
-    class Meta:
-        ordering = ['created']
-
     def save(self, *args, **kwargs):
         if (
                 not self.participant_id
@@ -407,7 +403,7 @@ class Trial(models.Model):
     @cached_property
     def number(self):
         return Trial.objects.filter(
-            questionnaire__study=self.questionnaire.study, is_test=False, created__lte=self.created,
+            questionnaire__study=self.questionnaire.study, is_test=False, pk__lte=self.pk,
         ).count()
 
     @cached_property
@@ -456,9 +452,15 @@ class Trial(models.Model):
     @property
     def is_abandoned(self):
         if not self.is_finished:
+            last_time_active = None
             latest_rating = self.rating_set.exclude(created=None).order_by('created').last()
-            last_time_active = latest_rating.created if latest_rating else self.created
-            return last_time_active + timedelta(hours=self.ABANDONED_AFTER_HRS) < timezone.now()
+            if latest_rating:
+                last_time_active = latest_rating.created
+            elif self.created:
+                last_time_active = self.created
+            if last_time_active:
+                return last_time_active + timedelta(hours=self.ABANDONED_AFTER_HRS) < timezone.now()
+            return True
         return False
 
     def init(self, study):
