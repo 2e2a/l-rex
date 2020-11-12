@@ -675,7 +675,10 @@ class RatingsCreateView(ProgressMixin, TestTrialMixin, TrialMixin, generic.Templ
                         self.formset[instance.question].fields['scale_value'].initial = instance.scale_value.pk
                     if hasattr(instance, 'comment'):
                         self.formset[instance.question].fields['comment'].initial = instance.comment
-                messages.error(request, self.study.answer_questions_message)
+                if self.n_questions > 1:
+                    messages.error(request, self.study.answer_questions_message)
+                else:
+                    messages.error(request, self.study.answer_question_message)
                 return response
             elif self.study.enable_item_rating_feedback:
                     show_feedback, feedbacks = self._handle_feedbacks(self.formset, instances)
