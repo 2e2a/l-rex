@@ -793,7 +793,7 @@ class Study(models.Model):
                 item_list_distribution=row[columns['list_distribution']],
                 is_filler=(row[columns['is_filler']] == 'True'),
                 is_example=(row[columns['is_example']] == 'True'),
-                block=(row[columns['block']] == 'True'),
+                block=row[columns['block']],
                 items_validated=(row[columns['items_validated']] == 'True'),
             )
             materials.save()
