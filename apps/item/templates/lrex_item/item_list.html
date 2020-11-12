@@ -45,6 +45,7 @@
             {% elif item.markdownitem %}
             {{ item.markdownitem.text|markdownify }}
             {% else %}
+            {{ item.audiolinkitem.description|markdownify }}
             {% for item_url in item.audiolinkitem.urls_list %}
             <div>
                 <audio controls="controls">
