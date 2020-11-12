@@ -321,7 +321,7 @@ class Study(models.Model):
         return self.questions.first()
 
     def get_question(self, number):
-        for question in self.questions:
+        for question in self.questions.all():
             if question.number == number:
                 return question
 
