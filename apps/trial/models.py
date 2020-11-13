@@ -411,14 +411,6 @@ class Trial(models.Model):
         return self.questionnaire.items
 
     @cached_property
-    def questionnaire_item_ratings(self):
-        item_ratings = []
-        for questionnaire_item in self.questionnaire.questionnaire_items.all():
-            ratings = Rating.objects.filter(trial=self, questionnaire_item=questionnaire_item).all()
-            item_ratings.append((questionnaire_item, ratings))
-        return item_ratings
-
-    @cached_property
     def ratings_completed(self):
         return Rating.objects.filter(trial=self, question=0).count()
 
