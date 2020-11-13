@@ -488,6 +488,7 @@ class Rating(models.Model):
 
     class Meta:
         ordering = ['trial', 'questionnaire_item', 'question']
+        unique_together = ['trial', 'questionnaire_item', 'question']
 
     @cached_property
     def question_user(self):

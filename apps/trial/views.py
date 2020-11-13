@@ -2,6 +2,7 @@ from markdownx.utils import markdownify
 
 from django.contrib import messages
 from django.conf import settings
+from django.db.utils import IntegrityError
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.utils.safestring import mark_safe
@@ -693,7 +694,10 @@ class RatingsCreateView(ProgressMixin, TestTrialMixin, TrialMixin, generic.Templ
             for instance in instances:
                 instance.trial = self.trial
                 instance.questionnaire_item = self.questionnaire_item
-                instance.save()
+                try:
+                    instance.save()
+                except IntegrityError:
+                    return redirect(self.get_next_url())
             if self.is_last:
                 self.trial.ended = now()
                 self.trial.save()
