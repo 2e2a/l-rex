@@ -40,21 +40,7 @@
             {% if study.use_blocks %}<span class="badge badge-secondary">block {{ item.materials_block }}</span>{% endif %}
         </div>
         <div class="flex-grow-1 mr-4">
-            {% if item.textitem %}
-            {{ item.textitem.text|linebreaks }}
-            {% elif item.markdownitem %}
-            {{ item.markdownitem.text|markdownify }}
-            {% else %}
-            {{ item.audiolinkitem.description|markdownify }}
-            {% for item_url in item.audiolinkitem.urls_list %}
-            <div>
-                <audio controls="controls">
-                    <source src="{{ item_url }}">
-                    Your browser does not support the <code>audio</code> element.
-                </audio>
-            </div>
-            {% endfor %}
-            {% endif %}
+            {% include 'lrex_item/item_preview.html' %}
         </div>
         <div class="flex-shrink-0">
             <div class="dropdown">

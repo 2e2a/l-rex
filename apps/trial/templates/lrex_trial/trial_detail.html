@@ -32,20 +32,7 @@
         <td>{{ q_item.question_order_user }}</td>
         {% endif %}
         <td>
-            {% if q_item.item.textitem %}
-            {{ q_item.item.textitem.text|linebreaks }}
-            {% elif q_item.item.markdownitem %}
-            {{ q_item.item.markdownitem.text|markdownify }}
-            {% else %}
-            {% for item_url in q_item.item.audiolinkitem.urls_list %}
-            <div>
-                <audio controls="controls">
-                    <source src="{{ item_url }}">
-                    Your browser does not support the <code>audio</code> element.
-                </audio>
-            </div>
-            {% endfor %}
-            {% endif %}
+            {% include 'lrex_item/item_preview.html' with item=q_item.item %}
         </td>
         {% if study.has_question_with_random_scale %}
         <td>
