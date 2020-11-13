@@ -42,11 +42,12 @@ class Item(models.Model):
 
     @property
     def content(self):
-        if hasattr(self, 'textitem'):
+        study = self.materials.study
+        if study.has_text_items:
             return self.textitem.text
-        elif hasattr(self, 'markdownitem'):
+        elif study.has_markdown_items:
             return self.markdownitem.text
-        elif hasattr(self, 'audiolinkitem'):
+        elif study.has_audiolink_items:
             return self.audiolinkitem.urls
         return ''
 

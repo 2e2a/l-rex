@@ -430,17 +430,15 @@ class Study(models.Model):
         from apps.trial.models import Trial
         return Trial.objects.filter(
             questionnaire__study=self,
-            is_test = False,
+            is_test=False,
         ).exclude(
             participant_id=None,
-            created=None,
-            ended=None,
             demographics=None,
         ).exists()
 
     def delete_participant_information(self):
         from apps.trial.models import Trial, DemographicValue
-        Trial.objects.filter(questionnaire__study=self).update(participant_id=None, created=None, ended=None)
+        Trial.objects.filter(questionnaire__study=self).update(participant_id=None)
         DemographicValue.objects.filter(trial__questionnaire__study=self).delete()
 
     @cached_property

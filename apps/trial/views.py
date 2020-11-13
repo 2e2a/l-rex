@@ -2,6 +2,7 @@ from markdownx.utils import markdownify
 
 from django.contrib import messages
 from django.conf import settings
+from django.core.paginator import Paginator
 from django.db.utils import IntegrityError
 from django.http import HttpResponse
 from django.shortcuts import redirect
@@ -155,6 +156,7 @@ class QuestionnaireListView(
 
     def get_queryset(self):
         return super().get_queryset().filter(study=self.study)
+
 
     @property
     def pagination_offset(self):
@@ -589,6 +591,31 @@ class TrialDetailView(
 ):
     model = models.Trial
     title = 'Trial overview'
+    paginate_by = 16
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        trial = self.get_object()
+        questionnaire_items = trial.questionnaire.questionnaire_items.all()
+        questionnaire_items = questionnaire_items.prefetch_related(
+            'ratings',
+            'item',
+            'item__materials',
+        )
+        if self.study.has_text_items:
+            questionnaire_items = questionnaire_items.prefetch_related('item__textitem')
+        elif self.study.has_markdown_items:
+            questionnaire_items = questionnaire_items.prefetch_related('item__markdownitem')
+        elif self.study.has_audiolink_items:
+            questionnaire_items = questionnaire_items.prefetch_related('item__audiolinkitem')
+        paginator = Paginator(questionnaire_items, self.paginate_by)
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        context.update({
+            'questionnaire_items': questionnaire_items,
+            'page_obj': page_obj,
+        })
+        return context
 
 
 class TrialDeleteView(

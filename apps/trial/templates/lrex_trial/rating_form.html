@@ -4,11 +4,11 @@
 
 {% block rating_content %}
 <div class="my-2 p-4 border bg-white">
-    {% if item.textitem %}
+    {% if study.has_text_items %}
     <div class="item-content"><p>{{ item.textitem.text|linebreaks }}</p></div>
-    {% elif item.markdownitem %}
+    {% elif study.has_mardown_items %}
     <div class="item-content">{{ item.markdownitem.text|markdownify }}</div>
-    {% else %}
+    {% elif study.has_audiolink_items %}
     {% if item.audiolinkitem.description %}
     <p>
         {{ item.audiolinkitem.description|markdownify }}

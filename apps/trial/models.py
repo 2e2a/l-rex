@@ -373,8 +373,6 @@ class Trial(models.Model):
     questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE)
     created = models.DateTimeField(
         default=timezone.now,
-        blank=True,
-        null=True,
     )
     ended = models.DateTimeField(
         blank=True,
@@ -391,6 +389,9 @@ class Trial(models.Model):
         default=False,
     )
 
+    class Meta:
+        ordering = ['created']
+
     def save(self, *args, **kwargs):
         if (
                 not self.participant_id
@@ -403,20 +404,12 @@ class Trial(models.Model):
     @cached_property
     def number(self):
         return Trial.objects.filter(
-            questionnaire__study=self.questionnaire.study, is_test=False, pk__lte=self.pk,
-        ).count()
+            questionnaire__study=self.questionnaire.study, is_test=False, created__lt=self.created,
+        ).count() + 1
 
     @cached_property
     def items(self):
         return self.questionnaire.items
-
-    @cached_property
-    def questionnaire_item_ratings(self):
-        item_ratings = []
-        for questionnaire_item in self.questionnaire.questionnaire_items.all():
-            ratings = Rating.objects.filter(trial=self, questionnaire_item=questionnaire_item).all()
-            item_ratings.append((questionnaire_item, ratings))
-        return item_ratings
 
     @cached_property
     def ratings_completed(self):
@@ -444,7 +437,7 @@ class Trial(models.Model):
 
     @property
     def time_taken(self):
-        if self.created and self.ended:
+        if self.ended:
             return (self.ended - self.created).seconds
 
     ABANDONED_AFTER_HRS = 1
@@ -452,15 +445,12 @@ class Trial(models.Model):
     @property
     def is_abandoned(self):
         if not self.is_finished:
-            last_time_active = None
             latest_rating = self.rating_set.exclude(created=None).order_by('created').last()
             if latest_rating:
                 last_time_active = latest_rating.created
-            elif self.created:
+            else:
                 last_time_active = self.created
-            if last_time_active:
-                return last_time_active + timedelta(hours=self.ABANDONED_AFTER_HRS) < timezone.now()
-            return True
+            return last_time_active + timedelta(hours=self.ABANDONED_AFTER_HRS) < timezone.now()
         return False
 
     def init(self, study):
