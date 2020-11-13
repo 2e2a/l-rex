@@ -1,8 +1,7 @@
 {% load contrib_tags %}
-
 {% if study.has_text_items %}
     {{ item.textitem.text|linebreaks }}
-{% elif study.has_markdownitems %}
+{% elif study.has_markdown_items %}
     {{ item.markdownitem.text|markdownify }}
 {% elif study.has_audiolink_items %}
     {{ item.audiolinkitem.description|markdownify }}
