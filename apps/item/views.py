@@ -97,10 +97,14 @@ class ItemListView(
         queryset = super().get_queryset()
         queryset = queryset.filter(materials=self.materials)
         queryset = queryset.prefetch_related(
-            'textitem',
-            'markdownitem',
-            'audiolinkitem',
+            'materials',
         )
+        if self.study.has_text_items:
+            queryset = queryset.prefetch_related('textitem')
+        elif self.study.has_markdown_items:
+            queryset = queryset.prefetch_related('markdownitem')
+        elif self.study.has_audiolink_items:
+            queryset = queryset.prefetch_related('audiolinkitem')
         return queryset
 
 
