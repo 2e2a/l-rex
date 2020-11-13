@@ -437,7 +437,7 @@ class Trial(models.Model):
 
     @property
     def time_taken(self):
-        if self.created and self.ended:
+        if self.ended:
             return (self.ended - self.created).seconds
 
     ABANDONED_AFTER_HRS = 1
@@ -445,7 +445,6 @@ class Trial(models.Model):
     @property
     def is_abandoned(self):
         if not self.is_finished:
-            last_time_active = None
             latest_rating = self.rating_set.exclude(created=None).order_by('created').last()
             if latest_rating:
                 last_time_active = latest_rating.created
