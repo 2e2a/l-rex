@@ -1,4 +1,3 @@
-from allauth import urls as allauth_urls
 from django.conf import settings
 from django.conf.urls import handler500
 from django.contrib import admin
@@ -18,8 +17,9 @@ urlpatterns = [
     path('items/', include(item_urls)),
     path('trials/', include(trial_urls.urlpatterns)),
     path('questionnaires/', include(trial_urls.urlpatterns_questionnaires)),
-    path('user/', include(user_urls)),
-    path('accounts/', include(allauth_urls)),
+    path('accounts/', include(user_urls)),
+    path('accounts/', include('django_registration.backends.activation.urls')),
+    path('accounts/', include('django.contrib.auth.urls')),
     path('admin/', admin.site.urls),
     path('markdownx/', include('markdownx.urls')),
     path('', include(home_urls))
