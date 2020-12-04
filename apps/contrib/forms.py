@@ -7,7 +7,6 @@ from django import forms
 
 
 from . import csv as contrib_csv
-from . import utils
 
 
 def disable_form_field(form, field):
@@ -43,15 +42,6 @@ class HelperMixin:
         self.helper.add_input(Submit('submit', self.submit_label))
         if self.add_save:
             self.helper.add_input(Submit('save', self.save_label, css_class='btn-secondary'))
-
-
-class ListField(forms.CharField):
-
-    def validate(self, value):
-        super().validate(value)
-        value_list = utils.split_list_string(value)
-        if not len(value_list) > 1:
-            raise forms.ValidationError('At least two values must be entered.')
 
 
 class CrispyForm(OptionalLabelMixin, HelperMixin, forms.Form):
