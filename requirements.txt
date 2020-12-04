@@ -4,28 +4,20 @@
 #
 #    pip-compile --output-file=requirements.txt requirements.heroku.in requirements.in
 #
-certifi==2019.11.28       # via requests
-chardet==3.0.4            # via requests
-defusedxml==0.6.0         # via python3-openid
+confusable-homoglyphs==3.2.0  # via django-registration
 dj-database-url==0.5.0    # via django-heroku
-django-allauth==0.41.0    # via -r requirements.in
 django-crispy-forms==1.9.0  # via -r requirements.in
 django-heroku==0.3.1      # via -r requirements.heroku.in
 django-markdownx==3.0.1   # via -r requirements.in
-django==2.2.11            # via -r requirements.in, django-allauth, django-heroku, django-markdownx
+django-registration==3.1.1  # via -r requirements.in
+django==2.2.11            # via -r requirements.in, django-heroku, django-markdownx, django-registration
 gunicorn==20.0.4          # via -r requirements.heroku.in
-idna==2.9                 # via requests
 markdown==3.2.1           # via django-markdownx
-oauthlib==3.1.0           # via requests-oauthlib
 pillow==7.0.0             # via django-markdownx
 psycopg2-binary==2.8.4    # via -r requirements.in
 psycopg2==2.8.4           # via django-heroku
-python3-openid==3.1.0     # via django-allauth
 pytz==2019.3              # via django
-requests-oauthlib==1.3.0  # via django-allauth
-requests==2.23.0          # via django-allauth, requests-oauthlib
 sqlparse==0.3.1           # via django
-urllib3==1.25.8           # via requests
 whitenoise==5.0.1         # via -r requirements.heroku.in, django-heroku
 
 # The following packages are considered to be unsafe in a requirements file:
