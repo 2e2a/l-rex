@@ -16,7 +16,7 @@ User = get_user_model()
 class UserAccountCreateView(LoginRequiredMixin, SuccessMessageMixin, generic.CreateView):
     model = models.UserProfile
     title = 'User settings'
-    template_name = 'lrex_home/base_form.html'
+    template_name = 'base_form.html'
     form_class = forms.AccountForm
     success_message = 'User settings successfully updated.'
 
@@ -44,7 +44,7 @@ class UserAccountUpdateView(LoginRequiredMixin, SuccessMessageMixin, generic.Upd
 
 class UserAccountDeleteView(LoginRequiredMixin, contrib_views.DefaultDeleteView):
     model = User
-    template_name = 'lrex_home/base_confirm_delete.html'
+    template_name = 'base_confirm_delete.html'
     message = 'Delete user account? Note that all studies and collected data will be deleted.'
 
     def get_object(self, queryset=None):

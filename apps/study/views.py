@@ -227,7 +227,7 @@ class StudyListView(LoginRequiredMixin, contrib_views.PaginationHelperMixin, gen
 class StudyCreateView(LoginRequiredMixin, generic.CreateView):
     model = models.Study
     title = 'Create a new study'
-    template_name = 'lrex_home/base_form.html'
+    template_name = 'base_form.html'
     form_class = forms.StudyForm
 
     def form_valid(self, form):
@@ -300,7 +300,7 @@ class StudyDeleteView(
     contrib_views.DefaultDeleteView
 ):
     model = models.Study
-    template_name = 'lrex_home/base_confirm_delete.html'
+    template_name = 'base_confirm_delete.html'
 
     def get_success_url(self):
         return self.reverse_paginated('studies')
@@ -346,7 +346,7 @@ class StudyArchiveDownloadView(StudyObjectMixin, CheckStudyCreatorMixin, generic
 
 class StudyCreateFromArchiveView(LoginRequiredMixin,  SuccessMessageMixin, generic.FormView):
     title = 'Create a new study from archive'
-    template_name = 'lrex_home/base_form.html'
+    template_name = 'base_form.html'
     form_class = forms.StudyNewFromArchiveForm
 
     def get(self, request, *args, **kwargs):
@@ -378,7 +378,7 @@ class StudyCreateFromArchiveView(LoginRequiredMixin,  SuccessMessageMixin, gener
 
 class StudyRestoreFromArchiveView(StudyMixin, CheckStudyCreatorMixin, SuccessMessageMixin, generic.FormView):
     title = 'Restore study from archive'
-    template_name = 'lrex_home/base_form.html'
+    template_name = 'base_form.html'
     form_class = forms.StudyFromArchiveForm
 
     def get(self, request, *args, **kwargs):
@@ -407,7 +407,7 @@ class StudyRestoreFromArchiveView(StudyMixin, CheckStudyCreatorMixin, SuccessMes
 
 class StudyCreateCopyView(StudyMixin, CheckStudyCreatorMixin, SuccessMessageMixin, generic.FormView):
     title = 'Create a copy of a study'
-    template_name = 'lrex_home/base_form.html'
+    template_name = 'base_form.html'
     form_class = forms.StudyCopyForm
     success_message = 'Study successfully created.'
 

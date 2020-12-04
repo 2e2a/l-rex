@@ -1,10 +1,10 @@
-{% extends "lrex_home/base.html" %}
+{% extends "base.html" %}
 {% load crispy_forms_tags %}
 
 {% block title %}Log in{% endblock %}
 
 {% block content %}
-<form class="login" method="POST" action="{% url 'account_login' %}">
+<form method="POST" action="{% url 'login' %}">
     {% csrf_token %}
     {{ form|crispy }}
     {% if redirect_field_value %}
@@ -14,10 +14,10 @@
 </form>
 <div class="mt-3">
     <p>
-        Don't have an account? <a href="{% url 'account_signup' %}">Register</a>.
+        Don't have an account? <a href="{% url 'django_registration_register' %}">Register</a>.
     </p>
     <p>
-        Forgot your password? <a href="{% url 'account_reset_password' %}">Reset password</a>.
+        Forgot your password? <a href="{% url 'password_reset' %}">Reset password</a>.
     </p>
 </div>
 {% endblock %}

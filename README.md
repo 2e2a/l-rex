@@ -15,13 +15,11 @@ We are currently running a free instance of L-Rex on our private server at [http
 - [python](https://www.python.org/)
 - [Django](https://www.djangoproject.com/)
 - [django-crispy-forms](https://github.com/django-crispy-forms/django-crispy-forms)
-- [django-allauth](https://github.com/pennersr/django-allauth)
+- [django-registration](https://github.com/ubernostrum/django-registration)
 - [psycopg2](http://initd.org/psycopg/) (When using PostgreSQL)
-- [python-memcached ](https://github.com/linsomniac/python-memcached) (When using caching)
 - [bootstrap](https://getbootstrap.com/)
 - [jquery](https://jquery.com/)
 - [popper.js](https://popper.js.org/)
-- [Font Awesome](https://fontawesome.com/)
 - [node-sass](https://github.com/sass/node-sass)
 
 
@@ -34,7 +32,7 @@ make deploy
 ### Configuration
 
 Configuration parameters (e.g. `DATABASES`) can be overwritten in `lrex/local.py`.
-Add a `Site` for your domain (used by allauth).
+Add a `Site` for your domain.
 
 ### Usage
 

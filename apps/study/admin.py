@@ -23,6 +23,7 @@ class StudyAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_date'
     list_display = (
         'title',
+        'creator',
         'created_date',
         'is_published',
         'is_archived'

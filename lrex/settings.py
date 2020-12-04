@@ -47,9 +47,6 @@ INSTALLED_APPS = [
 
     'markdownx',
     'crispy_forms',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
 
     'django.contrib.admin',
 ]
@@ -69,7 +66,7 @@ ROOT_URLCONF = 'lrex.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['lrex/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -101,13 +98,10 @@ LOGIN_REDIRECT_URL = '/'
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
 )
 
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
-ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
-ACCOUNT_FORMS = {'signup': 'apps.home.forms.FixedAutofocusSignupForm'}
+ACCOUNT_ACTIVATION_DAYS = 7
+
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 

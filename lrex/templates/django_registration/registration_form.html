@@ -1,10 +1,10 @@
-{% extends "lrex_home/base.html" %}
+{% extends "base.html" %}
 {% load crispy_forms_tags %}
 
 {% block title %}Register{% endblock %}
 
 {% block content %}
-<form class="signup" id="signup_form" method="post" action="{% url 'account_signup' %}">
+<form method="POST" action="{% url 'django_registration_register' %}">
     {% csrf_token %}
     {{ form|crispy }}
     {% if redirect_field_value %}

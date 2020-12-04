@@ -1,0 +1,11 @@
+Hello from {{ site.name }}!
+
+You're receiving this e-mail because your e-mail address was used to register as user {{ user.username }} on our site.
+
+To activate your account, go to
+
+{{ scheme }}://{{ site.domain }}{% url 'django_registration_activate' activation_key=activation_key %}
+
+This link will be valid for {{ expiration_days }} days.
+
+Thank you for using {{ site.name }}!

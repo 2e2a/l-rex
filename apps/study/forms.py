@@ -4,6 +4,7 @@ from django import forms
 from django.contrib.auth.models import User
 
 from apps.contrib import forms as contrib_forms
+from apps.contrib import utils
 
 from . import models
 
@@ -252,12 +253,32 @@ class ArchiveForm(contrib_forms.CrispyModelForm):
         return is_archived
 
 
+class ScaleLabelsListField(forms.CharField):
+
+    def __init__(self, **kwargs):
+        kwargs.update({
+            'max_length': 1000,
+            'required': True,
+        })
+        super().__init__(**kwargs)
+
+    def validate(self, value):
+        super().validate(value)
+        value_list = utils.split_list_string(value)
+        if not len(value_list) > 1:
+            raise forms.ValidationError('At least two values must be entered.')
+        if any(len(value) > models.ScaleValue.LABEL_MAX_LENGTH for value in value_list):
+            raise forms.ValidationError(
+                'A scale value is too long. Limit: {} characters.'.format(models.ScaleValue.LABEL_MAX_LENGTH)
+            )
+
+
 class QuestionForm(contrib_forms.CrispyModelForm):
-    scale_labels = contrib_forms.ListField(
-        max_length=200,
-        required=True,
-        help_text='Rating scale labels, separated by commas (e.g. "1,2,3,4,5"). '
-                  'If a label contains a comma itself, escape it with "\\" (e.g. "A,B,Can\'t decide\\, I like both").'
+    scale_labels = ScaleLabelsListField(
+        help_text=(
+            'Rating scale labels, separated by commas (e.g. "1,2,3,4,5"). '
+            'If a label contains a comma itself, escape it with "\\" (e.g. "A,B,Can\'t decide\\, I like both").'
+        ),
     )
 
     class Meta:
