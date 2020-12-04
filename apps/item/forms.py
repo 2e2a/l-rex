@@ -9,6 +9,8 @@ from django.forms import modelformset_factory
 from apps.contrib import csv as contrib_csv
 from apps.contrib import forms as contrib_forms
 from apps.contrib.utils import split_list_string
+from apps.study import forms as study_forms
+from apps.study import models as study_models
 
 from . import models
 
@@ -182,6 +184,9 @@ class ItemUploadForm(contrib_forms.CSVUploadForm):
                         row[cleaned_data['question_{}_scale_column'.format(question.number + 1)] - 1]
                     )
                     assert len(scale_values) == question.scale_values.count()
+                    assert all(
+                        len(scale_value) <= study_models.ScaleValue.LABEL_MAX_LENGTH for scale_value in scale_values
+                    )
                 if cleaned_data['question_{}_legend_column'.format(question.number + 1)] > 0:
                     assert row[cleaned_data['question_{}_legend_column'.format(question.number + 1)] - 1]
 
@@ -196,7 +201,7 @@ class ItemQuestionForm(contrib_forms.OptionalLabelMixin, forms.ModelForm):
         model = models.ItemQuestion
         fields = ['question', 'scale_labels', 'legend', 'number']
         field_classes = {
-            'scale_labels': contrib_forms.ListField,
+            'scale_labels': study_forms.ScaleLabelsListField,
         }
         widgets = {
             'number': forms.HiddenInput()
