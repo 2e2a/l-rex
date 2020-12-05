@@ -10,14 +10,23 @@
 
 <div class="controls mb-2">
     {% include 'bootstrap/layout/field_errors_block.html' %}
+    {% if exceeds_horizontal_limit %}
+        <div class="btn-group-vertical" data-toggle="buttons">
+            {% for choice in field.field.choices %}
+                <button type="button" class="btn btn-outline-secondary btn-sm {% if choice.0|stringformat:"s" == field.value|default_if_none:""|stringformat:"s" %}active{% endif %}">
+                    {{ choice.1 }}
+                </button>
+            {% endfor %}
+        </div>
+    {% else %}
     <div class="btn-group btn-group-toggle d-flex justify-content-between" data-toggle="buttons">
-    {% for choice in field.field.choices %}
-            <label  for="id_{{ field.id_for_label }}_{{ forloop.counter }}" class="btn btn-outline-secondary btn-sm {% if choice.0|stringformat:"s" == field.value|default_if_none:""|stringformat:"s" %}active{% endif %}">
-                <input type="radio" class="form-check-input"{% if choice.0|stringformat:"s" == field.value|default_if_none:""|stringformat:"s" %} checked="checked"{% endif %} name="{{ field.html_name }}" id="id_{{ field.id_for_label }}_{{ forloop.counter }}" value="{{ choice.0 }}">
+        {% for choice in field.field.choices %}
+            <button type="button" class="btn btn-outline-secondary btn-sm {% if choice.0|stringformat:"s" == field.value|default_if_none:""|stringformat:"s" %}active{% endif %}">
                 {{ choice.1 }}
-            </label>
-    {% endfor %}
+            </button>
+        {% endfor %}
     </div>
+    {% endif %}
 
     {% if field.help_text %}
         <small id="hint_{{ field.auto_id }}" class="form-text text-muted">{{ field.help_text|safe }}</small>

@@ -6,7 +6,7 @@
 <div class="my-2 p-4 border bg-white">
     {% if study.has_text_items %}
     <div class="item-content"><p>{{ item.textitem.text|linebreaks }}</p></div>
-    {% elif study.has_mardown_items %}
+    {% elif study.has_markdown_items %}
     <div class="item-content">{{ item.markdownitem.text|markdownify }}</div>
     {% elif study.has_audiolink_items %}
     {% if item.audiolinkitem.description %}
