@@ -14,6 +14,7 @@ from django.views import generic
 
 from apps.contrib import csv as contrib_csv
 from apps.contrib import views as contrib_views
+from apps.study import models as study_models
 from apps.study import views as study_views
 
 from . import forms
@@ -655,6 +656,8 @@ class RatingsCreateView(ProgressMixin, TestTrialMixin, TrialMixin, generic.Templ
     model = models.Rating
     template_name = 'lrex_trial/rating_form.html'
 
+    HORIZONTAL_LAYOUT_LIMIT = 70
+
     formset = None
     helper = None
 
@@ -731,6 +734,12 @@ class RatingsCreateView(ProgressMixin, TestTrialMixin, TrialMixin, generic.Templ
             return redirect(self.get_next_url())
         return super().get(request, *args, **kwargs)
 
+    @property
+    def _has_long_scale_value(self):
+        scale_values = study_models.ScaleValue.objects.filter(question__study=self.study).all()
+        sum_length = sum(len(scale_value.label) for scale_value in scale_values)
+        return sum_length >= self.HORIZONTAL_LAYOUT_LIMIT
+
     def get_context_data(self, **kwargs):
         kwargs.update(
             {
@@ -741,7 +750,8 @@ class RatingsCreateView(ProgressMixin, TestTrialMixin, TrialMixin, generic.Templ
         )
         context = super().get_context_data(**kwargs)
         context.update({
-            'contact': mark_safe(self.study.contact)
+            'contact': mark_safe(self.study.contact),
+            'exceeds_horizontal_limit': self._has_long_scale_value,
         })
         if self.study.short_instructions:
             context['short_instructions_rich'] = mark_safe(markdownify(self.study.short_instructions))
