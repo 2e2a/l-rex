@@ -1175,7 +1175,7 @@ class ScaleValue(models.Model):
         on_delete=models.CASCADE,
         related_name='scale_values',
     )
-    LABEL_MAX_LENGTH = 50
+    LABEL_MAX_LENGTH = 1000
     label = models.CharField(
         max_length=LABEL_MAX_LENGTH,
         help_text='Provide a label for this point of the scale.',
