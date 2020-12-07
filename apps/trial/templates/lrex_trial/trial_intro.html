@@ -2,7 +2,7 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-{% if not study.is_imit_reached or is_test %}
+{% if not study.is_finished and not study.is_imit_reached or is_test %}
     {% if study.is_published or is_test %}
     <div class="my-2 p-4 border bg-white">
         <p>{{ intro_rich }}</p>
