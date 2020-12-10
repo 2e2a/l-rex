@@ -4,6 +4,7 @@ from django.urls import reverse
 from django.utils.functional import cached_property
 
 from apps.contrib.utils import slugify_unique, split_list_string
+from apps.study.models import ScaleValue
 
 
 class Item(models.Model):
@@ -146,8 +147,8 @@ class ItemQuestion(models.Model):
         max_length=1000,
         help_text='Individual question text for this item (e.g. "How acceptable is this sentence?").',
     )
-    scale_labels = models.CharField(
-        max_length=500,
+    scale_labels = models.TextField(
+        max_length=(10 * ScaleValue.LABEL_MAX_LENGTH),
         help_text='Individual rating scale labels for this item, separated by commas (e.g. "1,2,3,4,5"). '
                   'If a label contains a comma itself, escape it with "\\" (e.g. "A,B,Can\'t decide\\, I like both"). '
                   'Note that this will only overwrite the displayed labels, but the responses will be saved according '
