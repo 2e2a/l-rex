@@ -259,6 +259,7 @@ class ScaleLabelsListField(forms.CharField):
         kwargs.update({
             'max_length': 10 * models.ScaleValue.LABEL_MAX_LENGTH,
             'required': True,
+            'widget': forms.Textarea,
         })
         super().__init__(**kwargs)
 
