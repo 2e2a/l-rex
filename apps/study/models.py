@@ -279,13 +279,16 @@ class Study(models.Model):
 
     def save(self, *args, **kwargs):
         new_slug = slugify_unique(self.title, Study, self.id)
+        slug_changed = False
         if self.slug != new_slug:
             self.slug = new_slug
+            slug_changed = True
+        super().save(*args, **kwargs)
+        if slug_changed:
             for materials in self.materials.all():
                 materials.save()
-        for questionnaire in self.questionnaires.all():
-            questionnaire.save()
-        return super().save(*args, **kwargs)
+            for questionnaire in self.questionnaires.all():
+                questionnaire.save()
 
     def __str__(self):
         return self.title

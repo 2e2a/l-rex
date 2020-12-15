@@ -29,10 +29,12 @@ class MaterialsMixin:
         return self.materials_object
 
     def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-        data['study'] = self.study
-        data['materials'] = self.materials
-        return data
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'study': self.study,
+            'materials': self.materials,
+        })
+        return context
 
 
 class MaterialsObjectMixin(MaterialsMixin):
@@ -97,7 +99,7 @@ class MaterialsSettingsView(
 
     def get_success_url(self):
         if 'save' in self.request.POST:
-            return reverse('materials-settings', args=[self.materials.slug])
+            return reverse('materials-settings', args=[self.object.slug])
         return reverse('study', args=[self.study.slug])
 
     def get_context_data(self, **kwargs):
