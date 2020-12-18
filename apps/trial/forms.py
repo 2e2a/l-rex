@@ -1,7 +1,7 @@
 import re
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Field, Fieldset, Layout, Submit, Button
-from crispy_forms.bootstrap import StrictButton, FieldWithButtons, InlineField, FormActions
+from crispy_forms.bootstrap import FieldWithButtons
 from django import forms
 
 from apps.contrib import forms as contrib_forms
@@ -131,71 +131,71 @@ class QuestionnaireUploadForm(contrib_forms.CSVUploadForm):
         super().__init__(*args, **kwargs)
 
     @staticmethod
-    def read_items(study, items_string):
+    def read_items(items_string, materials_titles, study_items):
         items = []
-        error_msg = None
         item_strings = items_string.split(',')
         for item_string in item_strings:
-            pattern = re.compile('(.*)-(\d+)(\D+)')
+            pattern = re.compile(r'(.*)-(\d+)(\D+)')
             match = pattern.match(item_string)
             if not match or len(match.groups()) != 3:
-                error_msg = 'Not a valid item format "{}".'.format(item_string)
-                break
+                raise forms.ValidationError('Not a valid item format "{}".'.format(item_string))
             materials_title = match.group(1)
-            item_num = match.group(2)
-            item_cond = match.group(3)
             try:
-                item = item_models.Item.objects.get(
-                    materials__study=study,
-                    materials__title=materials_title,
-                    number=item_num,
-                    condition=item_cond,
-                )
-                items.append(item)
-            except item_models.Item.DoesNotExist:
-                error_msg = 'Item {} does not exist.'.format(item_string)
-                break
-        if error_msg:
-            raise forms.ValidationError(error_msg)
+                item_num = int(match.group(2))
+                item_cond = match.group(3)
+                item_match = None
+            except ValueError:
+                raise forms.ValidationError('Not a valid item format "{}".'.format(item_string))
+            for item in study_items:
+                if (
+                        item.number == item_num and item.condition == item_cond
+                        and materials_titles[item.materials_id] == materials_title
+                ):
+                    item_match = item
+                    break
+            if item_match:
+                items.append(item_match)
+            else:
+                raise forms.ValidationError('Item {} does not exist.'.format(item_string))
         return items
 
     @staticmethod
-    def read_item_lists(study, list_string):
+    def read_item_lists(study, list_string, materials_titles, study_itemlists):
         lists = []
-        error_msg = None
         list_strings = list_string.split(',')
         for list_string in list_strings:
-            pattern = re.compile('(.*)-(\d+)')
+            pattern = re.compile(r'(.*)-(\d+)')
             match = pattern.match(list_string)
             if not match or len(match.groups()) != 2:
-                error_msg = 'Not a valid item list format "{}".'.format(list_string)
-                break
-            materials_title = match.group(1)
-            list_num = match.group(2)
+                raise forms.ValidationError('Not a valid item list format "{}".'.format(list_string))
             try:
-                item_list = item_models.ItemList.objects.get(
-                    materials__study=study,
-                    materials__title=materials_title,
-                    number=list_num,
-                )
-                lists.append(item_list)
-            except item_models.ItemList.DoesNotExist:
-                error_msg = 'Item list {} does not exist.'.format(list_string)
-                break
-        if error_msg:
-            raise forms.ValidationError(error_msg)
+                materials_title = match.group(1)
+                list_num = int(match.group(2))
+            except ValueError:
+                raise forms.ValidationError('Not a valid item list format "{}".'.format(list_string))
+            list_match = None
+            for item_list in study_itemlists:
+                if item_list.number == list_num and materials_titles[item_list.materials_id] == materials_title:
+                    list_match = item_list
+                    break
+            if list_match:
+                lists.append(list_match)
+            else:
+                raise forms.ValidationError('Item list {} does not exist.'.format(list_string))
         return lists
 
     def check_upload_form(self, reader, cleaned_data):
         used_items = set()
+        materials_titles = { materials.pk: materials.title for materials in self.materials.all()}
+        study_items = list(item_models.Item.objects.filter(marials__study=self.study).all())
         for row in reader:
             int(row[cleaned_data['questionnaire_column'] - 1])
             item_lists_col = cleaned_data['item_lists_column']
             items_string = row[cleaned_data['items_column'] - 1]
-            used_items.update(self.read_items(self.study, items_string))
+            used_items.update(self.read_items(items_string, materials_titles, study_items))
             if item_lists_col > 0:
                 item_lists_string = row[item_lists_col - 1]
-                self.read_item_lists(self.study, item_lists_string)
+                self.read_item_lists(self.study, item_lists_string, materials_titles, study_items)
         if not len(used_items) == item_models.Item.objects.filter(materials__study=self.study).count():
             raise forms.ValidationError('Not all items used in questionnaires.')
 
