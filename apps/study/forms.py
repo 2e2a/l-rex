@@ -257,8 +257,9 @@ class ScaleLabelsListField(forms.CharField):
 
     def __init__(self, **kwargs):
         kwargs.update({
-            'max_length': 1000,
+            'max_length': 10 * models.ScaleValue.LABEL_MAX_LENGTH,
             'required': True,
+            'widget': forms.Textarea,
         })
         super().__init__(**kwargs)
 

@@ -14,6 +14,7 @@ from django.views import generic
 
 from apps.contrib import csv as contrib_csv
 from apps.contrib import views as contrib_views
+from apps.item import models as item_models
 from apps.study import models as study_models
 from apps.study import views as study_views
 
@@ -350,7 +351,7 @@ class QuestionnaireUploadView(
             'lists': form.cleaned_data['item_lists_column'] - 1,
         }
         data = contrib_csv.read_file(form.cleaned_data)
-        self.study.questionnaires_csv_restore(data, user_columns=columns, detected_csv=form.detected_csv)
+        self.study.questionnaires_from_csv(data, user_columns=columns, detected_csv=form.detected_csv)
         messages.success(self.request, 'Questionnaires uploaded.')
         return result
 
@@ -738,6 +739,11 @@ class RatingsCreateView(ProgressMixin, TestTrialMixin, TrialMixin, generic.Templ
     def _has_long_scale_value(self):
         scale_values = study_models.ScaleValue.objects.filter(question__study=self.study).all()
         sum_length = sum(len(scale_value.label) for scale_value in scale_values)
+        item_scale_label_list = item_models.ItemQuestion.objects.filter(
+            item__materials__study=self.study
+        ).values_list('scale_labels', flat=True)
+        for item_scale_labels in item_scale_label_list:
+            sum_length = max(sum_length, len(item_scale_labels))
         return sum_length >= self.HORIZONTAL_LAYOUT_LIMIT
 
     def get_context_data(self, **kwargs):

@@ -8,9 +8,10 @@ from string import ascii_lowercase
 from django.db import models
 from django.urls import reverse
 from django.utils.functional import cached_property
+from django.utils.text import slugify
 
 from apps.contrib import csv as contrib_csv
-from apps.contrib.utils import slugify_unique, split_list_string
+from apps.contrib.utils import split_list_string
 from apps.item import models as item_models
 from apps.trial import models as trial_models
 
@@ -70,13 +71,15 @@ class Materials(models.Model):
         verbose_name_plural = 'Materials'
 
     def save(self, *args, **kwargs):
-        slug = '{}--{}'.format(self.study.slug, self.title)
-        new_slug = slugify_unique(slug, Materials, self.id)
+        new_slug = slugify('{}-{}'.format(self.study.slug, self.title))
+        slug_changed = False
         if new_slug != self.slug:
-            self.slug = slugify_unique(slug, Materials, self.id)
+            self.slug = new_slug
+            slug_changed = True
+        super().save(*args, **kwargs)
+        if slug_changed:
             for item in self.items.all():
                 item.save()
-        return super().save(*args, **kwargs)
 
     @cached_property
     def items_sorted_by_block(self):
@@ -402,10 +405,17 @@ class Materials(models.Model):
                     csv_row.extend(['', '', ''])
             writer.writerow(csv_row)
 
-    def items_csv_create(self, fileobj, has_materials_column=False, user_columns=None, detected_csv=contrib_csv.DEFAULT_DIALECT):
-        new_items = []
-        items_to_delete = list(item_models.Item.objects.filter(materials=self).all())
-        columns = contrib_csv.csv_columns(self.items_csv_header, user_columns=user_columns, add_materials_column=has_materials_column)
+    def items_from_csv(
+            self, fileobj, has_materials_column=False, user_columns=None, detected_csv=contrib_csv.DEFAULT_DIALECT,
+    ):
+        questions = list(self.study.questions.all())
+        item_questions = []
+        self.items.all().delete()
+        columns = contrib_csv.csv_columns(
+            self.items_csv_header, user_columns=user_columns, add_materials_column=has_materials_column
+        )
+        custom_question_column = any('question{}'.format(question.number) in columns for question in questions)
+        custom_scale_column = any('scale{}'.format(question.number) in columns for question in questions)
         reader = csv.reader(fileobj, delimiter=detected_csv['delimiter'], quoting=detected_csv['quoting'])
         if detected_csv['has_header']:
             next(reader)
@@ -414,52 +424,27 @@ class Materials(models.Model):
                 continue
             if has_materials_column and not row[columns['materials']] == self.title:
                 continue
-            item = None
-            created = False
             if 'block' in columns and row[columns['block']]:
                 block = int(row[columns['block']])
             else:
                 block = 1
+
             if self.study.has_text_items:
-                item, created = item_models.TextItem.objects.get_or_create(
-                    number=row[columns['item']],
-                    condition=row[columns['condition']],
-                    text=row[columns['content']],
-                    materials=self,
-                    block=block,
-                )
+                item_model = item_models.TextItem
             elif self.study.has_markdown_items:
-                item, created = item_models.MarkdownItem.objects.get_or_create(
-                    number=row[columns['item']],
-                    condition=row[columns['condition']],
-                    text=row[columns['content']],
-                    materials=self,
-                    block=block,
-                )
-            elif self.study.has_audiolink_items:
-                description=row[columns['audio_description']] if 'audio_description' in columns else None
-                item, created = item_models.AudioLinkItem.objects.get_or_create(
-                    number=row[columns['item']],
-                    condition=row[columns['condition']],
-                    urls=row[columns['content']],
-                    description=description,
-                    materials=self,
-                    block=block,
-                )
-
-            if created:
-                new_items.append(item)
-            elif item.item_ptr in items_to_delete:
-                items_to_delete.remove(item.item_ptr)
-
-            custom_question_column = any(
-                'question{}'.format(question.number) in columns for question in self.study.questions.all()
+                item_model = item_models.MarkdownItem
+            else:
+                item_model = item_models.AudioLinkItem
+            item = item_model.objects.create(
+                number=row[columns['item']],
+                condition=row[columns['condition']],
+                text=row[columns['content']],
+                materials=self,
+                block=block,
             )
-            custom_scale_column = any(
-                'scale{}'.format(question.number) in columns for question in self.study.questions.all()
-            )
+
             if custom_question_column or custom_scale_column:
-                for question in self.study.questions.all():
+                for question in questions:
                     question_column = 'question{}'.format(question.number)
                     scale_labels_column = 'scale{}'.format(question.number)
                     legend_column = 'legend{}'.format(question.number)
@@ -468,27 +453,17 @@ class Materials(models.Model):
                     )
                     scale_labels = row[columns[scale_labels_column]] if scale_labels_column in columns else None
                     legend = row[columns[legend_column]] if legend_column in columns else None
-                    item_question = item_models.ItemQuestion.objects.filter(
-                        item=item, number=question.number
-                    ).first()
-                    if item_question:
-                        item_question.question = item_question_question
-                        item_question.scale_labels = scale_labels
-                        item_question.legend = legend
-                        item_question.save()
-                    else:
-                        item_models.ItemQuestion.objects.create(
-                            item=item,
-                            number=question.number,
-                            question=item_question_question,
-                            scale_labels=scale_labels,
-                            legend=legend,
-                        )
+                    item_question = item_models.ItemQuestion(
+                        item=item,
+                        number=question.number,
+                        question=item_question_question,
+                        scale_labels=scale_labels,
+                        legend=legend,
+                    )
+                    item_questions.append(item_question)
 
-        if new_items or items_to_delete and self.is_complete:
-            self.delete_lists()
-        for item in items_to_delete:
-            item.delete()
+        if item_questions:
+            item_models.ItemQuestion.objects.bulk_create(item_questions)
 
     def item_feedbacks_csv_header(self, add_materials_column=False, **kwargs):
         csv_row = ['materials'] if add_materials_column else []
@@ -511,7 +486,7 @@ class Materials(models.Model):
             ])
             writer.writerow(csv_row)
 
-    def item_feedbacks_csv_create(self, fileobj, has_materials_column=False, user_columns=None, detected_csv=contrib_csv.DEFAULT_DIALECT):
+    def item_feedbacks_from_csv(self, fileobj, has_materials_column=False, user_columns=None, detected_csv=contrib_csv.DEFAULT_DIALECT):
         self.delete_feedbacks()
         reader = csv.reader(fileobj, delimiter=detected_csv['delimiter'], quoting=detected_csv['quoting'])
         if detected_csv['has_header']:
@@ -556,9 +531,10 @@ class Materials(models.Model):
             ])
             writer.writerow(csv_row)
 
-    def itemlists_csv_create(self, fileobj, has_materials_column=False, user_columns=None, detected_csv=contrib_csv.DEFAULT_DIALECT):
+    def itemlists_from_csv(self, fileobj, has_materials_column=False, user_columns=None, detected_csv=contrib_csv.DEFAULT_DIALECT):
         from apps.item.forms import ItemListUploadForm
         self.delete_lists()
+        materials_items = list(self.items.all())
         reader = csv.reader(fileobj, delimiter=detected_csv['delimiter'], quoting=detected_csv['quoting'])
         if detected_csv['has_header']:
             next(reader)
@@ -570,7 +546,7 @@ class Materials(models.Model):
                 continue
             list_num = row[columns['list']]
             items_string = row[columns['items']]
-            items = ItemListUploadForm.read_items(self, items_string)
+            items = ItemListUploadForm.read_items(items_string, materials_items=materials_items)
             itemlist = item_models.ItemList.objects.create(materials=self, number=list_num)
             itemlist.items.set(items)
 

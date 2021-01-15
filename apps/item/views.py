@@ -347,6 +347,7 @@ class ItemUploadView(
 
     def form_valid(self, form):
         result = super().form_valid(form)
+        questions = list(self.study.questions.all())
         columns = {
             'item': form.cleaned_data['number_column'] - 1,
             'condition': form.cleaned_data['condition_column'] - 1,
@@ -357,7 +358,7 @@ class ItemUploadView(
         if self.study.has_audiolink_items:
             if form.cleaned_data['audio_description_column'] > 0:
                 columns.update({'audio_description': form.cleaned_data['audio_description_column'] - 1})
-        for i, question in enumerate(self.study.questions.all()):
+        for i, question in enumerate(questions):
             question_column = 'question_{}_question_column'.format(question.number + 1)
             if form.cleaned_data[question_column] > 0:
                 columns.update({'question{}'.format(i): form.cleaned_data[question_column] - 1})
@@ -368,7 +369,9 @@ class ItemUploadView(
             if form.cleaned_data[legend_column] > 0:
                 columns.update({'legend{}'.format(i): form.cleaned_data[legend_column] - 1})
         data = StringIO(contrib_csv.read_file(form.cleaned_data))
-        self.materials.items_csv_create(data, has_materials_column=False, user_columns=columns, detected_csv=form.detected_csv)
+        self.materials.items_from_csv(
+            data, has_materials_column=False, user_columns=columns, detected_csv=form.detected_csv,
+        )
         messages.success(self.request, 'Items uploaded.')
         self.validate_items()
         return result
@@ -567,7 +570,7 @@ class ItemFeedbackUploadView(
             'feedback': form.cleaned_data['feedback_column'] - 1,
         }
         data = StringIO(contrib_csv.read_file(form.cleaned_data))
-        self.materials.item_feedbacks_csv_create(data, has_materials_column=False, user_columns=columns, detected_csv=form.detected_csv)
+        self.materials.item_feedbacks_from_csv(data, has_materials_column=False, user_columns=columns, detected_csv=form.detected_csv)
         messages.success(self.request, 'Item lists uploaded.')
         return result
 
@@ -646,7 +649,7 @@ class ItemListUploadView(
             'items': form.cleaned_data['items_column'] - 1,
         }
         data = StringIO(contrib_csv.read_file(form.cleaned_data))
-        self.materials.itemlists_csv_create(data, has_materials_column=False, user_columns=columns, detected_csv=form.detected_csv)
+        self.materials.itemlists_from_csv(data, has_materials_column=False, user_columns=columns, detected_csv=form.detected_csv)
         messages.success(self.request, 'Item lists uploaded.')
         return result
 

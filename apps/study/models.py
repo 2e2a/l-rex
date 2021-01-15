@@ -279,13 +279,16 @@ class Study(models.Model):
 
     def save(self, *args, **kwargs):
         new_slug = slugify_unique(self.title, Study, self.id)
+        slug_changed = False
         if self.slug != new_slug:
             self.slug = new_slug
+            slug_changed = True
+        super().save(*args, **kwargs)
+        if slug_changed:
             for materials in self.materials.all():
                 materials.save()
-        for questionnaire in self.questionnaires.all():
-            questionnaire.save()
-        return super().save(*args, **kwargs)
+            for questionnaire in self.questionnaires.all():
+                questionnaire.save()
 
     def __str__(self):
         return self.title
@@ -614,21 +617,21 @@ class Study(models.Model):
         return [
             ('01_results.csv', self.results_csv, None,
              'Study results'),
-            ('02_settings.csv', self.settings_csv, self.settings_csv_restore,
+            ('02_settings.csv', self.settings_csv, self.settings_from_csv,
              'General study settings, instructions, intro/outro, etc.'),
-            ('03_questions.csv', self.questions_csv, self.questions_csv_restore,
+            ('03_questions.csv', self.questions_csv, self.questions_from_csv,
              'Questions'),
-            ('04_materials.csv', self.materials_csv, self.materials_csv_restore,
+            ('04_materials.csv', self.materials_csv, self.materials_from_csv,
              'Settings for each set of materials'),
-            ('05_items.csv', self.items_csv, self.items_csv_restore,
+            ('05_items.csv', self.items_csv, self.items_from_csv,
              'Items for all sets of materials'),
-            ('06_item_feedbacks.csv', self.item_feedbacks_csv, self.item_feedbacks_restore,
+            ('06_item_feedbacks.csv', self.item_feedbacks_csv, self.item_feedbacks_from_csv,
              'Item feedback (if used)'),
-            ('07_lists.csv', self.itemlists_csv, self.itemlists_csv_restore,
+            ('07_lists.csv', self.itemlists_csv, self.itemlists_from_csv,
              'Lists for all sets of materials'),
-            ('08_questionnaires.csv', self.questionnaires_csv, self.questionnaires_csv_restore,
+            ('08_questionnaires.csv', self.questionnaires_csv, self.questionnaires_from_csv,
              'Study questionnaires'),
-            ('09_blocks.csv', self.questionnaire_blocks_csv, self.questionnaire_blocks_csv_restore,
+            ('09_blocks.csv', self.questionnaire_blocks_csv, self.questionnaire_blocks_from_csv,
              'Questionnaire blocks (if used)'),
         ]
 
@@ -697,7 +700,7 @@ class Study(models.Model):
             ['demographics', self.demographics_string]
         )
 
-    def settings_csv_restore(self, fileobj):
+    def settings_from_csv(self, fileobj):
         reader = csv.reader(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
         study_settings = self._read_settings(reader)
         if not self.is_archived:
@@ -736,7 +739,8 @@ class Study(models.Model):
                 question.rating_comment,
             ])
 
-    def questions_csv_restore(self, fileobj, detected_csv=contrib_csv.DEFAULT_DIALECT):
+    def questions_from_csv(self, fileobj, detected_csv=contrib_csv.DEFAULT_DIALECT):
+        scale_values = []
         columns = contrib_csv.csv_columns(self.questions_csv_header)
         reader = csv.reader(fileobj, delimiter=detected_csv['delimiter'], quoting=detected_csv['quoting'])
         if detected_csv['has_header']:
@@ -754,12 +758,15 @@ class Study(models.Model):
                 rating_comment=row[columns['rating_comment']],
             )
             for i, scale_value in enumerate(split_list_string(row[columns['scale_labels']])):
-                ScaleValue.objects.create(
-                    number=i,
-                    question=question,
-                    label=scale_value,
+                scale_values.append(
+                    ScaleValue(
+                        number=i,
+                        question=question,
+                        label=scale_value,
+                    )
                 )
             question_number += 1
+        ScaleValue.objects.bulk_create(scale_values)
 
     def materials_csv_header(self, **kwargs):
         return ['title', 'list_distribution', 'is_filler', 'is_example', 'block', 'items_validated']
@@ -778,7 +785,7 @@ class Study(models.Model):
                 materials.items_validated,
             ])
 
-    def materials_csv_restore(self, fileobj, detected_csv=contrib_csv.DEFAULT_DIALECT):
+    def materials_from_csv(self, fileobj, detected_csv=contrib_csv.DEFAULT_DIALECT):
         columns = contrib_csv.csv_columns(self.materials_csv_header)
         reader = csv.reader(fileobj, delimiter=detected_csv['delimiter'], quoting=detected_csv['quoting'])
         if detected_csv['has_header']:
@@ -804,10 +811,10 @@ class Study(models.Model):
                 writer.writerow(header)
             materials.items_csv(fileobj, add_header=False, add_materials_column=True)
 
-    def items_csv_restore(self, fileobj, **kwargs):
+    def items_from_csv(self, fileobj, **kwargs):
         for materials in self.materials.all():
             fileobj.seek(0)
-            materials.items_csv_create(fileobj, has_materials_column=True)
+            materials.items_from_csv(fileobj, has_materials_column=True)
 
     def itemlists_csv(self, fileobj):
         for i, materials in enumerate(self.materials.all()):
@@ -817,10 +824,10 @@ class Study(models.Model):
                 writer.writerow(header)
             materials.itemlists_csv(fileobj, add_header=False, add_materials_column=True)
 
-    def itemlists_csv_restore(self, fileobj, **kwargs):
+    def itemlists_from_csv(self, fileobj, **kwargs):
         for materials in self.materials.all():
             fileobj.seek(0)
-            materials.itemlists_csv_create(fileobj, has_materials_column=True)
+            materials.itemlists_from_csv(fileobj, has_materials_column=True)
 
     def questionnaires_csv_header(self, **kwargs):
         return ['questionnaire', 'lists', 'items', 'question_order']
@@ -844,32 +851,42 @@ class Study(models.Model):
                 csv_row.append('')
             writer.writerow(csv_row)
 
-    def questionnaires_csv_restore(self, fileobj, user_columns=None, detected_csv=contrib_csv.DEFAULT_DIALECT):
+    def questionnaires_from_csv(self, fileobj, user_columns=None, detected_csv=contrib_csv.DEFAULT_DIALECT):
+        # FIXME: handle validation error?
+        from apps.item.models import Item, ItemList
         from apps.trial.models import Questionnaire, QuestionnaireItem
         from apps.trial.forms import QuestionnaireUploadForm
+        questionnaire_items = []
         self.delete_questionnaires()
         reader = csv.reader(fileobj, delimiter=detected_csv['delimiter'], quoting=detected_csv['quoting'])
         if detected_csv['has_header']:
             next(reader)
         columns = contrib_csv.csv_columns(self.questionnaires_csv_header, user_columns=user_columns)
+        materials_titles = { materials.pk: materials.title for materials in self.materials.all()}
+        study_items = list(Item.objects.filter(materials__study=self).all())
+        study_itemlists = list(ItemList.objects.filter(materials__study=self).all())
         for row in reader:
             if not row:
                 continue
             questionnaire = Questionnaire.objects.create(study=self, number=row[columns['questionnaire']])
             if 'lists' in columns:
-                item_lists = QuestionnaireUploadForm.read_item_lists(self, row[columns['lists']])
-                questionnaire.item_lists.set(item_lists)
-            items = QuestionnaireUploadForm.read_items(self, row[columns['items']])
-            if self.pseudo_randomize_question_order:
-                question_orders = re.findall('"([^"]+)"', row[columns['question_order']])
-            for i, item in enumerate(items):
-                QuestionnaireItem.objects.create(
-                    number=i,
-                    questionnaire=questionnaire,
-                    item=item,
-                    question_order=question_orders[i] if self.pseudo_randomize_question_order else None,
+                item_lists = QuestionnaireUploadForm.read_item_lists(
+                    self, row[columns['lists']], materials_titles, study_itemlists
                 )
-            questionnaire.save()
+                questionnaire.item_lists.set(item_lists)
+            items = QuestionnaireUploadForm.read_items(row[columns['items']], materials_titles, study_items)
+            if self.pseudo_randomize_question_order:
+                question_orders = re.findall('"([^"]+)"', row[columns['question_order']])  # FIXME: why
+            for i, item in enumerate(items):
+                questionnaire_items.append(
+                    QuestionnaireItem(
+                        number=i,
+                        questionnaire=questionnaire,
+                        item=item,
+                        question_order=question_orders[i] if self.pseudo_randomize_question_order else None,
+                    )
+                )
+        QuestionnaireItem.objects.bulk_create(questionnaire_items)
 
     def questionnaire_blocks_csv_header(self, **kwargs):
         return ['block', 'randomization', 'instructions', 'short_instructions']
@@ -887,7 +904,7 @@ class Study(models.Model):
             ]
             writer.writerow(csv_row)
 
-    def questionnaire_blocks_csv_restore(self, fileobj, user_columns=None, detected_csv=contrib_csv.DEFAULT_DIALECT):
+    def questionnaire_blocks_from_csv(self, fileobj, user_columns=None, detected_csv=contrib_csv.DEFAULT_DIALECT):
         from apps.trial.models import QuestionnaireBlock
         self.delete_questionnaire_blocks()
         reader = csv.reader(fileobj, delimiter=detected_csv['delimiter'], quoting=detected_csv['quoting'])
@@ -913,10 +930,10 @@ class Study(models.Model):
                 writer.writerow(header)
             materials.item_feedbacks_csv(fileobj, add_header=False, add_materials_column=True)
 
-    def item_feedbacks_restore(self, fileobj, **kwargs):
+    def item_feedbacks_from_csv(self, fileobj, **kwargs):
         for materials in self.materials.all():
             fileobj.seek(0)
-            materials.item_feedbacks_csv_create(fileobj, has_materials_column=True)
+            materials.item_feedbacks_from_csv(fileobj, has_materials_column=True)
 
     def archive_file(self, fileobj):
         with zipfile.ZipFile(fileobj, 'w', zipfile.ZIP_DEFLATED) as archive:
@@ -1163,7 +1180,7 @@ class ScaleValue(models.Model):
         related_name='scale_values',
     )
     LABEL_MAX_LENGTH = 1000
-    label = models.CharField(
+    label = models.TextField(
         max_length=LABEL_MAX_LENGTH,
         help_text='Provide a label for this point of the scale.',
     )

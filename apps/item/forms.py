@@ -324,38 +324,37 @@ class ItemListUploadForm(contrib_forms.CSVUploadForm):
         super().__init__(*args, **kwargs)
 
     @staticmethod
-    def read_items(materials, items_string):
+    def read_items(items_string, materials_items):
         items = []
-        error_msg = None
         item_strings = items_string.split(',')
         for item_string in item_strings:
             pattern = re.compile('(\d+)(\D+)')
             match = pattern.match(item_string)
             if not match or len(match.groups()) != 2:
-                error_msg = 'Not a valid item format "{}".'.format(item_string)
-                break
-            item_num = match.group(1)
-            item_cond = match.group(2)
+                raise forms.ValidationError('Not a valid item format "{}".'.format(item_string))
             try:
-                item = models.Item.objects.get(
-                    materials=materials,
-                    number=item_num,
-                    condition=item_cond,
-                )
-                items.append(item)
-            except models.Item.DoesNotExist:
-                error_msg = 'Item {} does not exist.'.format(item_string)
-                break
-        if error_msg:
-            raise forms.ValidationError(error_msg)
+                item_num = int(match.group(1))
+            except ValueError:
+                raise forms.ValidationError('Not a valid item format "{}".'.format(item_string))
+            item_cond = match.group(2)
+            item_match = None
+            for item in materials_items:
+                if item.number == item_num and item.condition == item_cond:
+                    item_match = item
+                    break
+            if item_match:
+                items.append(item_match)
+            else:
+                raise forms.ValidationError('Item {} does not exist.'.format(item_string))
         return items
 
     def check_upload_form(self, reader, cleaned_data):
         used_items = set()
+        materials_items = list(self.materials.items.all())
         for row in reader:
             int(row[cleaned_data['list_column'] - 1])
             items_string = row[cleaned_data['items_column'] - 1]
-            used_items.update(self.read_items(self.materials, items_string))
+            used_items.update(self.read_items(items_string, materials_items))
         if not len(used_items) == models.Item.objects.filter(materials=self.materials).count():
             raise forms.ValidationError('Not all items used in lists.')
 

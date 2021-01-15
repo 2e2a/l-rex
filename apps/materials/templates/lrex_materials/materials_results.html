@@ -34,7 +34,7 @@
     <th scope="col">N</th>
     {% for question in study.questions.all %}
         {% for scale_value in question.scale_values.all %}
-        <th scope="col" class="table-primary">{{ scale_value.label }}</th>
+        <th scope="col" class="table-primary">{{ scale_value.label|truncatechars:"10" }}</th>
         {% endfor %}
     {% endfor %}
 </tr>
