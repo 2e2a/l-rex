@@ -738,17 +738,6 @@ class RatingsCreateView(ProgressMixin, TestTrialMixin, TrialMixin, generic.Templ
             return redirect(self.get_next_url())
         return super().get(request, *args, **kwargs)
 
-    @property
-    def _has_long_scale_value(self):
-        scale_values = study_models.ScaleValue.objects.filter(question__study=self.study).all()
-        sum_length = sum(len(scale_value.label) for scale_value in scale_values)
-        item_scale_label_list = item_models.ItemQuestion.objects.filter(
-            item__materials__study=self.study
-        ).values_list('scale_labels', flat=True)
-        for item_scale_labels in item_scale_label_list:
-            sum_length = max(sum_length, len(item_scale_labels))
-        return sum_length >= self.HORIZONTAL_LAYOUT_LIMIT
-
     def get_context_data(self, **kwargs):
         kwargs.update(
             {
@@ -760,7 +749,7 @@ class RatingsCreateView(ProgressMixin, TestTrialMixin, TrialMixin, generic.Templ
         context = super().get_context_data(**kwargs)
         context.update({
             'contact': mark_safe(self.study.contact),
-            'exceeds_horizontal_limit': self._has_long_scale_value,
+            'use_vertical_scale_layout': self.study.use_vertical_scale_layout,
         })
         if self.study.short_instructions:
             context['short_instructions_rich'] = mark_safe(markdownify(self.study.short_instructions))
