@@ -70,6 +70,13 @@ class Study(models.Model):
         default=False,
         help_text='Show questions in random order (if multiple questions are defined).',
     )
+    use_vertical_scale_layout = models.BooleanField(
+        default=False,
+        help_text=(
+            'Enable if you want the response options to be presented below each other (default: horizontal layout). '
+            'If multiple questions are defined, this setting applies to all of them.'
+        ),
+    )
     enable_item_rating_feedback = models.BooleanField(
         default=False,
         help_text='Allows you to define feedback shown to participants for individual item ratings.',

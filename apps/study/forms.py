@@ -73,6 +73,7 @@ class StudySettingsForm(contrib_forms.CrispyModelForm):
             'trial_limit',
             'use_blocks',
             'pseudo_randomize_question_order',
+            'use_vertical_scale_layout',
             'enable_item_rating_feedback',
         ]
         widgets = {
