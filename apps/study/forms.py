@@ -239,6 +239,8 @@ class ArchiveForm(contrib_forms.CrispyModelForm):
         required=True,
         label='Please confirm that you have successfully downloaded and checked the archive file and want to proceed.'
     )
+    submit_label = 'Archive study (delete all study data)'
+    submit_css_class = 'btn-danger'
 
     class Meta:
         model = models.Study

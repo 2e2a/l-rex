@@ -44,19 +44,21 @@
         </td>
         {% endif %}
         {% for rating in ratings %}
-        <td>
-            {{ rating.scale_value.label }}
-        </td>
-        {% if rating.question_object.has_rating_comment %}
-        <td>
-            {% if rating.comment %}
-            "{{ rating.comment }}"
+            <td>
+                {{ rating.scale_value.label }}
+            </td>
+            {% if rating.question_object.has_rating_comment %}
+            <td>
+                {% if rating.comment %}
+                "{{ rating.comment }}"
+                {% endif %}
+            </td>
             {% endif %}
-        </td>
-        {% endif %}
-        <td>
-            {{ rating.created|date:"SHORT_DATETIME_FORMAT" }}
-        </td>
+            {% if forloop.last %}
+            <td>
+                {{ rating.created|date:"SHORT_DATETIME_FORMAT" }}
+            </td>
+            {% endif %}
         {% endfor %}
     </tr>
     {% endfor %}
