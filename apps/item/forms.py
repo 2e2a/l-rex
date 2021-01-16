@@ -349,14 +349,11 @@ class ItemListUploadForm(contrib_forms.CSVUploadForm):
         return items
 
     def check_upload_form(self, reader, cleaned_data):
-        used_items = set()
         materials_items = list(self.materials.items.all())
         for row in reader:
             int(row[cleaned_data['list_column'] - 1])
             items_string = row[cleaned_data['items_column'] - 1]
-            used_items.update(self.read_items(items_string, materials_items))
-        if not len(used_items) == models.Item.objects.filter(materials=self.materials).count():
-            raise forms.ValidationError('Not all items used in lists.')
+            self.read_items(items_string, materials_items)
 
 
 class ItemFeedbackForm(contrib_forms.OptionalLabelMixin, forms.ModelForm):

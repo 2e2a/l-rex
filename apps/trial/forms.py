@@ -185,19 +185,16 @@ class QuestionnaireUploadForm(contrib_forms.CSVUploadForm):
         return lists
 
     def check_upload_form(self, reader, cleaned_data):
-        used_items = set()
         materials_titles = { materials.pk: materials.title for materials in self.materials.all()}
         study_items = list(item_models.Item.objects.filter(marials__study=self.study).all())
         for row in reader:
             int(row[cleaned_data['questionnaire_column'] - 1])
             item_lists_col = cleaned_data['item_lists_column']
             items_string = row[cleaned_data['items_column'] - 1]
-            used_items.update(self.read_items(items_string, materials_titles, study_items))
+            self.read_items(items_string, materials_titles, study_items)
             if item_lists_col > 0:
                 item_lists_string = row[item_lists_col - 1]
                 self.read_item_lists(self.study, item_lists_string, materials_titles, study_items)
-        if not len(used_items) == item_models.Item.objects.filter(materials__study=self.study).count():
-            raise forms.ValidationError('Not all items used in questionnaires.')
 
 
 class ConsentForm(contrib_forms.CrispyForm):
