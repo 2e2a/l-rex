@@ -274,7 +274,6 @@ class Materials(models.Model):
     def results(self):
         ratings = trial_models.Rating.objects.filter(
             questionnaire_item__item__materials=self,
-            trial__is_test=False,
         ).prefetch_related(
             'scale_value',
             'trial',
@@ -300,6 +299,7 @@ class Materials(models.Model):
             else:
                 row = {
                     'participant': participant,
+                    'is_test_trial': 'yes' if rating.trial.is_test else 'no',
                     'item': item.number,
                     'condition': item.condition,
                     'position': rating.questionnaire_item.number + 1,
@@ -560,7 +560,7 @@ class Materials(models.Model):
             itemlist.items.set(items)
 
     def results_csv_header(self):
-        csv_row = ['materials', 'participant', 'item', 'condition', 'position']
+        csv_row = ['materials', 'participant', 'is_test_trial', 'item', 'condition', 'position']
         if self.study.pseudo_randomize_question_order:
             csv_row.append('question order')
         if self.study.has_question_with_random_scale:
@@ -577,7 +577,10 @@ class Materials(models.Model):
         writer = csv.writer(fileobj, delimiter=contrib_csv.DEFAULT_DELIMITER, quoting=contrib_csv.DEFAULT_QUOTING)
         results = self.results()
         for result in results:
-            csv_row = [self.title, result['participant'], result['item'], result['condition'], result['position']]
+            csv_row = [
+                self.title, result['participant'], result['is_test_trial'], result['item'], result['condition'],
+                result['position']
+            ]
             if self.study.pseudo_randomize_question_order:
                 csv_row.append(result['question_order'])
             if self.study.has_question_with_random_scale:
