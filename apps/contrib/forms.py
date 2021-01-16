@@ -28,6 +28,7 @@ class OptionalLabelMixin:
 class HelperMixin:
     helper = None
     submit_label = None
+    submit_css_class = None
     save_label = None
 
     add_save = False
@@ -38,7 +39,10 @@ class HelperMixin:
 
     def init_helper(self):
         self.helper = FormHelper()
-        self.helper.add_input(Submit('submit', self.submit_label))
+        if self.submit_css_class:
+            self.helper.add_input(Submit('submit', self.submit_label, css_class=self.submit_css_class))
+        else:
+            self.helper.add_input(Submit('submit', self.submit_label))
         if self.add_save:
             self.helper.add_input(Submit('save', self.save_label, css_class='btn-secondary'))
 
