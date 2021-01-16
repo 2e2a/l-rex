@@ -610,11 +610,14 @@ class TrialDetailView(
             questionnaire_items = questionnaire_items.prefetch_related('item__markdownitem')
         elif self.study.has_audiolink_items:
             questionnaire_items = questionnaire_items.prefetch_related('item__audiolinkitem')
-        paginator = Paginator(questionnaire_items, self.paginate_by)
+        questionnaire_items_with_ratings = []
+        for questionnaire_item in questionnaire_items.all():
+            ratings = questionnaire_item.ratings.filter(trial=trial)
+            questionnaire_items_with_ratings.append((questionnaire_item, ratings))
+        paginator = Paginator(questionnaire_items_with_ratings, self.paginate_by)
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         context.update({
-            'questionnaire_items': questionnaire_items,
             'page_obj': page_obj,
         })
         return context

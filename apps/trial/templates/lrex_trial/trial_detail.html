@@ -23,7 +23,7 @@
     </tr>
     </thead>
     <tbody>
-    {% for q_item in page_obj %}
+    {% for q_item, ratings in page_obj %}
     <tr>
         <td>{{ q_item.number }}</td>
         <td>{{ q_item.item.materials }}</td>
@@ -43,7 +43,7 @@
             {% endfor %}
         </td>
         {% endif %}
-        {% for rating in q_item.ratings.all %}
+        {% for rating in ratings %}
         <td>
             {{ rating.scale_value.label }}
         </td>
