@@ -429,19 +429,28 @@ class Materials(models.Model):
             else:
                 block = 1
 
+            item_fields = {
+                'number': row[columns['item']],
+                'condition': row[columns['condition']],
+                'materials': self,
+                'block': block,
+            }
             if self.study.has_text_items:
                 item_model = item_models.TextItem
+                item_fields.update({
+                    'text': row[columns['content']],
+                })
             elif self.study.has_markdown_items:
                 item_model = item_models.MarkdownItem
+                item_fields.update({
+                    'text': row[columns['content']],
+                })
             else:
                 item_model = item_models.AudioLinkItem
-            item = item_model.objects.create(
-                number=row[columns['item']],
-                condition=row[columns['condition']],
-                text=row[columns['content']],
-                materials=self,
-                block=block,
-            )
+                item_fields.update({
+                    'urls': row[columns['content']],
+                })
+            item = item_model.objects.create(**item_fields)
 
             if custom_question_column or custom_scale_column:
                 for question in questions:
