@@ -14,9 +14,9 @@
         <th>Random scale</th>
         {% endif %}
         {% for question in trial.questionnaire.study.questions.all %}
-        <th>Rating</th>
+        <th>Rating{{ forloop.counter }}</th>
         {% if question.has_rating_comment %}
-        <th>Comment</th>
+        <th>Comment{{ forloop.counter }}</th>
         {% endif %}
         {% endfor %}
         <th>Time</th>
