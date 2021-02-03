@@ -78,7 +78,7 @@
     </div>
     {% for announcement in announcements %}
         <div class="alert alert-dark border" role="alert">
-            {{ announcement }}
+            {{ announcement|safe }}
         </div>
     {% endfor %}
     {% for message in messages %}
