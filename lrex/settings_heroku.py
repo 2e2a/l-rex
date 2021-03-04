@@ -123,7 +123,7 @@ SECURE_SSL_REDIRECT = True
 
 # server settings
 SITE_ID = 1
-ADMINS = []
+ADMINS = [('Admin', 'admin@l-rex.de')]
 DEFAULT_FROM_EMAIL = 'support@l-rex.de'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.getenv('EMAIL_HOST')
