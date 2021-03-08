@@ -21,29 +21,5 @@
       "is_staff": true,
       "is_active": true
     }
-  },
-  {
-    "model": "account.emailaddress",
-    "pk": 1,
-    "fields": {
-      "user": [
-        "user"
-      ],
-      "email": "user@lrex.org",
-      "verified": true,
-      "primary": true
-    }
-  },
-  {
-    "model": "account.emailaddress",
-    "pk": 2,
-    "fields": {
-      "user": [
-        "admin"
-      ],
-      "email": "admin@lrex.org",
-      "verified": true,
-      "primary": true
-    }
   }
 ]
