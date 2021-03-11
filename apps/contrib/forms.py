@@ -52,6 +52,7 @@ class CrispyForm(OptionalLabelMixin, HelperMixin, forms.Form):
     save_label = 'Save'
 
     def __init__(self, *args, **kwargs):
+        self.study = kwargs.pop('study', None)
         super().__init__(*args, **kwargs)
         self.init_helper()
         self.append_optional_to_labels()
@@ -62,6 +63,7 @@ class CrispyModelForm(OptionalLabelMixin, HelperMixin, forms.ModelForm):
     save_label = 'Save'
 
     def __init__(self, *args, **kwargs):
+        self.study = kwargs.pop('study', None)
         super().__init__(*args, **kwargs)
         self.init_helper()
         self.append_optional_to_labels()
@@ -110,3 +112,51 @@ class CSVUploadForm(CrispyForm):
             except (ValueError, AssertionError):
                 raise forms.ValidationError('Line {}: unexpected entry.'.format(reader.line_num), code='invalid')
         return cleaned_data
+
+
+class CrispyModelFormsetFactory:
+    form_tag = True
+
+    def __new__(cls, form_count=None, custom_formset=None, study=None):
+        helper = FormHelper()
+        helper.form_tag = cls.form_tag
+        layout = cls.get_layout(study)
+        if layout:
+            helper.add_layout(layout)
+        if cls.form_tag:
+            inputs = cls.get_inputs(study=study)
+            if inputs is None:
+                helper.add_input(Submit('submit', 'Submit'))
+                helper.add_input(Submit('save', 'Save', css_class='btn-secondary'))
+                if form_count:
+                    helper.add_input(Submit('reset', 'Reset', css_class='btn-secondary'))
+            else:
+                for input in inputs:
+                    helper.add_input(input)
+        factory_kwargs = {
+            'form': cls.form,
+        }
+        if form_count:
+            factory_kwargs.update({
+                'extra': 0,
+                'min_num': form_count,
+            })
+        else:
+            form_disabled = study.is_active or study.is_finished
+            factory_kwargs.update({
+                'extra': 1 if not form_disabled else 0,
+                'can_delete': True
+            })
+        if custom_formset:
+            factory_kwargs['formset'] = custom_formset
+        formset_class = forms.modelformset_factory(cls.model, **factory_kwargs)
+        formset_class.helper = helper
+        return formset_class
+
+    @staticmethod
+    def get_inputs(study=None):
+        return None
+
+    @staticmethod
+    def get_layout(study=None):
+        return None

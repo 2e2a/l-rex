@@ -18,9 +18,8 @@ class MaterialsForm(contrib_forms.CrispyModelForm):
         ]
 
     def __init__(self, *args, **kwargs):
-        study = kwargs.pop('study')
         super().__init__(*args, **kwargs)
-        if not study.use_blocks:
+        if not self.study.use_blocks:
             self.fields['is_example'].widget = forms.HiddenInput()
             self.fields['block'].widget = forms.HiddenInput()
 
