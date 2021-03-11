@@ -1205,6 +1205,9 @@ class DemographicField(models.Model):
         on_delete=models.CASCADE,
         related_name='demographics'
     )
+    number = models.IntegerField(
+        default=0,
+    )
     name = models.CharField(
         max_length=500,
         help_text='You can enter a demographic question (e.g., "age" or "native languages"). The participants will '
@@ -1213,7 +1216,7 @@ class DemographicField(models.Model):
     )
 
     class Meta:
-        ordering = ['study', 'pk']
+        ordering = ['study', 'number']
 
     def __str__(self):
         return self.name
