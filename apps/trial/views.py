@@ -1,4 +1,5 @@
 from markdownx.utils import markdownify
+from crispy_forms.layout import HTML
 
 from django.contrib import messages
 from django.conf import settings
@@ -203,51 +204,55 @@ class QuestionnaireGenerateView(
     study_views.CheckStudyCreatorMixin,
     study_views.DisableFormIfStudyActiveMixin,
     study_views.QuestionnaireNavMixin,
-    generic.TemplateView
+    contrib_views.FormsetView,
 ):
     title = 'Generate questionnaires'
     template_name = 'lrex_dashboard/questionnaire_formset_form.html'
-    formset = None
-    helper = None
+    formset_factory = forms.QuestionnaireGenerateFormsetFactory
+
+    item_blocks = None
+
+    def get_formset_queryset(self):
+        return self.study.questionnaire_blocks.all()
+
+    def get_form_count(self):
+        return len(self.item_blocks)
+
+    def save_form(self, form, number):
+        form.instance.block = number + 1
+        form.instance.study = self.study
+        super().save_form(form, number)
+
+    def submit_redirect(self):
+        return redirect('questionnaires', study_slug=self.study.slug)
 
     def dispatch(self, request, *args, **kwargs):
-        self.helper = forms.questionnaire_block_formset_helper(has_example_block=self.study.has_exmaples)
-        self.blocks = self.study.item_blocks
+        self.item_blocks = self.study.item_blocks
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
         if not self.study.is_allowed_pseudo_randomization:
             messages.info(request, 'Note: Define filler materials to use pseudo randomization.')
-        return super().dispatch(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
     def _initialize_questionnaire_blocks(self):
         existing_blocks = models.QuestionnaireBlock.objects.filter(study=self.study)
-        if len(existing_blocks) != len(self.blocks):
-            for block in existing_blocks: block.delete()
-            for block in self.blocks:
+        if len(existing_blocks) != len(self.item_blocks):
+            for block in existing_blocks:
+                block.delete()
+            for block in self.item_blocks:
                 models.QuestionnaireBlock.objects.create(
                     study=self.study,
                     block=block,
                 )
 
-    def get(self, request, *args, **kwargs):
+    def formset_valid(self):
         self._initialize_questionnaire_blocks()
-        self.formset = forms.questionnaire_block_factory(len(self.blocks))(
-            queryset=models.QuestionnaireBlock.objects.filter(study=self.study)
-        )
-        forms.customize_randomization(self.formset, self.study)
-        return super().get(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        if 'submit' in request.POST:
-            self.formset = forms.questionnaire_block_factory(len(self.blocks))(request.POST, request.FILES)
-            forms.customize_randomization(self.formset, self.study)
-            if self.formset.is_valid():
-                self.formset.save(commit=True)
-                try:
-                    self.study.generate_questionnaires()
-                    messages.success(request, 'Questionnaires generated.')
-                except RuntimeError:
-                    messages.error(request, 'Pseudo-randomization timed out. Retry or add more filler items and retry.')
-                return redirect('questionnaires', study_slug=self.study.slug)
-        return super().get(request, *args, **kwargs)
+        try:
+            self.study.generate_questionnaires()
+            messages.success(self.request, 'Questionnaires generated.')
+        except RuntimeError:
+            messages.error(self.request, 'Pseudo-randomization timed out. Retry or add more filler items and retry.')
 
 
 class QuestionnaireDeleteAllView(
@@ -277,17 +282,34 @@ class QuestionnaireBlockInstructionsUpdateView(
     contrib_views.LeaveWarningMixin,
     contrib_views.DisableFormMixin,
     study_views.QuestionnaireNavMixin,
-    generic.TemplateView,
+    contrib_views.FormsetView,
 ):
     title = 'Edit questionnaire block instructions'
     template_name = 'lrex_dashboard/questionnaire_formset_form.html'
-    formset = None
-    helper = None
+    formset_factory = forms.QuestionnaireBlockFormsetFactory
 
-    def dispatch(self, *args, **kwargs):
-        self.helper = forms.questionnaire_block_update_formset_helper()
-        self.blocks = self.study.item_blocks
-        return super().dispatch(*args, **kwargs)
+    def get_formset_queryset(self):
+        return self.study.questionnaire_blocks.all()
+
+    def get_form_count(self):
+        return self.study.questionnaire_blocks.count()
+
+    def submit_redirect(self):
+        return redirect('questionnaires', study_slug=self.study.slug)
+
+    def get(self, request, *args, **kwargs):
+        if not self.study.use_blocks:
+            messages.info(request, 'Blocks are disabled for this study.')
+        if not self.study.items_validated:
+            messages.info(request, 'All materials items need to be validated before creating block instructions.')
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'nav2_active': 1,
+        })
+        return context
 
     @property
     def is_disabled(self):
@@ -297,33 +319,6 @@ class QuestionnaireBlockInstructionsUpdateView(
             return True
         return False
 
-    def get(self, request, *args, **kwargs):
-        self.formset = forms.questionnaire_block_update_factory(len(self.blocks))(
-            queryset=models.QuestionnaireBlock.objects.filter(study=self.study)
-        )
-        if not self.study.use_blocks:
-            messages.info(request, 'Blocks are disabled for this study.')
-        if not self.study.items_validated:
-            messages.info(request, 'All materials items need to be validated before creating block instructions.')
-        return super().get(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        self.formset = forms.questionnaire_block_update_factory(len(self.blocks))(request.POST, request.FILES)
-        if self.formset.is_valid():
-            self.formset.save(commit=True)
-            messages.success(request, 'Block instructions updated.')
-            if 'submit' in request.POST:
-                return redirect('study', study_slug=self.study.slug)
-            else:  # save
-                return redirect('questionnaire-blocks', study_slug=self.study.slug)
-        return super().get(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update({
-            'nav2_active': 1,
-        })
-        return context
 
 
 class QuestionnaireUploadView(
@@ -455,6 +450,7 @@ class TrialDeleteAllView(
 
 
 class TestTrialMixin:
+    message = 'Note: This is a test trial.'
 
     @cached_property
     def is_test_trial(self):
@@ -462,8 +458,13 @@ class TestTrialMixin:
 
     def get(self, request, *args, **kwargs):
         if self.is_test_trial:
-            messages.warning(request, 'Note: This is a test trial.')
+            messages.warning(request, self.message)
         return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        if self.is_test_trial:
+            messages.warning(request, self.message)
+        return super().post(request, *args, **kwargs)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -545,45 +546,30 @@ class TrialCreateView(study_views.StudyMixin, TestTrialMixin, generic.CreateView
         return url
 
 
-class DemographicsCreateView(TrialMixin, TestTrialMixin, generic.TemplateView):
+class DemographicsCreateView(TrialMixin, TestTrialMixin, contrib_views.FormsetView):
     model = models.Rating
     template_name = 'lrex_trial/trial_demographics.html'
+    formset_factory = forms.DemographicsValueFormsetFactory
+    custom_formset = forms.DemographicsValueFormset
 
-    formset = None
-    helper = None
+    def get_formset_queryset(self):
+        return self.trial.demographics.all()
 
-    def dispatch(self, request, *args, **kwargs):
-        if self.trial.demographics.exists():
-            return redirect(reverse('ratings-create', args=[self.trial.slug, 0]))
-        self.n_fields = self.study.demographics.count()
-        self.helper = forms.demographics_formset_helper(self.study.continue_label)
-        return super().dispatch(request, *args, **kwargs)
+    def get_form_count(self):
+        return self.study.demographics.count()
 
-    def get(self, request, *args, **kwargs):
-        self.formset = forms.demographics_formset_factory(self.n_fields, self.n_fields)(
-            queryset=models.DemographicValue.objects.none()
-        )
-        forms.demographics_formset_init(self.formset, self.study.demographics.all())
-        return super().get(request, *args, **kwargs)
+    def save_form(self, form, number):
+        form.instance.field = self.study.demographics.get(number=number)
+        form.instance.trial = self.trial
+        super().save_form(form, number)
 
-    def get_success_url(self):
+    def submit_redirect(self):
         if self.study.use_blocks:
             url = reverse('rating-block-instructions', args=[self.trial.slug, 0])
         else:
             url = reverse('ratings-create', args=[self.trial.slug, 0])
         url = self.test_url(url)
-        return url
-
-    def post(self, request, *args, **kwargs):
-        self.formset = forms.demographics_formset_factory(self.n_fields)(request.POST, request.FILES)
-        forms.demographics_formset_init(self.formset, self.study.demographics.all())
-        if self.formset.is_valid():
-            instances = self.formset.save(commit=False)
-            for instance in instances:
-                instance.trial = self.trial
-                instance.save()
-            return redirect(self.get_success_url())
-        return super().get(request, *args, **kwargs)
+        return redirect(url)
 
 
 class TrialDetailView(
@@ -649,94 +635,73 @@ class ProgressMixin:
     def get_context_data(self, **kwargs):
         num = kwargs['num']
         count = kwargs['n_trial_items']
-        data = super().get_context_data(**kwargs)
-        data['progress_i'] = num
-        data['progress_count'] = count
-        data['progress'] = num * 100 / count
-        return data
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'progress_i': num,
+            'progress_count': count,
+            'progress': num * 100 / count,
+        })
+        return context
 
 
-class RatingsCreateView(ProgressMixin, TestTrialMixin, TrialMixin, generic.TemplateView):
+class RatingsCreateView(ProgressMixin, TestTrialMixin, TrialMixin, contrib_views.FormsetView):
     model = models.Rating
     template_name = 'lrex_trial/rating_form.html'
+    formset_factory = forms.RatingFormsetFactory
+    custom_formset = forms.RatingFormset
 
     HORIZONTAL_LAYOUT_LIMIT = 70
 
-    formset = None
-    helper = None
+    def get_formset_queryset(self):
+        return self.trial.rating_set.none()
+
+    def get_form_count(self):
+        return self.study.questions.count()
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({
+            'questionnaire_item': self.questionnaire_item,
+        })
+        return kwargs
+
+    def save_form(self, form, number):
+        form.instance.trial = self.trial
+        form.instance.questionnaire_item = self.questionnaire_item
+        try:
+            super().save_form(form, number)
+        except IntegrityError:
+            return redirect(self.get_next_url())
+
+    def submit_redirect(self):
+        if self.is_last:
+            self.trial.ended = now()
+            self.trial.save()
+        return redirect(self.get_next_url())
+
+    def formset_valid(self):
+        pass
+
+    def formset_invalid(self):
+        if any('scale_value' in form_errors for form_errors in self.formset.errors):
+            messages.error(self.request, self.study.answer_questions_message)
+        if any('feedbacks_given' in form_errors for form_errors in self.formset.errors):
+            messages.error(self.request, self.study.feedback_message)
 
     def dispatch(self, request, *args, **kwargs):
         self.num = int(self.kwargs['num'])
         redirect_link = self._redirect_to_correct_num(self.num)
         if redirect_link:
             return redirect(redirect_link)
-        self.questionnaire_item = models.QuestionnaireItem.objects.get(
+        self.questionnaire_item = models.QuestionnaireItem.objects.prefetch_related(
+            'item',
+            'item__item_questions',
+            'question_properties',
+        ).get(
             questionnaire=self.trial.questionnaire,
             number=self.num
         )
-        self.n_questions = self.study.questions.count()
-        self.item_questions = self.questionnaire_item.item.item_questions.all()
-        self.helper = forms.rating_formset_helper()
         return super().dispatch(request, *args, **kwargs)
-
-    def get(self, request, *args, **kwargs):
-        self.formset = forms.ratingformset_factory(self.n_questions)(
-            queryset=models.Rating.objects.none()
-        )
-        forms.ratingformset_init(
-            self.formset,
-            self.study,
-            self.item_questions,
-            self.questionnaire_item,
-        )
-        return super().get(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        if self.questionnaire_item.ratings.filter(trial=self.trial).exists():
-            return redirect(self.get_next_url())
-        self.formset = forms.ratingformset_factory(self.n_questions)(request.POST, request.FILES)
-        forms.ratingformset_init(
-            self.formset,
-            self.study,
-            self.item_questions,
-            self.questionnaire_item,
-        )
-        if self.formset.is_valid():
-            instances = self.formset.save(commit=False)
-            if len(instances) < self.n_questions or any(form['scale_value'].value() is None for form in self.formset):
-                response = self.get(request, *args, **kwargs)
-                for instance in instances:
-                    if hasattr(instance, 'scale_value'):
-                        self.formset[instance.question].fields['scale_value'].initial = instance.scale_value.pk
-                    if hasattr(instance, 'comment'):
-                        self.formset[instance.question].fields['comment'].initial = instance.comment
-                if self.n_questions > 1:
-                    messages.error(request, self.study.answer_questions_message)
-                else:
-                    messages.error(request, self.study.answer_question_message)
-                return response
-            elif self.study.enable_item_rating_feedback:
-                    show_feedback, feedbacks = self._handle_feedbacks(self.formset, instances)
-                    if show_feedback:
-                        response = self.get(request, *args, **kwargs)
-                        for instance in instances:
-                            self.formset[instance.question].fields['scale_value'].initial = instance.scale_value.pk
-                        show_feedback = forms.ratingformset_handle_feedbacks(self.formset, feedbacks)
-                        if show_feedback:
-                            messages.error(request, self.study.feedback_message)
-                        return response
-            for instance in instances:
-                instance.trial = self.trial
-                instance.questionnaire_item = self.questionnaire_item
-                try:
-                    instance.save()
-                except IntegrityError:
-                    return redirect(self.get_next_url())
-            if self.is_last:
-                self.trial.ended = now()
-                self.trial.save()
-            return redirect(self.get_next_url())
-        return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         kwargs.update(
@@ -789,25 +754,6 @@ class RatingsCreateView(ProgressMixin, TestTrialMixin, TrialMixin, generic.Templ
             url = reverse('rating-outro', args=[self.trial.slug])
         url = self.test_url(url)
         return url
-
-    def _handle_feedbacks(self, ratingforms, instances):
-        feedbacks = []
-        reload_form_with_feedback = False
-        feedbacks_qs = self.questionnaire_item.item.item_feedback
-        if feedbacks_qs.count() > 0:
-            for i, instance in enumerate(instances):
-                question_feedbacks = feedbacks_qs.filter(question=instance.scale_value.question)
-                feedbacks_given = ratingforms[i]['feedbacks_given'].value()
-                feedbacks_given = [int(f) for f in feedbacks_given.split(',')] if feedbacks_given else []
-                show_feedback = None
-                for feedback in question_feedbacks:
-                    if feedback.pk not in feedbacks_given and feedback.show_feedback(instance.scale_value):
-                        reload_form_with_feedback = True
-                        show_feedback = feedback
-                    feedbacks.append(
-                        (i, feedbacks_given, show_feedback)
-                    )
-        return reload_form_with_feedback, feedbacks
 
 
 class RatingBlockInstructionsView(ProgressMixin, TestTrialMixin, TrialMixin, generic.TemplateView):

@@ -306,7 +306,6 @@ class QuestionnaireBlock(models.Model):
         choices=RANDOMIZATION_TYPE,
         default=RANDOMIZATION_PSEUDO,
         help_text='Randomize items in each questionnaire block.',
-        blank=True,
     )
     study = models.ForeignKey(
         'lrex_study.Study',
@@ -333,9 +332,6 @@ class QuestionnaireItem(models.Model):
     @cached_property
     def question_order_user(self):
         return ','.join(str(int(question_num) + 1) for question_num in self.question_order.split(','))
-
-    def question_property(self, number):
-        return self.question_properties.filter(number=number).first()
 
     def __str__(self):
         return '{} - {}'.format(self.number, self.item)

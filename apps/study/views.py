@@ -27,7 +27,7 @@ class WarnUserIfStudyActiveMixin:
 
     def get(self, request, *args, **kwargs):
         if self.study.is_active or self.study.is_finished:
-            if hasattr(self, 'form_valid') or hasattr(self, 'helper'):
+            if hasattr(self, 'form_valid') or hasattr(self, 'formset'):
                 msg = 'Note: Form is disabled. '
             else:
                 msg = 'Note: Some actions are disabled. '
@@ -593,26 +593,18 @@ class QuestionUpdateView(
     contrib_views.LeaveWarningMixin,
     DisableFormIfStudyActiveMixin,
     TasksNavMixin,
-    generic.DetailView,
+    contrib_views.FormsetView,
 ):
     model = models.Study
     title = 'Questions'
     template_name = 'lrex_dashboard/tasks_formset_form.html'
-    formset = None
-    helper = None
+    formset_factory = forms.QuestionFormsetFactory
 
-    @property
-    def is_disabled(self):
-        if self.study.is_active:
-            return True
-        if self.study.has_item_questions:
-            return True
-        return False
+    def get_formset_queryset(self):
+        return self.study.questions.all()
 
-    def dispatch(self, *args, **kwargs):
-        self.helper = forms.question_formset_helper()
-        self.n_questions = self.study.questions.count()
-        return super().dispatch(*args, **kwargs)
+    def submit_redirect(self):
+        return redirect('study', study_slug=self.study.slug)
 
     def get(self, request, *args, **kwargs):
         if not self.is_disabled:
@@ -624,74 +616,39 @@ class QuestionUpdateView(
                       '<a href="{}">remove questionnaires</a> first.'.format(
                     reverse('questionnaires', args=[self.study.slug]))
                 messages.info(request, mark_safe(msg))
-        self.formset = forms.question_formset_factory(self.n_questions, 0 if self.n_questions > 0 else 1)(
-            queryset=self.study.questions.all()
-        )
-        forms.initialize_with_questions(self.formset, self.study.questions.all())
-        forms.question_formset_disable_fields(
-            self.formset,
-            disable_randomize_scale=self.study.has_questionnaires,
-        )
         return super().get(request, *args, **kwargs)
 
     def _invalidate_materials_items(self):
         for materials in self.study.materials.all():
             materials.set_items_validated(False)
 
-    def post(self, request, *args, **kwargs):
-        self.formset = forms.question_formset_factory(self.n_questions)(request.POST, request.FILES)
-        if self.formset.is_valid():
-            instances = self.formset.save(commit=False)
-            for i, (instance, form) in enumerate(zip(instances, self.formset)):
-                instance.study = self.study
-                instance.number = i
-                instance.save()
-                scale_values_new = []
-                scale_values_old = list(instance.scale_values.all())
-                scale_labels = split_list_string(form.cleaned_data['scale_labels'])
-                for j, scale_label in enumerate(scale_labels):
-                    if scale_label:
-                        scale_value, created = models.ScaleValue.objects.get_or_create(
-                            number=j,
-                            question=instance,
-                            label=scale_label,
-                        )
-                        if created:
-                            scale_values_new.append(scale_value)
-                        else:
-                            scale_values_old.remove(scale_value)
-                if scale_values_old or scale_values_new and self.study.has_item_questions:
-                    self._invalidate_materials_items()
-                for scale_value in scale_values_old:
-                    scale_value.delete()
-            self.n_questions = self.study.questions.count()
-            extra = len(self.formset.forms) - self.n_questions
-            if 'submit' in request.POST:
-                messages.success(request, 'Questions saved.')
-                return redirect('study', study_slug=self.study.slug)
-            elif 'save' in request.POST:
-                messages.success(request, 'Questions saved.')
-            elif 'add' in request.POST:
-                self.formset = forms.question_formset_factory(self.n_questions, extra + 1)(
-                    queryset=models.Question.objects.filter(study=self.study)
+    def save_form(self, form, number):
+        form.instance.study = self.study
+        form.instance.number = number
+        super().save_form(form, number)
+        scale_values = []
+        number_changed = False
+        scale_values_old_count = form.instance.scale_values.all().count()
+        scale_labels = split_list_string(form.cleaned_data['scale_labels'])
+        scale_values_count = len(scale_labels)
+        if scale_values_old_count > scale_values_count:
+            n_deleted_scales = scale_values_old_count - scale_values_count
+            form.instance.scale_values.all()[n_deleted_scales:].delete()
+            number_changed = True
+        for j, scale_label in enumerate(scale_labels):
+            if scale_label:
+                scale_value, created = models.ScaleValue.objects.get_or_create(
+                    number=j,
+                    question=form.instance,
                 )
-            else: # delete last
-                if extra > 0:
-                    extra -= 1
-                elif self.n_questions > 0:
-                    self.study.questions.last().delete()
-                    if self.study.has_item_questions:
-                        self._invalidate_materials_items()
-                    self.n_questions -= 1
-                self.formset = forms.question_formset_factory(self.n_questions, extra)(
-                    queryset=models.Question.objects.filter(study=self.study)
-                )
-            forms.initialize_with_questions(self.formset, self.study.questions.all())
-            forms.question_formset_disable_fields(
-                self.formset,
-                disable_randomize_scale=self.study.has_questionnaires,
-            )
-        return super().get(request, *args, **kwargs)
+                scale_value.label = scale_label
+                scale_values.append(scale_value)
+                if created:
+                    number_changed = True
+        if number_changed and self.study.has_item_questions:
+            self._invalidate_materials_items()
+        for scale_value in scale_values:
+            scale_value.save()
 
 
 class StudyInstructionsUpdateView(
@@ -770,59 +727,28 @@ class DemographicsUpdateView(
     contrib_views.LeaveWarningMixin,
     DisableFormIfStudyActiveMixin,
     TasksNavMixin,
-    generic.DetailView,
+    contrib_views.FormsetView,
 ):
     model = models.Study
     title = 'Demographics'
     template_name = 'lrex_dashboard/tasks_formset_form.html'
-    formset = None
-    helper = None
+    formset_factory = forms.DemographicsFormsetFactory
 
-    def dispatch(self, *args, **kwargs):
-        self.helper = forms.demographic_formset_helper()
-        self.n_fields = self.study.demographics.count()
-        return super().dispatch(*args, **kwargs)
+    def get_formset_queryset(self):
+        return self.study.demographics.all()
+
+    def submit_redirect(self):
+        return redirect('study', study_slug=self.study.slug)
 
     def get(self, request, *args, **kwargs):
         msg = 'Please respect the privacy of your participants. Do not collect private data that you do not need.'
         messages.warning(self.request, msg)
-        self.formset = forms.demographic_formset_factory(self.n_fields, 0 if self.n_fields > 0 else 1)(
-            queryset=self.study.demographics.all()
-        )
         return super().get(request, *args, **kwargs)
 
-    def post(self, request, *args, **kwargs):
-        self.formset = forms.demographic_formset_factory(self.n_fields)(request.POST, request.FILES)
-        if self.formset.is_valid():
-            instances = self.formset.save(commit=False)
-            for i, (instance, form) in enumerate(zip(instances, self.formset)):
-                instance.study = self.study
-                instance.number = i
-                instance.save()
-            self.n_fields = self.study.demographics.count()
-            extra = len(self.formset.forms) - self.n_fields
-            if 'submit' in request.POST:
-                messages.success(request, 'Demographics saved.')
-                return redirect('study', study_slug=self.study.slug)
-            elif 'save' in request.POST:
-                messages.success(request, 'Demographics saved.')
-                self.formset = forms.demographic_formset_factory(self.n_fields, extra)(
-                    queryset=self.study.demographics.all()
-                )
-            elif 'add' in request.POST:
-                self.formset = forms.demographic_formset_factory(self.n_fields, extra + 1)(
-                    queryset=self.study.demographics.all()
-                )
-            else: # delete last
-                if extra > 0:
-                    extra -= 1
-                elif self.n_fields > 0:
-                    self.study.demographics.last().delete()
-                    self.n_fields -= 1
-                self.formset = forms.demographic_formset_factory(self.n_fields, extra)(
-                    queryset=self.study.demographics.all()
-                )
-        return super().get(request, *args, **kwargs)
+    def save_form(self, form, number):
+        form.instance.study = self.study
+        form.instance.number = number
+        super().save_form(form, number)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

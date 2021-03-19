@@ -33,7 +33,7 @@
 <div class="my-2 p-4 border bg-white">
     <div class="mb-3">
         <form method="post">
-            {% crispy view.formset view.helper %}
+            {% crispy view.formset view.formset.helper %}
             <div class="form-actions text-center">
                 <input type="submit" name="submit" value="{{ continue_label }}" class="btn btn-primary mt-2">
             </div>
