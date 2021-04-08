@@ -547,8 +547,6 @@ class Study(models.Model):
         questionnaire_item_list = []
         for last_item_list in last_item_lists:
             materials_item_lists = item_lists_by_materials[last_item_list.materials_id]
-            print(last_item_list.number)
-            print(materials_item_lists)
             next_item_list = (
                 materials_item_lists[last_item_list.number + 1]
                 if (last_item_list.number + 1) < len(materials_item_lists) else materials_item_lists[0]
@@ -556,14 +554,13 @@ class Study(models.Model):
             questionnaire_item_list.append(next_item_list)
         return questionnaire_item_list
 
-    def _create_questionnaires(self, materials):
+    def _initial_questionnaires(self, materials):
         from apps.trial.models import Questionnaire
         questionnaires = []
         questionnaire_count = self._questionnaire_count(materials)
         for i in range(1, questionnaire_count + 1):
             slug = Questionnaire.compute_slug(self, i)
             questionnaires.append(Questionnaire(study=self, number=i, slug=slug))
-        questionnaires = Questionnaire.objects.bulk_create(questionnaires)
         return questionnaires
 
     def _get_item_lists_by_materials(self, materials_list):
@@ -583,50 +580,47 @@ class Study(models.Model):
             last_item_lists = questionnaire_item_lists
         return questionnaires
 
-    def _generate_questionnaire_permutations(
-            self, materials, questionnaires, randomize_scales, questions, permutations=4
-    ):
+    def _generate_questionnaire_permutations(self, materials, questionnaires, permutations=4):
         from apps.trial.models import Questionnaire, QuestionnaireItem
+        questionnaire_permutations = []
         if self.randomization_reqiured:
             questionnaire_count = len(questionnaires)
-            questionnaire_items = []
             for i, questionnaire in enumerate(questionnaires):
-                questionnaire_permutations = []
                 for permutation in range(1, permutations + 1):
                     num = questionnaire_count * permutation + i + 1
                     slug = Questionnaire.compute_slug(self, num)
                     questionnaire_permutations.append(Questionnaire(study=self, number=num, slug=slug))
-                Questionnaire.objects.bulk_create(questionnaire_permutations)
-                for questionnaire_permutation in questionnaire_permutations:
-                    questionnaire_permutation.item_lists.set(questionnaire.item_lists.all())
-                    questionnaire_items.extend(questionnaire_permutation.generate_questionnaire_items(
-                        materials, self.block_randomization, randomize_scales, questions,
-                    ))
-            QuestionnaireItem.objects.bulk_create(questionnaire_items)
-
+        return questionnaire_permutations
 
     def generate_questionnaires(self):
-        from apps.trial.models import QuestionnaireItem
+        from apps.trial.models import Questionnaire, QuestionnaireItem, QuestionProperty
         try:
             self.questionnaires.all().delete()
             materials_list = list(self.materials.prefetch_related('items', 'lists').all())
             item_lists_by_materials = self._get_item_lists_by_materials(materials_list)
-            questionnaires = self._create_questionnaires(materials_list)
-            questionnaires = self._compute_questionnaire_item_lists(
-                materials_list, item_lists_by_materials, questionnaires
-            )
+            questionnaires = self._initial_questionnaires(materials_list)
             randomize_scales = self.has_question_with_random_scale
             questions = list(self.questions.all())
-            questionnaire_items = []
-            for questionnaire in questionnaires:
-                questionnaire_items.extend(
-                    questionnaire.generate_questionnaire_items(
-                        materials_list, self.block_randomization, randomize_scales, questions
-                    )
-                )
-            QuestionnaireItem.objects.bulk_create(questionnaire_items)
             if self.randomization_reqiured:
-                self._generate_questionnaire_permutations(materials_list, questionnaires, randomize_scales, questions)
+                questionnaires.extend(self._generate_questionnaire_permutations(materials_list, questionnaires))
+            questionnaires = Questionnaire.objects.bulk_create(questionnaires)
+            self._compute_questionnaire_item_lists(materials_list, item_lists_by_materials, questionnaires)
+            all_questionnaires = []
+            questionnaire_items_by_questionnaire = {}
+            for questionnaire in questionnaires:
+                questionnaire_items = questionnaire.generate_questionnaire_items(
+                    self, materials_list, self.block_randomization
+                )
+                if self.pseudo_randomize_question_order:
+                    questionnaire.randomize_question_order(questions, questionnaire_items)
+                questionnaire_items_by_questionnaire[questionnaire] = questionnaire_items
+                all_questionnaires.extend(questionnaire_items)
+            QuestionnaireItem.objects.bulk_create(all_questionnaires)
+            question_properties = []
+            for questionnaire, questionnaire_items in questionnaire_items_by_questionnaire.items():
+                if randomize_scales:
+                    questionnaire.generate_question_properties(questions, questionnaire_items)
+            QuestionProperty.objects.bulk_create(question_properties)
         except RuntimeError as error:
             self.delete_questionnaires()
             raise error
