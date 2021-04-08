@@ -1,5 +1,5 @@
+from itertools import groupby
 from markdownx.utils import markdownify
-from crispy_forms.layout import HTML
 
 from django.contrib import messages
 from django.conf import settings
@@ -15,8 +15,6 @@ from django.views import generic
 
 from apps.contrib import csv as contrib_csv
 from apps.contrib import views as contrib_views
-from apps.item import models as item_models
-from apps.study import models as study_models
 from apps.study import views as study_views
 
 from . import forms
@@ -178,19 +176,17 @@ class QuestionnaireDetailView(
     def title(self):
         return 'Questionnaire {}'.format(self.questionnaire.number)
 
-    def _add_items_for_block(self, context_items, block, q_items):
-        for q_item in q_items:
-            context_items.append(
-                (block, q_item, q_item.question_properties.all())
-            )
+    def _items_for_block(self, block, q_items):
+        return [(block, q_item, q_item.question_properties.all()) for q_item in q_items]
 
     def _context_questionnaire_items(self):
         context_items = []
         if self.study.use_blocks:
-            for block, q_items in self.questionnaire.questionnaire_items_by_block.items():
-                self._add_items_for_block(context_items, block, q_items)
+            questionnaire_items = self.questionnaire.questionnaire_items.prefetch_related('question_properties').all()
+            for block, q_items in groupby(questionnaire_items, lambda q_item: q_item.item.materials_block):
+                context_items.extend(self._items_for_block(block, q_items))
         else:
-            self._add_items_for_block(context_items, 1, self.questionnaire.questionnaire_items.all())
+            context_items.extend(self._items_for_block(1, self.questionnaire.questionnaire_items.all()))
         return context_items
 
     def get_context_data(self, **kwargs):

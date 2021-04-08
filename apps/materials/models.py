@@ -90,7 +90,7 @@ class Materials(models.Model):
     @cached_property
     def item_count(self):
         if self.items_validated:
-            return int(self.items.count() / len(self.conditions))
+            return int(self.items.count() / self.condition_count)
         return 0
 
     def item_pos(self, item):
@@ -100,18 +100,22 @@ class Materials(models.Model):
         )
 
     @cached_property
-    def conditions(self):
-        items = self.items.filter(number=1)
-        conditions = [item.condition for item in items]
-        return conditions
+    def condition_count(self):
+        return self.items.filter(number=1).count()
+
+    @cached_property
+    def auto_block(self):
+        if self.is_example:
+            return 0
+        if self.block > 0:
+            return self.block
 
     @cached_property
     def item_blocks(self):
-        if self.is_example:
-            return [0]
-        if self.block > 0:
-            return [self.block]
-        item_blocks = set([item.block for item in self.items.all()])
+        if self.auto_block:
+            item_blocks = [self.auto_block]
+        else:
+            item_blocks = set([item.block for item in self.items.all()])
         return sorted(item_blocks)
 
     @cached_property
@@ -158,10 +162,9 @@ class Materials(models.Model):
             else:
                 break
 
-        condition_count = len(conditions)
         n_items = len(items)
         if self.item_list_distribution == self.LIST_DISTRIBUTION_LATIN_SQUARE:
-            if n_items % condition_count != 0:
+            if n_items % self.condition_count != 0:
                 msg = 'Number of stimuli is not a multiple of the number of conditions (stimuli: {}, conditions: {})'.format(
                     n_items,
                     ', '.join('"{}"'.format(condition) for condition in conditions)
@@ -180,9 +183,9 @@ class Materials(models.Model):
                 if not item.audiolinkitem.urls:
                     raise AssertionError('Item {} has no URLs.'.format(item))
 
-            if i % condition_count == 0:
+            if i % self.condition_count == 0:
                 item_number += 1
-            if item.number != item_number or item.condition != conditions[i % condition_count]:
+            if item.number != item_number or item.condition != conditions[i % self.condition_count]:
                 msg = 'Item "{}" was not expected. Check whether item number/condition is correct.'.format(item)
                 raise AssertionError(msg)
 
@@ -255,16 +258,14 @@ class Materials(models.Model):
         self.lists.all().delete()
         item_lists = []
         if self.item_list_distribution == self.LIST_DISTRIBUTION_LATIN_SQUARE:
-            conditions = self.conditions
-            condition_count = len(conditions)
-            for i in range(condition_count):
+            for i in range(self.condition_count):
                 item_list = item_models.ItemList.objects.create(
                     materials=self,
                     number=i,
                 )
                 item_lists.append(item_list)
             for i, item in enumerate(self.items.all()):
-                shift = (i - (item.number - 1)) % condition_count
+                shift = (i - (item.number - 1)) % self.condition_count
                 item_list = item_lists[shift]
                 item_list.items.add(item)
         elif self.item_list_distribution == self.LIST_DISTRIBUTION_ALL_TO_ALL:

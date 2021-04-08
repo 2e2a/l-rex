@@ -1,4 +1,6 @@
 from collections import deque
+from collections import defaultdict
+from itertools import permutations
 from itertools import groupby
 from itertools import permutations
 from math import ceil
@@ -8,7 +10,6 @@ import uuid
 
 from markdownx.models import MarkdownxField
 
-from collections import OrderedDict
 from datetime import timedelta
 from django.db import models
 from django.urls import reverse
@@ -35,8 +36,12 @@ class Questionnaire(models.Model):
     class Meta:
         ordering = ['number']
 
+    @staticmethod
+    def compute_slug(study, number):
+        return '{}-{}'.format(study.slug, number)
+
     def save(self, *args, **kwargs):
-        self.slug = '{}-{}'.format(self.study.slug, self.number)
+        self.slug = self.compute_slug()
         return super().save(*args, **kwargs)
 
     def get_absolute_url(self):
@@ -59,26 +64,6 @@ class Questionnaire(models.Model):
         )
         queryset = queryset[:10]
         return queryset
-
-    @cached_property
-    def questionnaire_items_by_block(self):
-        blocks = OrderedDict()
-        for questionnaire_item in self.questionnaire_items.all():
-            if questionnaire_item.item.materials_block in blocks:
-                blocks[questionnaire_item.item.materials_block].append(questionnaire_item)
-            else:
-                blocks[questionnaire_item.item.materials_block] = [questionnaire_item]
-        return blocks
-
-    def block_items(self, block):
-        return self.questionnaire_items_by_block[block]
-
-    def _block_randomization(self):
-        block_randomization = OrderedDict()
-        questionnaire_blocks = self.study.questionnaire_blocks.all()
-        for questionnaire_block in questionnaire_blocks:
-            block_randomization[questionnaire_block.block] = questionnaire_block.randomization
-        return block_randomization
 
     def _generate_block_items(self, block_items, block_offset):
         questionnaire_items = []
@@ -127,7 +112,7 @@ class Questionnaire(models.Model):
         items_by_materials = {}
         for id, materials_items in groupby(block_items, lambda x: x.materials_id):
             items = list(materials_items)
-            if materials_dict[id].is_filler or len(materials_dict[id].conditions) == 1:
+            if materials_dict[id].is_filler or materials_dict[id].condition_count == 1:
                 random.shuffle(items)
             else:
                 items = self._materials_items_with_alternating_conditions(items)
@@ -154,19 +139,21 @@ class Questionnaire(models.Model):
     PSEUDO_RANDOMIZE_SLOT_TRIES = 1000
 
     def _compute_block_slots(self, block_items, materials_dict):
-        filler = list([ id for id, materials in materials_dict.items() if materials.is_filler])
+        filler = list([id for id, materials in materials_dict.items() if materials.is_filler])
         n_tries = self.PSEUDO_RANDOMIZE_SLOT_TRIES
-        while n_tries:
+        while n_tries > 0:
             slots = []
             items = block_items.copy()
             random.shuffle(items)
             colliding = []
             last_item = None
             for item in items:
-                if item.materials_id in filler \
-                        or not last_item \
-                        or last_item.materials_id in filler \
-                        or last_item.materials_id != item.materials_id:
+                if (
+                        item.materials_id in filler
+                        or not last_item
+                        or last_item.materials_id in filler
+                        or last_item.materials_id != item.materials_id
+                ):
                     slots.append(item.materials_id)
                 else:
                     colliding.append(item)
@@ -174,14 +161,14 @@ class Questionnaire(models.Model):
             resolution_failed = False
             for item in colliding:
                 slot_size = len(slots)
-                n_insert_tries =  int(slot_size / 4)
-                while n_insert_tries:
+                n_insert_tries = int(slot_size / 4)
+                while n_insert_tries > 0:
                     pos = random.randint(0, slot_size - 2)
                     if item.materials_id != slots[pos] and item.materials_id != slots[pos + 1]:
                         slots.insert(pos + 1, item.materials_id)
                         break
                     n_insert_tries -= 1
-                if not n_insert_tries:
+                if n_insert_tries == 0:
                     resolution_failed = True
             if not resolution_failed:
                 return slots
@@ -189,28 +176,41 @@ class Questionnaire(models.Model):
                 n_tries -= 1
         raise RuntimeError('Unable to compute slots.')
 
-    @cached_property
-    def _item_list_items(self):
-        item_lists = self.item_lists.all()
-        items = item_models.Item.objects.filter(
-            itemlist__in=item_lists
-        ).order_by(
-            'materials_id', 'number', 'condition'
-        )
-        items = sorted(items, key=lambda x: x.materials_block)
-        return list(items)
-
-    def _compute_slots(self, materials_dict, block_randomization):
+    def _compute_slots(self, materials_dict, block_randomization, items_by_block):
         slots = {}
-        items_by_block = groupby(self._item_list_items, lambda x: x.materials_block)
-        for block, block_items in items_by_block:
+        for block, block_items in items_by_block.items():
             block_items = list(block_items)
             if block_randomization[block] == QuestionnaireBlock.RANDOMIZATION_PSEUDO:
                 slots[block] = self._compute_block_slots(block_items, materials_dict)
         return slots
 
-    def _random_question_permutations(self, n_items):
-        questions = [question.number for question in self.study.questions.all()]
+    def _has_pseudo_randomization(self, block_randomization):
+        return any(
+            randomization for randomization in block_randomization.values()
+            if randomization == QuestionnaireBlock.RANDOMIZATION_PSEUDO
+        )
+
+    def generate_questionnaire_items(self, study, materials_list, items_by_block, block_randomization):
+        questionnaire_items = []
+        random.seed()
+        materials_dict = {e.id: e for e in materials_list}
+        if self._has_pseudo_randomization(block_randomization):
+            slots = self._compute_slots(materials_dict, block_randomization, items_by_block)
+        block_offset = 0
+        for block, block_items in items_by_block.items():
+            if block_randomization[block] == QuestionnaireBlock.RANDOMIZATION_TRUE:
+                questionnaire_items.extend(self._generate_items_random(block_items, block_offset))
+            elif block_randomization[block] == QuestionnaireBlock.RANDOMIZATION_PSEUDO:
+                questionnaire_items.extend(
+                    self._generate_items_pseudo_random(block_items, block_offset, slots[block], materials_dict)
+                )
+            else:
+                questionnaire_items.extend(self._generate_block_items(block_items, block_offset))
+            block_offset += len(block_items)
+        return questionnaire_items
+
+    def _random_question_permutations(self, questions, n_items):
+        questions = [question.number for question in questions]
         question_permutations = list(permutations(questions))
         n_permutations = len(question_permutations)
         per_permutation = ceil(n_items/n_permutations)
@@ -218,9 +218,9 @@ class Questionnaire(models.Model):
         random.shuffle(question_permutations)
         return question_permutations
 
-    def _randomize_question_order(self, questionnaire_items):
+    def randomize_question_order(self, questions, questionnaire_items):
         n_items = len(questionnaire_items)
-        question_permutations = self._random_question_permutations(n_items)
+        question_permutations = self._random_question_permutations(questions, n_items)
         for questionnaire_item, permutation in zip(questionnaire_items, question_permutations):
             questionnaire_item.question_order = ','.join(str(p) for p in permutation)
 
@@ -233,43 +233,23 @@ class Questionnaire(models.Model):
         random.SystemRandom().shuffle(scale_permutations)
         return scale_permutations
 
-    def _randomize_question_scales(self):
-        questionnaire_items = list(self.questionnaire_items.all())
+    def _randomize_question_scales(self, questions, questionnaire_items):
         n_items = len(questionnaire_items)
-        for question in self.study.questions.all():
+        question_properties = []
+        for question in questions:
             if question.randomize_scale:
                 scale_permutations = self._random_scale_permutations(question, n_items)
                 for questionnaire_item, permutation in zip(questionnaire_items, scale_permutations):
-                    QuestionProperty.objects.create(
+                    question_property = QuestionProperty(
                         number=question.number,
                         questionnaire_item=questionnaire_item,
                         scale_order=','.join(str(p) for p in permutation)
                     )
+                    question_properties.append(question_property)
+        return question_properties
 
-    def generate_items(self):
-        random.seed()
-        materials_dict = {e.id: e for e in self.study.materials.all()}
-        block_randomization = self._block_randomization()
-        slots = self._compute_slots(materials_dict, block_randomization)
-        items_by_block = groupby(self._item_list_items, lambda x: x.materials_block)
-        block_offset = 0
-        questionnaire_items = []
-        for block, block_items in items_by_block:
-            block_items = list(block_items)
-            if block_randomization[block] == QuestionnaireBlock.RANDOMIZATION_TRUE:
-                questionnaire_items.extend(self._generate_items_random(block_items, block_offset))
-            elif block_randomization[block] == QuestionnaireBlock.RANDOMIZATION_PSEUDO:
-                questionnaire_items.extend(
-                    self._generate_items_pseudo_random(block_items, block_offset, slots[block], materials_dict)
-                )
-            else:
-                questionnaire_items.extend(self._generate_block_items(block_items, block_offset))
-            block_offset += len(block_items)
-        if self.study.pseudo_randomize_question_order:
-            self._randomize_question_order(questionnaire_items)
-        QuestionnaireItem.objects.bulk_create(questionnaire_items)
-        if self.study.has_question_with_random_scale:
-            self._randomize_question_scales()
+    def generate_question_properties(self, questions, questionnaire_items):
+        return self._randomize_question_scales(questions, questionnaire_items)
 
     def __str__(self):
         return str(self.number)

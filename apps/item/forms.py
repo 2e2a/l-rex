@@ -107,8 +107,8 @@ class ItemUploadForm(contrib_forms.CSVUploadForm):
 
     def __init__(self, *args, **kwargs):
         self.materials = kwargs.pop('materials')
-        self.study = self.materials.study
         super().__init__(*args, **kwargs)
+        self.study = self.materials.study
         if self.study.has_text_items:
             content_help_text = 'Specify which column contains the item text.'
         elif self.study.has_markdown_items:

@@ -489,6 +489,14 @@ class Study(models.Model):
         return False
 
     @cached_property
+    def block_randomization(self):
+        block_randomization = {}
+        questionnaire_blocks = self.questionnaire_blocks.all()
+        for questionnaire_block in questionnaire_blocks:
+            block_randomization[questionnaire_block.block] = questionnaire_block.randomization
+        return block_randomization
+
+    @cached_property
     def has_exmaples(self):
         return self.materials.filter(is_example=True).exists()
 
@@ -522,61 +530,128 @@ class Study(models.Model):
         next_questionnaire = min(trial_count, key=trial_count.get)
         return next_questionnaire
 
-    def _questionnaire_count(self):
+    def _questionnaire_count(self, materials_list):
         questionnaire_lcm = 1
-        for materials in self.materials.all():
-            condition_count = len(materials.conditions)
-            questionnaire_lcm = math.lcm(questionnaire_lcm,  condition_count)
+        for materials in materials_list:
+            questionnaire_lcm = math.lcm(questionnaire_lcm,  materials.condition_count)
         return questionnaire_lcm
 
-    def _init_questionnaire_lists(self):
+    def _init_questionnaire_lists(self, materials_list):
         questionnaire_item_list = []
-        for materials in self.materials.all():
+        for materials in materials_list:
             item_list = materials.lists.first()
             questionnaire_item_list.append(item_list)
         return questionnaire_item_list
 
-    def _next_questionnaire_lists(self, last_questionnaire):
+    def _next_questionnaire_lists(self, item_lists_by_materials, last_item_lists):
         questionnaire_item_list = []
-        last_item_lists = last_questionnaire.item_lists.all()
         for last_item_list in last_item_lists:
-            next_item_list = last_item_list.next()
+            materials_item_lists = item_lists_by_materials[last_item_list.materials_id]
+            next_item_list = (
+                materials_item_lists[last_item_list.number + 1]
+                if (last_item_list.number + 1) < len(materials_item_lists) else materials_item_lists[0]
+            )
             questionnaire_item_list.append(next_item_list)
         return questionnaire_item_list
 
-    def _create_next_questionnaire(self, last_questionnaire, num):
+    def _initial_questionnaires(self, materials):
         from apps.trial.models import Questionnaire
-        questionnaire = Questionnaire.objects.create(study=self, number=num)
-        if not last_questionnaire:
-            questionnaire_item_lists = self._init_questionnaire_lists()
-        else:
-            questionnaire_item_lists = self._next_questionnaire_lists(last_questionnaire)
-        for item_list in questionnaire_item_lists:
-            questionnaire.item_lists.add(item_list)
-        return questionnaire
+        questionnaires = []
+        questionnaire_count = self._questionnaire_count(materials)
+        for i in range(1, questionnaire_count + 1):
+            slug = Questionnaire.compute_slug(self, i)
+            questionnaires.append(Questionnaire(study=self, number=i, slug=slug))
+        return questionnaires
 
-    def _generate_questionnaire_permutations(self, permutations=4):
-        from apps.trial.models import Questionnaire
+    def _get_item_lists_by_materials(self, materials_list):
+        item_lists_by_materials = {}
+        for materials in materials_list:
+            item_lists_by_materials[materials.pk] = list(materials.lists.all())
+        return item_lists_by_materials
+
+    def _compute_questionnaire_item_lists(self, materials, item_lists_by_materials, questionnaires):
+        item_lists_by_questionnaire = {}
+        last_item_lists = None
+        for questionnaire in questionnaires:
+            questionnaire_item_lists = (
+                self._init_questionnaire_lists(materials)
+                if not last_item_lists else self._next_questionnaire_lists(item_lists_by_materials, last_item_lists)
+            )
+            questionnaire.item_lists.set(questionnaire_item_lists)
+            last_item_lists = questionnaire_item_lists
+            item_lists_by_questionnaire[questionnaire] = questionnaire_item_lists
+        return item_lists_by_questionnaire
+
+    def _generate_questionnaire_permutations(self, materials, questionnaires, permutations=4):
+        from apps.trial.models import Questionnaire, QuestionnaireItem
+        questionnaire_permutations = []
         if self.randomization_reqiured:
-            questionnaires = list(self.questionnaires.all())
             questionnaire_count = len(questionnaires)
-            for permutation in range(1, permutations):
-                for i, questionnaire in enumerate(questionnaires):
+            for i, questionnaire in enumerate(questionnaires):
+                for permutation in range(1, permutations + 1):
                     num = questionnaire_count * permutation + i + 1
-                    questionnaire_permutation=Questionnaire.objects.create(study=self, number=num)
-                    questionnaire_permutation.item_lists.set(questionnaire.item_lists.all())
-                    questionnaire_permutation.generate_items()
+                    slug = Questionnaire.compute_slug(self, num)
+                    questionnaire_permutations.append(Questionnaire(study=self, number=num, slug=slug))
+        return questionnaire_permutations
+
+    def _items_by_block_by_questionnaire(self, materials_list, questionnaires, lists_by_questionnaire, use_blocks):
+        from apps.item.models import Item
+        items_by_block_by_questionnaire = {}
+        items = Item.objects.filter(materials__study=self).order_by('materials', 'number', 'condition')
+        items = list(items.prefetch_related('itemlist_set').all())
+        for questionnaire in questionnaires:
+            items_in_questionnaire = []
+            for item in items:
+                if set(item.itemlist_set.all()).intersection(lists_by_questionnaire[questionnaire]):
+                    items_in_questionnaire.append(item)
+            items_by_block = {}
+            if use_blocks:
+                materials_block = {materials.pk: materials.auto_block for materials in materials_list}
+                for item in items_in_questionnaire:
+                    block = materials_block[item.materials_id]
+                    if not block:
+                        block = item.block
+                    items_by_block.setdefault(block, [])
+                    items_by_block[block].append(item)
+            else:
+                items_by_block[1] = list(items)
+            items_by_block_by_questionnaire[questionnaire] = items_by_block
+        return items_by_block_by_questionnaire
 
     def generate_questionnaires(self):
+        from apps.trial.models import Questionnaire, QuestionnaireItem, QuestionProperty
         try:
             self.questionnaires.all().delete()
-            questionnaire_count = self._questionnaire_count()
-            last_questionnaire = None
-            for i in range(questionnaire_count):
-                last_questionnaire = self._create_next_questionnaire(last_questionnaire, i + 1)
-                last_questionnaire.generate_items()
+            materials_list = list(self.materials.prefetch_related('items', 'lists').all())
+            item_lists_by_materials = self._get_item_lists_by_materials(materials_list)
+            questionnaires = self._initial_questionnaires(materials_list)
+            randomize_scales = self.has_question_with_random_scale
+            questions = list(self.questions.all())
             if self.randomization_reqiured:
-                self._generate_questionnaire_permutations()
+                questionnaires.extend(self._generate_questionnaire_permutations(materials_list, questionnaires))
+            questionnaires = Questionnaire.objects.bulk_create(questionnaires)
+            lists_by_questionnaire = self._compute_questionnaire_item_lists(
+                materials_list, item_lists_by_materials, questionnaires
+            )
+            items_by_block = self._items_by_block_by_questionnaire(
+                materials_list,  questionnaires, lists_by_questionnaire, self.use_blocks
+            )
+            all_questionnaires = []
+            questionnaire_items_by_questionnaire = {}
+            for questionnaire in questionnaires:
+                questionnaire_items = questionnaire.generate_questionnaire_items(
+                    self, materials_list, items_by_block[questionnaire], self.block_randomization
+                )
+                if self.pseudo_randomize_question_order:
+                    questionnaire.randomize_question_order(questions, questionnaire_items)
+                questionnaire_items_by_questionnaire[questionnaire] = questionnaire_items
+                all_questionnaires.extend(questionnaire_items)
+            QuestionnaireItem.objects.bulk_create(all_questionnaires)
+            question_properties = []
+            for questionnaire, questionnaire_items in questionnaire_items_by_questionnaire.items():
+                if randomize_scales:
+                    questionnaire.generate_question_properties(questions, questionnaire_items)
+            QuestionProperty.objects.bulk_create(question_properties)
         except RuntimeError as error:
             self.delete_questionnaires()
             raise error
