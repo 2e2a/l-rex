@@ -126,12 +126,6 @@ class ItemList(models.Model):
     def __str__(self):
         return '{}-{}'.format(self.materials, self.number)
 
-    def next(self):
-        next_list =  self.materials.lists.filter(pk__gt=self.pk).first()
-        if not next_list:
-            next_list =  self.materials.lists.first()
-        return next_list
-
 
 class ItemQuestion(models.Model):
     item = models.ForeignKey(
