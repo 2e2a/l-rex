@@ -570,6 +570,7 @@ class Study(models.Model):
         return item_lists_by_materials
 
     def _compute_questionnaire_item_lists(self, materials, item_lists_by_materials, questionnaires):
+        item_lists_by_questionnaire = {}
         last_item_lists = None
         for questionnaire in questionnaires:
             questionnaire_item_lists = (
@@ -578,7 +579,8 @@ class Study(models.Model):
             )
             questionnaire.item_lists.set(questionnaire_item_lists)
             last_item_lists = questionnaire_item_lists
-        return questionnaires
+            item_lists_by_questionnaire[questionnaire] = questionnaire_item_lists
+        return item_lists_by_questionnaire
 
     def _generate_questionnaire_permutations(self, materials, questionnaires, permutations=4):
         from apps.trial.models import Questionnaire, QuestionnaireItem
@@ -592,6 +594,30 @@ class Study(models.Model):
                     questionnaire_permutations.append(Questionnaire(study=self, number=num, slug=slug))
         return questionnaire_permutations
 
+    def _items_by_block_by_questionnaire(self, materials_list, questionnaires, lists_by_questionnaire, use_blocks):
+        from apps.item.models import Item
+        items_by_block_by_questionnaire = {}
+        items = Item.objects.filter(materials__study=self).order_by('materials', 'number', 'condition')
+        items = list(items.prefetch_related('itemlist_set').all())
+        for questionnaire in questionnaires:
+            items_in_questionnaire = []
+            for item in items:
+                if set(item.itemlist_set.all()).intersection(lists_by_questionnaire[questionnaire]):
+                    items_in_questionnaire.append(item)
+            items_by_block = {}
+            if use_blocks:
+                materials_block = {materials.pk: materials.auto_block for materials in materials_list}
+                for item in items_in_questionnaire:
+                    block = materials_block[item.materials_id]
+                    if not block:
+                        block = item.block
+                    items_by_block.setdefault(block, [])
+                    items_by_block[block].append(item)
+            else:
+                items_by_block[1] = list(items)
+            items_by_block_by_questionnaire[questionnaire] = items_by_block
+        return items_by_block_by_questionnaire
+
     def generate_questionnaires(self):
         from apps.trial.models import Questionnaire, QuestionnaireItem, QuestionProperty
         try:
@@ -604,12 +630,17 @@ class Study(models.Model):
             if self.randomization_reqiured:
                 questionnaires.extend(self._generate_questionnaire_permutations(materials_list, questionnaires))
             questionnaires = Questionnaire.objects.bulk_create(questionnaires)
-            self._compute_questionnaire_item_lists(materials_list, item_lists_by_materials, questionnaires)
+            lists_by_questionnaire = self._compute_questionnaire_item_lists(
+                materials_list, item_lists_by_materials, questionnaires
+            )
+            items_by_block = self._items_by_block_by_questionnaire(
+                materials_list,  questionnaires, lists_by_questionnaire, self.use_blocks
+            )
             all_questionnaires = []
             questionnaire_items_by_questionnaire = {}
             for questionnaire in questionnaires:
                 questionnaire_items = questionnaire.generate_questionnaire_items(
-                    self, materials_list, self.block_randomization
+                    self, materials_list, items_by_block[questionnaire], self.block_randomization
                 )
                 if self.pseudo_randomize_question_order:
                     questionnaire.randomize_question_order(questions, questionnaire_items)

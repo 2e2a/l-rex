@@ -176,24 +176,6 @@ class Questionnaire(models.Model):
                 n_tries -= 1
         raise RuntimeError('Unable to compute slots.')
 
-    def _items_by_block(self, materials_dict, use_blocks):
-        items = item_models.Item.objects.filter(
-            itemlist__in=self.item_lists.all()
-        ).order_by(
-            'materials', 'number', 'condition'
-        ).all()
-        items_by_block = {}
-        if use_blocks:
-            for item in items:
-                block = materials_dict[item.materials_id].auto_block
-                if not block:
-                    block = item.block
-                items_by_block.setdefault(block, [])
-                items_by_block[block].append(item)
-        else:
-            items_by_block[1] = list(items)
-        return items_by_block
-
     def _compute_slots(self, materials_dict, block_randomization, items_by_block):
         slots = {}
         for block, block_items in items_by_block.items():
@@ -208,11 +190,10 @@ class Questionnaire(models.Model):
             if randomization == QuestionnaireBlock.RANDOMIZATION_PSEUDO
         )
 
-    def generate_questionnaire_items(self, study, materials_list, block_randomization):
+    def generate_questionnaire_items(self, study, materials_list, items_by_block, block_randomization):
         questionnaire_items = []
         random.seed()
         materials_dict = {e.id: e for e in materials_list}
-        items_by_block = self._items_by_block(materials_dict, study.use_blocks)
         if self._has_pseudo_randomization(block_randomization):
             slots = self._compute_slots(materials_dict, block_randomization, items_by_block)
         block_offset = 0
