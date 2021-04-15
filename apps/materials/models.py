@@ -152,7 +152,8 @@ class Materials(models.Model):
         conditions = []
         self.set_items_validated(False)
 
-        items = self.items.all()
+        items = self.items.prefetch_related('materials', 'textitem', 'markdownitem', 'audiolinkitem', 'item_questions')
+        items = list(items.all())
         if len(items) == 0:
             raise AssertionError('No items.')
 
@@ -171,6 +172,7 @@ class Materials(models.Model):
                 )
                 raise AssertionError(msg)
 
+        questions = list(self.study.questions.all())
         item_number = 0
         for i, item in enumerate(items):
             if self.study.has_text_items:
@@ -189,7 +191,6 @@ class Materials(models.Model):
                 msg = 'Item "{}" was not expected. Check whether item number/condition is correct.'.format(item)
                 raise AssertionError(msg)
 
-            questions = list(self.study.questions.all())
             for item_question in item.item_questions.all():
                 if item_question.number >= len(questions):
                     raise AssertionError('For item question validation the study question(s) must be defined first.')
@@ -232,7 +233,7 @@ class Materials(models.Model):
         warnings.append(msg)
         self.items_validated = True
         self.save()
-        self.compute_item_lists()
+        self.create_item_lists()
         return warnings
 
     def pregenerate_items(self, n_items, n_conditions):
@@ -254,23 +255,27 @@ class Materials(models.Model):
                     materials=self,
                 )
 
-    def compute_item_lists(self):
+    def create_item_lists(self):
         self.lists.all().delete()
         item_lists = []
         if self.item_list_distribution == self.LIST_DISTRIBUTION_LATIN_SQUARE:
             for i in range(self.condition_count):
-                item_list = item_models.ItemList.objects.create(
+                item_list = item_models.ItemList(
                     materials=self,
                     number=i,
                 )
                 item_lists.append(item_list)
+            item_models.ItemList.objects.bulk_create(item_lists)
+            items_by_list = {item_list: [] for item_list in item_lists}
             for i, item in enumerate(self.items.all()):
                 shift = (i - (item.number - 1)) % self.condition_count
                 item_list = item_lists[shift]
-                item_list.items.add(item)
+                items_by_list[item_list].append(item)
+            for item_list, items in items_by_list.items():
+                item_list.items.set(items)
         elif self.item_list_distribution == self.LIST_DISTRIBUTION_ALL_TO_ALL:
             item_list = item_models.ItemList.objects.create(materials=self)
-            item_list.items.add(*list(self.items_sorted_by_block))
+            item_list.items.set(list(self.items_sorted_by_block))
 
     def results(self):
         ratings = trial_models.Rating.objects.filter(

@@ -538,7 +538,9 @@ class ItemListListView(
         return redirect('itemlists', materials_slug=self.materials.slug)
 
     def get_queryset(self):
-        return models.ItemList.objects.filter(materials=self.materials)
+        queryset = models.ItemList.objects.filter(materials=self.materials)
+        queryset = queryset.prefetch_related('items')
+        return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

@@ -407,7 +407,7 @@ class Trial(models.Model):
         )
         return questionnaire_block
 
-    @property
+    @cached_property
     def is_finished(self):
         return self.ratings_completed == self.ratings_count
 
