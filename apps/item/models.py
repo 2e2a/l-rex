@@ -42,9 +42,7 @@ class Item(models.Model):
             return self.materials.block
         return self.block
 
-    @property
-    def content(self):
-        study = self.materials.study
+    def content(self, study):
         if study.has_text_items:
             return self.textitem.text
         elif study.has_markdown_items:

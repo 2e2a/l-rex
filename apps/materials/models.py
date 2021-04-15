@@ -290,7 +290,9 @@ class Materials(models.Model):
             'questionnaire_item__item__textitem',
             'questionnaire_item__item__audiolinkitem',
             'questionnaire_item__item__markdownitem',
+            'questionnaire_item__question_properties',
         )
+        has_question_with_random_scale = self.study.has_question_with_random_scale
         results = {}
         for rating in ratings:
             participant = rating.trial.number
@@ -309,7 +311,7 @@ class Materials(models.Model):
                     'item': item.number,
                     'condition': item.condition,
                     'position': rating.questionnaire_item.number + 1,
-                    'content': item.content,
+                    'content': item.content(self.study),
                     'questions': [rating.question],
                     'ratings': [rating.scale_value.number],
                     'labels': [rating.scale_value.label],
@@ -317,7 +319,7 @@ class Materials(models.Model):
                 }
                 if self.study.pseudo_randomize_question_order:
                     row['question_order'] = rating.questionnaire_item.question_order_user
-                if self.study.has_question_with_random_scale:
+                if has_question_with_random_scale:
                     row['random_scale'] = '\n'.join(
                         q_property.question_scale_user
                         for q_property in rating.questionnaire_item.question_properties.all()
@@ -333,12 +335,13 @@ class Materials(models.Model):
                 grouped_results[item].extend(list(results))
             else:
                 grouped_results[item] = list(results)
+        questions = list(self.study.questions.prefetch_related('scale_values').all())
         aggregated_results = {}
         for results_for_item in grouped_results.values():
             rating_count = len(results_for_item)
             aggregated_result = copy.deepcopy(results_for_item[0])
-            aggregated_result['scale_count'] = [None] * self.study.questions.count()
-            for question in self.study.questions.all():
+            aggregated_result['scale_count'] = [None] * len(questions)
+            for question in questions:
                 aggregated_result['scale_count'][question.number] = {
                     scale_value.number: 0 for scale_value in question.scale_values.all()
                 }
@@ -394,7 +397,7 @@ class Materials(models.Model):
             writer.writerow(header)
         for item in self.items.all():
             csv_row = [self.title] if add_materials_column else []
-            csv_row.extend([item.number, item.condition, item.content, item.block])
+            csv_row.extend([item.number, item.condition, item.content(self.study), item.block])
             if self.study.has_audiolink_items:
                 csv_row.append(
                     item.audiolinkitem.description

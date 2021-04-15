@@ -22,7 +22,7 @@
     <th scope="col"></th>
     <th scope="col"></th>
     <th scope="col"></th>
-    {% for question in study.questions.all %}
+    {% for question in questions %}
     <th scope="col" colspan="{{ question.scalevalues.count }}">Question {{ forloop.counter }}</th>
     {% endfor %}
 </tr>
@@ -32,7 +32,7 @@
     {% if 'item' in aggregate_by %}<th scope="col">Item</th>{% endif %}
     {% if 'condition' in aggregate_by %}<th scope="col">Condition</th>{% endif %}
     <th scope="col">N</th>
-    {% for question in study.questions.all %}
+    {% for question in questions %}
         {% for scale_value in question.scale_values.all %}
         <th scope="col" class="table-primary">{{ scale_value.label|truncatechars:"10" }}</th>
         {% endfor %}

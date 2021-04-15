@@ -390,7 +390,8 @@ class TrialListView(
         return redirect('trials', study_slug=self.study.slug)
 
     def get_queryset(self):
-        return super().get_queryset().filter(questionnaire__study=self.study)
+        queryset = models.Trial.objects.filter(questionnaire__study=self.study).prefetch_related('questionnaire')
+        return queryset
 
 
 class TrialParticipantsCSVDownloadView(

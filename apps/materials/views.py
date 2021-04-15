@@ -174,6 +174,7 @@ class MaterialsResultsView(
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({
+            'questions': list(self.study.questions.prefetch_related('scale_values').all()),
             'nav_active': 6,
             'nav2_active': 1,
             'active_materials': self.materials.pk,
