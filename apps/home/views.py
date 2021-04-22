@@ -1,7 +1,7 @@
 from markdownx.utils import markdownify
 
 from django.conf import settings
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.shortcuts import redirect
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
@@ -16,7 +16,7 @@ from . import models
 
 @requires_csrf_token
 def handler500(request):
-    response = render_to_response('lrex_home/error_500.html')
+    response = render('lrex_home/error_500.html')
     response.status_code = 500
     return response
 
