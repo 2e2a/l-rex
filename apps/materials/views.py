@@ -165,8 +165,6 @@ class MaterialsResultsView(
 
     def _aggregated_results(self):
         results = self.object.aggregated_results(self.aggregate_by)
-        print(self.aggregate_by)
-        print(results)
         paginator = Paginator(results, self.paginate_by)
         results_on_page = paginator.get_page(self.page)
         return results_on_page
