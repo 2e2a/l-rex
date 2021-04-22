@@ -295,7 +295,7 @@ class QuestionForm(contrib_forms.CrispyModelForm):
     def __init__(self, *args, **kwargs):
         study = kwargs.pop('study')
         super().__init__(*args, **kwargs)
-        self.fields['scale_labels'].initial = self.instance.scale_labels if self.instance else None
+        self.fields['scale_labels'].initial = self.instance.get_scale_labels(multiline=True) if self.instance else None
         if study.has_questionnaires:
             self.fields['randomize_scale'].widget.attrs['readonly'] = True
             self.fields['randomize_scale'].widget.attrs['disabled'] = True

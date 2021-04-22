@@ -21,14 +21,15 @@ def split_list_string(value):
         if end > 0:
             is_escaped = value[end - 1] == '\\' if end > 1 else False
             if not is_escaped:
-                values.append(value[:end].replace('\\',''))
+                values.append(value[:end].strip().replace('\\', ''))
                 value = value[end + 1:]
                 end = 0
         else:
-            values.append(value.strip().replace('\\',''))
+            values.append(value.strip().replace('\\', ''))
             break
     return values
 
 
-def to_list_string(value_list):
-    return ','.join(str(value).replace(',', '\\,') for value in value_list)
+def to_list_string(value_list, multiline=False):
+    separator = ',\n' if multiline else ','
+    return separator.join(str(value).replace(',', '\\,') for value in value_list)

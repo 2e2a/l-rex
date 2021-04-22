@@ -371,23 +371,22 @@ class RatingForm(RequiredMessageFromStudyMixin, contrib_forms.CrispyModelForm):
 
     def clean(self):
         data = super().clean()
-        scale_value = data.get('scale_value')
-        if scale_value:
+        if self.feedbacks:
+            scale_value = data.get('scale_value')
             feedbacks_given = data['feedbacks_given'].split(',')
-            if self.feedbacks:
-                feedbacks_for_scale = [
-                    f for f in self.feedbacks
-                    if f.question == self.question and str(f.pk) not in feedbacks_given and f.show_feedback(scale_value)
-                ]
-                if feedbacks_for_scale:
-                    self.data = self.data.copy()
-                    feedback_text = '\n'.join([f.feedback for f in feedbacks_for_scale])
-                    self.data['form-{}-feedback'.format(self.question.number)] = feedback_text
-                    self.fields['feedback'].widget = forms.Textarea()
-                    self.fields['feedback'].widget.attrs['readonly'] = True
-                    feedbacks_given += [str(f.pk) for f in feedbacks_for_scale]
-                    self.data['form-{}-feedbacks_given'.format(self.question.number)] = ','.join(feedbacks_given)
-                    raise forms.ValidationError({'feedbacks_given': []})
+            feedbacks_for_scale = [
+                f for f in self.feedbacks
+                if f.question == self.question and str(f.pk) not in feedbacks_given and f.show_feedback(scale_value)
+            ]
+            if feedbacks_for_scale:
+                self.data = self.data.copy()
+                feedback_text = '\n'.join([f.feedback for f in feedbacks_for_scale])
+                self.data['form-{}-feedback'.format(self.question.number)] = feedback_text
+                self.fields['feedback'].widget = forms.Textarea()
+                self.fields['feedback'].widget.attrs['readonly'] = True
+                feedbacks_given += [str(f.pk) for f in feedbacks_for_scale]
+                self.data['form-{}-feedbacks_given'.format(self.question.number)] = ','.join(feedbacks_given)
+                raise forms.ValidationError({'feedbacks_given': []})
 
     def handle_feedbacks(self, feedbacks_given, feedback=None):
         if feedback:

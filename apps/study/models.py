@@ -1237,12 +1237,12 @@ class Question(models.Model):
         ordering = ['study', 'number']
 
     @cached_property
-    def scale_labels(self):
-        return to_list_string(scale_value.label for scale_value in self.scale_values.all())
-
-    @cached_property
     def has_rating_comment(self):
         return self.rating_comment != self.RATING_COMMENT_NONE
+
+    def get_scale_labels(self, multiline=False):
+        labels = [scale_value.label for scale_value in self.scale_values.all()]
+        return to_list_string(labels, multiline)
 
     def is_valid_scale_value(self, scale_value_label):
         return self.scale_values.filter(label=scale_value_label).exists()

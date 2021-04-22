@@ -209,7 +209,7 @@ class ItemQuestionForm(contrib_forms.CrispyModelForm):
         self.append_optional_to_labels()
         self.fields['number'].initial = self.question.number
         self.fields['question'].initial = self.question.question
-        self.fields['scale_labels'].initial = self.question.scale_labels
+        self.fields['scale_labels'].initial = self.question.get_scale_labels()
         self.fields['legend'].initial = self.question.legend
 
     def clean_scale_labels(self):
@@ -359,7 +359,6 @@ class ItemFeedbackForm(contrib_forms.CrispyModelForm):
         super().__init__(*args, **kwargs)
         self.append_optional_to_labels()
         self.fields['question'].queryset = self.fields['question'].queryset.filter(study=self.study)
-        self.fields['question'].empty_label = None
 
     class Meta:
         model = models.ItemFeedback
@@ -367,8 +366,8 @@ class ItemFeedbackForm(contrib_forms.CrispyModelForm):
 
     def clean(self):
         data = super().clean()
-        question = data['question']
-        scale_values = split_list_string(data['scale_values'])
+        question = data.get('question')
+        scale_values = split_list_string(data.get('scale_values'))
         if not all(question.is_valid_scale_value(scale_value) for scale_value in scale_values):
             raise ValidationError('Invalid scale values')
 

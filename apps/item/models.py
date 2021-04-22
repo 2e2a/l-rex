@@ -173,8 +173,8 @@ class ItemFeedback(models.Model):
         on_delete=models.CASCADE,
         help_text='Question for the feedback.',
     )
-    scale_values = models.CharField(
-        max_length=500,
+    scale_values = models.TextField(
+        max_length=(10 * ScaleValue.LABEL_MAX_LENGTH),
         help_text='Scale values, separated by commas (e.g. "1,3"). '
                   'If a label contains a comma itself, escape it with "\\" (e.g. "A,B,Can\'t decide\\, I like both"). '
                   'The feedback will be shown to the participant if one of these ratings is selected.'
