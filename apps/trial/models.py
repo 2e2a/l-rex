@@ -404,7 +404,7 @@ class Trial(models.Model):
     @cached_property
     def number(self):
         return Trial.objects.filter(
-            questionnaire__study=self.questionnaire.study, is_test=False, created__lt=self.created,
+            questionnaire__study=self.questionnaire.study, is_test=self.is_test, created__lt=self.created,
         ).count() + 1
 
     @cached_property
