@@ -1,6 +1,10 @@
 {% load crispy_forms_filters %}
 {% load l10n %}
 
+<label for="{{ field.id_for_label }}" class="col-form-label {{ label_class }}">
+    <em>{{ field.label|safe }}</em>
+</label>
+
 <div class="mb-3 text-center">
     <div class="btn-group{% if use_vertical_scale_layout %}-vertical{% endif %} btn-group-toggle d-flex justify-content-between" data-toggle="buttons">
         {% for choice in field.field.choices %}
