@@ -215,7 +215,6 @@ class QuestionnaireGenerateView(
         return len(self.item_blocks)
 
     def save_form(self, form, number):
-        form.instance.block = number + 1
         form.instance.study = self.study
         super().save_form(form, number)
 
