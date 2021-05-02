@@ -41,7 +41,7 @@ class Questionnaire(models.Model):
         return '{}-{}'.format(study.slug, number)
 
     def save(self, *args, **kwargs):
-        self.slug = self.compute_slug()
+        self.slug = self.compute_slug(self.study, self.number)
         return super().save(*args, **kwargs)
 
     def get_absolute_url(self):
