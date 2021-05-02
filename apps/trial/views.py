@@ -226,6 +226,7 @@ class QuestionnaireGenerateView(
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
+        self._initialize_questionnaire_blocks()
         if not self.study.is_allowed_pseudo_randomization:
             messages.info(request, 'Note: Define filler materials to use pseudo randomization.')
         return super().get(request, *args, **kwargs)
@@ -242,7 +243,6 @@ class QuestionnaireGenerateView(
                 )
 
     def formset_valid(self):
-        self._initialize_questionnaire_blocks()
         try:
             self.study.generate_questionnaires()
             messages.success(self.request, 'Questionnaires generated.')

@@ -197,7 +197,7 @@ class Questionnaire(models.Model):
         if self._has_pseudo_randomization(block_randomization):
             slots = self._compute_slots(materials_dict, block_randomization, items_by_block)
         block_offset = 0
-        for block, block_items in items_by_block.items():
+        for block, block_items in sorted(items_by_block.items()):
             if block_randomization[block] == QuestionnaireBlock.RANDOMIZATION_TRUE:
                 questionnaire_items.extend(self._generate_items_random(block_items, block_offset))
             elif block_randomization[block] == QuestionnaireBlock.RANDOMIZATION_PSEUDO:

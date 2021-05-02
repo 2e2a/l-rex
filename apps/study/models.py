@@ -635,7 +635,7 @@ class Study(models.Model):
                 materials_list, item_lists_by_materials, questionnaires
             )
             items_by_block = self._items_by_block_by_questionnaire(
-                materials_list,  questionnaires, lists_by_questionnaire, self.use_blocks
+                materials_list, questionnaires, lists_by_questionnaire, self.use_blocks
             )
             all_questionnaires = []
             questionnaire_items_by_questionnaire = {}
@@ -651,7 +651,9 @@ class Study(models.Model):
             question_properties = []
             for questionnaire, questionnaire_items in questionnaire_items_by_questionnaire.items():
                 if randomize_scales:
-                    questionnaire.generate_question_properties(questions, questionnaire_items)
+                    question_properties.extend(
+                        questionnaire.generate_question_properties(questions, questionnaire_items)
+                    )
             QuestionProperty.objects.bulk_create(question_properties)
         except RuntimeError as error:
             self.delete_questionnaires()
