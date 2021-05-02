@@ -354,7 +354,9 @@ class RatingForm(RequiredMessageFromStudyMixin, contrib_forms.CrispyModelForm):
         self.fields['question'].initial = self.question.number
         scale_value = self.fields.get('scale_value')
         scale_value.queryset = scale_value.queryset.filter(question=self.question)
-        scale_value.label = item_question.question if item_question else self.question.question
+        scale_value.label = (
+            item_question.question if item_question and item_question.question else self.question.question
+        )
         scale_value.help_text = item_question.legend if item_question and item_question.legend else self.question.legend
         choices = scale_value.choices
         if item_question and item_question.scale_labels:
