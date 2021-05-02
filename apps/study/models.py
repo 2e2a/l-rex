@@ -575,7 +575,8 @@ class Study(models.Model):
         for questionnaire in questionnaires:
             questionnaire_item_lists = (
                 self._init_questionnaire_lists(materials)
-                if not last_item_lists else self._next_questionnaire_lists(item_lists_by_materials, last_item_lists)
+                if not last_item_lists
+                else self._next_questionnaire_lists(item_lists_by_materials, last_item_lists)
             )
             questionnaire.item_lists.set(questionnaire_item_lists)
             last_item_lists = questionnaire_item_lists
@@ -614,7 +615,7 @@ class Study(models.Model):
                     items_by_block.setdefault(block, [])
                     items_by_block[block].append(item)
             else:
-                items_by_block[1] = list(items)
+                items_by_block[1] = list(items_in_questionnaire)
             items_by_block_by_questionnaire[questionnaire] = items_by_block
         return items_by_block_by_questionnaire
 
