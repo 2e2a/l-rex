@@ -459,8 +459,6 @@ class TestTrialMixin:
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        if self.is_test_trial:
-            messages.warning(request, self.message)
         return super().post(request, *args, **kwargs)
 
     def get_form_kwargs(self):
