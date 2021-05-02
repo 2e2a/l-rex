@@ -325,7 +325,7 @@ class SharedWithForm(contrib_forms.CrispyForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['shared_with'].initial = ', '.join(user.username for user in study.shared_with.all())
+        self.fields['shared_with'].initial = ', '.join(user.username for user in self.study.shared_with.all())
 
     def clean_shared_with(self):
         shared_with = self.cleaned_data['shared_with']
