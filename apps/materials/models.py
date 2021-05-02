@@ -299,6 +299,8 @@ class Materials(models.Model):
             participant = rating.trial.number
             item = rating.questionnaire_item.item
             key = '{:03d}-{:03d}{}'.format(participant, item.number, item.condition)
+            if rating.trial.is_test:
+                key = 'test-' + key
             if key in results:
                 row = results[key]
                 row['questions'].append(rating.question)
