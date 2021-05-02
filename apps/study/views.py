@@ -213,7 +213,7 @@ class StudyListView(LoginRequiredMixin, contrib_views.PaginationHelperMixin, gen
             queryset = queryset.filter(
                 Q(creator=self.request.user) |
                 Q(shared_with=self.request.user)
-            ).distinct()
+            )
         if not self.show_archived:
             queryset = queryset.filter(is_archived=False)
         if self.sort_by == 'name':
