@@ -324,10 +324,10 @@ class Study(models.Model):
 
     @cached_property
     def item_blocks(self):
-        item_bocks = set()
+        item_blocks = set()
         for materials in self.materials.all():
-            item_bocks.update(materials.item_blocks)
-        return sorted(item_bocks)
+            item_blocks.update(materials.item_blocks)
+        return sorted(item_blocks)
 
     @cached_property
     def question(self):
@@ -610,7 +610,7 @@ class Study(models.Model):
                 materials_block = {materials.pk: materials.auto_block for materials in materials_list}
                 for item in items_in_questionnaire:
                     block = materials_block[item.materials_id]
-                    if not block:
+                    if block is None:
                         block = item.block
                     items_by_block.setdefault(block, [])
                     items_by_block[block].append(item)

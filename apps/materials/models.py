@@ -109,10 +109,11 @@ class Materials(models.Model):
             return 0
         if self.block > 0:
             return self.block
+        return None
 
     @cached_property
     def item_blocks(self):
-        if self.auto_block:
+        if self.auto_block is not None:
             item_blocks = [self.auto_block]
         else:
             item_blocks = set([item.block for item in self.items.all()])
