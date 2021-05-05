@@ -820,7 +820,7 @@ class Study(models.Model):
         for question in self.questions.all():
             writer.writerow([
                 question.question,
-                question.scale_labels,
+                question.get_scale_labels(),
                 question.legend,
                 question.randomize_scale,
                 question.rating_comment,
