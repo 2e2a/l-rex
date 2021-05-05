@@ -956,7 +956,7 @@ class Study(models.Model):
             if not row:
                 continue
             questionnaire = Questionnaire.objects.create(study=self, number=row[columns['questionnaire']])
-            if 'lists' in columns:
+            if columns['lists'] > 0 and row[columns['lists']]:
                 item_lists = QuestionnaireUploadForm.read_item_lists(
                     self, row[columns['lists']], materials_titles, study_itemlists
                 )

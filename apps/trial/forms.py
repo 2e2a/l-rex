@@ -181,8 +181,8 @@ class QuestionnaireUploadForm(contrib_forms.CSVUploadForm):
         return lists
 
     def check_upload_form(self, reader, cleaned_data):
-        materials_titles = { materials.pk: materials.title for materials in self.materials.all()}
-        study_items = list(item_models.Item.objects.filter(marials__study=self.study).all())
+        materials_titles = { materials.pk: materials.title for materials in self.study.materials.all()}
+        study_items = list(item_models.Item.objects.filter(materials__study=self.study).all())
         for row in reader:
             int(row[cleaned_data['questionnaire_column'] - 1])
             item_lists_col = cleaned_data['item_lists_column']

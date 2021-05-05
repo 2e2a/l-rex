@@ -315,7 +315,6 @@ class QuestionnaireBlockInstructionsUpdateView(
         return False
 
 
-
 class QuestionnaireUploadView(
     study_views.StudyMixin,
     study_views.CheckStudyCreatorMixin,
@@ -333,10 +332,10 @@ class QuestionnaireUploadView(
         return kwargs
 
     def form_valid(self, form):
-        result =  super().form_valid(form)
+        result = super().form_valid(form)
         self.study.questionnaires.all().delete()
         columns = {
-            'questionnaires': form.cleaned_data['questionnaires_column'] - 1,
+            'questionnaire': form.cleaned_data['questionnaire_column'] - 1,
             'items': form.cleaned_data['items_column'] - 1,
             'lists': form.cleaned_data['item_lists_column'] - 1,
         }
