@@ -23,6 +23,10 @@ def read_file(form_cleaned_data):
     return data
 
 
+def read_file_stream(form_cleaned_data):
+    return StringIO(read_file(form_cleaned_data))
+
+
 def seek_file(form_cleaned_data):
     form_cleaned_data['file'].seek(0)
 

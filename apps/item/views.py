@@ -1,4 +1,3 @@
-from io import StringIO
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import ValidationError
@@ -368,7 +367,7 @@ class ItemUploadView(
             legend_column = 'question_{}_legend_column'.format(question.number + 1)
             if form.cleaned_data[legend_column] > 0:
                 columns.update({'legend{}'.format(i): form.cleaned_data[legend_column] - 1})
-        data = StringIO(contrib_csv.read_file(form.cleaned_data))
+        data = contrib_csv.read_file_stream(form.cleaned_data)
         self.materials.items_from_csv(
             data, has_materials_column=False, user_columns=columns, detected_csv=form.detected_csv,
         )
@@ -499,7 +498,7 @@ class ItemFeedbackUploadView(
             'scale_values': form.cleaned_data['scale_values_column'] - 1,
             'feedback': form.cleaned_data['feedback_column'] - 1,
         }
-        data = StringIO(contrib_csv.read_file(form.cleaned_data))
+        data = contrib_csv.read_file_stream(form.cleaned_data)
         self.materials.item_feedbacks_from_csv(data, has_materials_column=False, user_columns=columns, detected_csv=form.detected_csv)
         messages.success(self.request, 'Item lists uploaded.')
         return result
@@ -580,7 +579,7 @@ class ItemListUploadView(
             'list': form.cleaned_data['list_column'] - 1,
             'items': form.cleaned_data['items_column'] - 1,
         }
-        data = StringIO(contrib_csv.read_file(form.cleaned_data))
+        data = contrib_csv.read_file_stream(form.cleaned_data)
         self.materials.itemlists_from_csv(data, has_materials_column=False, user_columns=columns, detected_csv=form.detected_csv)
         messages.success(self.request, 'Item lists uploaded.')
         return result

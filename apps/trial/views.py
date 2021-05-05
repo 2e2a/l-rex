@@ -340,7 +340,7 @@ class QuestionnaireUploadView(
             'items': form.cleaned_data['items_column'] - 1,
             'lists': form.cleaned_data['item_lists_column'] - 1,
         }
-        data = contrib_csv.read_file(form.cleaned_data)
+        data = contrib_csv.read_file_stream(form.cleaned_data)
         self.study.questionnaires_from_csv(data, user_columns=columns, detected_csv=form.detected_csv)
         messages.success(self.request, 'Questionnaires uploaded.')
         return result
