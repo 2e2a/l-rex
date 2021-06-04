@@ -4,14 +4,28 @@
 #
 #    pip-compile requirements.in
 #
-asgiref==3.3.4            # via django
-confusable-homoglyphs==3.2.0  # via django-registration
-django-crispy-forms==1.11.2  # via -r requirements.in
-django-markdownx==3.0.1   # via -r requirements.in
-django-registration==3.1.2  # via -r requirements.in
-django==3.2               # via -r requirements.in, django-markdownx, django-registration
-markdown==3.3.4           # via django-markdownx
-pillow==8.2.0             # via django-markdownx
-psycopg2-binary==2.8.6    # via -r requirements.in
-pytz==2021.1              # via django
-sqlparse==0.4.1           # via django
+asgiref==3.3.4
+    # via django
+confusable-homoglyphs==3.2.0
+    # via django-registration
+django-crispy-forms==1.11.2
+    # via -r requirements.in
+django-markdownx==3.0.1
+    # via -r requirements.in
+django-registration==3.1.2
+    # via -r requirements.in
+django==3.2.1
+    # via
+    #   -r requirements.in
+    #   django-markdownx
+    #   django-registration
+markdown==3.3.4
+    # via django-markdownx
+pillow==8.2.0
+    # via django-markdownx
+psycopg2-binary==2.8.6
+    # via -r requirements.in
+pytz==2021.1
+    # via django
+sqlparse==0.4.1
+    # via django
