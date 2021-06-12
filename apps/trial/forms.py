@@ -123,9 +123,6 @@ class QuestionnaireUploadForm(contrib_forms.CSVUploadForm):
 
     validator_int_columns = ['questionnaire_column']
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
     @staticmethod
     def read_items(items_string, materials_titles, study_items):
         items = []
