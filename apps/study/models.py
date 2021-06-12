@@ -583,7 +583,7 @@ class Study(models.Model):
             item_lists_by_questionnaire[questionnaire] = questionnaire_item_lists
         return item_lists_by_questionnaire
 
-    def _generate_questionnaire_permutations(self, materials, questionnaires, permutations=4):
+    def _generate_questionnaire_permutations(self, materials, questionnaires, permutations=3):
         from apps.trial.models import Questionnaire, QuestionnaireItem
         questionnaire_permutations = []
         if self.randomization_reqiured:
