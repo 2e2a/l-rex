@@ -54,3 +54,21 @@ class UserAccountDeleteView(LoginRequiredMixin, contrib_views.DefaultDeleteView)
         return reverse('home')
 
 
+class UserEmailChangeView(LoginRequiredMixin, SuccessMessageMixin, generic.UpdateView):
+    template_name = 'lrex_user/email_change_form.html'
+    form_class = forms.EmailChangeForm
+    title = 'E-mail'
+    success_message = 'E-mail successfully updated.'
+
+    def get_object(self, queryset=None):
+        return self.request.user
+
+    def get_success_url(self):
+        return reverse('home')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({
+            'user': self.request.user,
+        })
+        return kwargs
