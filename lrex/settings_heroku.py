@@ -66,12 +66,15 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'apps.home.context_processors.announcements',
             ],
         },
     },
 ]
 
 WSGI_APPLICATION = 'lrex.wsgi.application'
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Auth
 LOGIN_REDIRECT_URL = '/'
@@ -100,6 +103,14 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
+# Internationalization
+# https://docs.djangoproject.com/en/1.10/topics/i18n/
+LANGUAGE_CODE = 'en-us'
+TIME_ZONE = 'UTC'
+USE_TZ = True
+
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 # https://devcenter.heroku.com/articles/django-assets/
@@ -111,7 +122,6 @@ STATICFILES_DIRS = [
     os.path.join(CONFIG_DIR, 'assets'),
     os.path.join(CONFIG_DIR, 'static'),
 ]
-
 
 # Other
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
@@ -133,19 +143,11 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PASSWORD')
 EMAIL_USE_SSL = True
 
 # lrex
-LREX_VERSION = 'beta'
-LREX_CONTACT_MD = \
-    'Alexej Starschenko  \n' \
-    'Uthmannstraße 16  \n' \
-    '12043 Berlin  \n' \
-    '*support@l-rex.de*' \
+LREX_VERSION = 0.8
+LREX_CONTACT_MD = 'Please define contact as markdown in local.py'
+LREX_PRIVACY_MD = 'Please define privacy statement as markdown in local.py'
+LREX_ANNOUNCEMENTS = []
 
-LREX_PRIVACY_MD = \
-    'We do not track our users:\n\n' \
-    '- Cookies are used for authentication only.\n' \
-    '- No user tracking software is used.\n' \
-    '- No external 3rd party components.\n' \
-    'Only the study data is linked to your user profile to provide the platform functionality.\n'
 
 # Activate Django-Heroku.
 django_heroku.settings(locals())
