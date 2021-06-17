@@ -143,26 +143,23 @@ class StudyLabelsForm(contrib_forms.CrispyModelForm):
             'comment_label',
             'participation_id_label',
             'password_label',
-            'answer_question_message',
+            'field_required_message',
             'answer_questions_message',
             'feedback_message',
         ]
 
     def __init__(self, *args, **kwargs):
-        study = kwargs.pop('study')
         super().__init__(*args, **kwargs)
-        if not study.has_question_rating_comments:
+        if not self.study.has_question_rating_comments:
             self.fields['optional_label'].widget = forms.HiddenInput()
             self.fields['comment_label'].widget = forms.HiddenInput()
-        if not study.enable_item_rating_feedback:
+        if not self.study.enable_item_rating_feedback:
             self.fields['feedback_message'].widget = forms.HiddenInput()
-        if study.questions.count() > 1:
-            self.fields['answer_question_message'].widget = forms.HiddenInput()
         else:
             self.fields['answer_questions_message'].widget = forms.HiddenInput()
-        if study.participant_id != study.PARTICIPANT_ID_RANDOM:
+        if self.study.participant_id != self.study.PARTICIPANT_ID_RANDOM:
             self.fields['participation_id_label'].widget = forms.HiddenInput()
-        if not study.password:
+        if not self.study.password:
             self.fields['password_label'].widget = forms.HiddenInput()
 
 
@@ -295,41 +292,28 @@ class QuestionForm(contrib_forms.CrispyModelForm):
             'rating_comment',
         ]
 
-
-def question_formset_factory(n_questions, extra=0):
-    return forms.modelformset_factory(
-        models.Question,
-        form=QuestionForm,
-        min_num=n_questions,
-        extra=extra,
-    )
-
-
-def initialize_with_questions(question_formset, questions):
-    for question, form in zip(questions, question_formset):
-        form['scale_labels'].initial = question.scale_labels
+    def __init__(self, *args, **kwargs):
+        study = kwargs.pop('study')
+        super().__init__(*args, **kwargs)
+        self.fields['scale_labels'].initial = self.instance.get_scale_labels(multiline=True) if self.instance else None
+        if study.has_questionnaires:
+            self.fields['randomize_scale'].widget.attrs['readonly'] = True
+            self.fields['randomize_scale'].widget.attrs['disabled'] = True
 
 
-def question_formset_disable_fields(question_formset, **kwargs):
-    disable_randomize_scales = kwargs.pop('disable_randomize_scale', False)
-    for form in question_formset:
-        if disable_randomize_scales:
-            form.fields['randomize_scale'].widget.attrs['readonly'] = True
-            form.fields['randomize_scale'].widget.attrs['disabled'] = True
+class QuestionFormsetFactory(contrib_forms.CrispyModelFormsetFactory):
+    model = models.Question
+    form = QuestionForm
 
-
-def question_formset_helper():
-    formset_helper = FormHelper()
-    formset_helper.add_layout(
-        Layout(
-            Fieldset('Question {{ forloop.counter }}', None, 'question', 'scale_labels', 'randomize_scale', 'legend', 'rating_comment'),
-        ),
-    )
-    formset_helper.add_input(Submit('submit', 'Submit'))
-    formset_helper.add_input(Submit('save', 'Save', css_class='btn-secondary'))
-    formset_helper.add_input(Submit('add', 'Add', css_class='btn-secondary'))
-    formset_helper.add_input(Submit('delete', 'Delete last', css_class='btn-danger'))
-    return formset_helper
+    @staticmethod
+    def get_layout(study=None):
+        return Layout(
+                Fieldset(
+                    'Question {{ forloop.counter }}', None, 'question', 'scale_labels', 'randomize_scale', 'legend',
+                    'rating_comment', 'DELETE',
+                    HTML('<hr>'),
+                ),
+            )
 
 
 class SharedWithForm(contrib_forms.CrispyForm):
@@ -340,9 +324,8 @@ class SharedWithForm(contrib_forms.CrispyForm):
     )
 
     def __init__(self, *args, **kwargs):
-        study = kwargs.pop('study')
         super().__init__(*args, **kwargs)
-        self.fields['shared_with'].initial = ', '.join(user.username for user in study.shared_with.all())
+        self.fields['shared_with'].initial = ', '.join(user.username for user in self.study.shared_with.all())
 
     def clean_shared_with(self):
         shared_with = self.cleaned_data['shared_with']
@@ -403,24 +386,12 @@ class DemographicFieldForm(contrib_forms.CrispyModelForm):
         ]
 
 
-def demographic_formset_factory(n_fields, extra=0):
-    return forms.modelformset_factory(
-        models.DemographicField,
-        form=DemographicFieldForm,
-        min_num=n_fields,
-        extra=extra,
-    )
+class DemographicsFormsetFactory(contrib_forms.CrispyModelFormsetFactory):
+    model = models.DemographicField
+    form = DemographicFieldForm
 
-
-def demographic_formset_helper():
-    formset_helper = FormHelper()
-    formset_helper.add_layout(
-        Layout(
-            Fieldset('Demographic field {{ forloop.counter }}', None, 'name'),
-        ),
-    )
-    formset_helper.add_input(Submit('submit', 'Submit'))
-    formset_helper.add_input(Submit('save', 'Save', css_class='btn-secondary'))
-    formset_helper.add_input(Submit('add', 'Add', css_class='btn-secondary'))
-    formset_helper.add_input(Submit('delete', 'Delete last', css_class='btn-danger'))
-    return formset_helper
+    @staticmethod
+    def get_layout(study=None):
+        return Layout(
+            Fieldset('Demographic field {{ forloop.counter }}', None, 'name', 'DELETE', HTML('<hr>'))
+        )

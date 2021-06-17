@@ -1,4 +1,3 @@
-from io import StringIO
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import ValidationError
@@ -368,7 +367,7 @@ class ItemUploadView(
             legend_column = 'question_{}_legend_column'.format(question.number + 1)
             if form.cleaned_data[legend_column] > 0:
                 columns.update({'legend{}'.format(i): form.cleaned_data[legend_column] - 1})
-        data = StringIO(contrib_csv.read_file(form.cleaned_data))
+        data = contrib_csv.read_file_stream(form.cleaned_data)
         self.materials.items_from_csv(
             data, has_materials_column=False, user_columns=columns, detected_csv=form.detected_csv,
         )
@@ -409,61 +408,38 @@ class ItemQuestionsUpdateView(
     study_views.DisableFormIfStudyActiveMixin,
     contrib_views.PaginationHelperMixin,
     study_views.MaterialsNavMixin,
-    generic.TemplateView
+    contrib_views.FormsetView
 ):
     template_name = 'lrex_dashboard/materials_formset_form.html'
     formset = None
     helper = None
+    formset_factory = forms.ItemQuestionFormsetFactory
+    custom_formset = forms.ItemQuestionFormset
 
     @property
     def title(self):
         return 'Customize item {} questions'.format(self.item)
 
-    def dispatch(self, request, *args, **kwargs):
-        self.n_questions = self.study.questions.count()
-        self.helper = forms.itemquestion_formset_helper()
-        return super().dispatch(request, *args, **kwargs)
+    def get_formset_queryset(self):
+        return self.item.item_questions.all()
+
+    def get_form_count(self):
+        return self.study.questions.count()
+
+    def save_form(self, form, number):
+        form.instance.item = self.item
+        super().save_form(form, number)
+
+    def submit_redirect(self):
+        return self.redirect_paginated('items', materials_slug=self.materials.slug)
 
     def get(self, request, *args, **kwargs):
-        self.formset = forms.itemquestion_formset_factory(self.n_questions)(
-            queryset=models.ItemQuestion.objects.filter(item=self.item),
-        )
-        forms.initialize_with_questions(self.formset, self.study.questions.all())
-        if self.n_questions == 0:
-            msg = 'Note: If you want to use per item question customization, please ' \
-                  '<a href="{}">define the study question</a> first.'.format(
-                        reverse('study-questions', args=[self.study.slug]))
+        if self.get_form_count() == 0:
+            msg = (
+                'Note: If you want to use per item question customization, please '
+                  '<a href="{}">define the study question</a> first.'
+            ).format(reverse('study-questions', args=[self.study.slug]))
             messages.info(self.request, mark_safe(msg))
-        return super().get(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        if 'reset' in request.POST:
-            self.item.item_questions.all().delete()
-            return self.get(request, *args, **kwargs)
-        self.formset = forms.itemquestion_formset_factory(self.n_questions)(request.POST, request.FILES)
-        if self.formset.is_valid():
-            instances = self.formset.save(commit=False)
-            scale_labels_valid = True
-            for instance in instances:
-                question = next(question for question in self.study.questions.all() if question.number == instance.number)
-                if instance.scale_labels:
-                    scale_labels = split_list_string(instance.scale_labels)
-                    if len(scale_labels) != question.scale_values.count():
-                        self.formset._errors[question.number]['scale_labels'] = \
-                            self.formset.error_class(ValidationError('Invalid scale labels').error_list)
-                        scale_labels_valid = False
-                        break
-                instance.number = question.number
-                instance.item = self.item
-
-            if scale_labels_valid:
-                for instance in instances:
-                    instance.save()
-                messages.success(request, 'Item questions saved.')
-                if 'submit' in request.POST:
-                    return self.redirect_paginated('items', materials_slug=self.materials.slug)
-                else:  # save
-                    return self.redirect_paginated('item-questions', item_slug=self.item.slug)
         return super().get(request, *args, **kwargs)
 
 
@@ -474,73 +450,26 @@ class ItemFeedbackUpdateView(
     study_views.DisableFormIfStudyActiveMixin,
     contrib_views.PaginationHelperMixin,
     study_views.MaterialsNavMixin,
-    generic.TemplateView
+    contrib_views.FormsetView
 ):
     template_name = 'lrex_dashboard/materials_formset_form.html'
     formset = None
     helper = None
+    formset_factory = forms.ItemFeedbackFormsetFactory
 
     @property
     def title(self):
         return 'Define item {} feedback'.format(self.item)
 
-    def dispatch(self, request, *args, **kwargs):
-        self.helper = forms.itemfeedback_formset_helper()
-        self.n_feedback = self.item.item_feedback.count()
-        return super().dispatch(request, *args, **kwargs)
+    def get_formset_queryset(self):
+        return self.item.item_feedback.all()
 
-    def get(self, request, *args, **kwargs):
-        extra = 0 if self.n_feedback > 0 else  1
-        self.formset = forms.itemfeedback_formset_factory(extra=extra)(
-            queryset=self.item.item_feedback.all(),
-        )
-        forms.itemfeedback_init_formset(self.formset, self.study)
-        return super().get(request, *args, **kwargs)
+    def save_form(self, form, number):
+        form.instance.item = self.item
+        super().save_form(form, number)
 
-    def post(self, request, *args, **kwargs):
-        self.formset = forms.itemfeedback_formset_factory()(request.POST, request.FILES)
-        n_forms = len(self.formset.forms)
-        if self.formset.is_valid():
-            instances = self.formset.save(commit=False)
-            scale_values_valid = True
-            n_instances = len(instances)
-            for i, instance in enumerate(instances):
-                scale_values = split_list_string(instance.scale_values)
-                if not all(instance.question.is_valid_scale_value(scale_value) for scale_value in scale_values):
-                    form_num = n_forms - n_instances
-                    self.formset._errors[form_num]['scale_values'] = \
-                        self.formset.error_class(ValidationError('Invalid scale values').error_list)
-                    scale_values_valid = False
-                    break
-                instance.item = self.item
-            if scale_values_valid:
-                for instance in instances:
-                    instance.save()
-            self.n_feedback = self.item.item_feedback.count()
-            extra = n_forms - self.n_feedback
-            if 'submit' in request.POST:
-                if scale_values_valid:
-                    messages.success(request, 'Feedback saved.')
-                    return self.redirect_paginated('items', materials_slug=self.materials.slug)
-            elif 'save' in request.POST:
-                if scale_values_valid:
-                    messages.success(request, 'Feedback saved.')
-                    return self.redirect_paginated('item-feedback', item_slug=self.item.slug)
-            elif 'add' in request.POST:
-                self.formset = forms.itemfeedback_formset_factory(extra + 1)(
-                    queryset=self.item.item_feedback.all(),
-                )
-            else: # delete last
-                if extra > 0:
-                    extra -= 1
-                elif self.n_feedback > 0:
-                    self.item.item_feedback.last().delete(),
-                    self.n_feedback -= 1
-                self.formset = forms.itemfeedback_formset_factory(extra)(
-                    queryset=self.item.item_feedback.all(),
-                )
-            forms.itemfeedback_init_formset(self.formset, self.study)
-        return super().get(request, *args, **kwargs)
+    def submit_redirect(self):
+        return self.redirect_paginated('items', materials_slug=self.materials.slug)
 
 
 class ItemFeedbackUploadView(
@@ -569,7 +498,7 @@ class ItemFeedbackUploadView(
             'scale_values': form.cleaned_data['scale_values_column'] - 1,
             'feedback': form.cleaned_data['feedback_column'] - 1,
         }
-        data = StringIO(contrib_csv.read_file(form.cleaned_data))
+        data = contrib_csv.read_file_stream(form.cleaned_data)
         self.materials.item_feedbacks_from_csv(data, has_materials_column=False, user_columns=columns, detected_csv=form.detected_csv)
         messages.success(self.request, 'Item lists uploaded.')
         return result
@@ -608,7 +537,9 @@ class ItemListListView(
         return redirect('itemlists', materials_slug=self.materials.slug)
 
     def get_queryset(self):
-        return models.ItemList.objects.filter(materials=self.materials)
+        queryset = models.ItemList.objects.filter(materials=self.materials)
+        queryset = queryset.prefetch_related('items')
+        return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -648,7 +579,7 @@ class ItemListUploadView(
             'list': form.cleaned_data['list_column'] - 1,
             'items': form.cleaned_data['items_column'] - 1,
         }
-        data = StringIO(contrib_csv.read_file(form.cleaned_data))
+        data = contrib_csv.read_file_stream(form.cleaned_data)
         self.materials.itemlists_from_csv(data, has_materials_column=False, user_columns=columns, detected_csv=form.detected_csv)
         messages.success(self.request, 'Item lists uploaded.')
         return result

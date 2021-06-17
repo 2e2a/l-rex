@@ -90,7 +90,7 @@ class Materials(models.Model):
     @cached_property
     def item_count(self):
         if self.items_validated:
-            return int(self.items.count() / len(self.conditions))
+            return int(self.items.count() / self.condition_count)
         return 0
 
     def item_pos(self, item):
@@ -100,18 +100,23 @@ class Materials(models.Model):
         )
 
     @cached_property
-    def conditions(self):
-        items = self.items.filter(number=1)
-        conditions = [item.condition for item in items]
-        return conditions
+    def condition_count(self):
+        return self.items.filter(number=1).count()
+
+    @cached_property
+    def auto_block(self):
+        if self.is_example:
+            return 0
+        if self.block > 0:
+            return self.block
+        return None
 
     @cached_property
     def item_blocks(self):
-        if self.is_example:
-            return [0]
-        if self.block > 0:
-            return [self.block]
-        item_blocks = set([item.block for item in self.items.all()])
+        if self.auto_block is not None:
+            item_blocks = [self.auto_block]
+        else:
+            item_blocks = set([item.block for item in self.items.all()])
         return sorted(item_blocks)
 
     @cached_property
@@ -148,7 +153,8 @@ class Materials(models.Model):
         conditions = []
         self.set_items_validated(False)
 
-        items = self.items.all()
+        items = self.items.prefetch_related('materials', 'textitem', 'markdownitem', 'audiolinkitem', 'item_questions')
+        items = list(items.all())
         if len(items) == 0:
             raise AssertionError('No items.')
 
@@ -158,16 +164,16 @@ class Materials(models.Model):
             else:
                 break
 
-        condition_count = len(conditions)
         n_items = len(items)
         if self.item_list_distribution == self.LIST_DISTRIBUTION_LATIN_SQUARE:
-            if n_items % condition_count != 0:
+            if n_items % self.condition_count != 0:
                 msg = 'Number of stimuli is not a multiple of the number of conditions (stimuli: {}, conditions: {})'.format(
                     n_items,
                     ', '.join('"{}"'.format(condition) for condition in conditions)
                 )
                 raise AssertionError(msg)
 
+        questions = list(self.study.questions.all())
         item_number = 0
         for i, item in enumerate(items):
             if self.study.has_text_items:
@@ -180,13 +186,12 @@ class Materials(models.Model):
                 if not item.audiolinkitem.urls:
                     raise AssertionError('Item {} has no URLs.'.format(item))
 
-            if i % condition_count == 0:
+            if i % self.condition_count == 0:
                 item_number += 1
-            if item.number != item_number or item.condition != conditions[i % condition_count]:
+            if item.number != item_number or item.condition != conditions[i % self.condition_count]:
                 msg = 'Item "{}" was not expected. Check whether item number/condition is correct.'.format(item)
                 raise AssertionError(msg)
 
-            questions = list(self.study.questions.all())
             for item_question in item.item_questions.all():
                 if item_question.number >= len(questions):
                     raise AssertionError('For item question validation the study question(s) must be defined first.')
@@ -229,7 +234,7 @@ class Materials(models.Model):
         warnings.append(msg)
         self.items_validated = True
         self.save()
-        self.compute_item_lists()
+        self.create_item_lists()
         return warnings
 
     def pregenerate_items(self, n_items, n_conditions):
@@ -251,25 +256,27 @@ class Materials(models.Model):
                     materials=self,
                 )
 
-    def compute_item_lists(self):
+    def create_item_lists(self):
         self.lists.all().delete()
         item_lists = []
         if self.item_list_distribution == self.LIST_DISTRIBUTION_LATIN_SQUARE:
-            conditions = self.conditions
-            condition_count = len(conditions)
-            for i in range(condition_count):
-                item_list = item_models.ItemList.objects.create(
+            for i in range(self.condition_count):
+                item_list = item_models.ItemList(
                     materials=self,
                     number=i,
                 )
                 item_lists.append(item_list)
+            item_models.ItemList.objects.bulk_create(item_lists)
+            items_by_list = {item_list: [] for item_list in item_lists}
             for i, item in enumerate(self.items.all()):
-                shift = (i - (item.number - 1)) % condition_count
+                shift = (i - (item.number - 1)) % self.condition_count
                 item_list = item_lists[shift]
-                item_list.items.add(item)
+                items_by_list[item_list].append(item)
+            for item_list, items in items_by_list.items():
+                item_list.items.set(items)
         elif self.item_list_distribution == self.LIST_DISTRIBUTION_ALL_TO_ALL:
             item_list = item_models.ItemList.objects.create(materials=self)
-            item_list.items.add(*list(self.items_sorted_by_block))
+            item_list.items.set(list(self.items_sorted_by_block))
 
     def results(self):
         ratings = trial_models.Rating.objects.filter(
@@ -284,7 +291,9 @@ class Materials(models.Model):
             'questionnaire_item__item__textitem',
             'questionnaire_item__item__audiolinkitem',
             'questionnaire_item__item__markdownitem',
+            'questionnaire_item__question_properties',
         )
+        has_question_with_random_scale = self.study.has_question_with_random_scale
         results = {}
         for rating in ratings:
             participant = rating.trial.number
@@ -305,7 +314,7 @@ class Materials(models.Model):
                     'item': item.number,
                     'condition': item.condition,
                     'position': rating.questionnaire_item.number + 1,
-                    'content': item.content,
+                    'content': item.content(self.study),
                     'questions': [rating.question],
                     'ratings': [rating.scale_value.number],
                     'labels': [rating.scale_value.label],
@@ -313,7 +322,7 @@ class Materials(models.Model):
                 }
                 if self.study.pseudo_randomize_question_order:
                     row['question_order'] = rating.questionnaire_item.question_order_user
-                if self.study.has_question_with_random_scale:
+                if has_question_with_random_scale:
                     row['random_scale'] = '\n'.join(
                         q_property.question_scale_user
                         for q_property in rating.questionnaire_item.question_properties.all()
@@ -329,12 +338,13 @@ class Materials(models.Model):
                 grouped_results[item].extend(list(results))
             else:
                 grouped_results[item] = list(results)
+        questions = list(self.study.questions.prefetch_related('scale_values').all())
         aggregated_results = {}
         for results_for_item in grouped_results.values():
             rating_count = len(results_for_item)
             aggregated_result = copy.deepcopy(results_for_item[0])
-            aggregated_result['scale_count'] = [None] * self.study.questions.count()
-            for question in self.study.questions.all():
+            aggregated_result['scale_count'] = [None] * len(questions)
+            for question in questions:
                 aggregated_result['scale_count'][question.number] = {
                     scale_value.number: 0 for scale_value in question.scale_values.all()
                 }
@@ -390,7 +400,7 @@ class Materials(models.Model):
             writer.writerow(header)
         for item in self.items.all():
             csv_row = [self.title] if add_materials_column else []
-            csv_row.extend([item.number, item.condition, item.content, item.block])
+            csv_row.extend([item.number, item.condition, item.content(self.study), item.block])
             if self.study.has_audiolink_items:
                 csv_row.append(
                     item.audiolinkitem.description

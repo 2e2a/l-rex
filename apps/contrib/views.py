@@ -74,15 +74,84 @@ class DisableFormMixin:
         return form
 
     def get(self, request, *args, **kwargs):
+        response = super().get(request, *args, **kwargs)
         if self.is_disabled:
-            if hasattr(self, 'helper'):
-                for helper_input in self.helper.inputs:
-                    helper_input.field_classes += '  disabled'
-                    helper_input.flat_attrs += '  disabled=True'
             if hasattr(self, 'formset'):
+                for helper_input in self.formset.helper.inputs:
+                    helper_input.field_classes += ' disabled'
+                    helper_input.flat_attrs += ' disabled=True'
                 for form in self.formset:
                     self.disable_form(form)
-        return  super().get(request, *args, **kwargs)
+        return response
+
+
+class FormsetView(generic.TemplateView):
+    formset_factory = None
+    custom_formset = None
+
+    formset_class = None
+    formset = None
+    form_count = None
+
+    def get_formset_queryset(self):
+        raise NotImplementedError('Provide a queryset.')
+
+    def get_form_count(self):
+        return None
+
+    def dispatch(self, request, *args, **kwargs):
+        self.form_count = self.get_form_count()
+        self.formset_class = self.formset_factory(
+            form_count=self.form_count, custom_formset=self.custom_formset, study=self.study
+        )
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        return {'study': self.study}
+
+    def get(self, request, *args, **kwargs):
+        self.formset = self.formset_class(queryset=self.get_formset_queryset(), form_kwargs=self.get_form_kwargs())
+        if self.get_form_count() is None and self.get_formset_queryset().count() == 0:
+            messages.info(
+                self.request,
+                'If you want to create multiple elements: save the first one, then a form for the next one will appear.'
+            )
+        return super().get(request, *args, **kwargs)
+
+    def save_form(self, form, number):
+        form.instance.save()
+
+    def formset_valid(self):
+        message = '{}s saved.'.format(self.formset_class.model._meta.verbose_name.capitalize())
+        messages.success(self.request, message)
+
+    def formset_invalid(self):
+        pass
+
+    def submit_redirect(self):
+        raise NotImplementedError('Provide a submit redirect.')
+
+    def post(self, request, *args, **kwargs):
+        self.formset = self.formset_class(
+            request.POST, request.FILES, queryset=self.get_formset_queryset(), form_kwargs=self.get_form_kwargs()
+        )
+        if self.formset.is_valid():
+            instances = self.formset.save(commit=False)
+            number = 0
+            for form in self.formset:
+                if form.instance.pk and form.cleaned_data.get('DELETE', False):
+                    form.instance.delete()
+                    continue
+                if self.form_count or form.instance in instances:
+                    self.save_form(form, number)
+                number += 1
+            self.formset_valid()
+            if 'submit' in request.POST:
+                return self.submit_redirect()
+            return self.get(request, *args, **kwargs)
+        else:
+            self.formset_invalid()
+        return super().get(request, *args, **kwargs)
 
 
 class PaginationHelperMixin:

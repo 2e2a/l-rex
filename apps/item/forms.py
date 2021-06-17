@@ -1,6 +1,6 @@
 import re
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Fieldset, Layout, Submit
+from crispy_forms.layout import Fieldset, HTML, Layout, Submit
 from django import forms
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
@@ -107,8 +107,8 @@ class ItemUploadForm(contrib_forms.CSVUploadForm):
 
     def __init__(self, *args, **kwargs):
         self.materials = kwargs.pop('materials')
-        self.study = self.materials.study
         super().__init__(*args, **kwargs)
+        self.study = self.materials.study
         if self.study.has_text_items:
             content_help_text = 'Specify which column contains the item text.'
         elif self.study.has_markdown_items:
@@ -191,11 +191,7 @@ class ItemUploadForm(contrib_forms.CSVUploadForm):
                     assert row[cleaned_data['question_{}_legend_column'.format(question.number + 1)] - 1]
 
 
-class ItemQuestionForm(contrib_forms.OptionalLabelMixin, forms.ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.append_optional_to_labels()
+class ItemQuestionForm(contrib_forms.CrispyModelForm):
 
     class Meta:
         model = models.ItemQuestion
@@ -207,42 +203,43 @@ class ItemQuestionForm(contrib_forms.OptionalLabelMixin, forms.ModelForm):
             'number': forms.HiddenInput()
         }
 
+    def __init__(self, *args, **kwargs):
+        self.question = kwargs.pop('question')
+        super().__init__(*args, **kwargs)
+        self.append_optional_to_labels()
+        self.fields['number'].initial = self.question.number
+        self.fields['question'].initial = self.question.question
+        self.fields['scale_labels'].initial = self.question.get_scale_labels()
+        self.fields['legend'].initial = self.question.legend
 
-def itemquestion_formset_factory(n_questions):
-    return modelformset_factory(
-        models.ItemQuestion,
-        form=ItemQuestionForm,
-        min_num=n_questions,
-        max_num=n_questions,
-        extra=0,
-    )
-
-
-def initialize_with_questions(itemquestion_formset, questions):
-
-    def get_question(num, questions):
-        for question in questions:
-            if question.number == num:
-                return question
-
-    for i, form in enumerate(itemquestion_formset):
-        question = get_question(i, questions)
-        if not form['question'].initial:
-            form['question'].initial = question.question
-            form['number'].initial = i
-            form['scale_labels'].initial = question.scale_labels
-            form['legend'].initial = question.legend
+    def clean_scale_labels(self):
+        data = self.cleaned_data['scale_labels']
+        scale_labels = split_list_string(data)
+        if len(scale_labels) != self.question.scale_values.count():
+                raise ValidationError('Invalid scale label number. Must match the original ???')
+        return data
 
 
-def itemquestion_formset_helper():
-    formset_helper = FormHelper()
-    formset_helper.add_layout(
-        Layout(Fieldset('Question {{ forloop.counter }}', None, 'question', 'scale_labels', 'legend'))
-    )
-    formset_helper.add_input(Submit('submit', 'Submit'))
-    formset_helper.add_input(Submit('save', 'Save', css_class='btn-secondary'))
-    formset_helper.add_input(Submit('reset', 'Reset'))
-    return formset_helper
+class ItemQuestionFormset(forms.BaseModelFormSet):
+
+    def get_form_kwargs(self, index):
+        kwargs = super().get_form_kwargs(index)
+        study = kwargs.get('study')
+        kwargs['question'] = study.questions.filter(number=index).first()
+        return kwargs
+
+
+class ItemQuestionFormsetFactory(contrib_forms.CrispyModelFormsetFactory):
+    model = models.ItemQuestion
+    form = ItemQuestionForm
+
+    @staticmethod
+    def get_layout(study=None):
+        return Layout(
+            Fieldset(
+                'Question {{ forloop.counter }}', None, 'question', 'scale_labels', 'legend', HTML('<hr>')
+            ),
+        )
 
 
 class ItemFeedbackUploadForm(contrib_forms.CSVUploadForm):
@@ -356,40 +353,34 @@ class ItemListUploadForm(contrib_forms.CSVUploadForm):
             self.read_items(items_string, materials_items)
 
 
-class ItemFeedbackForm(contrib_forms.OptionalLabelMixin, forms.ModelForm):
+class ItemFeedbackForm(contrib_forms.CrispyModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.append_optional_to_labels()
+        self.fields['question'].queryset = self.fields['question'].queryset.filter(study=self.study)
 
     class Meta:
         model = models.ItemFeedback
         fields = ['question', 'scale_values', 'feedback']
 
-
-def itemfeedback_formset_factory(extra=0):
-    return modelformset_factory(
-        models.ItemFeedback,
-        form=ItemFeedbackForm,
-        extra=extra,
-    )
-
-
-def itemfeedback_init_formset(itemfeedback_formset, study):
-
-    for form in itemfeedback_formset:
-        question = form.fields.get('question')
-        question.queryset = question.queryset.filter(study=study)
-        question.empty_label = None
+    def clean(self):
+        data = super().clean()
+        question = data.get('question')
+        scale_values = split_list_string(data.get('scale_values'))
+        if not all(question.is_valid_scale_value(scale_value) for scale_value in scale_values):
+            raise ValidationError('Invalid scale values')
 
 
-def itemfeedback_formset_helper():
-    formset_helper = FormHelper()
-    formset_helper.add_layout(
-        Layout(Fieldset('Feedback {{ forloop.counter }}', None, 'question', 'scale_values', 'feedback'))
-    )
-    formset_helper.add_input(Submit('submit', 'Submit'))
-    formset_helper.add_input(Submit('save', 'Save', css_class='btn-secondary'))
-    formset_helper.add_input(Submit('add', 'Add', css_class='btn-secondary'))
-    formset_helper.add_input(Submit('delete', 'Delete last', css_class='btn-danger'))
-    return formset_helper
+class ItemFeedbackFormsetFactory(contrib_forms.CrispyModelFormsetFactory):
+    model = models.ItemFeedback
+    form = ItemFeedbackForm
+
+    @staticmethod
+    def get_layout(study=None):
+        return Layout(
+            Fieldset(
+                'Feedback {{ forloop.counter }}', None, 'question', 'scale_values', 'feedback',
+                'DELETE', HTML('<hr>')
+            ),
+        )

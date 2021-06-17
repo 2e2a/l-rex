@@ -6,7 +6,7 @@ Read the [Wiki](https://github.com/2e2a/l-rex/wiki) for more information.
 
 ## Try it out
 
-We are currently running a free instance of L-Rex on our private server at [https://lrex.2e2a.de](https://lrex.2e2a.de). Feel free to use it for your studies.
+We are currently running an instance of L-Rex at [https://www.l-rex.de](https://www.l-rex.de). Feel free to use it for your studies.
 
 ## Deploy it on your own server
 

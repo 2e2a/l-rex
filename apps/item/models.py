@@ -42,9 +42,7 @@ class Item(models.Model):
             return self.materials.block
         return self.block
 
-    @property
-    def content(self):
-        study = self.materials.study
+    def content(self, study):
         if study.has_text_items:
             return self.textitem.text
         elif study.has_markdown_items:
@@ -126,12 +124,6 @@ class ItemList(models.Model):
     def __str__(self):
         return '{}-{}'.format(self.materials, self.number)
 
-    def next(self):
-        next_list =  self.materials.lists.filter(pk__gt=self.pk).first()
-        if not next_list:
-            next_list =  self.materials.lists.first()
-        return next_list
-
 
 class ItemQuestion(models.Model):
     item = models.ForeignKey(
@@ -181,8 +173,8 @@ class ItemFeedback(models.Model):
         on_delete=models.CASCADE,
         help_text='Question for the feedback.',
     )
-    scale_values = models.CharField(
-        max_length=500,
+    scale_values = models.TextField(
+        max_length=(10 * ScaleValue.LABEL_MAX_LENGTH),
         help_text='Scale values, separated by commas (e.g. "1,3"). '
                   'If a label contains a comma itself, escape it with "\\" (e.g. "A,B,Can\'t decide\\, I like both"). '
                   'The feedback will be shown to the participant if one of these ratings is selected.'
