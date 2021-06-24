@@ -144,8 +144,19 @@ EMAIL_USE_SSL = True
 
 # lrex
 LREX_VERSION = 0.8
-LREX_CONTACT_MD = 'Please define contact as markdown in local.py'
-LREX_PRIVACY_MD = 'Please define privacy statement as markdown in local.py'
+LREX_CONTACT_MD = (
+    'Alexej Starschenko  \n'
+    'Uthmannstraße 16  \n'
+    '12043 Berlin  \n'
+    '*support@l-rex.de*'
+)
+LREX_PRIVACY_MD = (
+    'We do not track our users:\n\n'
+    '- Cookies are used for authentication only.\n'
+    '- No user tracking software is used.\n'
+    '- No external 3rd party components.\n'
+    'Only the study data is linked to your user profile to provide the platform functionality.\n'
+)
 LREX_ANNOUNCEMENTS = []
 
 
