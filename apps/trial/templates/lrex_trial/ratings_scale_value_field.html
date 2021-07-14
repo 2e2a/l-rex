@@ -6,25 +6,23 @@
 </label>
 
 <div class="mb-3 text-center">
-    <div class="btn-group{% if use_vertical_scale_layout %}-vertical{% endif %} btn-group-toggle d-flex justify-content-between" data-toggle="buttons">
-        {% for choice in field.field.choices %}
-            <label class="btn btn-outline-secondary btn-sm">
-                <input type="radio"
-                       class="{% if use_custom_control %}custom-control-input{% else %}form-check-input{% endif %}{% if field.errors %} is-invalid{% endif %}"
-                        {% if choice.0|stringformat:"s" == field.value|default_if_none:""|stringformat:"s" %}
-                       checked="checked"{% endif %} name="{{ field.html_name }}"
-                       id="id_{{ field.html_name }}_{{ forloop.counter }}"
-                       value="{{ choice.0|unlocalize }}" {{ field.field.widget.attrs|flatatt }}>
-                {{ choice.1|unlocalize }}
-            </label>
+    <div class="btn-group{% if use_vertical_scale_layout %}-vertical{% endif %} d-flex justify-content-between">
+    {% for choice in field.field.choices %}
+        <input type="radio" class="btn-check" autocomplete="off"
+                {% if choice.0|stringformat:"s" == field.value|default_if_none:""|stringformat:"s" %} checked="checked"{% endif %}
+               name="{{ field.html_name }}" id="id_{{ field.html_name }}_{{ forloop.counter }}" value="{{ choice.0|unlocalize }}">
+        <label class="btn btn-outline-secondary" for="id_{{ field.html_name }}_{{ forloop.counter }}">
+            {{ choice.1|unlocalize }}
+        </label>
+        {% if field.errors and forloop.last and not inline_class %}
+            {% include 'bootstrap5/layout/field_errors_block.html' %}
+        {% endif %}
+    {% endfor %}
+    {% if field.errors and inline_class %}
+        {% for error in field.errors %}
+            <p id="error_{{ forloop.counter }}_{{ field.auto_id }}" class="text-danger mb-0"><small><strong>{{ error }}</strong></small></p>
         {% endfor %}
-    </div>
-    {% if field.errors %}
-        <div class="{% if use_custom_control %}custom-control custom-radio{% if inline_class %} custom-control-inline{% endif %}{% else %}form-check{% if inline_class %} form-check-inline{% endif %}{% endif %}">
-            {# the following input is only meant to allow boostrap to render the error message as it has to be after an invalid input. As the input has no name, no data will be sent. #}
-            <input type="checkbox" class="custom-control-input is-invalid">
-            {% include 'bootstrap4/layout/field_errors_block.html' %}
-        </div>
     {% endif %}
-    {% include 'bootstrap4/layout/help_text.html' %}
+    </div>
+    {% include 'bootstrap5/layout/help_text.html' %}
 </div>

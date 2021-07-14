@@ -1,7 +1,7 @@
 {% extends "lrex_dashboard/settings_form.html" %}
 
 {% block actions %}
-<a class="btn btn-outline-danger btn-sm ml-0 mr-2 mt-1" href="{% url 'study-settings-delete' study.slug %}">Delete study</a>
-<a class="btn btn-outline-secondary btn-sm ml-0 mr-0 mt-1" href="{% url 'study-settings-archive' study.slug %}">Archive study</a>
+<a class="btn btn-outline-danger btn-sm ms-0 me-2 mt-1" href="{% url 'study-settings-delete' study.slug %}">Delete study</a>
+<a class="btn btn-outline-secondary btn-sm ms-0 me-0 mt-1" href="{% url 'study-settings-archive' study.slug %}">Archive study</a>
 {% endblock %}
 

@@ -44,10 +44,11 @@
                     </div>
                     <div class="col-sm-6">
                         {% if allow_publish %}
-                        <a href="{% url 'trial-intro' study.slug %}?test=True" target="_blank">Link for
-                            testing&nearr;</a>
+                        <a href="{% url 'trial-intro' study.slug %}?test=True" target="_blank" class="btn p-0 btn-link">
+                            Link for testing&nearr;
+                        </a>
                         {% else %}
-                        <a class="card-link text-muted">Link for testing&nearr;</a>
+                        <a class="btn p-0 btn-link disabled">Link for testing&nearr;</a>
                         {% endif %}
                     </div>
                 </div>
@@ -57,9 +58,11 @@
                     </div>
                     <div class="col-sm-6">
                         {% if study.is_published %}
-                        <a href="{% url 'trial-intro' study.slug %}" target="_blank">Link for participants&nearr;</a>
+                        <a href="{% url 'trial-intro' study.slug %}" target="_blank" class="btn p-0 btn-link">
+                            Link for participants&nearr;
+                        </a>
                         {% else %}
-                        <a class="card-link text-muted">Link for participants&nearr;</a>
+                        <a class="btn p-0 btn-link disabled">Link for participants&nearr;</a>
                         {% endif %}
                     </div>
                 </div>

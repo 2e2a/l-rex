@@ -1,18 +1,17 @@
-<nav aria-label="Pagination">
-    <ul class="pagination mt-2 d-flex justify-content-center">
-        <div class="d-flex">
-            {% if page_obj.has_previous %}
-            <li class="page-item"><a class="page-link" href="?page=1{{ url_par }}">&laquo;&nbsp;first</a></li>
-            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{{ url_par }}">&lsaquo;&nbsp;previous</a></li>
-            {% else %}
-            <li class="page-item disabled"><a class="page-link">&laquo;&nbsp;first</a></li>
-            <li class="page-item disabled"><a class="page-link">&lsaquo;&nbsp;previous</a></li>
-            {% endif %}
-        </div>
+<nav class="mt-2 d-flex justify-content-center" aria-label="Pagination">
+            <ul class="pagination d-flex">
+                {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page=1{{ url_par }}">&laquo;&nbsp;first</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{{ url_par }}">&lsaquo;&nbsp;previous</a></li>
+                {% else %}
+                <li class="page-item disabled"><a class="page-link">&laquo;&nbsp;first</a></li>
+                <li class="page-item disabled"><a class="page-link">&lsaquo;&nbsp;previous</a></li>
+                {% endif %}
+            </ul>
         <div class="d-flex my-2 mx-2">
                 {{ page_obj.number }}&nbsp;/&nbsp;{{ page_obj.paginator.num_pages }}
         </div>
-        <div class="d-flex">
+        <ul class="pagination d-flex">
             {% if page_obj.has_next %}
             <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{{ url_par }}">next&nbsp;&rsaquo;</a></li>
             <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{{ url_par }}">last&nbsp;&raquo;</a></li>
@@ -20,6 +19,5 @@
             <li class="page-item disabled"><a class="page-link">next&nbsp;&rsaquo;</a></li>
             <li class="page-item disabled"><a class="page-link">last&nbsp;&raquo;</a></li>
             {% endif %}
-        </div>
-    </ul>
+        </ul>
 </nav>

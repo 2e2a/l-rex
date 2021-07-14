@@ -3,14 +3,14 @@
 {% block actions %}
 <div class="dropdown">
   <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="dropdownAggregate"
-          data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
       Aggregated by: {% for x in aggregate_by %}{{ x }}{% if not forloop.last %}+{% endif %}{% endfor %}
   </button>
-  <div class="dropdown-menu" aria-labelledby="dropdownAggregate">
-      <a class="dropdown-item" href="?aggregate_by=condition">condition</a>
-      <a class="dropdown-item" href="?aggregate_by=item,condition">item+condition</a>
-      <a class="dropdown-item" href="?aggregate_by=participant,condition">participant+condition</a>
-  </div>
+  <ul class="dropdown-menu" aria-labelledby="dropdownAggregate">
+      <a class="dropdown-item" href="?aggregate_by=condition">condition</a></li>
+      <li><a class="dropdown-item" href="?aggregate_by=item,condition">item+condition</a></li>
+      <li><a class="dropdown-item" href="?aggregate_by=participant,condition">participant+condition</a></li>
+  </ul>
 </div>
 {% endblock %}
 

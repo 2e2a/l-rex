@@ -35,13 +35,13 @@
         <form method="post">
             {% crispy view.formset view.formset.helper %}
             <div class="form-actions text-center">
-                <input type="submit" name="submit" value="{{ continue_label }}" class="btn btn-primary mt-2">
+                <input type="submit" name="submit" value="{{ continue_label }}" class="btn btn-outline-primary mt-2">
             </div>
         </form>
     </div>
     {% if short_instructions_rich %}
     <div class="mt-2">
-        <a data-toggle="collapse" href="#instructions" aria-expanded="false" aria-controls="instructions">
+        <a data-bs-toggle="collapse" href="#instructions" aria-expanded="false" role="button" aria-expanded="false" aria-controls="instructions">
             {{ study.instructions_label }}
         </a>
         <div class="collapse" id="instructions">
@@ -51,16 +51,16 @@
     {% endif %}
     {% if short_block_instructions_rich %}
     <div class="mt-2">
-        <a data-toggle="collapse" href="#BlockInstructions"  aria-expanded="false" aria-controls="BlockInstructions">
+        <a data-bs-toggle="collapse" href="#block_instructions"  aria-expanded="false" aria-expanded="false" aria-controls="blockInstructions">
             {{ study.block_instructions_label }}
         </a>
-        <div class="collapse" id="BlockInstructions">
+        <div class="collapse" id="block_instructions">
             {{ short_block_instructions_rich }}
         </div>
     </div>
     {% endif %}
     <div class="mt-4">
-        <span class="mr-2">{{ study.contact_label }}:</span>{{ contact }}
+        <span class="me-2">{{ study.contact_label }}:</span>{{ contact }}
     </div>
 </div>
 {% endblock %}

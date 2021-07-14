@@ -1,59 +1,66 @@
 {% extends "base.html" %}
 {% block nav %}
-<ul class="nav nav-tabs mb-2">
-    <li class="nav-item">
-        <a class="nav-link {% if not nav_active or nav_active == 0 %}active{% endif %}"
-           href="{% url 'study' study.slug %}">
-            <strong>Dashboard</strong>
-        </a>
-    </li><li class="nav-item">
-        <a class="nav-link {% if nav_active == 1 %}active{% endif %}" href="{% url 'study-settings' study.slug %}">
-            Settings
-        </a>
-    </li><li class="nav-item">
-        <a class="nav-link {% if nav_active == 2 %}active{% endif %}" href="{% url 'study-questions' study.slug %}">
-            Task and instructions
-        </a>
-    </li><li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle {% if nav_active == 3 %}active{% endif %}" data-toggle="dropdown"
-           href="#" role="button" aria-haspopup="true" aria-expanded="false">
-            Materials
-        </a>
-        <div class="dropdown-menu">
-            {% for materials in study.materials.all %}
-            <a class="dropdown-item {% if materials.pk == active_materials %}active{% endif %}"
-               href="{% url 'items' materials.slug %}">
-                {{ materials.title }}
+    <ul class="nav nav-tabs mb-2">
+        <li class="nav-item">
+            <a class="nav-link {% if not nav_active or nav_active == 0 %}active{% endif %}"
+               href="{% url 'study' study.slug %}">
+                <strong>Dashboard</strong>
             </a>
-            {% empty %}
-            <span class="dropdown-item disabled"><em>No materials yet</em></span>
-            {% endfor %}
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="{% url 'materials-create' study.slug %}">New materials</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if nav_active == 1 %}active{% endif %}" href="{% url 'study-settings' study.slug %}">
+                Settings
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if nav_active == 2 %}active{% endif %}" href="{% url 'study-questions' study.slug %}">
+                Task and instructions
+            </a>
+        </li>
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="materialsDropdown" role="button" data-bs-toggle="dropdown"
+               aria-expanded="false">
+                Materials
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                {% for materials in study.materials.all %}
+                    <li><a class="dropdown-item {% if materials.pk == active_materials %}active{% endif %}"
+                           href="{% url 'items' materials.slug %}">
+                        {{ materials.title }}
+                    </a></li>
+                {% empty %}
+                    <span class="dropdown-item disabled"><em>No materials yet</em></span>
+                {% endfor %}
+                <li class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{% url 'materials-create' study.slug %}">New materials</a></li>
+            </ul>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if nav_active == 4 %}active{% endif %}" href="{% url 'questionnaires' study.slug %}">
+                Questionnaires
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if nav_active == 5 %}active{% endif %}" href="{% url 'study-contact' study.slug %}">
+                Info and consent
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if nav_active == 6 %}active{% endif %}"
+               href="{% url 'trials' study.slug %}">Results</a>
+        </li>
+    </ul>
+    <div class="d-sm-flex justify-content-between">
+        <div>
+            {% block nav2 %}{% endblock %}
         </div>
-    </li><li class="nav-item">
-        <a class="nav-link {% if nav_active == 4 %}active{% endif %}" href="{% url 'questionnaires' study.slug %}">
-            Questionnaires
-        </a>
-    </li><li class="nav-item">
-        <a class="nav-link {% if nav_active == 5 %}active{% endif %}" href="{% url 'study-contact' study.slug %}">
-            Info and consent
-        </a>
-    </li><li class="nav-item">
-        <a class="nav-link {% if nav_active == 6 %}active{% endif %}" href="{% url 'trials' study.slug %}">Results</a>
-    </li>
-</ul>
-<div class="d-sm-flex justify-content-between">
-    <div>
-        {% block nav2 %}{% endblock %}
+        {% block current_study %}
+            <div>
+                {% if materials %}
+                    <span class="text-secondary">Materials: </span><span>{{ materials.title }}</span>
+                {% endif %}
+                <span class="text-secondary ms-2">Study: </span><span>{{ study.title }}</span>
+            </div>
+        {% endblock %}
     </div>
-    {% block current_study %}
-    <div>
-        {% if materials %}
-        <span class="text-secondary">Materials: </span><span>{{ materials.title }}</span>
-        {% endif %}
-        <span class="text-secondary ml-2">Study: </span><span>{{ study.title }}</span>
-    </div>
-    {% endblock %}
-</div>
 {% endblock %}

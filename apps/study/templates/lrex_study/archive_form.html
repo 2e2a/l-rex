@@ -5,7 +5,7 @@
 </p>
 {% for file, _, _, description in study.ARCHIVE_FILES %}
 <div class="row">
-    <div class="col-sm-5 text-right">
+    <div class="col-sm-5 text-end">
         <code>{{ file }}:</code>
     </div>
     <div class="col-sm-5">
@@ -17,7 +17,7 @@
     You can then use this archive file to restore this study later or create a similar study. <br>Please download the archive:
 </p>
 <div class="text-center mb-4">
-    <a href="{% url 'study-archive-download' study.slug %}" class="btn btn-primary">Generate and download archive</a>
+    <a href="{% url 'study-archive-download' study.slug %}" class="btn btn-outline-primary">Generate and download archive</a>
 </div>
 <p><strong>
     Important: Please make sure that the downloaded archive <code>ZIP-file</code> is valid and all <code>CSV-files</code> contain the expected content.

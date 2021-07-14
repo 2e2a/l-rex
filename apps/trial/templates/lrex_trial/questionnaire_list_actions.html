@@ -1,0 +1,14 @@
+<div class="dropdown ms-1 me-0 my-1">
+    <button class="btn btn-outline-secondary btn-sm" type="button" id="dropdownActionsButton" data-bs-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">
+        &hellip;
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+        <li><a class="dropdown-item {% if disabled %}disabled{% endif %}"
+               href="{% url 'questionnaire-upload' study.slug %}">Upload questionnaire CSV</a></li>
+        <li><a class="dropdown-item" href="{% url 'questionnaire-download' study.slug %}">Download questionnaire CSV</a>
+        </li>
+        <li><a class="dropdown-item {% if disabled %}disabled{% endif %}"
+               href="{% url 'questionnaires-delete' study.slug %}">Delete all questionnaires</a></li>
+    </ul>
+</div>

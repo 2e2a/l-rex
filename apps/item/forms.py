@@ -1,6 +1,6 @@
 import re
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Fieldset, HTML, Layout, Submit
+from crispy_forms.layout import Fieldset, HTML, Layout
 from django import forms
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
@@ -206,7 +206,6 @@ class ItemQuestionForm(contrib_forms.CrispyModelForm):
     def __init__(self, *args, **kwargs):
         self.question = kwargs.pop('question')
         super().__init__(*args, **kwargs)
-        self.append_optional_to_labels()
         self.fields['number'].initial = self.question.number
         self.fields['question'].initial = self.question.question
         self.fields['scale_labels'].initial = self.question.get_scale_labels()
@@ -357,7 +356,6 @@ class ItemFeedbackForm(contrib_forms.CrispyModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.append_optional_to_labels()
         self.fields['question'].queryset = self.fields['question'].queryset.filter(study=self.study)
 
     class Meta:
