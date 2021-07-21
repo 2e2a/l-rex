@@ -18,7 +18,6 @@ class OptionalLabelMixin:
     optional_label_ignore_fields = None
 
     def append_optional_to_labels(self):
-        print('test')
         for name, field in self.fields.items():
             if (
                     not field.required

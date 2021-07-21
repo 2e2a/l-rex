@@ -82,11 +82,6 @@ class DemoView(generic.TemplateView):
     template_name = 'lrex_home/demo.html'
     title = 'Demo studies'
 
-    def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-        data['demo_rich'] = mark_safe(markdownify(settings.LREX_PRIVACY_MD))
-        return data
-
 
 class NewsView(generic.DetailView):
     model = models.News

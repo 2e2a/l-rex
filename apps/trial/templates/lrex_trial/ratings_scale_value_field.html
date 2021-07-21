@@ -11,7 +11,7 @@
         <input type="radio" class="btn-check" autocomplete="off"
                 {% if choice.0|stringformat:"s" == field.value|default_if_none:""|stringformat:"s" %} checked="checked"{% endif %}
                name="{{ field.html_name }}" id="id_{{ field.html_name }}_{{ forloop.counter }}" value="{{ choice.0|unlocalize }}">
-        <label class="btn btn-outline-secondary" for="id_{{ field.html_name }}_{{ forloop.counter }}">
+        <label class="btn btn-sm btn-outline-secondary" for="id_{{ field.html_name }}_{{ forloop.counter }}">
             {{ choice.1|unlocalize }}
         </label>
         {% if field.errors and forloop.last and not inline_class %}
