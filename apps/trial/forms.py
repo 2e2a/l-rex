@@ -226,6 +226,8 @@ class TrialForm(RequiredMessageFromStudyMixin, contrib_forms.CrispyModelForm):
     )
     optional_label_ignore_fields = ['participant_id']
 
+    participant_id = None
+
     @property
     def submit_label(self):
         return self.study.continue_label
@@ -250,6 +252,7 @@ class TrialForm(RequiredMessageFromStudyMixin, contrib_forms.CrispyModelForm):
 
     def __init__(self, *args, **kwargs):
         is_test = kwargs.pop('is_test')
+        self.participant_id = kwargs.pop('participant_id')
         super().__init__(*args, **kwargs)
         self.fields['participant_id'].label = self.study.participation_id_label
         self.fields['password'].label = self.study.password_label
@@ -258,6 +261,9 @@ class TrialForm(RequiredMessageFromStudyMixin, contrib_forms.CrispyModelForm):
             self.fields['participant_id'].readonly = True
         if self.study.participant_id == self.study.PARTICIPANT_ID_ENTER:
             self.fields['participant_id'].required = True
+            if self.participant_id:
+                self.fields['participant_id'].initial = self.participant_id
+                self.fields['participant_id'].widget.attrs['disabled'] = True
         else:
             self.fields['participant_id'].required = False
             self.fields['participant_id'].widget = forms.HiddenInput()
@@ -265,6 +271,8 @@ class TrialForm(RequiredMessageFromStudyMixin, contrib_forms.CrispyModelForm):
             self.fields['password'].required = False
             self.fields['password'].widget = forms.HiddenInput()
 
+    def clean_participant_id(self):
+        return self.participant_id if self.participant_id else self.cleaned_data['participant_id']
     def clean_password(self):
         password = self.cleaned_data['password']
         if password and password != self.study.password:

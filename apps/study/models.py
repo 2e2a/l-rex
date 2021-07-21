@@ -92,18 +92,20 @@ class Study(models.Model):
     PARTICIPANT_ID_RANDOM = 'random'
     PARTICIPANT_ID_CHOICES = (
         (PARTICIPANT_ID_NONE, 'No participant IDs'),
-        (PARTICIPANT_ID_ENTER, 'Participants are asked to enter an ID'),
+        (PARTICIPANT_ID_ENTER, 'Participants have an external ID'),
         (PARTICIPANT_ID_RANDOM, 'Generate random ID for each participant'),
     )
     participant_id = models.CharField(
         max_length=8,
         choices=PARTICIPANT_ID_CHOICES,
         default=PARTICIPANT_ID_NONE,
-        help_text=(
+        help_text=mark_safe(
             'Choose the first option for fully anonymous participation. Choose the second option if you want to '
             'save an ID that participants receive independently (e.g., from an external participant recruitment '
-            'platform). Choose the third option to generate a unique identifier (code) for each participant which '
-            'will be displayed at the end of the questionnaire and which can be used e.g. as proof of participation.'
+            'platform). The ID is entered manually or passed via an URL parameter '
+            '(see <a target="_blank" href="https://github.com/2e2a/l-rex/wiki">Wiki&#8599;</a> for details). '
+            'Choose the third option to generate a unique identifier (code) for each participant which will be '
+            'displayed at the end of the questionnaire and which can be used e.g. as proof of participation.'
         ),
         verbose_name='participant ID'
     )

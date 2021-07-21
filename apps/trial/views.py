@@ -503,6 +503,13 @@ class TrialCreateView(study_views.StudyMixin, TestTrialMixin, generic.CreateView
     model = models.Trial
     form_class = forms.TrialForm
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({
+            'participant_id': self.request.GET.get('participant_id'),
+        })
+        return kwargs
+
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         data['instructions_rich'] = mark_safe(markdownify(self.study.instructions))
