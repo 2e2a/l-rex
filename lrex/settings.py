@@ -143,8 +143,8 @@ SECRET_KEY = '&+b$6n1(x=h0($ww_d4^j&6r%rtv47$gacl!nazl71g7&siqa3'
 
 # server settings
 SITE_ID = 1
-ADMINS = []
-DEFAULT_FROM_EMAIL = 'noreply@l-rex.de'
+ADMINS = ['admin@l-rex.de']
+DEFAULT_FROM_EMAIL = 'support@l-rex.de'
 
 # lrex
 LREX_VERSION = 0.8

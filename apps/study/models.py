@@ -13,6 +13,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
+from django.utils.html import mark_safe
 from django.utils.dateformat import format
 from django.utils.timezone import now
 
@@ -35,6 +36,13 @@ class StudySteps(Enum):
     STEP_STD_RESULTS = 10
     STEP_STD_ANONYMIZE = 11
     STEP_STD_ARCHIVE = 12
+    STEP_STD_OPT_DRAFT = 13
+    STEP_STD_OPT_PUBLISH = 14
+    STEP_STD_OPT_BLOCK_INSTRUCTIONS = 15
+    STEP_STD_OPT_SETTINGS = 16
+    STEP_STD_OPT_LABELS = 17
+    STEP_STD_OPT_SHARE = 18
+    STEP_STD_OPT_INVOICE = 19
 
 
 class Study(models.Model):
@@ -282,6 +290,9 @@ class Study(models.Model):
         editable=False,
     )
     is_archived = models.BooleanField(
+        default=False,
+    )
+    has_invoice = models.BooleanField(
         default=False,
     )
 
@@ -1080,6 +1091,13 @@ class Study(models.Model):
         StudySteps.STEP_STD_RESULTS: 'download results',
         StudySteps.STEP_STD_ANONYMIZE: 'remove participant information when not needed anymore',
         StudySteps.STEP_STD_ARCHIVE: 'archive the study',
+        StudySteps.STEP_STD_OPT_DRAFT: 'set study status to draft to make changes',
+        StudySteps.STEP_STD_OPT_PUBLISH: 'set study status to publish to resume collecting results',
+        StudySteps.STEP_STD_OPT_BLOCK_INSTRUCTIONS: 'write instructions for questionnaire blocks',
+        StudySteps.STEP_STD_OPT_SETTINGS: 'customize study settings',
+        StudySteps.STEP_STD_OPT_LABELS: 'customize labels',
+        StudySteps.STEP_STD_OPT_SHARE: 'share study with other users',
+        StudySteps.STEP_STD_OPT_INVOICE: 'request an invoice',
     }
 
     def step_url(self, step):
@@ -1107,6 +1125,20 @@ class Study(models.Model):
             return reverse('trials', args=[self.slug])
         elif step == StudySteps.STEP_STD_ARCHIVE:
             return reverse('study-settings', args=[self.slug])
+        elif step == StudySteps.STEP_STD_OPT_DRAFT:
+            return reverse('study', args=[self.slug])
+        elif step == StudySteps.STEP_STD_OPT_PUBLISH:
+            return reverse('study', args=[self.slug])
+        elif step == StudySteps.STEP_STD_OPT_BLOCK_INSTRUCTIONS:
+            return reverse('questionnaire-blocks', args=[self.slug])
+        elif step == StudySteps.STEP_STD_OPT_SETTINGS:
+            return reverse('study-settings', args=[self.slug])
+        elif step == StudySteps.STEP_STD_OPT_LABELS:
+            return reverse('study-labels', args=[self.slug])
+        elif step == StudySteps.STEP_STD_OPT_SHARE:
+            return reverse('study-share', args=[self.slug])
+        elif step == StudySteps.STEP_STD_OPT_INVOICE:
+            return reverse('study-invoice', args=[self.slug])
 
     def _append_step_info(self, steps, step, group):
         if group not in steps:
@@ -1165,38 +1197,19 @@ class Study(models.Model):
     def optional_steps(self):
         steps = {}
         if self.is_published:
-            steps.update({
-                'Dashboard':
-                    [
-                        ('set study status to draft to make changes', reverse('study', args=[self.slug])),
-                    ]
-
-            })
+            self._append_step_info(steps, StudySteps.STEP_STD_OPT_DRAFT, 'Dashboard')
         elif self.is_finished:
-            steps.update({
-                'Dashboard':
-                    [
-                        ('set study status to draft to make changes', reverse('study', args=[self.slug])),
-                        ('set study status to publish to resume collecting results', reverse('study', args=[self.slug])),
-                    ]
-
-            })
+            self._append_step_info(steps, StudySteps.STEP_STD_OPT_DRAFT, 'Dashboard')
+            self._append_step_info(steps, StudySteps.STEP_STD_OPT_PUBLISH, 'Dashboard')
         else:
             if self.use_blocks and self.has_questionnaires and not self.has_block_instructions:
-                steps.update({
-                    'Questionnaires': [
-                        ('write instructions for questionnaire blocks',
-                         reverse('questionnaire-blocks', args=[self.slug]))
-                    ]
-                })
-            steps.update({
-                'Settings':
-                [
-                    ('customize study settings', reverse('study-settings', args=[self.slug])),
-                    ('customize labels', reverse('study-labels', args=[self.slug])),
-                    ('share study with other users', reverse('study-share', args=[self.slug])),
-                ]
-            })
+                self._append_step_info(steps, StudySteps.STEP_STD_OPT_BLOCK_INSTRUCTIONS, 'Questionnaires')
+            group = 'Settings'
+            self._append_step_info(steps, StudySteps.STEP_STD_OPT_SETTINGS, group)
+            self._append_step_info(steps, StudySteps.STEP_STD_OPT_LABELS, group)
+            self._append_step_info(steps, StudySteps.STEP_STD_OPT_SHARE, group)
+        if not self.has_invoice:
+            self._append_step_info(steps, StudySteps.STEP_STD_OPT_INVOICE, 'Settings')
         return steps
 
 

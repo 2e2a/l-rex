@@ -3,6 +3,7 @@ from markdownx.utils import markdownify
 from django.conf import settings
 from django.shortcuts import render
 from django.shortcuts import redirect
+from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
 from django.views import generic
@@ -12,6 +13,7 @@ from apps.user import models as user_models
 from apps.study import models as study_models
 
 from . import models
+from . import forms
 
 
 @requires_csrf_token
@@ -94,3 +96,33 @@ class NewsView(generic.DetailView):
         data = super().get_context_data(**kwargs)
         data['news_rich'] = mark_safe(markdownify(self.get_object().text))
         return data
+
+
+class DonateView(generic.TemplateView):
+    template_name = 'lrex_home/donate.html'
+    title = 'Support us'
+
+
+class InvoiceRequestView(generic.FormView):
+    template_name = 'lrex_home/invoice_form.html'
+    form_class = forms.InvoiceRequestForm
+    title = 'Request an invoice'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({
+            'user': self.request.user,
+        })
+        return kwargs
+
+    def get_success_url(self):
+        return reverse('invoice-requested')
+
+    def form_valid(self, form):
+        form.send_mail()
+        return super().form_valid(form)
+
+
+class InvoiceRequestedView(generic.TemplateView):
+    template_name = 'lrex_home/invoice_done.html'
+    title = 'Invoice request send'

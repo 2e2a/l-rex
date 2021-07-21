@@ -84,6 +84,20 @@
                         {{ trial_count_finished }}
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-sm-6 text-secondary">
+                        Support us (optional):
+                    </div>
+                    <div class="col-sm-6">
+                        {% if not study.has_invoice %}
+                            <a href="{% url 'study-invoice' study.slug %}" class="btn p-0 btn-link">
+                                Request invoice
+                            </a>
+                        {% else %}
+                            Thank you!
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
     </div>

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="card my-2 flex-fill">
+        <div class="card-body">
+            <h2 class="card-title">1. Invoice</h2>
+            <p class="card-text">
+                You can request an invoice for using L-Rex.
+            </p>
+            <p>
+                <a href="{% url 'invoice-request' %}" type="button" class="btn btn-outline-primary">
+                    Request an invoice
+                </a>
+                <a href="{% url 'studies' %}" type="button" class="btn btn-outline-primary">
+                    Request an invoice for a study
+                </a>
+            </p>
+        </div>
+    </div>
+    <div class="card my-2 flex-fill">
+        <div class="card-body">
+            <h2 class="card-title">2. Liberapay donation</h2>
+            <p class="card-text">
+                Monthly donation  via Liberapay...
+            </p>
+        </div>
+    </div>
+    <div class="card my-2 flex-fill">
+        <div class="card-body">
+            <h2 class="card-title">3. Bank transfer</h2>
+            <p class="card-text">
+                You can just transfer a donation to our bank account:
+            </p>
+        </div>
+    </div>
+{% endblock %}

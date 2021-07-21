@@ -1,10 +1,11 @@
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Div, Field, Fieldset, HTML, Layout, Submit
+from crispy_forms.layout import Div, Fieldset, HTML, Layout, Submit
 from django import forms
 from django.contrib.auth.models import User
 
 from apps.contrib import forms as contrib_forms
 from apps.contrib import utils
+from apps.home.forms import InvoiceRequestForm
 
 from . import models
 
@@ -395,3 +396,10 @@ class DemographicsFormsetFactory(contrib_forms.CrispyModelFormsetFactory):
         return Layout(
             Fieldset('Demographic field {{ forloop.counter }}', None, 'name', 'DELETE', HTML('<hr>'))
         )
+
+
+class StudyInvoiceRequestForm(InvoiceRequestForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['subject'].initial = 'Durchführen der L-Rex Studie "{}"'.format(self.study.title)

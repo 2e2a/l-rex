@@ -1,19 +1,26 @@
 {% extends 'lrex_dashboard/base.html' %}
 {% block nav2 %}
-<ul class="nav nav-pills mb-2">
-    <li class="nav-item">
-        <a class="nav-link {% if not nav2_active or nav2_active == 0 %}active{% endif %}"
-           href="{% url 'study-settings' study.slug %}">
-            Settings
-        </a>
-    </li><li class="nav-item">
-        <a class="nav-link {% if nav2_active == 1 %}active{% endif %}" href="{% url 'study-labels' study.slug %}">
-            Customize labels
-        </a>
-    </li><li class="nav-item">
-        <a class="nav-link {% if nav2_active == 2 %}active{% endif %}" href="{% url 'study-share' study.slug %}">
-            Share
-        </a>
-    </li>
-</ul>
+    <ul class="nav nav-pills mb-2">
+        <li class="nav-item">
+            <a class="nav-link {% if not nav2_active or nav2_active == 0 %}active{% endif %}"
+               href="{% url 'study-settings' study.slug %}">
+                Settings
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if nav2_active == 1 %}active{% endif %}" href="{% url 'study-labels' study.slug %}">
+                Customize labels
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if nav2_active == 2 %}active{% endif %}" href="{% url 'study-share' study.slug %}">
+                Share
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if nav2_active == 3 %}active{% endif %}" href="{% url 'study-invoice' study.slug %}">
+                Invoice
+            </a>
+        </li>
+    </ul>
 {% endblock %}

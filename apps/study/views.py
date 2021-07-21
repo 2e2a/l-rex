@@ -831,3 +831,48 @@ class StudyResultsCSVDownloadView(StudyObjectMixin, CheckStudyCreatorMixin, gene
         self.study.results_csv(response)
         return response
 
+
+class StudyInvoiceView(
+    StudyMixin,
+    CheckStudyCreatorMixin,
+    SuccessMessageMixin,
+    contrib_views.LeaveWarningMixin,
+    SettingsNavMixin,
+    generic.FormView,
+):
+    model = models.Study
+    title = 'Request invoice for study'
+    template_name = 'lrex_study/study_invoice.html'
+    form_class = forms.StudyInvoiceRequestForm
+    success_message = 'Invoice requested. Thank you!'
+
+    @property
+    def title(self):
+        if self.study.has_invoice:
+            return 'Study invoice requested'
+        else:
+            return 'Request study invoice'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({
+            'user': self.request.user,
+            'study': self.study,
+        })
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'nav2_active': 3,
+        })
+        return context
+
+    def form_valid(self, form):
+        form.send_mail()
+        self.study.has_invoice = True
+        self.study.save()
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('study-invoice', args=[self.study.slug])

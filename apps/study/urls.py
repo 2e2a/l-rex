@@ -31,4 +31,5 @@ urlpatterns = [
     path('<slug:study_slug>/questionnaires/', include(trial_urls.urlpatterns_questionnaires_study)),
     path('<slug:study_slug>/trials/', include(trial_urls.urlpatterns_study)),
     path('<slug:study_slug>/delete/', views.StudyDeleteView.as_view(), name='study-delete'),
+    path('<slug:study_slug>/invoice/', views.StudyInvoiceView.as_view(), name='study-invoice'),
 ]
