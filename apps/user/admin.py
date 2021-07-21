@@ -14,11 +14,13 @@ class ProfileInline(admin.StackedInline):
 
 class ProfileUserAdmin(UserAdmin):
     inlines = (ProfileInline, )
-
-    def get_inline_instances(self, request, obj=None):
-        if not obj:
-            return list()
-        return super().get_inline_instances(request, obj)
+    fieldsets = (
+        (None, {'fields': ('username', 'password')}),
+        ('Personal info', {'fields': ('email',)}),
+        ('Important dates', {'fields': ('last_login', 'date_joined')}),
+    )
+    list_display = ('username', 'email', 'date_joined', 'is_staff')
+    ordering = ('date_joined',)
 
 
 admin.site.unregister(User)
