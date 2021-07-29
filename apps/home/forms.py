@@ -7,7 +7,10 @@ from apps.contrib import forms as contrib_forms
 
 class InvoiceRequestForm(contrib_forms.CrispyForm):
     email = forms.EmailField()
-    subject = forms.CharField(initial='Nutzung des L-Rex Dienstes', label='Invoice subject')
+    subject = forms.CharField(
+        initial='Use of the L-Rex service (online platform for linguistic rating experiments)',
+        label='Invoice subject',
+    )
     AMOUNT_CHOICES = [
         ('', '---'),
         ('10', '10€'),

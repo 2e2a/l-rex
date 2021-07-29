@@ -125,4 +125,4 @@ class InvoiceRequestView(generic.FormView):
 
 class InvoiceRequestedView(generic.TemplateView):
     template_name = 'lrex_home/invoice_done.html'
-    title = 'Invoice request send'
+    title = 'Invoice request sent'

@@ -1,27 +1,51 @@
 {% extends "base.html" %}
 
 {% block content %}
+    <p>
+    If you are a researcher who has funding for experiments, please consider supporting us in one of the following ways.
+    Your support will help us to cover the server costs and to invest time into maintaining L-Rex, fixing bugs,
+    and implementing new features. Your support also makes it possible to offer the service for free to students and
+    researchers with limited financial resources.
+    </p>
     <div class="card my-2 flex-fill">
         <div class="card-body">
             <h2 class="card-title">1. Invoice</h2>
             <p class="card-text">
-                You can request an invoice for using L-Rex.
+                Invoices are only available for residents of Germany (for tax reasons). You can decide yourself how much
+                you want to pay.<br>
+                <br>
+                You can request a general invoice for using L-Rex:
             </p>
             <p>
                 <a href="{% url 'invoice-request' %}" type="button" class="btn btn-outline-primary">
-                    Request an invoice
+                    Request an invoice for using L-Rex
                 </a>
+
+            </p>
+            <p class="card-text">
+                You can also request an invoice for a specific study. Go to your studies, select the one that you want
+                to pay for and request an invoice on the study dashboard:
+            </p>
+            <p>
                 <a href="{% url 'studies' %}" type="button" class="btn btn-outline-primary">
-                    Request an invoice for a study
+                    Request an invoice for one of my studies
                 </a>
             </p>
         </div>
     </div>
     <div class="card my-2 flex-fill">
         <div class="card-body">
-            <h2 class="card-title">2. Liberapay donation</h2>
+            <h2 class="card-title">2. Donation via Liberapay</h2>
             <p class="card-text">
-                Monthly donation  via Liberapay...
+                This option is available internationally. Liberapay is a platform for recurrent donations
+                (via credit/debit card). You can decide freely how much and for how long you want to donate to L-Rex.
+                A Liberapay account is required. Liberapay is a privacy-friendly, open project structured around a
+                non-profit organization.
+            </p>
+            <p>
+                <a target="_blank" href="https://liberapay.com/" type="button" class="btn btn-outline-primary">
+                    Donate via Liberapay
+                </a>
             </p>
         </div>
     </div>
@@ -29,7 +53,9 @@
         <div class="card-body">
             <h2 class="card-title">3. Bank transfer</h2>
             <p class="card-text">
-                You can just transfer a donation to our bank account:
+                You can also transfer a donation directly to our L-Rex bank account:<br>
+                ...<br>
+                Please note that there may be fees, especially for international transfers.
             </p>
         </div>
     </div>

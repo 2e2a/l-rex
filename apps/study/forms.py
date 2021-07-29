@@ -402,4 +402,4 @@ class StudyInvoiceRequestForm(InvoiceRequestForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['subject'].initial = 'Durchführen der L-Rex Studie "{}"'.format(self.study.title)
+        self.fields['subject'].initial = 'Running the study "{}" via the L-Rex service (online platform for linguistic rating experiments) '.format(self.study.title)
