@@ -5,7 +5,6 @@ from django.contrib.auth.models import User
 
 from apps.contrib import forms as contrib_forms
 from apps.contrib import utils
-from apps.home.forms import InvoiceRequestForm
 
 from . import models
 
@@ -396,10 +395,3 @@ class DemographicsFormsetFactory(contrib_forms.CrispyModelFormsetFactory):
         return Layout(
             Fieldset('Demographic field {{ forloop.counter }}', None, 'name', 'DELETE', HTML('<hr>'))
         )
-
-
-class StudyInvoiceRequestForm(InvoiceRequestForm):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['subject'].initial = 'Running the study "{}" via the L-Rex service (online platform for linguistic rating experiments) '.format(self.study.title)

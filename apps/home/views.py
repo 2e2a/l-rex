@@ -112,6 +112,7 @@ class InvoiceRequestView(generic.FormView):
         kwargs = super().get_form_kwargs()
         kwargs.update({
             'user': self.request.user,
+            'study': self.request.GET.get('study'),
         })
         return kwargs
 
@@ -119,6 +120,12 @@ class InvoiceRequestView(generic.FormView):
         return reverse('invoice-requested')
 
     def form_valid(self, form):
+        study_pk = form['study'].value()
+        if study_pk:
+            study = study_models.Study.objects.filter(pk=study_pk).first()
+            if study:
+                study.has_invoice = True
+                study.save()
         form.send_mail()
         return super().form_valid(form)
 

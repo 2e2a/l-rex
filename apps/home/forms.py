@@ -2,23 +2,27 @@ from django import forms
 from django.conf import settings
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
+
 from apps.contrib import forms as contrib_forms
+from apps.study.models import Study
 
 
 class InvoiceRequestForm(contrib_forms.CrispyForm):
     email = forms.EmailField()
-    subject = forms.CharField(
-        initial='Use of the L-Rex service (online platform for linguistic rating experiments)',
-        label='Invoice subject',
-    )
+    name = forms.CharField()
+    address = forms.CharField(widget=forms.Textarea(attrs={'rows': 5}))
+    study = forms.ModelChoiceField(queryset=Study.objects.none(), required=False, label='Study')
+    comment = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 4}), label='Comment')
     AMOUNT_CHOICES = [
-        ('', '---'),
         ('10', '10€'),
         ('25', '25€'),
         ('50', '50€'),
         ('100', '100€'),
+        ('', 'Other amount'),
     ]
-    amount = forms.CharField(widget=forms.Select(choices=AMOUNT_CHOICES), required=False, label='Choose an amount')
+    amount = forms.CharField(widget=forms.Select(
+        choices=AMOUNT_CHOICES), initial='25', required=False, label='Choose an amount'
+    )
     other_amount = forms.IntegerField(required=False, label='Other amount in Euro')
     including_taxes = forms.BooleanField(required=False, label='Including 19% taxes')
 
@@ -29,9 +33,15 @@ class InvoiceRequestForm(contrib_forms.CrispyForm):
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user')
+        study = kwargs.pop('study')
         super().__init__(*args, **kwargs)
         if user.is_authenticated:
             self.fields['email'].initial = user.email
+            self.fields['study'].queryset = Study.objects.filter(creator=user, has_invoice=False)
+            self.fields['study'].initial = study
+        else:
+            self.fields['study'].widget = forms.HiddenInput()
+
 
     def clean(self):
         data = super().clean()

@@ -90,7 +90,7 @@
                     </div>
                     <div class="col-sm-6">
                         {% if not study.has_invoice %}
-                            <a href="{% url 'study-invoice' study.slug %}" class="btn p-0 btn-link">
+                            <a href="{% url 'invoice-request' %}?study={{ study.pk }}" class="btn p-0 btn-link">
                                 Request invoice
                             </a>
                         {% else %}

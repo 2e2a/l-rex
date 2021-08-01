@@ -1138,7 +1138,7 @@ class Study(models.Model):
         elif step == StudySteps.STEP_STD_OPT_SHARE:
             return reverse('study-share', args=[self.slug])
         elif step == StudySteps.STEP_STD_OPT_INVOICE:
-            return reverse('study-invoice', args=[self.slug])
+            return reverse('invoice-request') + '?study={}'.format(self.pk)
 
     def _append_step_info(self, steps, step, group):
         if group not in steps:

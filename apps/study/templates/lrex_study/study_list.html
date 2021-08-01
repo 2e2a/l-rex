@@ -22,11 +22,11 @@
                 <div class="flex-grow-1">
                     <a href="{% url 'study' study.slug %}"><strong>{{ study.title }}</strong></a>
                     {% if study.is_archived %}
-                        <div class="badge bg-light">Archived</div>
+                        <div class="badge bg-light text-dark">Archived</div>
                     {% elif study.is_published %}
                         <div class="badge bg-primary">Published</div>
                     {% elif study.is_finished %}
-                        <div class="badge bg-light">Finished</div>
+                        <div class="badge bg-light text-dark">Finished</div>
                     {% else %}
                         <div class="badge bg-secondary">Draft</div>
                     {% endif %}
@@ -35,6 +35,9 @@
                     {% endif %}
                     {% if study.is_trial_limit_reached %}
                         <div class="badge bg-secondary">Trial limit reached</div>
+                    {% endif %}
+                    {% if study.has_invoice %}
+                        <div class="badge bg-secondary">Paid! Thanks!</div>
                     {% endif %}
                     <div class="small mt-1">
                         <span class="pr-2">created: <strong>{{ study.created_date|date:"SHORT_DATE_FORMAT" }}</strong></span>
