@@ -20,11 +20,18 @@ class InvoiceRequestForm(contrib_forms.CrispyForm):
         ('100', '100€'),
         ('', 'Other amount'),
     ]
-    amount = forms.CharField(widget=forms.Select(
-        choices=AMOUNT_CHOICES), initial='25', required=False, label='Choose an amount'
+    amount = forms.CharField(
+        widget=forms.Select(choices=AMOUNT_CHOICES),
+        initial='25',
+        required=False,
+        label='Choose an amount',
+        help_text='Including 19% taxes',
     )
-    other_amount = forms.IntegerField(required=False, label='Other amount in Euro')
-    including_taxes = forms.BooleanField(required=False, label='Including 19% taxes')
+    other_amount = forms.IntegerField(
+        required=False,
+        label='Other amount in Euro',
+        help_text='Including 19% taxes',
+    )
 
     optional_label_ignore_fields = ('amount', 'other_amount')
 
@@ -48,19 +55,11 @@ class InvoiceRequestForm(contrib_forms.CrispyForm):
         if not data['amount'] and not data['other_amount']:
             raise forms.ValidationError('Please set an amount.')
         amount = data['other_amount'] if data['other_amount'] else int(data['amount'])
-        if data['including_taxes']:
-            data.update({
-                'amount_pre_tax': amount * .81,
-                'amount_taxes': amount * .19,
-                'amount_total': amount,
-            })
-        else:
-            amount_taxes = amount * .19
-            data.update({
-                'amount_pre_tax': amount,
-                'amount_taxes': amount_taxes,
-                'amount_total': amount + amount_taxes,
-            })
+        data.update({
+            'amount_pre_tax': amount * .81,
+            'amount_taxes': amount * .19,
+            'amount_total': amount,
+        })
         return data
 
     def send_mail(self):
