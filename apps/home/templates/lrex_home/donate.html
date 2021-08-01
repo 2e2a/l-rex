@@ -15,7 +15,7 @@
                 Invoices are only available for residents of Germany (for tax reasons).
             </p>
             <p>
-                <a href="{% url 'invoice-request' %}" type="button" class="btn btn-outline-primary">
+                <a href="{% url 'invoice-request' %}{% if study %}?study={{ study }}{% endif %}" type="button" class="btn btn-outline-primary">
                     Request an invoice for using L-Rex
                 </a>
             </p>

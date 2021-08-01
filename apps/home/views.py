@@ -102,6 +102,12 @@ class DonateView(generic.TemplateView):
     template_name = 'lrex_home/donate.html'
     title = 'Support us'
 
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data.update({
+            'study': self.request.GET.get('study'),
+        })
+        return data
 
 class InvoiceRequestView(generic.FormView):
     template_name = 'lrex_home/invoice_form.html'
