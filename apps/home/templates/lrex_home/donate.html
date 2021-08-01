@@ -2,33 +2,21 @@
 
 {% block content %}
     <p>
-    If you are a researcher who has funding for experiments, please consider supporting us in one of the following ways.
-    Your support will help us to cover the server costs and to invest time into maintaining L-Rex, fixing bugs,
-    and implementing new features. Your support also makes it possible to offer the service for free to students and
-    researchers with limited financial resources.
+        There are several ways in which you can support the L-Rex project financially. We are very grateful for any
+        contribution. Your support helps us to cover the server costs and to invest time into maintaining L-Rex,
+        fixing bugs, and implementing new features. Support from researchers who have funding for experiments makes
+        it possible to offer the service for free to students and researchers with limited financial resources.
     </p>
     <div class="card my-2 flex-fill">
         <div class="card-body">
-            <h2 class="card-title">1. Invoice</h2>
+            <h2 class="card-title">1. Optional invoice</h2>
             <p class="card-text">
-                Invoices are only available for residents of Germany (for tax reasons). You can decide yourself how much
-                you want to pay.<br>
-                <br>
-                You can request a general invoice for using L-Rex:
+                You can optionally request an invoice.
+                Invoices are only available for residents of Germany (for tax reasons).
             </p>
             <p>
                 <a href="{% url 'invoice-request' %}" type="button" class="btn btn-outline-primary">
                     Request an invoice for using L-Rex
-                </a>
-
-            </p>
-            <p class="card-text">
-                You can also request an invoice for a specific study. Go to your studies, select the one that you want
-                to pay for and request an invoice on the study dashboard:
-            </p>
-            <p>
-                <a href="{% url 'studies' %}" type="button" class="btn btn-outline-primary">
-                    Request an invoice for one of my studies
                 </a>
             </p>
         </div>
@@ -53,9 +41,12 @@
         <div class="card-body">
             <h2 class="card-title">3. Bank transfer</h2>
             <p class="card-text">
-                You can also transfer a donation directly to our L-Rex bank account:<br>
-                ...<br>
+                You can also transfer a donation directly to our L-Rex bank account.
                 Please note that there may be fees, especially for international transfers.
+            </p>
+            <p>
+                IBAN: ...<br>
+                BIC: ...
             </p>
         </div>
     </div>
