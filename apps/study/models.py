@@ -1124,7 +1124,7 @@ class Study(models.Model):
         elif step == StudySteps.STEP_STD_ANONYMIZE:
             return reverse('trials', args=[self.slug])
         elif step == StudySteps.STEP_STD_ARCHIVE:
-            return reverse('study-settings', args=[self.slug])
+            return reverse('study-archive', args=[self.slug])
         elif step == StudySteps.STEP_STD_OPT_DRAFT:
             return reverse('study', args=[self.slug])
         elif step == StudySteps.STEP_STD_OPT_PUBLISH:

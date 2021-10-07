@@ -6,8 +6,7 @@ all: help
 
 .PHONY: help
 help:
-	@echo L-REX development
-	@echo TODO
+	@echo L-REX development helper
 
 .PHONY: python
 python:
