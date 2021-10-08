@@ -150,6 +150,8 @@ DEFAULT_FROM_EMAIL = 'support@l-rex.de'
 LREX_VERSION = 0.8
 LREX_CONTACT_MD = 'Please define contact as markdown in local.py'
 LREX_PRIVACY_MD = 'Please define privacy statement as markdown in local.py'
+LREX_IBAN = ''
+LREX_BIC = ''
 LREX_ANNOUNCEMENTS = []
 
 # Import local settings

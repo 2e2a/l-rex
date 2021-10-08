@@ -44,10 +44,16 @@
                 You can also transfer a donation directly to our L-Rex bank account.
                 Please note that there may be fees, especially for international transfers.
             </p>
-            <p>
-                IBAN: ...<br>
-                BIC: ...
-            </p>
+            <table>
+                <tr>
+                    <td class="pe-2">IBAN:</td>
+                    <td><code>{{ iban }}</code></td>
+                </tr>
+                <tr>
+                    <td>BIC:</td>
+                    <td><code>{{ bic }}</code></td>
+                </tr>
+            </table>
         </div>
     </div>
 {% endblock %}
