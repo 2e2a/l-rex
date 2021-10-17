@@ -1097,7 +1097,7 @@ class Study(models.Model):
         StudySteps.STEP_STD_OPT_SETTINGS: 'customize study settings',
         StudySteps.STEP_STD_OPT_LABELS: 'customize labels',
         StudySteps.STEP_STD_OPT_SHARE: 'share study with other users',
-        StudySteps.STEP_STD_OPT_INVOICE: 'request an invoice',
+        StudySteps.STEP_STD_OPT_INVOICE: 'donate/request an invoice',
     }
 
     def step_url(self, step):
