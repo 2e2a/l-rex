@@ -244,14 +244,14 @@ class TrialForm(RequiredMessageFromStudyMixin, contrib_forms.CrispyModelForm):
         super().__init__(*args, **kwargs)
         self.fields['participant_id'].label = self.study.participation_id_label
         self.fields['password'].label = self.study.password_label
-        if is_test:
-            self.fields['participant_id'].initial = self._test_participant_id
-            self.fields['participant_id'].readonly = True
         if self.study.participant_id == self.study.PARTICIPANT_ID_ENTER:
             self.fields['participant_id'].required = True
             if self.participant_id:
                 self.fields['participant_id'].initial = self.participant_id
                 self.fields['participant_id'].widget.attrs['disabled'] = True
+            elif is_test:
+                self.fields['participant_id'].initial = self._test_participant_id
+                self.fields['participant_id'].readonly = True
         else:
             self.fields['participant_id'].required = False
             self.fields['participant_id'].widget = forms.HiddenInput()

@@ -529,8 +529,6 @@ class TrialCreateView(study_views.StudyMixin, TestTrialMixin, generic.CreateView
             active_trial_url = reverse('ratings-create', args=[active_trial.slug, 0])
             return redirect(active_trial_url)
         if self.is_test_trial:
-            if not form.instance.participant_id:
-                form.instance.participant_id = 'Test'
             form.instance.is_test = True
         form.instance.init(self.study)
         return super().form_valid(form)
