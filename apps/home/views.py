@@ -18,7 +18,7 @@ from . import forms
 
 @requires_csrf_token
 def handler500(request):
-    response = render('lrex_home/error_500.html')
+    response = render(request, 'lrex_home/error_500.html')
     response.status_code = 500
     return response
 
