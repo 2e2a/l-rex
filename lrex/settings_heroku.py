@@ -1,5 +1,4 @@
 import django_heroku
-
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -38,6 +37,7 @@ INSTALLED_APPS = [
 
     'markdownx',
     'crispy_forms',
+    'crispy_bootstrap5',
 
     'django.contrib.admin',
 ]
@@ -124,7 +124,8 @@ STATICFILES_DIRS = [
 ]
 
 # Other
-CRISPY_TEMPLATE_PACK = 'bootstrap4'
+CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
+CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
 # Security (set all True in production)
 CSRF_COOKIE_SECURE = True
@@ -143,7 +144,7 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PASSWORD')
 EMAIL_USE_SSL = True
 
 # lrex
-LREX_VERSION = 0.8
+LREX_VERSION = 1.0
 LREX_CONTACT_MD = (
     'Alexej Starschenko  \n'
     'Uthmannstraße 16  \n'
@@ -157,6 +158,8 @@ LREX_PRIVACY_MD = (
     '- No external 3rd party components.\n'
     'Only the study data is linked to your user profile to provide the platform functionality.\n'
 )
+LREX_IBAN = os.getenv('LREX_IBAN')
+LREX_BIC = os.getenv('LRX_BIC')
 LREX_ANNOUNCEMENTS = []
 
 
