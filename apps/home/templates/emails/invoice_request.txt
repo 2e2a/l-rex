@@ -1,0 +1,17 @@
+Dear L-Rex user,
+
+You have requested an invoice:
+
+{{ name }}
+{{ address }}
+{% if study %}study: {{ study }} {% endif %}
+{% if comment %}comment:
+{{ comment }}
+{% endif %}
+amount: {{ amount_pre_tax|floatformat:2 }}€
+taxes 19%: +{{ amount_taxes|floatformat:2 }}€
+total: {{ amount_total|floatformat:2 }}€
+
+We will prepare the invoice and send it to you shortly.
+
+Thank you for supporting the L-Rex project!

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <p>
+        There are several ways in which you can support the L-Rex project financially. We are very grateful for any
+        contribution. Your support helps us to cover the server costs and to invest time into maintaining L-Rex,
+        fixing bugs, and implementing new features. Support from researchers who have funding for experiments makes
+        it possible to offer the service for free to students and researchers with limited financial resources.
+    </p>
+    <div class="card my-2 flex-fill">
+        <div class="card-body">
+            <h2 class="card-title">1. Optional invoice</h2>
+            <p class="card-text">
+                You can optionally request an invoice.
+                Invoices are only available for residents of Germany (for tax reasons).
+            </p>
+            <p>
+                <a href="{% url 'invoice-request' %}{% if study %}?study={{ study }}{% endif %}" type="button" class="btn btn-outline-primary">
+                    Request an invoice for using L-Rex
+                </a>
+            </p>
+        </div>
+    </div>
+    <div class="card my-2 flex-fill">
+        <div class="card-body">
+            <h2 class="card-title">2. Donation via Liberapay</h2>
+            <p class="card-text">
+                This option is available internationally. Liberapay is a platform for recurrent donations
+                (via credit/debit card). You can decide freely how much and for how long you want to donate to L-Rex.
+                A Liberapay account is required. Liberapay is a privacy-friendly, open project structured around a
+                non-profit organization.
+            </p>
+            <p>
+                <a target="_blank" href="https://liberapay.com/L-Rex/donate" type="button" class="btn btn-outline-primary">
+                    Donate via Liberapay
+                </a>
+            </p>
+        </div>
+    </div>
+    <div class="card my-2 flex-fill">
+        <div class="card-body">
+            <h2 class="card-title">3. Donation via bank transfer</h2>
+            <p class="card-text">
+                You can also transfer a donation directly to our L-Rex bank account.
+                Please note that there may be fees, especially for international transfers.
+            </p>
+            <table>
+                <tr>
+                    <td class="pe-2">IBAN:</td>
+                    <td><code>{{ iban }}</code></td>
+                </tr>
+                <tr>
+                    <td>BIC:</td>
+                    <td><code>{{ bic }}</code></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+{% endblock %}

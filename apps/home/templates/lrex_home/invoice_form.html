@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <p>
+        You can optionally request an invoice. For tax reasons, invoices are only available for residents of Germany.
+        The invoice can be issued either for using L-Rex in general, or for a specific study (if you are logged in).
+        If you need the invoice to contain specific details (e.g., because they are required
+        for reimbursement by your university), you can provide them in the <i>comment</i> field.<br>
+        <br>
+        After submitting the form, you will receive a confirmation e-mail. We will get back to you as soon as possible with
+        an invoice, usually within a few days. If you do not receive an e-mail, please contact us under
+        <i>support@l-rex.de</i>.
+    </p>
+    {% crispy form %}
+{% endblock %}
+

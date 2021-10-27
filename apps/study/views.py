@@ -830,4 +830,3 @@ class StudyResultsCSVDownloadView(StudyObjectMixin, CheckStudyCreatorMixin, gene
         response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
         self.study.results_csv(response)
         return response
-

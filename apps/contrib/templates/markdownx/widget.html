@@ -1,25 +1,34 @@
-<ul class="nav nav-pills mb-2 justify-content-end" role="tablist">
-    <li>
-        <span class="text-secondary mr-2"><small><em>
-            You can use <a  target="_blank" href="https://en.wikipedia.org/wiki/Markdown#Example">Markdown</a>
+{% with edit_id="edit-"|add:widget.name preview_id="preview-"|add:widget.name %}
+    <ul class="nav nav-pills mb-2 justify-content-end" role="tablist">
+        <li>
+        <span class="text-secondary me-2"><small><em>
+            You can use <a target="_blank" href="https://en.wikipedia.org/wiki/Markdown#Example">Markdown&#8599;</a>
             to create rich text
         </em></small></span>
-    </li>
-    <li role="presentation" class="nav-item active">
-        <a href="#edit-{{ widget.name }}" class="nav-link active" aria-controls="edit" role="tab" data-toggle="tab">Edit</a>
-    </li>
-    <li role="presentation" class="nav-item">
-        <a href="#preview-{{ widget.name }}"  class="nav-link" aria-controls="preview" role="tab" data-toggle="tab">Preview</a>
-    </li>
-</ul>
-
-<div class="markdownx">
-    <div class="tab-content">
-        <div role="tabpanel" class="tab-pane active" id="edit-{{ widget.name }}">
-            {% include 'django/forms/widgets/textarea.html' %}
-        </div>
-        <div role="tabpanel" class="tab-pane" id="preview-{{ widget.name }}">
-            <div class="markdownx-preview border px-2 py-1"></div>
+        </li>
+        <li role="presentation" class="nav-item active">
+            <button class="nav-link active px-2 py-1" id="{{ edit_id }}-tab" data-bs-toggle="tab"
+                    data-bs-target="#{{ edit_id }}" type="button" role="tab" aria-controls="{{ edit_id }}"
+                    aria-selected="true">
+                Edit
+            </button>
+        </li>
+        <li role="presentation" class="nav-item">
+            <button class="nav-link px-2 py-1" id="{{ preview_id }}-tab" data-bs-toggle="tab"
+                    data-bs-target="#{{ preview_id }}" type="button" role="tab" aria-controls="{{ preview_id }}"
+                    aria-selected="false">
+                Preview
+            </button>
+        </li>
+    </ul>
+    <div class="markdownx">
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade show active" id="{{ edit_id }}">
+                {% include 'django/forms/widgets/textarea.html' %}
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="{{ preview_id }}">
+                <div class="markdownx-preview border px-2 py-1"></div>
+            </div>
         </div>
     </div>
-</div>
+{% endwith %}

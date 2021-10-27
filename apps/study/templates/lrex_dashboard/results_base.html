@@ -7,20 +7,20 @@
             Trials
         </a>
     </li><li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle {% if nav2_active == 1 %}active{% endif %}" data-toggle="dropdown"
+        <a class="nav-link dropdown-toggle {% if nav2_active == 1 %}active{% endif %}" data-bs-toggle="dropdown"
            href="#" role="button" aria-haspopup="true" aria-expanded="false">
             Summary
         </a>
-        <div class="dropdown-menu">
+        <ul class="dropdown-menu">
             {% for materials in study.materials.all %}
-            <a class="dropdown-item {% if materials.pk == active_materials %}active{% endif %}"
-               href="{% url 'materials-results' materials.slug %}">
-                {{ materials.title }}
-            </a>
+                <li><a class="dropdown-item {% if materials.pk == active_materials %}active{% endif %}"
+                   href="{% url 'materials-results' materials.slug %}">
+                    {{ materials.title }}
+                </a></li>
             {% empty %}
-            <span class="dropdown-item disabled"><em>No materials yet</em></span>
+                <li><span class="dropdown-item disabled"><em>No materials yet</em></span></li>
             {% endfor %}
-        </div>
+        </ul>
     </li>
 </ul>
 {% endblock %}

@@ -8,7 +8,7 @@
 <form method="post" action="{% url 'account_confirm_email' confirmation.key %}">
     {% csrf_token %}
     {{ form|crispy }}
-    <button type="submit" class="btn btn-primary">Confirm</button>
+    <button type="submit" class="btn btn-outline-primary">Confirm</button>
 </form>
 {% else %}
 {% url 'account_email' as email_url %}

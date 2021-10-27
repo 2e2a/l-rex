@@ -503,6 +503,13 @@ class TrialCreateView(study_views.StudyMixin, TestTrialMixin, generic.CreateView
     model = models.Trial
     form_class = forms.TrialForm
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({
+            'participant_id': self.request.GET.get('participant_id'),
+        })
+        return kwargs
+
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         data['instructions_rich'] = mark_safe(markdownify(self.study.instructions))
@@ -522,8 +529,6 @@ class TrialCreateView(study_views.StudyMixin, TestTrialMixin, generic.CreateView
             active_trial_url = reverse('ratings-create', args=[active_trial.slug, 0])
             return redirect(active_trial_url)
         if self.is_test_trial:
-            if not form.instance.participant_id:
-                form.instance.participant_id = 'Test'
             form.instance.is_test = True
         form.instance.init(self.study)
         return super().form_valid(form)

@@ -19,16 +19,39 @@ class OptionalLabelMixin:
 
     def append_optional_to_labels(self):
         for name, field in self.fields.items():
-            if not field.required \
-                    and (not self.optional_label_ignore_fields or not name in self.optional_label_ignore_fields) \
-                    and not isinstance(field.widget, forms.widgets.CheckboxInput):
+            if (
+                    not field.required
+                    and (not self.optional_label_ignore_fields or not name in self.optional_label_ignore_fields)
+                    and not isinstance(field.widget, forms.widgets.CheckboxInput)
+            ):
                 field.label = '{} (optional)'.format(field.label)
+
+
+class PrimarySubmit(Submit):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.field_classes = 'btn btn-outline-primary'
+
+
+class DangerSubmit(Submit):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.field_classes = 'btn btn-outline-danger'
+
+
+class SecondarySubmit(Submit):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.field_classes = 'btn btn-outline-secondary'
 
 
 class HelperMixin:
     helper = None
     submit_label = None
-    submit_css_class = None
+    submit_danger = False
     save_label = None
 
     add_save = False
@@ -39,12 +62,12 @@ class HelperMixin:
 
     def init_helper(self):
         self.helper = FormHelper()
-        if self.submit_css_class:
-            self.helper.add_input(Submit('submit', self.submit_label, css_class=self.submit_css_class))
+        if self.submit_danger:
+            self.helper.add_input(DangerSubmit('submit', self.submit_label))
         else:
-            self.helper.add_input(Submit('submit', self.submit_label))
+            self.helper.add_input(PrimarySubmit('submit', self.submit_label))
         if self.add_save:
-            self.helper.add_input(Submit('save', self.save_label, css_class='btn-secondary'))
+            self.helper.add_input(SecondarySubmit('save', self.save_label))
 
 
 class CrispyForm(OptionalLabelMixin, HelperMixin, forms.Form):
@@ -126,10 +149,10 @@ class CrispyModelFormsetFactory:
         if cls.form_tag:
             inputs = cls.get_inputs(study=study)
             if inputs is None:
-                helper.add_input(Submit('submit', 'Submit'))
-                helper.add_input(Submit('save', 'Save', css_class='btn-secondary'))
+                helper.add_input(PrimarySubmit('submit', 'Submit'))
+                helper.add_input(SecondarySubmit('save', 'Save'))
                 if form_count:
-                    helper.add_input(Submit('reset', 'Reset', css_class='btn-secondary'))
+                    helper.add_input(SecondarySubmit('reset', 'Reset'))
             else:
                 for input in inputs:
                     helper.add_input(input)

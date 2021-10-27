@@ -2,40 +2,40 @@
 {% load crispy_forms_tags %}
 
 {% block actions %}
-{% if study.use_blocks %}
-<div><a class="btn btn-outline-secondary btn-sm ml-0 mr-1 mt-1 {% if disabled %}disabled{% endif %}"
-        href="{% url 'questionnaire-generate' study.slug %}">
-    Generate questionnaires
-</a></div>
-{% else %}
-{% crispy generate_form generate_form.helper %}
-{% endif %}
-<div class="dropdown ml-1 mr-0 my-1">
-    <button class="btn btn-outline-secondary btn-sm" type="button" id="dropdownActionsButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        &hellip;
-    </button>
-    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
-        <a class="dropdown-item {% if disabled %}disabled{% endif %}" href="{% url 'questionnaire-upload' study.slug %}">Upload questionnaire CSV</a>
-        <a class="dropdown-item" href="{% url 'questionnaire-download' study.slug %}">Download questionnaire CSV</a>
-        <a class="dropdown-item {% if disabled %}disabled{% endif %}" href="{% url 'questionnaires-delete' study.slug %}">Delete all questionnaires</a>
-    </div>
-</div>
+    {% if study.use_blocks %}
+        <div><a class="btn btn-outline-secondary btn-sm ms-0 me-1 mt-1 {% if disabled %}disabled{% endif %}"
+                href="{% url 'questionnaire-generate' study.slug %}">
+            Generate questionnaires
+        </a></div>
+        {% include "lrex_trial/questionnaire_list_actions.html" %}
+    {% else %}
+        <div class="d-flex align-items-baseline">
+            <form method="post" class="d-flex align-items-baseline">{% csrf_token %}
+                {{ generate_form|crispy }}
+                <div>
+                    <input type="submit" value="Generate" class="btn btn-sm btn-outline-secondary ms-1">
+                </div>
+            </form>
+            {% include "lrex_trial/questionnaire_list_actions.html" %}
+        </div>
+    {% endif %}
 {% endblock %}
 
 {% block content %}
-<ul class="list-group">
-    {% for questionnaire in questionnaire_list %}
-    <li class="list-group-item d-flex">
-        <div class="mr-2">
-            <a href="{% url 'questionnaire' questionnaire.slug %}"><strong>#{{ questionnaire.number }}</strong></a>
-        </div>
-        <div class="text-truncate">
-            {% for q_item in questionnaire.questionnaire_items_preview %}{{ q_item.item.materials }}-{{ q_item.item }}{% if not forloop.last %}, {% else %}...{% endif %}{% endfor %}
-        </div>
-    </li>
-    {% empty %}
-    <li class="list-group-item">No questionnaires generated yet.</li>
-    {% endfor %}
-</ul>
-{% include 'lrex_contrib/pagination.html' %}
+    <ul class="list-group">
+        {% for questionnaire in questionnaire_list %}
+            <li class="list-group-item d-flex">
+                <div class="me-2">
+                    <a href="{% url 'questionnaire' questionnaire.slug %}"><strong>#{{ questionnaire.number }}</strong></a>
+                </div>
+                <div class="text-truncate">
+                    {% for q_item in questionnaire.questionnaire_items_preview %}{{ q_item.item.materials }}-
+                        {{ q_item.item }}{% if not forloop.last %}, {% else %}...{% endif %}{% endfor %}
+                </div>
+            </li>
+        {% empty %}
+            <li class="list-group-item">No questionnaires generated yet.</li>
+        {% endfor %}
+    </ul>
+    {% include 'lrex_contrib/pagination.html' %}
 {% endblock %}

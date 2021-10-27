@@ -3,6 +3,7 @@ from markdownx.utils import markdownify
 from django.conf import settings
 from django.shortcuts import render
 from django.shortcuts import redirect
+from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
 from django.views import generic
@@ -12,6 +13,7 @@ from apps.user import models as user_models
 from apps.study import models as study_models
 
 from . import models
+from . import forms
 
 
 @requires_csrf_token
@@ -82,11 +84,6 @@ class DemoView(generic.TemplateView):
     template_name = 'lrex_home/demo.html'
     title = 'Demo studies'
 
-    def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-        data['demo_rich'] = mark_safe(markdownify(settings.LREX_PRIVACY_MD))
-        return data
-
 
 class NewsView(generic.DetailView):
     model = models.News
@@ -99,3 +96,48 @@ class NewsView(generic.DetailView):
         data = super().get_context_data(**kwargs)
         data['news_rich'] = mark_safe(markdownify(self.get_object().text))
         return data
+
+
+class DonateView(generic.TemplateView):
+    template_name = 'lrex_home/donate.html'
+    title = 'Support us'
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data.update({
+            'study': self.request.GET.get('study'),
+            'iban': settings.LREX_IBAN,
+            'bic': settings.LREX_BIC,
+        })
+        return data
+
+class InvoiceRequestView(generic.FormView):
+    template_name = 'lrex_home/invoice_form.html'
+    form_class = forms.InvoiceRequestForm
+    title = 'Request an invoice'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({
+            'user': self.request.user,
+            'study': self.request.GET.get('study'),
+        })
+        return kwargs
+
+    def get_success_url(self):
+        return reverse('invoice-requested')
+
+    def form_valid(self, form):
+        study_pk = form['study'].value()
+        if study_pk:
+            study = study_models.Study.objects.filter(pk=study_pk).first()
+            if study:
+                study.has_invoice = True
+                study.save()
+        form.send_mail()
+        return super().form_valid(form)
+
+
+class InvoiceRequestedView(generic.TemplateView):
+    template_name = 'lrex_home/invoice_done.html'
+    title = 'Invoice request sent'

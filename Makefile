@@ -6,8 +6,7 @@ all: help
 
 .PHONY: help
 help:
-	@echo L-REX development
-	@echo TODO
+	@echo L-REX development helper
 
 .PHONY: python
 python:
@@ -32,8 +31,7 @@ update:
 js:
 	mkdir -p lrex/static/js
 	cp $(NODE_MODULES)/jquery/dist/jquery.slim.min.js lrex/static/js/
-	cp $(NODE_MODULES)/popper.js/dist/umd/popper.min.js lrex/static/js/
-	cp $(NODE_MODULES)/bootstrap/dist/js/bootstrap.min.js lrex/static/js/
+	cp $(NODE_MODULES)/bootstrap/dist/js/bootstrap.bundle.min.js lrex/static/js/
 
 .PHONY: scss
 scss:

@@ -1,5 +1,5 @@
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Div, Field, Fieldset, HTML, Layout, Submit
+from crispy_forms.layout import Div, Fieldset, HTML, Layout, Submit
 from django import forms
 from django.contrib.auth.models import User
 
@@ -33,17 +33,17 @@ class StudyFilterSortForm(contrib_forms.CrispyForm):
         self.helper = FormHelper()
         self.helper.add_layout(
             Layout(
-                HTML('<div class="form-group mr-2 text-secondary">Sort by:</div>'),
+                HTML('<div class="me-2 text-secondary">Sort by:</div>'),
                 Div('sort_by', css_class='mr-2'),
-                HTML('<div class="form-group mx-2 text-secondary">Show:</div>'),
-                Div('archived', css_class='mr-2'),
-                Div('shared', css_class='mr-2'),
+                HTML('<div class="mx-2 text-secondary">Show:</div>'),
+                Div('archived', css_class='me-2'),
+                Div('shared', css_class='me-2'),
             )
         )
         submit = Submit('submit', 'Update')
         submit.field_classes = 'btn btn-sm btn-outline-secondary'
         self.helper.add_input(submit)
-        self.helper.form_class = 'form-row align-items-center px-2 pt-2'
+        self.helper.form_class = 'd-flex align-items-baseline px-2 pt-2'
         self.helper.form_method = 'GET'
 
 
@@ -238,7 +238,7 @@ class ArchiveForm(contrib_forms.CrispyModelForm):
         label='Please confirm that you have successfully downloaded and checked the archive file and want to proceed.'
     )
     submit_label = 'Archive study (delete all study data)'
-    submit_css_class = 'btn-danger'
+    submit_danger = True
 
     class Meta:
         model = models.Study

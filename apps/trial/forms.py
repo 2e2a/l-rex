@@ -1,7 +1,5 @@
 import re
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Field, Fieldset, HTML, Layout, Submit, Button
-from crispy_forms.bootstrap import FieldWithButtons, InlineField
+from crispy_forms.layout import Field, Fieldset, HTML, Layout, Button
 from django import forms
 
 from apps.contrib import forms as contrib_forms
@@ -30,16 +28,6 @@ class RandomizationForm(contrib_forms.CrispyForm):
             self.fields['randomization'].initial = models.QuestionnaireBlock.RANDOMIZATION_PSEUDO
         else:
             self.fields['randomization'].initial = models.QuestionnaireBlock.RANDOMIZATION_TRUE
-
-    def init_helper(self):
-        self.helper = FormHelper()
-        self.helper.form_class = 'form-inline'
-        self.helper.layout = Layout(
-            FieldWithButtons(
-                Field('randomization', css_class='form-control-sm mt-1'),
-                Submit('generate', 'Generate', css_class='btn-primary btn-sm mx-1 mt-1')
-            )
-        )
 
 
 class QuestionnaireGenerateForm(contrib_forms.CrispyModelForm):
@@ -74,7 +62,7 @@ class QuestionnaireGenerateFormsetFactory(contrib_forms.CrispyModelFormsetFactor
     @classmethod
     def get_inputs(cls, study=None):
         return [
-            Submit('submit', 'Submit'),
+            contrib_forms.PrimarySubmit('submit', 'Submit'),
         ]
 
 
@@ -210,7 +198,7 @@ class ConsentForm(RequiredMessageFromStudyMixin, contrib_forms.CrispyForm):
         super().init_helper()
         self.helper.add_input(
             Button(
-                'print', self.study.save_consent_form_label, css_class='btn btn-secondary', onclick='window.print()'
+                'print', self.study.save_consent_form_label, css_class='btn btn-outline-secondary', onclick='window.print()'
             )
         )
 
@@ -225,6 +213,8 @@ class TrialForm(RequiredMessageFromStudyMixin, contrib_forms.CrispyModelForm):
         widget=forms.PasswordInput,
     )
     optional_label_ignore_fields = ['participant_id']
+
+    participant_id = None
 
     @property
     def submit_label(self):
@@ -250,20 +240,28 @@ class TrialForm(RequiredMessageFromStudyMixin, contrib_forms.CrispyModelForm):
 
     def __init__(self, *args, **kwargs):
         is_test = kwargs.pop('is_test')
+        self.participant_id = kwargs.pop('participant_id')
         super().__init__(*args, **kwargs)
         self.fields['participant_id'].label = self.study.participation_id_label
         self.fields['password'].label = self.study.password_label
-        if is_test:
-            self.fields['participant_id'].initial = self._test_participant_id
-            self.fields['participant_id'].readonly = True
         if self.study.participant_id == self.study.PARTICIPANT_ID_ENTER:
             self.fields['participant_id'].required = True
+            if self.participant_id:
+                self.fields['participant_id'].initial = self.participant_id
+                self.fields['participant_id'].widget.attrs['disabled'] = True
+            elif is_test:
+                self.fields['participant_id'].initial = self._test_participant_id
+                self.fields['participant_id'].readonly = True
         else:
             self.fields['participant_id'].required = False
             self.fields['participant_id'].widget = forms.HiddenInput()
         if not self.study.password:
             self.fields['password'].required = False
             self.fields['password'].widget = forms.HiddenInput()
+
+    def clean_participant_id(self):
+        return self.participant_id if self.participant_id else self.cleaned_data['participant_id']
+
 
     def clean_password(self):
         password = self.cleaned_data['password']
@@ -305,7 +303,7 @@ class DemographicsValueFormsetFactory(contrib_forms.CrispyModelFormsetFactory):
     @classmethod
     def get_inputs(cls, study=None):
         return [
-            Submit('submit', study.continue_label),
+            contrib_forms.PrimarySubmit('submit', study.continue_label),
         ]
 
 
@@ -408,7 +406,6 @@ class RatingFormset(forms.BaseModelFormSet):
             'item_question': questionnaire_item.item.item_questions.filter(number=index).first(),
             'feedbacks': list(questionnaire_item.item.item_feedback.all()),
         })
-        #kwargs['demographics_value'] = study.demographics.get(number=index)
         return kwargs
 
 
