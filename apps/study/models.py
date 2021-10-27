@@ -815,8 +815,8 @@ class Study(models.Model):
         shared_with_user_names = split_list_string(study_settings['shared_with'])
         shared_with_users = User.objects.filter(username__in=shared_with_user_names)
         self.shared_with.set(shared_with_users)
-        for demographics_field in split_list_string(study_settings['demographics']):
-            self.demographics.create(name=demographics_field)
+        for i, demographics_field in enumerate(split_list_string(study_settings['demographics'])):
+            self.demographics.create(number=i, name=demographics_field)
         self.created_date = now().date()
         self.is_published = False
         self.is_archived = False
