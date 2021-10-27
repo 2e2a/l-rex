@@ -1,7 +1,9 @@
+from datetime import timedelta
 from django import forms
 from django.conf import settings
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
+from django.utils.timezone import now
 
 from apps.contrib import forms as contrib_forms
 from apps.study.models import Study
@@ -40,7 +42,10 @@ class InvoiceRequestForm(contrib_forms.CrispyForm):
         super().__init__(*args, **kwargs)
         if user.is_authenticated:
             self.fields['email'].initial = user.email
-            self.fields['study'].queryset = Study.objects.filter(creator=user, has_invoice=False)[:25]
+            year_ago = now().date() - timedelta(days=365)
+            self.fields['study'].queryset = Study.objects.filter(
+                creator=user, has_invoice=False, created_date__gte=year_ago
+            )
             self.fields['study'].initial = study
         else:
             self.fields['study'].widget = forms.HiddenInput()
