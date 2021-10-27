@@ -143,7 +143,7 @@ SECRET_KEY = '&+b$6n1(x=h0($ww_d4^j&6r%rtv47$gacl!nazl71g7&siqa3'
 
 # server settings
 SITE_ID = 1
-ADMINS = ['admin@l-rex.de']
+ADMINS = [('Support', 'support@l-rex.de')]
 DEFAULT_FROM_EMAIL = 'support@l-rex.de'
 
 # lrex
