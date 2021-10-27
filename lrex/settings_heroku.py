@@ -159,7 +159,7 @@ LREX_PRIVACY_MD = (
     'Only the study data is linked to your user profile to provide the platform functionality.\n'
 )
 LREX_IBAN = os.getenv('LREX_IBAN')
-LREX_BIC = os.getenv('LRX_BIC')
+LREX_BIC = os.getenv('LREX_BIC')
 LREX_ANNOUNCEMENTS = []
 
 
