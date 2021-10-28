@@ -1,3 +1,4 @@
+from html import unescape
 from datetime import timedelta
 from django import forms
 from django.conf import settings
@@ -60,12 +61,11 @@ class InvoiceRequestForm(contrib_forms.CrispyForm):
             'amount_taxes': amount * self.tax_rate,
             'amount_total': amount,
         })
-        print(data)
         return data
 
     def send_mail(self):
         from_email = settings.DEFAULT_FROM_EMAIL
         recipients = [self.cleaned_data['email']]
-        message = render_to_string(self.email_template, self.cleaned_data)
+        message = unescape(render_to_string(self.email_template, self.cleaned_data))
         email = EmailMessage(self.email_subject, message, from_email, recipients, bcc=[from_email])
         email.send()

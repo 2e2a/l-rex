@@ -106,6 +106,7 @@ class DonateView(generic.TemplateView):
         data = super().get_context_data(**kwargs)
         data.update({
             'study': self.request.GET.get('study'),
+            'recipient': settings.LREX_RECIPIENT,
             'iban': settings.LREX_IBAN,
             'bic': settings.LREX_BIC,
         })
