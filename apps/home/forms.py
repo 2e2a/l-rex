@@ -35,7 +35,7 @@ class InvoiceRequestForm(contrib_forms.CrispyForm):
 
     email_subject = 'L-Rex invoice request confirmation'
     email_template = 'emails/invoice_request.txt'
-    tax_rate = .19
+    tax_rate = 19
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user')
@@ -56,9 +56,10 @@ class InvoiceRequestForm(contrib_forms.CrispyForm):
         if not data['amount'] and not data['other_amount']:
             raise forms.ValidationError('Please set an amount.')
         amount = data['other_amount'] if data['other_amount'] else int(data['amount'])
+        amount_taxes = amount * self.tax_rate / (100 + self.tax_rate)
         data.update({
-            'amount_pre_tax': amount * .81,
-            'amount_taxes': amount * self.tax_rate,
+            'amount_pre_tax': amount - amount_taxes,
+            'amount_taxes': amount_taxes,
             'amount_total': amount,
         })
         return data
