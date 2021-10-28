@@ -158,7 +158,7 @@ LREX_PRIVACY_MD = (
     '- No external 3rd party components.\n'
     'Only the study data is linked to your user profile to provide the platform functionality.\n'
 )
-LREX_RECIPIENT = ' M.Wierzba & A.Starschenko'
+LREX_RECIPIENT = os.getenv('LREX_RECIPIENT')
 LREX_IBAN = os.getenv('LREX_IBAN')
 LREX_BIC = os.getenv('LREX_BIC')
 LREX_ANNOUNCEMENTS = []
