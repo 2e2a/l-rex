@@ -142,7 +142,7 @@ class FormsetView(generic.TemplateView):
                 if form.instance.pk and form.cleaned_data.get('DELETE', False):
                     form.instance.delete()
                     continue
-                if self.form_count or form.instance in instances:
+                if self.form_count or form.instance in instances or form.instance.pk:
                     self.save_form(form, number)
                 number += 1
             self.formset_valid()
