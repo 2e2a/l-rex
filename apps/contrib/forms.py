@@ -2,7 +2,9 @@ import csv
 from io import StringIO
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
+from markdownx.models import MarkdownxFormField
 from django import forms
+from django.utils.html import strip_tags
 
 
 from . import csv as contrib_csv
@@ -70,7 +72,17 @@ class HelperMixin:
             self.helper.add_input(SecondarySubmit('save', self.save_label))
 
 
-class CrispyForm(OptionalLabelMixin, HelperMixin, forms.Form):
+class StripTagsInMarkdownMixin:
+
+    def clean(self):
+        data = super().clean()
+        for field in data:
+            if isinstance(self.fields[field], MarkdownxFormField):
+                data[field] = strip_tags(data[field])
+        return data
+
+
+class CrispyForm(OptionalLabelMixin, HelperMixin, StripTagsInMarkdownMixin, forms.Form):
     submit_label = 'Submit'
     save_label = 'Save'
 
@@ -81,7 +93,7 @@ class CrispyForm(OptionalLabelMixin, HelperMixin, forms.Form):
         self.append_optional_to_labels()
 
 
-class CrispyModelForm(OptionalLabelMixin, HelperMixin, forms.ModelForm):
+class CrispyModelForm(OptionalLabelMixin, HelperMixin, StripTagsInMarkdownMixin, forms.ModelForm):
     submit_label = 'Submit'
     save_label = 'Save'
 
