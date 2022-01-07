@@ -144,7 +144,7 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PASSWORD')
 EMAIL_USE_SSL = True
 
 # lrex
-LREX_VERSION = 1.0
+LREX_VERSION = "1.0.1"
 LREX_CONTACT_MD = (
     'Alexej Starschenko  \n'
     'Uthmannstraße 16  \n'
