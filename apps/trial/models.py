@@ -1,6 +1,4 @@
 from collections import deque
-from collections import defaultdict
-from itertools import permutations
 from itertools import groupby
 from itertools import permutations
 from math import ceil
@@ -16,6 +14,7 @@ from django.urls import reverse
 from django.utils.functional import cached_property
 from django.utils import timezone
 
+from apps.contrib.utils import strip_html_in_markdown_fields
 from apps.item import models as item_models
 from apps.study import models as study_models
 
@@ -295,6 +294,10 @@ class QuestionnaireBlock(models.Model):
 
     class Meta:
         ordering = ['block']
+
+    def save(self, *args, **kwargs):
+        strip_html_in_markdown_fields(QuestionnaireBlock, self)
+        return super().save(*args, **kwargs)
 
     def __str__(self):
         return str(self.block)
