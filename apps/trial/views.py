@@ -556,6 +556,9 @@ class DemographicsCreateView(TrialMixin, TestTrialMixin, contrib_views.FormsetVi
     def get_form_count(self):
         return self.study.demographics.count()
 
+    def formset_valid(self):
+        pass
+
     def save_form(self, form, number):
         form.instance.field = self.study.demographics.get(number=number)
         form.instance.trial = self.trial

@@ -19,8 +19,7 @@ from django.utils.timezone import now
 
 from apps.contrib import csv as contrib_csv
 from apps.contrib import math
-from apps.contrib.utils import slugify_unique
-from apps.contrib.utils import split_list_string, to_list_string
+from apps.contrib.utils import slugify_unique, split_list_string, strip_html_in_markdown_fields, to_list_string
 
 
 class StudySteps(Enum):
@@ -301,6 +300,7 @@ class Study(models.Model):
         verbose_name_plural = 'Studies'
 
     def save(self, *args, **kwargs):
+        strip_html_in_markdown_fields(Study, self)
         new_slug = slugify_unique(self.title, Study, self.id)
         slug_changed = False
         if self.slug != new_slug:

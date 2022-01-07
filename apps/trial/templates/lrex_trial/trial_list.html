@@ -43,7 +43,7 @@
         {% for trial in trial_list %}
             <li class="list-group-item d-flex">
                 <div class="flex-grow-1">
-                    <a href="{% url 'trial' trial.slug %}"><strong>#{{ page_obj.start_index|add:forloop.counter0 }}</strong></a>
+                    <a href="{% url 'trial' trial.slug %}"><strong>Trial #{{ page_obj.start_index|add:forloop.counter0 }}</strong></a>
                     {% if trial.participant_id %} Participant {{ trial.participant_id }} {% endif %}
                     {% if trial.is_test %}
                         <span class="badge bg-secondary">Test</span>

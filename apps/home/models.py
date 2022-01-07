@@ -4,7 +4,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.contrib.utils import slugify_unique
+from apps.contrib.utils import slugify_unique, strip_html_in_markdown_fields
 
 
 class News(models.Model):
@@ -27,6 +27,7 @@ class News(models.Model):
         verbose_name_plural = 'News'
 
     def save(self, *args, **kwargs):
+        strip_html_in_markdown_fields(News, self)
         new_slug = slugify_unique(self.title, News, self.id)
         if self.slug != new_slug:
             self.slug = slugify_unique(self.title, News, self.id)

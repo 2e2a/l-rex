@@ -1,3 +1,5 @@
+from markdownx.models import MarkdownxField
+from django.utils.html import strip_tags
 from django.utils.text import slugify
 
 
@@ -33,3 +35,9 @@ def split_list_string(value):
 def to_list_string(value_list, multiline=False):
     separator = ',\n' if multiline else ','
     return separator.join(str(value).replace(',', '\\,') for value in value_list)
+
+
+def strip_html_in_markdown_fields(Model, instance):
+    for field in Model._meta.fields:
+        if isinstance(field, MarkdownxField) and getattr(instance, field.name):
+            setattr(instance, field.name, strip_tags(getattr(instance, field.name)))

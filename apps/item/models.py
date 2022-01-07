@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.utils.functional import cached_property
 from django.utils.text import slugify
 
-from apps.contrib.utils import split_list_string
+from apps.contrib.utils import split_list_string, strip_html_in_markdown_fields
 from apps.study.models import ScaleValue
 
 
@@ -78,6 +78,10 @@ class MarkdownItem(Item):
     def get_absolute_url(self):
         return reverse('markdown-item-update', args=[self.slug])
 
+    def save(self, *args, **kwargs):
+        strip_html_in_markdown_fields(MarkdownItem, self)
+        return super().save(*args, **kwargs)
+
 
 class AudioLinkItem(Item):
     urls = models.TextField(
@@ -93,6 +97,10 @@ class AudioLinkItem(Item):
         null=True,
 
     )
+
+    def save(self, *args, **kwargs):
+        strip_html_in_markdown_fields(AudioLinkItem, self)
+        return super().save(*args, **kwargs)
 
     @cached_property
     def urls_list(self):
