@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
 from django.db.models import Q
-from django.http import HttpResponse
+from django.http import Http404, HttpResponse
 from django.shortcuts import redirect
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -92,7 +92,10 @@ class StudyMixin:
     def study(self):
         if not self.study_object:
             study_slug = self.kwargs['study_slug']
-            self.study_object = models.Study.objects.get(slug=study_slug)
+            try:
+                self.study_object = models.Study.objects.get(slug=study_slug)
+            except models.Study.DoesNotExist:
+                raise Http404()
         return self.study_object
 
     def get_context_data(self, **kwargs):
