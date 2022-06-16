@@ -19,7 +19,7 @@ node:
 	npm install
 
 .PHONY: install
-install: python node
+install: python
 
 .PHONY: update
 update:
@@ -39,7 +39,7 @@ scss:
 	$(NODE_BIN)/node-sass lrex/assets/scss/style.scss > lrex/static/css/lrex.css
 
 .PHONY: build
-build: js scss
+build: node js scss
 
 .PHONY: migrate
 migrate:
