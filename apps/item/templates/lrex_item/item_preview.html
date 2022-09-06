@@ -4,7 +4,9 @@
 {% elif study.has_markdown_items %}
     {{ item.markdownitem.text|markdownify }}
 {% elif study.has_audiolink_items %}
-    {{ item.audiolinkitem.description|markdownify }}
+    {% if item.audiolinkitem.description %}
+        {{ item.audiolinkitem.description|markdownify }}
+    {% endif %}
     {% for item_url in item.audiolinkitem.urls_list %}
         <div>
             <audio controls="controls">

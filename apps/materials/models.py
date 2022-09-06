@@ -462,6 +462,8 @@ class Materials(models.Model):
                 item_fields.update({
                     'urls': row[columns['content']],
                 })
+                if 'audio_description' in columns:
+                    item_fields['description'] = row[columns['audio_description']]
             item = item_model.objects.create(**item_fields)
 
             if custom_question_column or custom_scale_column:
