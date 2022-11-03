@@ -15,11 +15,11 @@ class ProfileInline(admin.StackedInline):
 class ProfileUserAdmin(UserAdmin):
     inlines = (ProfileInline, )
     fieldsets = (
-        (None, {'fields': ('username', 'password')}),
+        (None, {'fields': ('username', 'password', 'is_active', 'is_staff')}),
         ('Personal info', {'fields': ('email',)}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
-    list_display = ('username', 'email', 'date_joined', 'is_staff')
+    list_display = ('username', 'email', 'date_joined', 'is_active', 'is_staff')
     ordering = ('date_joined',)
 
 
