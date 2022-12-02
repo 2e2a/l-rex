@@ -185,6 +185,10 @@ class Materials(models.Model):
                 if not item.audiolinkitem.urls:
                     raise AssertionError('Item {} has no URLs.'.format(item))
 
+            for validated_item in items[:i]:
+                if validated_item.number == item.number and validated_item.condition == item.condition:
+                    raise AssertionError('Duplicate item "{}".'.format(item))
+
             if i % self.condition_count == 0:
                 item_number += 1
             condition_number = i % self.condition_count
