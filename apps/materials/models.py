@@ -8,10 +8,9 @@ from string import ascii_lowercase
 from django.db import models
 from django.urls import reverse
 from django.utils.functional import cached_property
-from django.utils.text import slugify
 
 from apps.contrib import csv as contrib_csv
-from apps.contrib.utils import split_list_string
+from apps.contrib.utils import slugify_unique, split_list_string
 from apps.item import models as item_models
 from apps.trial import models as trial_models
 
@@ -71,7 +70,7 @@ class Materials(models.Model):
         verbose_name_plural = 'Materials'
 
     def save(self, *args, **kwargs):
-        new_slug = slugify('{}-{}'.format(self.study.slug, self.title))
+        new_slug = slugify_unique('{}-{}'.format(self.study.slug, self.title), Materials, self.pk)
         slug_changed = False
         if new_slug != self.slug:
             self.slug = new_slug

@@ -2,9 +2,8 @@ from markdownx.models import MarkdownxField
 from django.db import models
 from django.urls import reverse
 from django.utils.functional import cached_property
-from django.utils.text import slugify
 
-from apps.contrib.utils import split_list_string, strip_html_in_markdown_fields
+from apps.contrib.utils import slugify_unique, split_list_string, strip_html_in_markdown_fields
 from apps.study.models import ScaleValue
 
 
@@ -55,7 +54,7 @@ class Item(models.Model):
         return '{}{}'.format(self.number, self.condition)
 
     def save(self, *args, **kwargs):
-        self.slug = slugify('{}-{}{}'.format(self.materials.slug, self.number, self.condition))
+        self.slug = slugify_unique('{}-{}{}'.format(self.materials.slug, self.number, self.condition), Item, self.pk)
         return super().save(*args, **kwargs)
 
 
