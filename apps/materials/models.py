@@ -187,8 +187,15 @@ class Materials(models.Model):
 
             if i % self.condition_count == 0:
                 item_number += 1
-            if item.number != item_number or item.condition != conditions[i % self.condition_count]:
-                msg = 'Item "{}" was not expected. Check whether item number/condition is correct.'.format(item)
+            condition_number = i % self.condition_count
+            if (
+                    item.number != item_number or
+                    condition_number > len(conditions) or item.condition != conditions[condition_number]
+            ):
+                msg = (
+                    'Item "{}" was not expected based on previous items. '
+                    'Check whether item numbers/conditions are correct.'
+                ).format(item)
                 raise AssertionError(msg)
 
             for item_question in item.item_questions.all():
@@ -386,7 +393,7 @@ class Materials(models.Model):
         if self.study.has_audiolink_items:
             csv_row.append('audio_description')
         for question in self.study.questions.all():
-            question_number  = question.number if zero_index else question.number +1
+            question_number = question.number if zero_index else question.number + 1
             csv_row.append('question{}'.format(question_number))
             csv_row.append('scale{}'.format(question_number))
             csv_row.append('legend{}'.format(question_number))
