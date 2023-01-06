@@ -20,7 +20,7 @@ class ProfileUserAdmin(UserAdmin):
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
     list_display = ('username', 'email', 'date_joined', 'is_active', 'is_staff')
-    ordering = ('date_joined',)
+    ordering = ('-date_joined',)
 
 
 admin.site.unregister(User)
