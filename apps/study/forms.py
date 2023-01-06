@@ -66,6 +66,7 @@ class StudySettingsForm(contrib_forms.CrispyModelForm):
         model = models.Study
         fields = [
             'title',
+            'slug',
             'item_type',
             'password',
             'participant_id',

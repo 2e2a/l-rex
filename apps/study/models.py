@@ -52,6 +52,8 @@ class Study(models.Model):
     slug = models.SlugField(
         unique=True,
         max_length=110,
+        verbose_name='Title used in URLs',
+        help_text='You can set a different title to be used in study URLs. This can for example be useful when the actual study name would give away crucial information to participants that they are not supposed to see.',
     )
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     ITEM_TYPE_TXT = 'txt'
@@ -301,7 +303,8 @@ class Study(models.Model):
 
     def save(self, *args, **kwargs):
         strip_html_in_markdown_fields(Study, self)
-        new_slug = slugify_unique(self.title, Study, self.id)
+        slug = self.slug if self.slug else self.title
+        new_slug = slugify_unique(slug, Study, self.id)
         slug_changed = False
         if self.slug != new_slug:
             self.slug = new_slug
