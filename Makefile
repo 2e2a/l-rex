@@ -19,7 +19,7 @@ node:
 	npm install
 
 .PHONY: install
-install: python node
+install: python
 
 .PHONY: update
 update:
