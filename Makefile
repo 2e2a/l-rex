@@ -13,6 +13,10 @@ python:
 	if [ ! -f $(VIRTUAL_ENV)/bin/python3 ]; then python3 -m venv $(VIRTUAL_ENV); fi
 	$(VIRTUAL_ENV)/bin/python3 -m pip install -r requirements.txt
 
+.PHONY: python-dev
+python-dev:
+	$(VIRTUAL_ENV)/bin/python3 -m pip install -r requirements.dev.txt
+
 
 .PHONY: node
 node:
@@ -71,6 +75,9 @@ demo-load:
 	$(VIRTUAL_ENV)/bin/python3 manage.py migrate
 	$(VIRTUAL_ENV)/bin/python3 manage.py loaddata fixtures/users.json
 	$(VIRTUAL_ENV)/bin/python3 manage.py loaddata fixtures/demo.json
+
+.PHONY: install-dev
+install-dev: python python-dev demo-load
 
 .PHONY: db-reset
 db-reset:
