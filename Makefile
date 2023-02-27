@@ -92,7 +92,7 @@ static:
 	$(VIRTUAL_ENV)/bin/python3 manage.py collectstatic --noinput
 
 .PHONY: deploy
-deploy: clean pull install build migrate static
+deploy: clean pull install migrate static
 
 .PHONY: fixenv
 fixvenv:
