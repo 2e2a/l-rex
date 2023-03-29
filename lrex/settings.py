@@ -147,7 +147,7 @@ ADMINS = [('Support', 'support@l-rex.de')]
 DEFAULT_FROM_EMAIL = 'support@l-rex.de'
 
 # lrex
-LREX_VERSION = "1.0.2"
+LREX_VERSION = "1.0.3"
 LREX_CONTACT_MD = 'Please define contact as markdown in local.py'
 LREX_PRIVACY_MD = 'Please define privacy statement as markdown in local.py'
 LREX_RECIPIENT = ''
