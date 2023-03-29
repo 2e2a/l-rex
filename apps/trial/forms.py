@@ -390,7 +390,6 @@ class RatingForm(RequiredMessageFromStudyMixin, contrib_forms.CrispyModelForm):
             feedbacks_given.append(feedback.pk)
             self['feedback'].initial = feedback.feedback
             self.fields['feedback'].widget = forms.Textarea()
-            #self.fields['feedback'].widget.attrs['readonly'] = True
         self['feedbacks_given'].initial = ','.join(str(f) for f in feedbacks_given)
 
 
@@ -400,10 +399,14 @@ class RatingFormset(forms.BaseModelFormSet):
         kwargs = super().get_form_kwargs(index)
         study = kwargs.get('study')
         questionnaire_item = kwargs.pop('questionnaire_item')
+        question_number = index
+        if questionnaire_item.question_order:
+            question_order = questionnaire_item.question_order.split(',')
+            question_number = question_order[index]
         kwargs.update({
-            'question': study.questions.get(number=index),
-            'question_property': questionnaire_item.question_properties.filter(number=index).first(),
-            'item_question': questionnaire_item.item.item_questions.filter(number=index).first(),
+            'question': study.questions.get(number=question_number),
+            'question_property': questionnaire_item.question_properties.filter(number=question_number).first(),
+            'item_question': questionnaire_item.item.item_questions.filter(number=question_number).first(),
             'feedbacks': list(questionnaire_item.item.item_feedback.all()),
         })
         return kwargs
