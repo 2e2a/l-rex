@@ -320,6 +320,7 @@ class RatingForm(RequiredMessageFromStudyMixin, contrib_forms.CrispyModelForm):
     )
     optional_label_ignore_fields = ['comment', 'feedback']
 
+    form_index = None
     question = None
     feedbacks = None
 
@@ -333,6 +334,7 @@ class RatingForm(RequiredMessageFromStudyMixin, contrib_forms.CrispyModelForm):
 
     def __init__(self, *args, **kwargs):
         is_test = kwargs.pop('is_test')
+        self.form_index = kwargs.pop('form_index')
         self.question = kwargs.pop('question')
         item_question = kwargs.pop('item_question')
         question_property = kwargs.pop('question_property')
@@ -378,19 +380,12 @@ class RatingForm(RequiredMessageFromStudyMixin, contrib_forms.CrispyModelForm):
             if feedbacks_for_scale:
                 self.data = self.data.copy()
                 feedback_text = '\n'.join([f.feedback for f in feedbacks_for_scale])
-                self.data['form-{}-feedback'.format(self.question.number)] = feedback_text
+                self.data['form-{}-feedback'.format(self.form_index)] = feedback_text
                 self.fields['feedback'].widget = forms.Textarea()
                 self.fields['feedback'].widget.attrs['readonly'] = True
                 feedbacks_given += [str(f.pk) for f in feedbacks_for_scale]
-                self.data['form-{}-feedbacks_given'.format(self.question.number)] = ','.join(feedbacks_given)
+                self.data['form-{}-feedbacks_given'.format(self.form_index)] = ','.join(feedbacks_given)
                 raise forms.ValidationError({'feedbacks_given': []})
-
-    def handle_feedbacks(self, feedbacks_given, feedback=None):
-        if feedback:
-            feedbacks_given.append(feedback.pk)
-            self['feedback'].initial = feedback.feedback
-            self.fields['feedback'].widget = forms.Textarea()
-        self['feedbacks_given'].initial = ','.join(str(f) for f in feedbacks_given)
 
 
 class RatingFormset(forms.BaseModelFormSet):
@@ -404,6 +399,7 @@ class RatingFormset(forms.BaseModelFormSet):
             question_order = questionnaire_item.question_order.split(',')
             question_number = question_order[index]
         kwargs.update({
+            'form_index': index,
             'question': study.questions.get(number=question_number),
             'question_property': questionnaire_item.question_properties.filter(number=question_number).first(),
             'item_question': questionnaire_item.item.item_questions.filter(number=question_number).first(),
