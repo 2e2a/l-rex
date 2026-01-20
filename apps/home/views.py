@@ -1,6 +1,7 @@
 from markdownx.utils import markdownify
 
 from django.conf import settings
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -112,7 +113,7 @@ class DonateView(generic.TemplateView):
         })
         return data
 
-class InvoiceRequestView(generic.FormView):
+class InvoiceRequestView(LoginRequiredMixin, generic.FormView):
     template_name = 'lrex_home/invoice_form.html'
     form_class = forms.InvoiceRequestForm
     title = 'Request an invoice'
