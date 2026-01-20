@@ -1,3 +1,4 @@
+from django_registration.backends.activation.views import RegistrationView
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
@@ -72,3 +73,7 @@ class UserEmailChangeView(LoginRequiredMixin, SuccessMessageMixin, generic.Updat
             'user': self.request.user,
         })
         return kwargs
+
+
+class UserRegistrationView(RegistrationView):
+    form_class = forms.UserRegistrationForm
