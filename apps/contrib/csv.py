@@ -33,7 +33,7 @@ def seek_file(form_cleaned_data):
 
 def sniff(data):
     data_len = len(data)
-    return data[:1000 if data_len > 1000 else data_len]
+    return data[:10000 if data_len > 10000 else data_len]
 
 def get_min_columns(form_cleaned_data):
     min_columns = 1
